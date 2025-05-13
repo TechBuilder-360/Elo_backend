@@ -32,7 +32,6 @@ func initializeDB() *ent.Client {
 	conf = configuration.Load(conf).(*config)
 
 	uri := fmt.Sprintf("host=%s port=%d user=%s dbname=%s password=%s", conf.DbHost, conf.DbPort, conf.DbUser, conf.DbName, conf.DbPass)
-	log.Info(uri)
 	client, err := ent.Open("postgres", uri)
 	if err != nil {
 		log.Panic("failed opening connection to postgres: %v", err)
