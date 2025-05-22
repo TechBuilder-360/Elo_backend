@@ -7,6 +7,7 @@ import (
 	"github.com/Toflex/directory_v2/cmd/http/router"
 	"github.com/Toflex/directory_v2/cmd/http/runtime"
 	"github.com/Toflex/directory_v2/database/database"
+	r "github.com/Toflex/directory_v2/database/redis"
 	"github.com/Toflex/directory_v2/pkg/configuration"
 	"github.com/samber/do/v2"
 	log "github.com/sirupsen/logrus"
@@ -39,6 +40,10 @@ func main() {
 	// close database
 	db := do.MustInvoke[*database.Client](runtime.Injector)
 	defer db.Close()
+
+	// close redis database
+	rdb := do.MustInvoke[*r.Client](runtime.Injector)
+	defer rdb.Close()
 
 	defer runtime.Injector.Shutdown()
 
