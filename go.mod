@@ -14,7 +14,12 @@ require (
 	go.deanishe.net/env v0.5.1
 )
 
-require github.com/vektah/gqlparser/v2 v2.5.27 // indirect
+require (
+	github.com/go-viper/mapstructure/v2 v2.2.1 // indirect
+	github.com/gorilla/websocket v1.5.0 // indirect
+	github.com/hashicorp/golang-lru/v2 v2.0.7 // indirect
+	github.com/vektah/gqlparser/v2 v2.5.27
+)
 
 require (
 	ariga.io/atlas v0.32.0 // indirect
