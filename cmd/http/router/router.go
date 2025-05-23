@@ -1,6 +1,9 @@
 package router
 
-func InitializeRoutes() {
+import (
+	"github.com/gin-gonic/gin"
+)
 
-	initializeGeneralRoutes()
+func InitializeRoutes(engine *gin.Engine) {
+	initializeGeneralRoutes(engine)
 }

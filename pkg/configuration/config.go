@@ -1,9 +1,6 @@
 package configuration
 
 import (
-	"log"
-	"os"
-
 	"go.deanishe.net/env"
 )
 
@@ -29,7 +26,6 @@ type baseConfig struct {
 
 func LoadBaseConfiguration() {
 	c := &baseConfig{}
-	log.Printf("Port: %s", os.Getenv("PWD"))
 	if err := env.Bind(c); err != nil {
 		panic(err.Error())
 	}
@@ -43,4 +39,20 @@ func Load(conf interface{}) interface{} {
 	}
 
 	return conf
+}
+
+func (c *baseConfig) GetEnv() ENVIRONMENT {
+	return c.Environment
+}
+
+func (c *baseConfig) IsProduction() bool {
+	return c.Environment == production
+}
+
+func (c *baseConfig) IsSandbox() bool {
+	return c.Environment == sandbox
+}
+
+func (c *baseConfig) IsDevelopment() bool {
+	return c.Environment == development
 }

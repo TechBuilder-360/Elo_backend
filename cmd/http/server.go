@@ -1,14 +1,16 @@
 package main
 
 import (
-	"net/http"
+	"fmt"
 	"os"
 
 	"github.com/Toflex/directory_v2/cmd/http/router"
 	"github.com/Toflex/directory_v2/cmd/http/runtime"
 	"github.com/Toflex/directory_v2/database/database"
 	r "github.com/Toflex/directory_v2/database/redis"
+	"github.com/Toflex/directory_v2/pkg/apm/sentry"
 	"github.com/Toflex/directory_v2/pkg/configuration"
+	"github.com/gin-gonic/gin"
 	"github.com/samber/do/v2"
 	log "github.com/sirupsen/logrus"
 )
@@ -47,10 +49,18 @@ func main() {
 
 	defer runtime.Injector.Shutdown()
 
+	// http engine
+	engine := do.MustInvoke[*gin.Engine](runtime.Injector)
+
 	// initialize routes
-	router.InitializeRoutes()
+	router.InitializeRoutes(engine)
+
+	// initialize Sentry
+	sentry.InitializeSentry(l)
 
 	port := configuration.Instance.Port
-	l.Printf("connect to http://localhost:%s/ for GraphQL playground", port)
-	l.Fatal(http.ListenAndServe(":"+port, nil))
+	addr := fmt.Sprintf("%s:%s", configuration.Instance.BASEURL, port)
+	l.Infof("connect to %s", addr)
+
+	engine.Run(addr)
 }
