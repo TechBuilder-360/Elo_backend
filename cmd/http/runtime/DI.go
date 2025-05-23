@@ -16,4 +16,8 @@ func InitializeDI() {
 	// provides redis connection
 	// redis initialization
 	do.Provide(Injector, r.NewClient)
+
+	// provides Server HTTP Engine
+	// GO-GIN server
+	do.Provide(Injector, server)
 }
