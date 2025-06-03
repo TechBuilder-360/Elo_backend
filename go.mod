@@ -15,6 +15,7 @@ require (
 )
 
 require (
+	github.com/TechBuilder-360/auth v0.0.0-20240111022528-567c7c82e86e // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20240528184218-531527333157 // indirect
 	google.golang.org/grpc v1.65.0 // indirect
 )
