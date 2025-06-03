@@ -6,7 +6,7 @@ import (
 	"github.com/99designs/gqlgen/graphql/handler/lru"
 	"github.com/99designs/gqlgen/graphql/handler/transport"
 	"github.com/99designs/gqlgen/graphql/playground"
-	"github.com/Toflex/directory_v2/domain/general/graph"
+	"github.com/Toflex/directory_v2/domain/user/graph"
 	"github.com/gin-gonic/gin"
 	"github.com/vektah/gqlparser/v2/ast"
 )
@@ -17,7 +17,7 @@ func initializeGeneralRoutes(engine *gin.Engine) {
 	// http.Handle("/", srv)
 
 	gqlHandler := handler.New(graph.NewExecutableSchema(graph.Config{Resolvers: &graph.Resolver{}}))
-	playgroundHandler := playground.Handler("General GraphQL playground", "/general")
+	playgroundHandler := playground.Handler("General GraphQL playground", "/api/user")
 
 	gqlHandler.AddTransport(transport.Options{})
 	gqlHandler.AddTransport(transport.GET{})
@@ -31,12 +31,12 @@ func initializeGeneralRoutes(engine *gin.Engine) {
 	})
 
 	// GraphQL endpoint
-	engine.POST("/general", func(c *gin.Context) {
+	engine.POST("/api/user", func(c *gin.Context) {
 		gqlHandler.ServeHTTP(c.Writer, c.Request)
 	})
 
 	// GraphQL Playground
-	engine.GET("/general", func(c *gin.Context) {
+	engine.GET("/api/user", func(c *gin.Context) {
 		playgroundHandler.ServeHTTP(c.Writer, c.Request)
 	})
 

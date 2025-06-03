@@ -3,6 +3,7 @@ package redis
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"github.com/Toflex/directory_v2/pkg/configuration"
 	"github.com/Toflex/directory_v2/pkg/log"
@@ -35,6 +36,15 @@ func connectRedis() *redis.Client {
 		DB:       conf.RedisDB,
 	})
 
+	// Test redis connection
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
+	defer cancel()
+
+	if _, err := rdb.Ping(ctx).Result(); err != nil {
+		log.Panic("unable to connect to redis: %s", err)
+	}
+
+	log.Info("connected to redis DB")
 	return rdb
 }
 
