@@ -54,7 +54,18 @@ func NewClient(i do.Injector) (*Client, error) {
 
 func (c *Client) Get(ctx context.Context, key string) (string, error) {
 	key = fmt.Sprintf("%s-%s", c.Namespace, key)
-	return rdb.Get(ctx, key).Result()
+	return c.rdb.Get(ctx, key).Result()
+}
+
+func (c *Client) Set(ctx context.Context, key, value string, expiration time.Duration) error {
+	key = fmt.Sprintf("%s-%s", c.Namespace, key)
+	_, err := c.rdb.Set(ctx, key, value, expiration).Result()
+	return err
+}
+
+func (c *Client) Delete(ctx context.Context, key string) error {
+	key = fmt.Sprintf("%s-%s", c.Namespace, key)
+	return c.rdb.Del(ctx, key).Err()
 }
 
 func (c *Client) Close() {

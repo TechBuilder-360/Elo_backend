@@ -11,48 +11,58 @@ import (
 )
 
 // ID filters vertices based on their ID field.
-func ID(id int) predicate.Manager {
+func ID(id string) predicate.Manager {
 	return predicate.Manager(sql.FieldEQ(FieldID, id))
 }
 
 // IDEQ applies the EQ predicate on the ID field.
-func IDEQ(id int) predicate.Manager {
+func IDEQ(id string) predicate.Manager {
 	return predicate.Manager(sql.FieldEQ(FieldID, id))
 }
 
 // IDNEQ applies the NEQ predicate on the ID field.
-func IDNEQ(id int) predicate.Manager {
+func IDNEQ(id string) predicate.Manager {
 	return predicate.Manager(sql.FieldNEQ(FieldID, id))
 }
 
 // IDIn applies the In predicate on the ID field.
-func IDIn(ids ...int) predicate.Manager {
+func IDIn(ids ...string) predicate.Manager {
 	return predicate.Manager(sql.FieldIn(FieldID, ids...))
 }
 
 // IDNotIn applies the NotIn predicate on the ID field.
-func IDNotIn(ids ...int) predicate.Manager {
+func IDNotIn(ids ...string) predicate.Manager {
 	return predicate.Manager(sql.FieldNotIn(FieldID, ids...))
 }
 
 // IDGT applies the GT predicate on the ID field.
-func IDGT(id int) predicate.Manager {
+func IDGT(id string) predicate.Manager {
 	return predicate.Manager(sql.FieldGT(FieldID, id))
 }
 
 // IDGTE applies the GTE predicate on the ID field.
-func IDGTE(id int) predicate.Manager {
+func IDGTE(id string) predicate.Manager {
 	return predicate.Manager(sql.FieldGTE(FieldID, id))
 }
 
 // IDLT applies the LT predicate on the ID field.
-func IDLT(id int) predicate.Manager {
+func IDLT(id string) predicate.Manager {
 	return predicate.Manager(sql.FieldLT(FieldID, id))
 }
 
 // IDLTE applies the LTE predicate on the ID field.
-func IDLTE(id int) predicate.Manager {
+func IDLTE(id string) predicate.Manager {
 	return predicate.Manager(sql.FieldLTE(FieldID, id))
+}
+
+// IDEqualFold applies the EqualFold predicate on the ID field.
+func IDEqualFold(id string) predicate.Manager {
+	return predicate.Manager(sql.FieldEqualFold(FieldID, id))
+}
+
+// IDContainsFold applies the ContainsFold predicate on the ID field.
+func IDContainsFold(id string) predicate.Manager {
+	return predicate.Manager(sql.FieldContainsFold(FieldID, id))
 }
 
 // CreatedAt applies equality check predicate on the "created_at" field. It's identical to CreatedAtEQ.
@@ -60,14 +70,29 @@ func CreatedAt(v time.Time) predicate.Manager {
 	return predicate.Manager(sql.FieldEQ(FieldCreatedAt, v))
 }
 
-// Position applies equality check predicate on the "position" field. It's identical to PositionEQ.
-func Position(v string) predicate.Manager {
-	return predicate.Manager(sql.FieldEQ(FieldPosition, v))
+// UpdatedAt applies equality check predicate on the "updated_at" field. It's identical to UpdatedAtEQ.
+func UpdatedAt(v time.Time) predicate.Manager {
+	return predicate.Manager(sql.FieldEQ(FieldUpdatedAt, v))
 }
 
-// Diasbled applies equality check predicate on the "diasbled" field. It's identical to DiasbledEQ.
-func Diasbled(v bool) predicate.Manager {
-	return predicate.Manager(sql.FieldEQ(FieldDiasbled, v))
+// DeletedAt applies equality check predicate on the "deleted_at" field. It's identical to DeletedAtEQ.
+func DeletedAt(v time.Time) predicate.Manager {
+	return predicate.Manager(sql.FieldEQ(FieldDeletedAt, v))
+}
+
+// UserID applies equality check predicate on the "user_id" field. It's identical to UserIDEQ.
+func UserID(v string) predicate.Manager {
+	return predicate.Manager(sql.FieldEQ(FieldUserID, v))
+}
+
+// BusinessID applies equality check predicate on the "business_id" field. It's identical to BusinessIDEQ.
+func BusinessID(v string) predicate.Manager {
+	return predicate.Manager(sql.FieldEQ(FieldBusinessID, v))
+}
+
+// Disabled applies equality check predicate on the "disabled" field. It's identical to DisabledEQ.
+func Disabled(v bool) predicate.Manager {
+	return predicate.Manager(sql.FieldEQ(FieldDisabled, v))
 }
 
 // DisableReason applies equality check predicate on the "disable_reason" field. It's identical to DisableReasonEQ.
@@ -120,79 +145,234 @@ func CreatedAtLTE(v time.Time) predicate.Manager {
 	return predicate.Manager(sql.FieldLTE(FieldCreatedAt, v))
 }
 
-// PositionEQ applies the EQ predicate on the "position" field.
-func PositionEQ(v string) predicate.Manager {
-	return predicate.Manager(sql.FieldEQ(FieldPosition, v))
+// UpdatedAtEQ applies the EQ predicate on the "updated_at" field.
+func UpdatedAtEQ(v time.Time) predicate.Manager {
+	return predicate.Manager(sql.FieldEQ(FieldUpdatedAt, v))
 }
 
-// PositionNEQ applies the NEQ predicate on the "position" field.
-func PositionNEQ(v string) predicate.Manager {
-	return predicate.Manager(sql.FieldNEQ(FieldPosition, v))
+// UpdatedAtNEQ applies the NEQ predicate on the "updated_at" field.
+func UpdatedAtNEQ(v time.Time) predicate.Manager {
+	return predicate.Manager(sql.FieldNEQ(FieldUpdatedAt, v))
 }
 
-// PositionIn applies the In predicate on the "position" field.
-func PositionIn(vs ...string) predicate.Manager {
-	return predicate.Manager(sql.FieldIn(FieldPosition, vs...))
+// UpdatedAtIn applies the In predicate on the "updated_at" field.
+func UpdatedAtIn(vs ...time.Time) predicate.Manager {
+	return predicate.Manager(sql.FieldIn(FieldUpdatedAt, vs...))
 }
 
-// PositionNotIn applies the NotIn predicate on the "position" field.
-func PositionNotIn(vs ...string) predicate.Manager {
-	return predicate.Manager(sql.FieldNotIn(FieldPosition, vs...))
+// UpdatedAtNotIn applies the NotIn predicate on the "updated_at" field.
+func UpdatedAtNotIn(vs ...time.Time) predicate.Manager {
+	return predicate.Manager(sql.FieldNotIn(FieldUpdatedAt, vs...))
 }
 
-// PositionGT applies the GT predicate on the "position" field.
-func PositionGT(v string) predicate.Manager {
-	return predicate.Manager(sql.FieldGT(FieldPosition, v))
+// UpdatedAtGT applies the GT predicate on the "updated_at" field.
+func UpdatedAtGT(v time.Time) predicate.Manager {
+	return predicate.Manager(sql.FieldGT(FieldUpdatedAt, v))
 }
 
-// PositionGTE applies the GTE predicate on the "position" field.
-func PositionGTE(v string) predicate.Manager {
-	return predicate.Manager(sql.FieldGTE(FieldPosition, v))
+// UpdatedAtGTE applies the GTE predicate on the "updated_at" field.
+func UpdatedAtGTE(v time.Time) predicate.Manager {
+	return predicate.Manager(sql.FieldGTE(FieldUpdatedAt, v))
 }
 
-// PositionLT applies the LT predicate on the "position" field.
-func PositionLT(v string) predicate.Manager {
-	return predicate.Manager(sql.FieldLT(FieldPosition, v))
+// UpdatedAtLT applies the LT predicate on the "updated_at" field.
+func UpdatedAtLT(v time.Time) predicate.Manager {
+	return predicate.Manager(sql.FieldLT(FieldUpdatedAt, v))
 }
 
-// PositionLTE applies the LTE predicate on the "position" field.
-func PositionLTE(v string) predicate.Manager {
-	return predicate.Manager(sql.FieldLTE(FieldPosition, v))
+// UpdatedAtLTE applies the LTE predicate on the "updated_at" field.
+func UpdatedAtLTE(v time.Time) predicate.Manager {
+	return predicate.Manager(sql.FieldLTE(FieldUpdatedAt, v))
 }
 
-// PositionContains applies the Contains predicate on the "position" field.
-func PositionContains(v string) predicate.Manager {
-	return predicate.Manager(sql.FieldContains(FieldPosition, v))
+// DeletedAtEQ applies the EQ predicate on the "deleted_at" field.
+func DeletedAtEQ(v time.Time) predicate.Manager {
+	return predicate.Manager(sql.FieldEQ(FieldDeletedAt, v))
 }
 
-// PositionHasPrefix applies the HasPrefix predicate on the "position" field.
-func PositionHasPrefix(v string) predicate.Manager {
-	return predicate.Manager(sql.FieldHasPrefix(FieldPosition, v))
+// DeletedAtNEQ applies the NEQ predicate on the "deleted_at" field.
+func DeletedAtNEQ(v time.Time) predicate.Manager {
+	return predicate.Manager(sql.FieldNEQ(FieldDeletedAt, v))
 }
 
-// PositionHasSuffix applies the HasSuffix predicate on the "position" field.
-func PositionHasSuffix(v string) predicate.Manager {
-	return predicate.Manager(sql.FieldHasSuffix(FieldPosition, v))
+// DeletedAtIn applies the In predicate on the "deleted_at" field.
+func DeletedAtIn(vs ...time.Time) predicate.Manager {
+	return predicate.Manager(sql.FieldIn(FieldDeletedAt, vs...))
 }
 
-// PositionEqualFold applies the EqualFold predicate on the "position" field.
-func PositionEqualFold(v string) predicate.Manager {
-	return predicate.Manager(sql.FieldEqualFold(FieldPosition, v))
+// DeletedAtNotIn applies the NotIn predicate on the "deleted_at" field.
+func DeletedAtNotIn(vs ...time.Time) predicate.Manager {
+	return predicate.Manager(sql.FieldNotIn(FieldDeletedAt, vs...))
 }
 
-// PositionContainsFold applies the ContainsFold predicate on the "position" field.
-func PositionContainsFold(v string) predicate.Manager {
-	return predicate.Manager(sql.FieldContainsFold(FieldPosition, v))
+// DeletedAtGT applies the GT predicate on the "deleted_at" field.
+func DeletedAtGT(v time.Time) predicate.Manager {
+	return predicate.Manager(sql.FieldGT(FieldDeletedAt, v))
 }
 
-// DiasbledEQ applies the EQ predicate on the "diasbled" field.
-func DiasbledEQ(v bool) predicate.Manager {
-	return predicate.Manager(sql.FieldEQ(FieldDiasbled, v))
+// DeletedAtGTE applies the GTE predicate on the "deleted_at" field.
+func DeletedAtGTE(v time.Time) predicate.Manager {
+	return predicate.Manager(sql.FieldGTE(FieldDeletedAt, v))
 }
 
-// DiasbledNEQ applies the NEQ predicate on the "diasbled" field.
-func DiasbledNEQ(v bool) predicate.Manager {
-	return predicate.Manager(sql.FieldNEQ(FieldDiasbled, v))
+// DeletedAtLT applies the LT predicate on the "deleted_at" field.
+func DeletedAtLT(v time.Time) predicate.Manager {
+	return predicate.Manager(sql.FieldLT(FieldDeletedAt, v))
+}
+
+// DeletedAtLTE applies the LTE predicate on the "deleted_at" field.
+func DeletedAtLTE(v time.Time) predicate.Manager {
+	return predicate.Manager(sql.FieldLTE(FieldDeletedAt, v))
+}
+
+// DeletedAtIsNil applies the IsNil predicate on the "deleted_at" field.
+func DeletedAtIsNil() predicate.Manager {
+	return predicate.Manager(sql.FieldIsNull(FieldDeletedAt))
+}
+
+// DeletedAtNotNil applies the NotNil predicate on the "deleted_at" field.
+func DeletedAtNotNil() predicate.Manager {
+	return predicate.Manager(sql.FieldNotNull(FieldDeletedAt))
+}
+
+// UserIDEQ applies the EQ predicate on the "user_id" field.
+func UserIDEQ(v string) predicate.Manager {
+	return predicate.Manager(sql.FieldEQ(FieldUserID, v))
+}
+
+// UserIDNEQ applies the NEQ predicate on the "user_id" field.
+func UserIDNEQ(v string) predicate.Manager {
+	return predicate.Manager(sql.FieldNEQ(FieldUserID, v))
+}
+
+// UserIDIn applies the In predicate on the "user_id" field.
+func UserIDIn(vs ...string) predicate.Manager {
+	return predicate.Manager(sql.FieldIn(FieldUserID, vs...))
+}
+
+// UserIDNotIn applies the NotIn predicate on the "user_id" field.
+func UserIDNotIn(vs ...string) predicate.Manager {
+	return predicate.Manager(sql.FieldNotIn(FieldUserID, vs...))
+}
+
+// UserIDGT applies the GT predicate on the "user_id" field.
+func UserIDGT(v string) predicate.Manager {
+	return predicate.Manager(sql.FieldGT(FieldUserID, v))
+}
+
+// UserIDGTE applies the GTE predicate on the "user_id" field.
+func UserIDGTE(v string) predicate.Manager {
+	return predicate.Manager(sql.FieldGTE(FieldUserID, v))
+}
+
+// UserIDLT applies the LT predicate on the "user_id" field.
+func UserIDLT(v string) predicate.Manager {
+	return predicate.Manager(sql.FieldLT(FieldUserID, v))
+}
+
+// UserIDLTE applies the LTE predicate on the "user_id" field.
+func UserIDLTE(v string) predicate.Manager {
+	return predicate.Manager(sql.FieldLTE(FieldUserID, v))
+}
+
+// UserIDContains applies the Contains predicate on the "user_id" field.
+func UserIDContains(v string) predicate.Manager {
+	return predicate.Manager(sql.FieldContains(FieldUserID, v))
+}
+
+// UserIDHasPrefix applies the HasPrefix predicate on the "user_id" field.
+func UserIDHasPrefix(v string) predicate.Manager {
+	return predicate.Manager(sql.FieldHasPrefix(FieldUserID, v))
+}
+
+// UserIDHasSuffix applies the HasSuffix predicate on the "user_id" field.
+func UserIDHasSuffix(v string) predicate.Manager {
+	return predicate.Manager(sql.FieldHasSuffix(FieldUserID, v))
+}
+
+// UserIDEqualFold applies the EqualFold predicate on the "user_id" field.
+func UserIDEqualFold(v string) predicate.Manager {
+	return predicate.Manager(sql.FieldEqualFold(FieldUserID, v))
+}
+
+// UserIDContainsFold applies the ContainsFold predicate on the "user_id" field.
+func UserIDContainsFold(v string) predicate.Manager {
+	return predicate.Manager(sql.FieldContainsFold(FieldUserID, v))
+}
+
+// BusinessIDEQ applies the EQ predicate on the "business_id" field.
+func BusinessIDEQ(v string) predicate.Manager {
+	return predicate.Manager(sql.FieldEQ(FieldBusinessID, v))
+}
+
+// BusinessIDNEQ applies the NEQ predicate on the "business_id" field.
+func BusinessIDNEQ(v string) predicate.Manager {
+	return predicate.Manager(sql.FieldNEQ(FieldBusinessID, v))
+}
+
+// BusinessIDIn applies the In predicate on the "business_id" field.
+func BusinessIDIn(vs ...string) predicate.Manager {
+	return predicate.Manager(sql.FieldIn(FieldBusinessID, vs...))
+}
+
+// BusinessIDNotIn applies the NotIn predicate on the "business_id" field.
+func BusinessIDNotIn(vs ...string) predicate.Manager {
+	return predicate.Manager(sql.FieldNotIn(FieldBusinessID, vs...))
+}
+
+// BusinessIDGT applies the GT predicate on the "business_id" field.
+func BusinessIDGT(v string) predicate.Manager {
+	return predicate.Manager(sql.FieldGT(FieldBusinessID, v))
+}
+
+// BusinessIDGTE applies the GTE predicate on the "business_id" field.
+func BusinessIDGTE(v string) predicate.Manager {
+	return predicate.Manager(sql.FieldGTE(FieldBusinessID, v))
+}
+
+// BusinessIDLT applies the LT predicate on the "business_id" field.
+func BusinessIDLT(v string) predicate.Manager {
+	return predicate.Manager(sql.FieldLT(FieldBusinessID, v))
+}
+
+// BusinessIDLTE applies the LTE predicate on the "business_id" field.
+func BusinessIDLTE(v string) predicate.Manager {
+	return predicate.Manager(sql.FieldLTE(FieldBusinessID, v))
+}
+
+// BusinessIDContains applies the Contains predicate on the "business_id" field.
+func BusinessIDContains(v string) predicate.Manager {
+	return predicate.Manager(sql.FieldContains(FieldBusinessID, v))
+}
+
+// BusinessIDHasPrefix applies the HasPrefix predicate on the "business_id" field.
+func BusinessIDHasPrefix(v string) predicate.Manager {
+	return predicate.Manager(sql.FieldHasPrefix(FieldBusinessID, v))
+}
+
+// BusinessIDHasSuffix applies the HasSuffix predicate on the "business_id" field.
+func BusinessIDHasSuffix(v string) predicate.Manager {
+	return predicate.Manager(sql.FieldHasSuffix(FieldBusinessID, v))
+}
+
+// BusinessIDEqualFold applies the EqualFold predicate on the "business_id" field.
+func BusinessIDEqualFold(v string) predicate.Manager {
+	return predicate.Manager(sql.FieldEqualFold(FieldBusinessID, v))
+}
+
+// BusinessIDContainsFold applies the ContainsFold predicate on the "business_id" field.
+func BusinessIDContainsFold(v string) predicate.Manager {
+	return predicate.Manager(sql.FieldContainsFold(FieldBusinessID, v))
+}
+
+// DisabledEQ applies the EQ predicate on the "disabled" field.
+func DisabledEQ(v bool) predicate.Manager {
+	return predicate.Manager(sql.FieldEQ(FieldDisabled, v))
+}
+
+// DisabledNEQ applies the NEQ predicate on the "disabled" field.
+func DisabledNEQ(v bool) predicate.Manager {
+	return predicate.Manager(sql.FieldNEQ(FieldDisabled, v))
 }
 
 // DisableReasonEQ applies the EQ predicate on the "disable_reason" field.
@@ -250,6 +430,16 @@ func DisableReasonHasSuffix(v string) predicate.Manager {
 	return predicate.Manager(sql.FieldHasSuffix(FieldDisableReason, v))
 }
 
+// DisableReasonIsNil applies the IsNil predicate on the "disable_reason" field.
+func DisableReasonIsNil() predicate.Manager {
+	return predicate.Manager(sql.FieldIsNull(FieldDisableReason))
+}
+
+// DisableReasonNotNil applies the NotNil predicate on the "disable_reason" field.
+func DisableReasonNotNil() predicate.Manager {
+	return predicate.Manager(sql.FieldNotNull(FieldDisableReason))
+}
+
 // DisableReasonEqualFold applies the EqualFold predicate on the "disable_reason" field.
 func DisableReasonEqualFold(v string) predicate.Manager {
 	return predicate.Manager(sql.FieldEqualFold(FieldDisableReason, v))
@@ -300,21 +490,31 @@ func DisabledAtLTE(v time.Time) predicate.Manager {
 	return predicate.Manager(sql.FieldLTE(FieldDisabledAt, v))
 }
 
-// HasBusinessUser applies the HasEdge predicate on the "business_user" edge.
-func HasBusinessUser() predicate.Manager {
+// DisabledAtIsNil applies the IsNil predicate on the "disabled_at" field.
+func DisabledAtIsNil() predicate.Manager {
+	return predicate.Manager(sql.FieldIsNull(FieldDisabledAt))
+}
+
+// DisabledAtNotNil applies the NotNil predicate on the "disabled_at" field.
+func DisabledAtNotNil() predicate.Manager {
+	return predicate.Manager(sql.FieldNotNull(FieldDisabledAt))
+}
+
+// HasBusiness applies the HasEdge predicate on the "business" edge.
+func HasBusiness() predicate.Manager {
 	return predicate.Manager(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, BusinessUserTable, BusinessUserColumn),
+			sqlgraph.Edge(sqlgraph.M2O, true, BusinessTable, BusinessColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})
 }
 
-// HasBusinessUserWith applies the HasEdge predicate on the "business_user" edge with a given conditions (other predicates).
-func HasBusinessUserWith(preds ...predicate.Business) predicate.Manager {
+// HasBusinessWith applies the HasEdge predicate on the "business" edge with a given conditions (other predicates).
+func HasBusinessWith(preds ...predicate.Business) predicate.Manager {
 	return predicate.Manager(func(s *sql.Selector) {
-		step := newBusinessUserStep()
+		step := newBusinessStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)
@@ -323,21 +523,21 @@ func HasBusinessUserWith(preds ...predicate.Business) predicate.Manager {
 	})
 }
 
-// HasUserManager applies the HasEdge predicate on the "user_manager" edge.
-func HasUserManager() predicate.Manager {
+// HasUser applies the HasEdge predicate on the "user" edge.
+func HasUser() predicate.Manager {
 	return predicate.Manager(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, UserManagerTable, UserManagerColumn),
+			sqlgraph.Edge(sqlgraph.M2O, true, UserTable, UserColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})
 }
 
-// HasUserManagerWith applies the HasEdge predicate on the "user_manager" edge with a given conditions (other predicates).
-func HasUserManagerWith(preds ...predicate.User) predicate.Manager {
+// HasUserWith applies the HasEdge predicate on the "user" edge with a given conditions (other predicates).
+func HasUserWith(preds ...predicate.User) predicate.Manager {
 	return predicate.Manager(func(s *sql.Selector) {
-		step := newUserManagerStep()
+		step := newUserStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)

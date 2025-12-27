@@ -7,6 +7,8 @@ import (
 
 	"github.com/Toflex/directory_v2/ent/business"
 	"github.com/Toflex/directory_v2/ent/manager"
+	"github.com/Toflex/directory_v2/ent/permission"
+	"github.com/Toflex/directory_v2/ent/role"
 	"github.com/Toflex/directory_v2/ent/schema"
 	"github.com/Toflex/directory_v2/ent/social"
 	"github.com/Toflex/directory_v2/ent/user"
@@ -16,8 +18,21 @@ import (
 // (default values, validators, hooks and policies) and stitches it
 // to their package variables.
 func init() {
+	businessMixin := schema.Business{}.Mixin()
+	businessMixinFields0 := businessMixin[0].Fields()
+	_ = businessMixinFields0
 	businessFields := schema.Business{}.Fields()
 	_ = businessFields
+	// businessDescCreatedAt is the schema descriptor for created_at field.
+	businessDescCreatedAt := businessMixinFields0[1].Descriptor()
+	// business.DefaultCreatedAt holds the default value on creation for the created_at field.
+	business.DefaultCreatedAt = businessDescCreatedAt.Default.(func() time.Time)
+	// businessDescUpdatedAt is the schema descriptor for updated_at field.
+	businessDescUpdatedAt := businessMixinFields0[2].Descriptor()
+	// business.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	business.DefaultUpdatedAt = businessDescUpdatedAt.Default.(func() time.Time)
+	// business.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	business.UpdateDefaultUpdatedAt = businessDescUpdatedAt.UpdateDefault.(func() time.Time)
 	// businessDescCategory is the schema descriptor for category field.
 	businessDescCategory := businessFields[0].Descriptor()
 	// business.DefaultCategory holds the default value on creation for the category field.
@@ -56,30 +71,102 @@ func init() {
 	businessDescVerified := businessFields[8].Descriptor()
 	// business.DefaultVerified holds the default value on creation for the verified field.
 	business.DefaultVerified = businessDescVerified.Default.(bool)
-	// businessDescCreatedAt is the schema descriptor for created_at field.
-	businessDescCreatedAt := businessFields[10].Descriptor()
-	// business.DefaultCreatedAt holds the default value on creation for the created_at field.
-	business.DefaultCreatedAt = businessDescCreatedAt.Default.(func() time.Time)
+	// businessDescID is the schema descriptor for id field.
+	businessDescID := businessMixinFields0[0].Descriptor()
+	// business.DefaultID holds the default value on creation for the id field.
+	business.DefaultID = businessDescID.Default.(func() string)
+	managerMixin := schema.Manager{}.Mixin()
+	managerMixinFields0 := managerMixin[0].Fields()
+	_ = managerMixinFields0
 	managerFields := schema.Manager{}.Fields()
 	_ = managerFields
 	// managerDescCreatedAt is the schema descriptor for created_at field.
-	managerDescCreatedAt := managerFields[0].Descriptor()
+	managerDescCreatedAt := managerMixinFields0[1].Descriptor()
 	// manager.DefaultCreatedAt holds the default value on creation for the created_at field.
 	manager.DefaultCreatedAt = managerDescCreatedAt.Default.(func() time.Time)
-	// managerDescPosition is the schema descriptor for position field.
-	managerDescPosition := managerFields[1].Descriptor()
-	// manager.PositionValidator is a validator for the "position" field. It is called by the builders before save.
-	manager.PositionValidator = managerDescPosition.Validators[0].(func(string) error)
-	// managerDescDiasbled is the schema descriptor for diasbled field.
-	managerDescDiasbled := managerFields[2].Descriptor()
-	// manager.DefaultDiasbled holds the default value on creation for the diasbled field.
-	manager.DefaultDiasbled = managerDescDiasbled.Default.(bool)
+	// managerDescUpdatedAt is the schema descriptor for updated_at field.
+	managerDescUpdatedAt := managerMixinFields0[2].Descriptor()
+	// manager.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	manager.DefaultUpdatedAt = managerDescUpdatedAt.Default.(func() time.Time)
+	// manager.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	manager.UpdateDefaultUpdatedAt = managerDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// managerDescDisabled is the schema descriptor for disabled field.
+	managerDescDisabled := managerFields[2].Descriptor()
+	// manager.DefaultDisabled holds the default value on creation for the disabled field.
+	manager.DefaultDisabled = managerDescDisabled.Default.(bool)
+	// managerDescID is the schema descriptor for id field.
+	managerDescID := managerMixinFields0[0].Descriptor()
+	// manager.DefaultID holds the default value on creation for the id field.
+	manager.DefaultID = managerDescID.Default.(func() string)
+	permissionMixin := schema.Permission{}.Mixin()
+	permissionMixinFields0 := permissionMixin[0].Fields()
+	_ = permissionMixinFields0
+	permissionFields := schema.Permission{}.Fields()
+	_ = permissionFields
+	// permissionDescCreatedAt is the schema descriptor for created_at field.
+	permissionDescCreatedAt := permissionMixinFields0[1].Descriptor()
+	// permission.DefaultCreatedAt holds the default value on creation for the created_at field.
+	permission.DefaultCreatedAt = permissionDescCreatedAt.Default.(func() time.Time)
+	// permissionDescUpdatedAt is the schema descriptor for updated_at field.
+	permissionDescUpdatedAt := permissionMixinFields0[2].Descriptor()
+	// permission.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	permission.DefaultUpdatedAt = permissionDescUpdatedAt.Default.(func() time.Time)
+	// permission.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	permission.UpdateDefaultUpdatedAt = permissionDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// permissionDescName is the schema descriptor for name field.
+	permissionDescName := permissionFields[0].Descriptor()
+	// permission.NameValidator is a validator for the "name" field. It is called by the builders before save.
+	permission.NameValidator = permissionDescName.Validators[0].(func(string) error)
+	// permissionDescDescription is the schema descriptor for description field.
+	permissionDescDescription := permissionFields[1].Descriptor()
+	// permission.DescriptionValidator is a validator for the "description" field. It is called by the builders before save.
+	permission.DescriptionValidator = permissionDescDescription.Validators[0].(func(string) error)
+	// permissionDescID is the schema descriptor for id field.
+	permissionDescID := permissionMixinFields0[0].Descriptor()
+	// permission.DefaultID holds the default value on creation for the id field.
+	permission.DefaultID = permissionDescID.Default.(func() string)
+	roleMixin := schema.Role{}.Mixin()
+	roleMixinFields0 := roleMixin[0].Fields()
+	_ = roleMixinFields0
+	roleFields := schema.Role{}.Fields()
+	_ = roleFields
+	// roleDescCreatedAt is the schema descriptor for created_at field.
+	roleDescCreatedAt := roleMixinFields0[1].Descriptor()
+	// role.DefaultCreatedAt holds the default value on creation for the created_at field.
+	role.DefaultCreatedAt = roleDescCreatedAt.Default.(func() time.Time)
+	// roleDescUpdatedAt is the schema descriptor for updated_at field.
+	roleDescUpdatedAt := roleMixinFields0[2].Descriptor()
+	// role.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	role.DefaultUpdatedAt = roleDescUpdatedAt.Default.(func() time.Time)
+	// role.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	role.UpdateDefaultUpdatedAt = roleDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// roleDescName is the schema descriptor for name field.
+	roleDescName := roleFields[0].Descriptor()
+	// role.NameValidator is a validator for the "name" field. It is called by the builders before save.
+	role.NameValidator = roleDescName.Validators[0].(func(string) error)
+	// roleDescDescription is the schema descriptor for description field.
+	roleDescDescription := roleFields[1].Descriptor()
+	// role.DescriptionValidator is a validator for the "description" field. It is called by the builders before save.
+	role.DescriptionValidator = roleDescDescription.Validators[0].(func(string) error)
+	// roleDescID is the schema descriptor for id field.
+	roleDescID := roleMixinFields0[0].Descriptor()
+	// role.DefaultID holds the default value on creation for the id field.
+	role.DefaultID = roleDescID.Default.(func() string)
+	socialMixin := schema.Social{}.Mixin()
+	socialMixinFields0 := socialMixin[0].Fields()
+	_ = socialMixinFields0
 	socialFields := schema.Social{}.Fields()
 	_ = socialFields
 	// socialDescCreatedAt is the schema descriptor for created_at field.
-	socialDescCreatedAt := socialFields[0].Descriptor()
+	socialDescCreatedAt := socialMixinFields0[1].Descriptor()
 	// social.DefaultCreatedAt holds the default value on creation for the created_at field.
 	social.DefaultCreatedAt = socialDescCreatedAt.Default.(func() time.Time)
+	// socialDescUpdatedAt is the schema descriptor for updated_at field.
+	socialDescUpdatedAt := socialMixinFields0[2].Descriptor()
+	// social.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	social.DefaultUpdatedAt = socialDescUpdatedAt.Default.(func() time.Time)
+	// social.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	social.UpdateDefaultUpdatedAt = socialDescUpdatedAt.UpdateDefault.(func() time.Time)
 	// socialDescName is the schema descriptor for name field.
 	socialDescName := socialFields[1].Descriptor()
 	// social.NameValidator is a validator for the "name" field. It is called by the builders before save.
@@ -88,8 +175,25 @@ func init() {
 	socialDescURL := socialFields[2].Descriptor()
 	// social.URLValidator is a validator for the "url" field. It is called by the builders before save.
 	social.URLValidator = socialDescURL.Validators[0].(func(string) error)
+	// socialDescID is the schema descriptor for id field.
+	socialDescID := socialMixinFields0[0].Descriptor()
+	// social.DefaultID holds the default value on creation for the id field.
+	social.DefaultID = socialDescID.Default.(func() string)
+	userMixin := schema.User{}.Mixin()
+	userMixinFields0 := userMixin[0].Fields()
+	_ = userMixinFields0
 	userFields := schema.User{}.Fields()
 	_ = userFields
+	// userDescCreatedAt is the schema descriptor for created_at field.
+	userDescCreatedAt := userMixinFields0[1].Descriptor()
+	// user.DefaultCreatedAt holds the default value on creation for the created_at field.
+	user.DefaultCreatedAt = userDescCreatedAt.Default.(func() time.Time)
+	// userDescUpdatedAt is the schema descriptor for updated_at field.
+	userDescUpdatedAt := userMixinFields0[2].Descriptor()
+	// user.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	user.DefaultUpdatedAt = userDescUpdatedAt.Default.(func() time.Time)
+	// user.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	user.UpdateDefaultUpdatedAt = userDescUpdatedAt.UpdateDefault.(func() time.Time)
 	// userDescFirstName is the schema descriptor for first_name field.
 	userDescFirstName := userFields[0].Descriptor()
 	// user.FirstNameValidator is a validator for the "first_name" field. It is called by the builders before save.
@@ -116,20 +220,24 @@ func init() {
 			return nil
 		}
 	}()
+	// userDescEmailVerified is the schema descriptor for email_verified field.
+	userDescEmailVerified := userFields[5].Descriptor()
+	// user.DefaultEmailVerified holds the default value on creation for the email_verified field.
+	user.DefaultEmailVerified = userDescEmailVerified.Default.(bool)
 	// userDescPhoneNumber is the schema descriptor for phone_number field.
-	userDescPhoneNumber := userFields[5].Descriptor()
+	userDescPhoneNumber := userFields[7].Descriptor()
 	// user.PhoneNumberValidator is a validator for the "phone_number" field. It is called by the builders before save.
 	user.PhoneNumberValidator = userDescPhoneNumber.Validators[0].(func(string) error)
 	// userDescDisabled is the schema descriptor for disabled field.
-	userDescDisabled := userFields[7].Descriptor()
+	userDescDisabled := userFields[9].Descriptor()
 	// user.DefaultDisabled holds the default value on creation for the disabled field.
 	user.DefaultDisabled = userDescDisabled.Default.(bool)
 	// userDescTier is the schema descriptor for tier field.
-	userDescTier := userFields[9].Descriptor()
+	userDescTier := userFields[10].Descriptor()
 	// user.DefaultTier holds the default value on creation for the tier field.
 	user.DefaultTier = userDescTier.Default.(int8)
-	// userDescCreatedAt is the schema descriptor for created_at field.
-	userDescCreatedAt := userFields[10].Descriptor()
-	// user.DefaultCreatedAt holds the default value on creation for the created_at field.
-	user.DefaultCreatedAt = userDescCreatedAt.Default.(func() time.Time)
+	// userDescID is the schema descriptor for id field.
+	userDescID := userMixinFields0[0].Descriptor()
+	// user.DefaultID holds the default value on creation for the id field.
+	user.DefaultID = userDescID.Default.(func() string)
 }

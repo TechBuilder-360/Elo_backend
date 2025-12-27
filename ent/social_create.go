@@ -35,6 +35,40 @@ func (sc *SocialCreate) SetNillableCreatedAt(t *time.Time) *SocialCreate {
 	return sc
 }
 
+// SetUpdatedAt sets the "updated_at" field.
+func (sc *SocialCreate) SetUpdatedAt(t time.Time) *SocialCreate {
+	sc.mutation.SetUpdatedAt(t)
+	return sc
+}
+
+// SetNillableUpdatedAt sets the "updated_at" field if the given value is not nil.
+func (sc *SocialCreate) SetNillableUpdatedAt(t *time.Time) *SocialCreate {
+	if t != nil {
+		sc.SetUpdatedAt(*t)
+	}
+	return sc
+}
+
+// SetDeletedAt sets the "deleted_at" field.
+func (sc *SocialCreate) SetDeletedAt(t time.Time) *SocialCreate {
+	sc.mutation.SetDeletedAt(t)
+	return sc
+}
+
+// SetNillableDeletedAt sets the "deleted_at" field if the given value is not nil.
+func (sc *SocialCreate) SetNillableDeletedAt(t *time.Time) *SocialCreate {
+	if t != nil {
+		sc.SetDeletedAt(*t)
+	}
+	return sc
+}
+
+// SetBusinessID sets the "business_id" field.
+func (sc *SocialCreate) SetBusinessID(s string) *SocialCreate {
+	sc.mutation.SetBusinessID(s)
+	return sc
+}
+
 // SetName sets the "name" field.
 func (sc *SocialCreate) SetName(s string) *SocialCreate {
 	sc.mutation.SetName(s)
@@ -47,8 +81,22 @@ func (sc *SocialCreate) SetURL(s string) *SocialCreate {
 	return sc
 }
 
+// SetID sets the "id" field.
+func (sc *SocialCreate) SetID(s string) *SocialCreate {
+	sc.mutation.SetID(s)
+	return sc
+}
+
+// SetNillableID sets the "id" field if the given value is not nil.
+func (sc *SocialCreate) SetNillableID(s *string) *SocialCreate {
+	if s != nil {
+		sc.SetID(*s)
+	}
+	return sc
+}
+
 // SetSocialID sets the "social" edge to the Business entity by ID.
-func (sc *SocialCreate) SetSocialID(id int) *SocialCreate {
+func (sc *SocialCreate) SetSocialID(id string) *SocialCreate {
 	sc.mutation.SetSocialID(id)
 	return sc
 }
@@ -97,12 +145,26 @@ func (sc *SocialCreate) defaults() {
 		v := social.DefaultCreatedAt()
 		sc.mutation.SetCreatedAt(v)
 	}
+	if _, ok := sc.mutation.UpdatedAt(); !ok {
+		v := social.DefaultUpdatedAt()
+		sc.mutation.SetUpdatedAt(v)
+	}
+	if _, ok := sc.mutation.ID(); !ok {
+		v := social.DefaultID()
+		sc.mutation.SetID(v)
+	}
 }
 
 // check runs all checks and user-defined validators on the builder.
 func (sc *SocialCreate) check() error {
 	if _, ok := sc.mutation.CreatedAt(); !ok {
 		return &ValidationError{Name: "created_at", err: errors.New(`ent: missing required field "Social.created_at"`)}
+	}
+	if _, ok := sc.mutation.UpdatedAt(); !ok {
+		return &ValidationError{Name: "updated_at", err: errors.New(`ent: missing required field "Social.updated_at"`)}
+	}
+	if _, ok := sc.mutation.BusinessID(); !ok {
+		return &ValidationError{Name: "business_id", err: errors.New(`ent: missing required field "Social.business_id"`)}
 	}
 	if _, ok := sc.mutation.Name(); !ok {
 		return &ValidationError{Name: "name", err: errors.New(`ent: missing required field "Social.name"`)}
@@ -137,8 +199,13 @@ func (sc *SocialCreate) sqlSave(ctx context.Context) (*Social, error) {
 		}
 		return nil, err
 	}
-	id := _spec.ID.Value.(int64)
-	_node.ID = int(id)
+	if _spec.ID.Value != nil {
+		if id, ok := _spec.ID.Value.(string); ok {
+			_node.ID = id
+		} else {
+			return nil, fmt.Errorf("unexpected Social.ID type: %T", _spec.ID.Value)
+		}
+	}
 	sc.mutation.id = &_node.ID
 	sc.mutation.done = true
 	return _node, nil
@@ -147,11 +214,23 @@ func (sc *SocialCreate) sqlSave(ctx context.Context) (*Social, error) {
 func (sc *SocialCreate) createSpec() (*Social, *sqlgraph.CreateSpec) {
 	var (
 		_node = &Social{config: sc.config}
-		_spec = sqlgraph.NewCreateSpec(social.Table, sqlgraph.NewFieldSpec(social.FieldID, field.TypeInt))
+		_spec = sqlgraph.NewCreateSpec(social.Table, sqlgraph.NewFieldSpec(social.FieldID, field.TypeString))
 	)
+	if id, ok := sc.mutation.ID(); ok {
+		_node.ID = id
+		_spec.ID.Value = id
+	}
 	if value, ok := sc.mutation.CreatedAt(); ok {
 		_spec.SetField(social.FieldCreatedAt, field.TypeTime, value)
 		_node.CreatedAt = value
+	}
+	if value, ok := sc.mutation.UpdatedAt(); ok {
+		_spec.SetField(social.FieldUpdatedAt, field.TypeTime, value)
+		_node.UpdatedAt = value
+	}
+	if value, ok := sc.mutation.DeletedAt(); ok {
+		_spec.SetField(social.FieldDeletedAt, field.TypeTime, value)
+		_node.DeletedAt = &value
 	}
 	if value, ok := sc.mutation.Name(); ok {
 		_spec.SetField(social.FieldName, field.TypeString, value)
@@ -169,13 +248,13 @@ func (sc *SocialCreate) createSpec() (*Social, *sqlgraph.CreateSpec) {
 			Columns: []string{social.SocialColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(business.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(business.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		_node.business_business_social = &nodes[0]
+		_node.BusinessID = nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec
@@ -226,10 +305,6 @@ func (scb *SocialCreateBulk) Save(ctx context.Context) ([]*Social, error) {
 					return nil, err
 				}
 				mutation.id = &nodes[i].ID
-				if specs[i].ID.Value != nil {
-					id := specs[i].ID.Value.(int64)
-					nodes[i].ID = int(id)
-				}
 				mutation.done = true
 				return nodes[i], nil
 			})

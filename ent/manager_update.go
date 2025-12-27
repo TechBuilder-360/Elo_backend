@@ -30,30 +30,70 @@ func (mu *ManagerUpdate) Where(ps ...predicate.Manager) *ManagerUpdate {
 	return mu
 }
 
-// SetPosition sets the "position" field.
-func (mu *ManagerUpdate) SetPosition(s string) *ManagerUpdate {
-	mu.mutation.SetPosition(s)
+// SetUpdatedAt sets the "updated_at" field.
+func (mu *ManagerUpdate) SetUpdatedAt(t time.Time) *ManagerUpdate {
+	mu.mutation.SetUpdatedAt(t)
 	return mu
 }
 
-// SetNillablePosition sets the "position" field if the given value is not nil.
-func (mu *ManagerUpdate) SetNillablePosition(s *string) *ManagerUpdate {
-	if s != nil {
-		mu.SetPosition(*s)
+// SetDeletedAt sets the "deleted_at" field.
+func (mu *ManagerUpdate) SetDeletedAt(t time.Time) *ManagerUpdate {
+	mu.mutation.SetDeletedAt(t)
+	return mu
+}
+
+// SetNillableDeletedAt sets the "deleted_at" field if the given value is not nil.
+func (mu *ManagerUpdate) SetNillableDeletedAt(t *time.Time) *ManagerUpdate {
+	if t != nil {
+		mu.SetDeletedAt(*t)
 	}
 	return mu
 }
 
-// SetDiasbled sets the "diasbled" field.
-func (mu *ManagerUpdate) SetDiasbled(b bool) *ManagerUpdate {
-	mu.mutation.SetDiasbled(b)
+// ClearDeletedAt clears the value of the "deleted_at" field.
+func (mu *ManagerUpdate) ClearDeletedAt() *ManagerUpdate {
+	mu.mutation.ClearDeletedAt()
 	return mu
 }
 
-// SetNillableDiasbled sets the "diasbled" field if the given value is not nil.
-func (mu *ManagerUpdate) SetNillableDiasbled(b *bool) *ManagerUpdate {
+// SetUserID sets the "user_id" field.
+func (mu *ManagerUpdate) SetUserID(s string) *ManagerUpdate {
+	mu.mutation.SetUserID(s)
+	return mu
+}
+
+// SetNillableUserID sets the "user_id" field if the given value is not nil.
+func (mu *ManagerUpdate) SetNillableUserID(s *string) *ManagerUpdate {
+	if s != nil {
+		mu.SetUserID(*s)
+	}
+	return mu
+}
+
+// SetBusinessID sets the "business_id" field.
+func (mu *ManagerUpdate) SetBusinessID(s string) *ManagerUpdate {
+	mu.mutation.SetBusinessID(s)
+	return mu
+}
+
+// SetNillableBusinessID sets the "business_id" field if the given value is not nil.
+func (mu *ManagerUpdate) SetNillableBusinessID(s *string) *ManagerUpdate {
+	if s != nil {
+		mu.SetBusinessID(*s)
+	}
+	return mu
+}
+
+// SetDisabled sets the "disabled" field.
+func (mu *ManagerUpdate) SetDisabled(b bool) *ManagerUpdate {
+	mu.mutation.SetDisabled(b)
+	return mu
+}
+
+// SetNillableDisabled sets the "disabled" field if the given value is not nil.
+func (mu *ManagerUpdate) SetNillableDisabled(b *bool) *ManagerUpdate {
 	if b != nil {
-		mu.SetDiasbled(*b)
+		mu.SetDisabled(*b)
 	}
 	return mu
 }
@@ -72,6 +112,12 @@ func (mu *ManagerUpdate) SetNillableDisableReason(s *string) *ManagerUpdate {
 	return mu
 }
 
+// ClearDisableReason clears the value of the "disable_reason" field.
+func (mu *ManagerUpdate) ClearDisableReason() *ManagerUpdate {
+	mu.mutation.ClearDisableReason()
+	return mu
+}
+
 // SetDisabledAt sets the "disabled_at" field.
 func (mu *ManagerUpdate) SetDisabledAt(t time.Time) *ManagerUpdate {
 	mu.mutation.SetDisabledAt(t)
@@ -86,26 +132,20 @@ func (mu *ManagerUpdate) SetNillableDisabledAt(t *time.Time) *ManagerUpdate {
 	return mu
 }
 
-// SetBusinessUserID sets the "business_user" edge to the Business entity by ID.
-func (mu *ManagerUpdate) SetBusinessUserID(id int) *ManagerUpdate {
-	mu.mutation.SetBusinessUserID(id)
+// ClearDisabledAt clears the value of the "disabled_at" field.
+func (mu *ManagerUpdate) ClearDisabledAt() *ManagerUpdate {
+	mu.mutation.ClearDisabledAt()
 	return mu
 }
 
-// SetBusinessUser sets the "business_user" edge to the Business entity.
-func (mu *ManagerUpdate) SetBusinessUser(b *Business) *ManagerUpdate {
-	return mu.SetBusinessUserID(b.ID)
+// SetBusiness sets the "business" edge to the Business entity.
+func (mu *ManagerUpdate) SetBusiness(b *Business) *ManagerUpdate {
+	return mu.SetBusinessID(b.ID)
 }
 
-// SetUserManagerID sets the "user_manager" edge to the User entity by ID.
-func (mu *ManagerUpdate) SetUserManagerID(id int) *ManagerUpdate {
-	mu.mutation.SetUserManagerID(id)
-	return mu
-}
-
-// SetUserManager sets the "user_manager" edge to the User entity.
-func (mu *ManagerUpdate) SetUserManager(u *User) *ManagerUpdate {
-	return mu.SetUserManagerID(u.ID)
+// SetUser sets the "user" edge to the User entity.
+func (mu *ManagerUpdate) SetUser(u *User) *ManagerUpdate {
+	return mu.SetUserID(u.ID)
 }
 
 // Mutation returns the ManagerMutation object of the builder.
@@ -113,20 +153,21 @@ func (mu *ManagerUpdate) Mutation() *ManagerMutation {
 	return mu.mutation
 }
 
-// ClearBusinessUser clears the "business_user" edge to the Business entity.
-func (mu *ManagerUpdate) ClearBusinessUser() *ManagerUpdate {
-	mu.mutation.ClearBusinessUser()
+// ClearBusiness clears the "business" edge to the Business entity.
+func (mu *ManagerUpdate) ClearBusiness() *ManagerUpdate {
+	mu.mutation.ClearBusiness()
 	return mu
 }
 
-// ClearUserManager clears the "user_manager" edge to the User entity.
-func (mu *ManagerUpdate) ClearUserManager() *ManagerUpdate {
-	mu.mutation.ClearUserManager()
+// ClearUser clears the "user" edge to the User entity.
+func (mu *ManagerUpdate) ClearUser() *ManagerUpdate {
+	mu.mutation.ClearUser()
 	return mu
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (mu *ManagerUpdate) Save(ctx context.Context) (int, error) {
+	mu.defaults()
 	return withHooks(ctx, mu.sqlSave, mu.mutation, mu.hooks)
 }
 
@@ -152,18 +193,21 @@ func (mu *ManagerUpdate) ExecX(ctx context.Context) {
 	}
 }
 
+// defaults sets the default values of the builder before save.
+func (mu *ManagerUpdate) defaults() {
+	if _, ok := mu.mutation.UpdatedAt(); !ok {
+		v := manager.UpdateDefaultUpdatedAt()
+		mu.mutation.SetUpdatedAt(v)
+	}
+}
+
 // check runs all checks and user-defined validators on the builder.
 func (mu *ManagerUpdate) check() error {
-	if v, ok := mu.mutation.Position(); ok {
-		if err := manager.PositionValidator(v); err != nil {
-			return &ValidationError{Name: "position", err: fmt.Errorf(`ent: validator failed for field "Manager.position": %w`, err)}
-		}
+	if mu.mutation.BusinessCleared() && len(mu.mutation.BusinessIDs()) > 0 {
+		return errors.New(`ent: clearing a required unique edge "Manager.business"`)
 	}
-	if mu.mutation.BusinessUserCleared() && len(mu.mutation.BusinessUserIDs()) > 0 {
-		return errors.New(`ent: clearing a required unique edge "Manager.business_user"`)
-	}
-	if mu.mutation.UserManagerCleared() && len(mu.mutation.UserManagerIDs()) > 0 {
-		return errors.New(`ent: clearing a required unique edge "Manager.user_manager"`)
+	if mu.mutation.UserCleared() && len(mu.mutation.UserIDs()) > 0 {
+		return errors.New(`ent: clearing a required unique edge "Manager.user"`)
 	}
 	return nil
 }
@@ -172,7 +216,7 @@ func (mu *ManagerUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if err := mu.check(); err != nil {
 		return n, err
 	}
-	_spec := sqlgraph.NewUpdateSpec(manager.Table, manager.Columns, sqlgraph.NewFieldSpec(manager.FieldID, field.TypeInt))
+	_spec := sqlgraph.NewUpdateSpec(manager.Table, manager.Columns, sqlgraph.NewFieldSpec(manager.FieldID, field.TypeString))
 	if ps := mu.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
@@ -180,40 +224,52 @@ func (mu *ManagerUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			}
 		}
 	}
-	if value, ok := mu.mutation.Position(); ok {
-		_spec.SetField(manager.FieldPosition, field.TypeString, value)
+	if value, ok := mu.mutation.UpdatedAt(); ok {
+		_spec.SetField(manager.FieldUpdatedAt, field.TypeTime, value)
 	}
-	if value, ok := mu.mutation.Diasbled(); ok {
-		_spec.SetField(manager.FieldDiasbled, field.TypeBool, value)
+	if value, ok := mu.mutation.DeletedAt(); ok {
+		_spec.SetField(manager.FieldDeletedAt, field.TypeTime, value)
+	}
+	if mu.mutation.DeletedAtCleared() {
+		_spec.ClearField(manager.FieldDeletedAt, field.TypeTime)
+	}
+	if value, ok := mu.mutation.Disabled(); ok {
+		_spec.SetField(manager.FieldDisabled, field.TypeBool, value)
 	}
 	if value, ok := mu.mutation.DisableReason(); ok {
 		_spec.SetField(manager.FieldDisableReason, field.TypeString, value)
 	}
+	if mu.mutation.DisableReasonCleared() {
+		_spec.ClearField(manager.FieldDisableReason, field.TypeString)
+	}
 	if value, ok := mu.mutation.DisabledAt(); ok {
 		_spec.SetField(manager.FieldDisabledAt, field.TypeTime, value)
 	}
-	if mu.mutation.BusinessUserCleared() {
+	if mu.mutation.DisabledAtCleared() {
+		_spec.ClearField(manager.FieldDisabledAt, field.TypeTime)
+	}
+	if mu.mutation.BusinessCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   manager.BusinessUserTable,
-			Columns: []string{manager.BusinessUserColumn},
+			Table:   manager.BusinessTable,
+			Columns: []string{manager.BusinessColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(business.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(business.FieldID, field.TypeString),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := mu.mutation.BusinessUserIDs(); len(nodes) > 0 {
+	if nodes := mu.mutation.BusinessIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   manager.BusinessUserTable,
-			Columns: []string{manager.BusinessUserColumn},
+			Table:   manager.BusinessTable,
+			Columns: []string{manager.BusinessColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(business.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(business.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {
@@ -221,28 +277,28 @@ func (mu *ManagerUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if mu.mutation.UserManagerCleared() {
+	if mu.mutation.UserCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   manager.UserManagerTable,
-			Columns: []string{manager.UserManagerColumn},
+			Table:   manager.UserTable,
+			Columns: []string{manager.UserColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeString),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := mu.mutation.UserManagerIDs(); len(nodes) > 0 {
+	if nodes := mu.mutation.UserIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   manager.UserManagerTable,
-			Columns: []string{manager.UserManagerColumn},
+			Table:   manager.UserTable,
+			Columns: []string{manager.UserColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {
@@ -270,30 +326,70 @@ type ManagerUpdateOne struct {
 	mutation *ManagerMutation
 }
 
-// SetPosition sets the "position" field.
-func (muo *ManagerUpdateOne) SetPosition(s string) *ManagerUpdateOne {
-	muo.mutation.SetPosition(s)
+// SetUpdatedAt sets the "updated_at" field.
+func (muo *ManagerUpdateOne) SetUpdatedAt(t time.Time) *ManagerUpdateOne {
+	muo.mutation.SetUpdatedAt(t)
 	return muo
 }
 
-// SetNillablePosition sets the "position" field if the given value is not nil.
-func (muo *ManagerUpdateOne) SetNillablePosition(s *string) *ManagerUpdateOne {
-	if s != nil {
-		muo.SetPosition(*s)
+// SetDeletedAt sets the "deleted_at" field.
+func (muo *ManagerUpdateOne) SetDeletedAt(t time.Time) *ManagerUpdateOne {
+	muo.mutation.SetDeletedAt(t)
+	return muo
+}
+
+// SetNillableDeletedAt sets the "deleted_at" field if the given value is not nil.
+func (muo *ManagerUpdateOne) SetNillableDeletedAt(t *time.Time) *ManagerUpdateOne {
+	if t != nil {
+		muo.SetDeletedAt(*t)
 	}
 	return muo
 }
 
-// SetDiasbled sets the "diasbled" field.
-func (muo *ManagerUpdateOne) SetDiasbled(b bool) *ManagerUpdateOne {
-	muo.mutation.SetDiasbled(b)
+// ClearDeletedAt clears the value of the "deleted_at" field.
+func (muo *ManagerUpdateOne) ClearDeletedAt() *ManagerUpdateOne {
+	muo.mutation.ClearDeletedAt()
 	return muo
 }
 
-// SetNillableDiasbled sets the "diasbled" field if the given value is not nil.
-func (muo *ManagerUpdateOne) SetNillableDiasbled(b *bool) *ManagerUpdateOne {
+// SetUserID sets the "user_id" field.
+func (muo *ManagerUpdateOne) SetUserID(s string) *ManagerUpdateOne {
+	muo.mutation.SetUserID(s)
+	return muo
+}
+
+// SetNillableUserID sets the "user_id" field if the given value is not nil.
+func (muo *ManagerUpdateOne) SetNillableUserID(s *string) *ManagerUpdateOne {
+	if s != nil {
+		muo.SetUserID(*s)
+	}
+	return muo
+}
+
+// SetBusinessID sets the "business_id" field.
+func (muo *ManagerUpdateOne) SetBusinessID(s string) *ManagerUpdateOne {
+	muo.mutation.SetBusinessID(s)
+	return muo
+}
+
+// SetNillableBusinessID sets the "business_id" field if the given value is not nil.
+func (muo *ManagerUpdateOne) SetNillableBusinessID(s *string) *ManagerUpdateOne {
+	if s != nil {
+		muo.SetBusinessID(*s)
+	}
+	return muo
+}
+
+// SetDisabled sets the "disabled" field.
+func (muo *ManagerUpdateOne) SetDisabled(b bool) *ManagerUpdateOne {
+	muo.mutation.SetDisabled(b)
+	return muo
+}
+
+// SetNillableDisabled sets the "disabled" field if the given value is not nil.
+func (muo *ManagerUpdateOne) SetNillableDisabled(b *bool) *ManagerUpdateOne {
 	if b != nil {
-		muo.SetDiasbled(*b)
+		muo.SetDisabled(*b)
 	}
 	return muo
 }
@@ -312,6 +408,12 @@ func (muo *ManagerUpdateOne) SetNillableDisableReason(s *string) *ManagerUpdateO
 	return muo
 }
 
+// ClearDisableReason clears the value of the "disable_reason" field.
+func (muo *ManagerUpdateOne) ClearDisableReason() *ManagerUpdateOne {
+	muo.mutation.ClearDisableReason()
+	return muo
+}
+
 // SetDisabledAt sets the "disabled_at" field.
 func (muo *ManagerUpdateOne) SetDisabledAt(t time.Time) *ManagerUpdateOne {
 	muo.mutation.SetDisabledAt(t)
@@ -326,26 +428,20 @@ func (muo *ManagerUpdateOne) SetNillableDisabledAt(t *time.Time) *ManagerUpdateO
 	return muo
 }
 
-// SetBusinessUserID sets the "business_user" edge to the Business entity by ID.
-func (muo *ManagerUpdateOne) SetBusinessUserID(id int) *ManagerUpdateOne {
-	muo.mutation.SetBusinessUserID(id)
+// ClearDisabledAt clears the value of the "disabled_at" field.
+func (muo *ManagerUpdateOne) ClearDisabledAt() *ManagerUpdateOne {
+	muo.mutation.ClearDisabledAt()
 	return muo
 }
 
-// SetBusinessUser sets the "business_user" edge to the Business entity.
-func (muo *ManagerUpdateOne) SetBusinessUser(b *Business) *ManagerUpdateOne {
-	return muo.SetBusinessUserID(b.ID)
+// SetBusiness sets the "business" edge to the Business entity.
+func (muo *ManagerUpdateOne) SetBusiness(b *Business) *ManagerUpdateOne {
+	return muo.SetBusinessID(b.ID)
 }
 
-// SetUserManagerID sets the "user_manager" edge to the User entity by ID.
-func (muo *ManagerUpdateOne) SetUserManagerID(id int) *ManagerUpdateOne {
-	muo.mutation.SetUserManagerID(id)
-	return muo
-}
-
-// SetUserManager sets the "user_manager" edge to the User entity.
-func (muo *ManagerUpdateOne) SetUserManager(u *User) *ManagerUpdateOne {
-	return muo.SetUserManagerID(u.ID)
+// SetUser sets the "user" edge to the User entity.
+func (muo *ManagerUpdateOne) SetUser(u *User) *ManagerUpdateOne {
+	return muo.SetUserID(u.ID)
 }
 
 // Mutation returns the ManagerMutation object of the builder.
@@ -353,15 +449,15 @@ func (muo *ManagerUpdateOne) Mutation() *ManagerMutation {
 	return muo.mutation
 }
 
-// ClearBusinessUser clears the "business_user" edge to the Business entity.
-func (muo *ManagerUpdateOne) ClearBusinessUser() *ManagerUpdateOne {
-	muo.mutation.ClearBusinessUser()
+// ClearBusiness clears the "business" edge to the Business entity.
+func (muo *ManagerUpdateOne) ClearBusiness() *ManagerUpdateOne {
+	muo.mutation.ClearBusiness()
 	return muo
 }
 
-// ClearUserManager clears the "user_manager" edge to the User entity.
-func (muo *ManagerUpdateOne) ClearUserManager() *ManagerUpdateOne {
-	muo.mutation.ClearUserManager()
+// ClearUser clears the "user" edge to the User entity.
+func (muo *ManagerUpdateOne) ClearUser() *ManagerUpdateOne {
+	muo.mutation.ClearUser()
 	return muo
 }
 
@@ -380,6 +476,7 @@ func (muo *ManagerUpdateOne) Select(field string, fields ...string) *ManagerUpda
 
 // Save executes the query and returns the updated Manager entity.
 func (muo *ManagerUpdateOne) Save(ctx context.Context) (*Manager, error) {
+	muo.defaults()
 	return withHooks(ctx, muo.sqlSave, muo.mutation, muo.hooks)
 }
 
@@ -405,18 +502,21 @@ func (muo *ManagerUpdateOne) ExecX(ctx context.Context) {
 	}
 }
 
+// defaults sets the default values of the builder before save.
+func (muo *ManagerUpdateOne) defaults() {
+	if _, ok := muo.mutation.UpdatedAt(); !ok {
+		v := manager.UpdateDefaultUpdatedAt()
+		muo.mutation.SetUpdatedAt(v)
+	}
+}
+
 // check runs all checks and user-defined validators on the builder.
 func (muo *ManagerUpdateOne) check() error {
-	if v, ok := muo.mutation.Position(); ok {
-		if err := manager.PositionValidator(v); err != nil {
-			return &ValidationError{Name: "position", err: fmt.Errorf(`ent: validator failed for field "Manager.position": %w`, err)}
-		}
+	if muo.mutation.BusinessCleared() && len(muo.mutation.BusinessIDs()) > 0 {
+		return errors.New(`ent: clearing a required unique edge "Manager.business"`)
 	}
-	if muo.mutation.BusinessUserCleared() && len(muo.mutation.BusinessUserIDs()) > 0 {
-		return errors.New(`ent: clearing a required unique edge "Manager.business_user"`)
-	}
-	if muo.mutation.UserManagerCleared() && len(muo.mutation.UserManagerIDs()) > 0 {
-		return errors.New(`ent: clearing a required unique edge "Manager.user_manager"`)
+	if muo.mutation.UserCleared() && len(muo.mutation.UserIDs()) > 0 {
+		return errors.New(`ent: clearing a required unique edge "Manager.user"`)
 	}
 	return nil
 }
@@ -425,7 +525,7 @@ func (muo *ManagerUpdateOne) sqlSave(ctx context.Context) (_node *Manager, err e
 	if err := muo.check(); err != nil {
 		return _node, err
 	}
-	_spec := sqlgraph.NewUpdateSpec(manager.Table, manager.Columns, sqlgraph.NewFieldSpec(manager.FieldID, field.TypeInt))
+	_spec := sqlgraph.NewUpdateSpec(manager.Table, manager.Columns, sqlgraph.NewFieldSpec(manager.FieldID, field.TypeString))
 	id, ok := muo.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "Manager.id" for update`)}
@@ -450,40 +550,52 @@ func (muo *ManagerUpdateOne) sqlSave(ctx context.Context) (_node *Manager, err e
 			}
 		}
 	}
-	if value, ok := muo.mutation.Position(); ok {
-		_spec.SetField(manager.FieldPosition, field.TypeString, value)
+	if value, ok := muo.mutation.UpdatedAt(); ok {
+		_spec.SetField(manager.FieldUpdatedAt, field.TypeTime, value)
 	}
-	if value, ok := muo.mutation.Diasbled(); ok {
-		_spec.SetField(manager.FieldDiasbled, field.TypeBool, value)
+	if value, ok := muo.mutation.DeletedAt(); ok {
+		_spec.SetField(manager.FieldDeletedAt, field.TypeTime, value)
+	}
+	if muo.mutation.DeletedAtCleared() {
+		_spec.ClearField(manager.FieldDeletedAt, field.TypeTime)
+	}
+	if value, ok := muo.mutation.Disabled(); ok {
+		_spec.SetField(manager.FieldDisabled, field.TypeBool, value)
 	}
 	if value, ok := muo.mutation.DisableReason(); ok {
 		_spec.SetField(manager.FieldDisableReason, field.TypeString, value)
 	}
+	if muo.mutation.DisableReasonCleared() {
+		_spec.ClearField(manager.FieldDisableReason, field.TypeString)
+	}
 	if value, ok := muo.mutation.DisabledAt(); ok {
 		_spec.SetField(manager.FieldDisabledAt, field.TypeTime, value)
 	}
-	if muo.mutation.BusinessUserCleared() {
+	if muo.mutation.DisabledAtCleared() {
+		_spec.ClearField(manager.FieldDisabledAt, field.TypeTime)
+	}
+	if muo.mutation.BusinessCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   manager.BusinessUserTable,
-			Columns: []string{manager.BusinessUserColumn},
+			Table:   manager.BusinessTable,
+			Columns: []string{manager.BusinessColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(business.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(business.FieldID, field.TypeString),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := muo.mutation.BusinessUserIDs(); len(nodes) > 0 {
+	if nodes := muo.mutation.BusinessIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   manager.BusinessUserTable,
-			Columns: []string{manager.BusinessUserColumn},
+			Table:   manager.BusinessTable,
+			Columns: []string{manager.BusinessColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(business.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(business.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {
@@ -491,28 +603,28 @@ func (muo *ManagerUpdateOne) sqlSave(ctx context.Context) (_node *Manager, err e
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if muo.mutation.UserManagerCleared() {
+	if muo.mutation.UserCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   manager.UserManagerTable,
-			Columns: []string{manager.UserManagerColumn},
+			Table:   manager.UserTable,
+			Columns: []string{manager.UserColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeString),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := muo.mutation.UserManagerIDs(); len(nodes) > 0 {
+	if nodes := muo.mutation.UserIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   manager.UserManagerTable,
-			Columns: []string{manager.UserManagerColumn},
+			Table:   manager.UserTable,
+			Columns: []string{manager.UserColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {

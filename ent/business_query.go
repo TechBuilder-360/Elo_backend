@@ -21,12 +21,12 @@ import (
 // BusinessQuery is the builder for querying Business entities.
 type BusinessQuery struct {
 	config
-	ctx                 *QueryContext
-	order               []business.OrderOption
-	inters              []Interceptor
-	predicates          []predicate.Business
-	withBusinessSocial  *SocialQuery
-	withBusinessManager *ManagerQuery
+	ctx         *QueryContext
+	order       []business.OrderOption
+	inters      []Interceptor
+	predicates  []predicate.Business
+	withSocials *SocialQuery
+	withManages *ManagerQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -63,8 +63,8 @@ func (bq *BusinessQuery) Order(o ...business.OrderOption) *BusinessQuery {
 	return bq
 }
 
-// QueryBusinessSocial chains the current query on the "business_social" edge.
-func (bq *BusinessQuery) QueryBusinessSocial() *SocialQuery {
+// QuerySocials chains the current query on the "socials" edge.
+func (bq *BusinessQuery) QuerySocials() *SocialQuery {
 	query := (&SocialClient{config: bq.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := bq.prepareQuery(ctx); err != nil {
@@ -77,7 +77,7 @@ func (bq *BusinessQuery) QueryBusinessSocial() *SocialQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(business.Table, business.FieldID, selector),
 			sqlgraph.To(social.Table, social.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, business.BusinessSocialTable, business.BusinessSocialColumn),
+			sqlgraph.Edge(sqlgraph.O2M, false, business.SocialsTable, business.SocialsColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(bq.driver.Dialect(), step)
 		return fromU, nil
@@ -85,8 +85,8 @@ func (bq *BusinessQuery) QueryBusinessSocial() *SocialQuery {
 	return query
 }
 
-// QueryBusinessManager chains the current query on the "business_manager" edge.
-func (bq *BusinessQuery) QueryBusinessManager() *ManagerQuery {
+// QueryManages chains the current query on the "manages" edge.
+func (bq *BusinessQuery) QueryManages() *ManagerQuery {
 	query := (&ManagerClient{config: bq.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := bq.prepareQuery(ctx); err != nil {
@@ -99,7 +99,7 @@ func (bq *BusinessQuery) QueryBusinessManager() *ManagerQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(business.Table, business.FieldID, selector),
 			sqlgraph.To(manager.Table, manager.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, business.BusinessManagerTable, business.BusinessManagerColumn),
+			sqlgraph.Edge(sqlgraph.O2M, false, business.ManagesTable, business.ManagesColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(bq.driver.Dialect(), step)
 		return fromU, nil
@@ -131,8 +131,8 @@ func (bq *BusinessQuery) FirstX(ctx context.Context) *Business {
 
 // FirstID returns the first Business ID from the query.
 // Returns a *NotFoundError when no Business ID was found.
-func (bq *BusinessQuery) FirstID(ctx context.Context) (id int, err error) {
-	var ids []int
+func (bq *BusinessQuery) FirstID(ctx context.Context) (id string, err error) {
+	var ids []string
 	if ids, err = bq.Limit(1).IDs(setContextOp(ctx, bq.ctx, ent.OpQueryFirstID)); err != nil {
 		return
 	}
@@ -144,7 +144,7 @@ func (bq *BusinessQuery) FirstID(ctx context.Context) (id int, err error) {
 }
 
 // FirstIDX is like FirstID, but panics if an error occurs.
-func (bq *BusinessQuery) FirstIDX(ctx context.Context) int {
+func (bq *BusinessQuery) FirstIDX(ctx context.Context) string {
 	id, err := bq.FirstID(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
@@ -182,8 +182,8 @@ func (bq *BusinessQuery) OnlyX(ctx context.Context) *Business {
 // OnlyID is like Only, but returns the only Business ID in the query.
 // Returns a *NotSingularError when more than one Business ID is found.
 // Returns a *NotFoundError when no entities are found.
-func (bq *BusinessQuery) OnlyID(ctx context.Context) (id int, err error) {
-	var ids []int
+func (bq *BusinessQuery) OnlyID(ctx context.Context) (id string, err error) {
+	var ids []string
 	if ids, err = bq.Limit(2).IDs(setContextOp(ctx, bq.ctx, ent.OpQueryOnlyID)); err != nil {
 		return
 	}
@@ -199,7 +199,7 @@ func (bq *BusinessQuery) OnlyID(ctx context.Context) (id int, err error) {
 }
 
 // OnlyIDX is like OnlyID, but panics if an error occurs.
-func (bq *BusinessQuery) OnlyIDX(ctx context.Context) int {
+func (bq *BusinessQuery) OnlyIDX(ctx context.Context) string {
 	id, err := bq.OnlyID(ctx)
 	if err != nil {
 		panic(err)
@@ -227,7 +227,7 @@ func (bq *BusinessQuery) AllX(ctx context.Context) []*Business {
 }
 
 // IDs executes the query and returns a list of Business IDs.
-func (bq *BusinessQuery) IDs(ctx context.Context) (ids []int, err error) {
+func (bq *BusinessQuery) IDs(ctx context.Context) (ids []string, err error) {
 	if bq.ctx.Unique == nil && bq.path != nil {
 		bq.Unique(true)
 	}
@@ -239,7 +239,7 @@ func (bq *BusinessQuery) IDs(ctx context.Context) (ids []int, err error) {
 }
 
 // IDsX is like IDs, but panics if an error occurs.
-func (bq *BusinessQuery) IDsX(ctx context.Context) []int {
+func (bq *BusinessQuery) IDsX(ctx context.Context) []string {
 	ids, err := bq.IDs(ctx)
 	if err != nil {
 		panic(err)
@@ -294,38 +294,38 @@ func (bq *BusinessQuery) Clone() *BusinessQuery {
 		return nil
 	}
 	return &BusinessQuery{
-		config:              bq.config,
-		ctx:                 bq.ctx.Clone(),
-		order:               append([]business.OrderOption{}, bq.order...),
-		inters:              append([]Interceptor{}, bq.inters...),
-		predicates:          append([]predicate.Business{}, bq.predicates...),
-		withBusinessSocial:  bq.withBusinessSocial.Clone(),
-		withBusinessManager: bq.withBusinessManager.Clone(),
+		config:      bq.config,
+		ctx:         bq.ctx.Clone(),
+		order:       append([]business.OrderOption{}, bq.order...),
+		inters:      append([]Interceptor{}, bq.inters...),
+		predicates:  append([]predicate.Business{}, bq.predicates...),
+		withSocials: bq.withSocials.Clone(),
+		withManages: bq.withManages.Clone(),
 		// clone intermediate query.
 		sql:  bq.sql.Clone(),
 		path: bq.path,
 	}
 }
 
-// WithBusinessSocial tells the query-builder to eager-load the nodes that are connected to
-// the "business_social" edge. The optional arguments are used to configure the query builder of the edge.
-func (bq *BusinessQuery) WithBusinessSocial(opts ...func(*SocialQuery)) *BusinessQuery {
+// WithSocials tells the query-builder to eager-load the nodes that are connected to
+// the "socials" edge. The optional arguments are used to configure the query builder of the edge.
+func (bq *BusinessQuery) WithSocials(opts ...func(*SocialQuery)) *BusinessQuery {
 	query := (&SocialClient{config: bq.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
-	bq.withBusinessSocial = query
+	bq.withSocials = query
 	return bq
 }
 
-// WithBusinessManager tells the query-builder to eager-load the nodes that are connected to
-// the "business_manager" edge. The optional arguments are used to configure the query builder of the edge.
-func (bq *BusinessQuery) WithBusinessManager(opts ...func(*ManagerQuery)) *BusinessQuery {
+// WithManages tells the query-builder to eager-load the nodes that are connected to
+// the "manages" edge. The optional arguments are used to configure the query builder of the edge.
+func (bq *BusinessQuery) WithManages(opts ...func(*ManagerQuery)) *BusinessQuery {
 	query := (&ManagerClient{config: bq.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
-	bq.withBusinessManager = query
+	bq.withManages = query
 	return bq
 }
 
@@ -335,12 +335,12 @@ func (bq *BusinessQuery) WithBusinessManager(opts ...func(*ManagerQuery)) *Busin
 // Example:
 //
 //	var v []struct {
-//		Category string `json:"category,omitempty"`
+//		CreatedAt time.Time `json:"created_at,omitempty"`
 //		Count int `json:"count,omitempty"`
 //	}
 //
 //	client.Business.Query().
-//		GroupBy(business.FieldCategory).
+//		GroupBy(business.FieldCreatedAt).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
 func (bq *BusinessQuery) GroupBy(field string, fields ...string) *BusinessGroupBy {
@@ -358,11 +358,11 @@ func (bq *BusinessQuery) GroupBy(field string, fields ...string) *BusinessGroupB
 // Example:
 //
 //	var v []struct {
-//		Category string `json:"category,omitempty"`
+//		CreatedAt time.Time `json:"created_at,omitempty"`
 //	}
 //
 //	client.Business.Query().
-//		Select(business.FieldCategory).
+//		Select(business.FieldCreatedAt).
 //		Scan(ctx, &v)
 func (bq *BusinessQuery) Select(fields ...string) *BusinessSelect {
 	bq.ctx.Fields = append(bq.ctx.Fields, fields...)
@@ -408,8 +408,8 @@ func (bq *BusinessQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Bus
 		nodes       = []*Business{}
 		_spec       = bq.querySpec()
 		loadedTypes = [2]bool{
-			bq.withBusinessSocial != nil,
-			bq.withBusinessManager != nil,
+			bq.withSocials != nil,
+			bq.withManages != nil,
 		}
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
@@ -430,26 +430,26 @@ func (bq *BusinessQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Bus
 	if len(nodes) == 0 {
 		return nodes, nil
 	}
-	if query := bq.withBusinessSocial; query != nil {
-		if err := bq.loadBusinessSocial(ctx, query, nodes,
-			func(n *Business) { n.Edges.BusinessSocial = []*Social{} },
-			func(n *Business, e *Social) { n.Edges.BusinessSocial = append(n.Edges.BusinessSocial, e) }); err != nil {
+	if query := bq.withSocials; query != nil {
+		if err := bq.loadSocials(ctx, query, nodes,
+			func(n *Business) { n.Edges.Socials = []*Social{} },
+			func(n *Business, e *Social) { n.Edges.Socials = append(n.Edges.Socials, e) }); err != nil {
 			return nil, err
 		}
 	}
-	if query := bq.withBusinessManager; query != nil {
-		if err := bq.loadBusinessManager(ctx, query, nodes,
-			func(n *Business) { n.Edges.BusinessManager = []*Manager{} },
-			func(n *Business, e *Manager) { n.Edges.BusinessManager = append(n.Edges.BusinessManager, e) }); err != nil {
+	if query := bq.withManages; query != nil {
+		if err := bq.loadManages(ctx, query, nodes,
+			func(n *Business) { n.Edges.Manages = []*Manager{} },
+			func(n *Business, e *Manager) { n.Edges.Manages = append(n.Edges.Manages, e) }); err != nil {
 			return nil, err
 		}
 	}
 	return nodes, nil
 }
 
-func (bq *BusinessQuery) loadBusinessSocial(ctx context.Context, query *SocialQuery, nodes []*Business, init func(*Business), assign func(*Business, *Social)) error {
+func (bq *BusinessQuery) loadSocials(ctx context.Context, query *SocialQuery, nodes []*Business, init func(*Business), assign func(*Business, *Social)) error {
 	fks := make([]driver.Value, 0, len(nodes))
-	nodeids := make(map[int]*Business)
+	nodeids := make(map[string]*Business)
 	for i := range nodes {
 		fks = append(fks, nodes[i].ID)
 		nodeids[nodes[i].ID] = nodes[i]
@@ -457,30 +457,29 @@ func (bq *BusinessQuery) loadBusinessSocial(ctx context.Context, query *SocialQu
 			init(nodes[i])
 		}
 	}
-	query.withFKs = true
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(social.FieldBusinessID)
+	}
 	query.Where(predicate.Social(func(s *sql.Selector) {
-		s.Where(sql.InValues(s.C(business.BusinessSocialColumn), fks...))
+		s.Where(sql.InValues(s.C(business.SocialsColumn), fks...))
 	}))
 	neighbors, err := query.All(ctx)
 	if err != nil {
 		return err
 	}
 	for _, n := range neighbors {
-		fk := n.business_business_social
-		if fk == nil {
-			return fmt.Errorf(`foreign-key "business_business_social" is nil for node %v`, n.ID)
-		}
-		node, ok := nodeids[*fk]
+		fk := n.BusinessID
+		node, ok := nodeids[fk]
 		if !ok {
-			return fmt.Errorf(`unexpected referenced foreign-key "business_business_social" returned %v for node %v`, *fk, n.ID)
+			return fmt.Errorf(`unexpected referenced foreign-key "business_id" returned %v for node %v`, fk, n.ID)
 		}
 		assign(node, n)
 	}
 	return nil
 }
-func (bq *BusinessQuery) loadBusinessManager(ctx context.Context, query *ManagerQuery, nodes []*Business, init func(*Business), assign func(*Business, *Manager)) error {
+func (bq *BusinessQuery) loadManages(ctx context.Context, query *ManagerQuery, nodes []*Business, init func(*Business), assign func(*Business, *Manager)) error {
 	fks := make([]driver.Value, 0, len(nodes))
-	nodeids := make(map[int]*Business)
+	nodeids := make(map[string]*Business)
 	for i := range nodes {
 		fks = append(fks, nodes[i].ID)
 		nodeids[nodes[i].ID] = nodes[i]
@@ -488,22 +487,21 @@ func (bq *BusinessQuery) loadBusinessManager(ctx context.Context, query *Manager
 			init(nodes[i])
 		}
 	}
-	query.withFKs = true
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(manager.FieldBusinessID)
+	}
 	query.Where(predicate.Manager(func(s *sql.Selector) {
-		s.Where(sql.InValues(s.C(business.BusinessManagerColumn), fks...))
+		s.Where(sql.InValues(s.C(business.ManagesColumn), fks...))
 	}))
 	neighbors, err := query.All(ctx)
 	if err != nil {
 		return err
 	}
 	for _, n := range neighbors {
-		fk := n.business_business_manager
-		if fk == nil {
-			return fmt.Errorf(`foreign-key "business_business_manager" is nil for node %v`, n.ID)
-		}
-		node, ok := nodeids[*fk]
+		fk := n.BusinessID
+		node, ok := nodeids[fk]
 		if !ok {
-			return fmt.Errorf(`unexpected referenced foreign-key "business_business_manager" returned %v for node %v`, *fk, n.ID)
+			return fmt.Errorf(`unexpected referenced foreign-key "business_id" returned %v for node %v`, fk, n.ID)
 		}
 		assign(node, n)
 	}
@@ -520,7 +518,7 @@ func (bq *BusinessQuery) sqlCount(ctx context.Context) (int, error) {
 }
 
 func (bq *BusinessQuery) querySpec() *sqlgraph.QuerySpec {
-	_spec := sqlgraph.NewQuerySpec(business.Table, business.Columns, sqlgraph.NewFieldSpec(business.FieldID, field.TypeInt))
+	_spec := sqlgraph.NewQuerySpec(business.Table, business.Columns, sqlgraph.NewFieldSpec(business.FieldID, field.TypeString))
 	_spec.From = bq.sql
 	if unique := bq.ctx.Unique; unique != nil {
 		_spec.Unique = *unique

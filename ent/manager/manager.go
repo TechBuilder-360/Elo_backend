@@ -16,51 +16,53 @@ const (
 	FieldID = "id"
 	// FieldCreatedAt holds the string denoting the created_at field in the database.
 	FieldCreatedAt = "created_at"
-	// FieldPosition holds the string denoting the position field in the database.
-	FieldPosition = "position"
-	// FieldDiasbled holds the string denoting the diasbled field in the database.
-	FieldDiasbled = "diasbled"
+	// FieldUpdatedAt holds the string denoting the updated_at field in the database.
+	FieldUpdatedAt = "updated_at"
+	// FieldDeletedAt holds the string denoting the deleted_at field in the database.
+	FieldDeletedAt = "deleted_at"
+	// FieldUserID holds the string denoting the user_id field in the database.
+	FieldUserID = "user_id"
+	// FieldBusinessID holds the string denoting the business_id field in the database.
+	FieldBusinessID = "business_id"
+	// FieldDisabled holds the string denoting the disabled field in the database.
+	FieldDisabled = "disabled"
 	// FieldDisableReason holds the string denoting the disable_reason field in the database.
 	FieldDisableReason = "disable_reason"
 	// FieldDisabledAt holds the string denoting the disabled_at field in the database.
 	FieldDisabledAt = "disabled_at"
-	// EdgeBusinessUser holds the string denoting the business_user edge name in mutations.
-	EdgeBusinessUser = "business_user"
-	// EdgeUserManager holds the string denoting the user_manager edge name in mutations.
-	EdgeUserManager = "user_manager"
+	// EdgeBusiness holds the string denoting the business edge name in mutations.
+	EdgeBusiness = "business"
+	// EdgeUser holds the string denoting the user edge name in mutations.
+	EdgeUser = "user"
 	// Table holds the table name of the manager in the database.
 	Table = "managers"
-	// BusinessUserTable is the table that holds the business_user relation/edge.
-	BusinessUserTable = "managers"
-	// BusinessUserInverseTable is the table name for the Business entity.
+	// BusinessTable is the table that holds the business relation/edge.
+	BusinessTable = "managers"
+	// BusinessInverseTable is the table name for the Business entity.
 	// It exists in this package in order to avoid circular dependency with the "business" package.
-	BusinessUserInverseTable = "businesses"
-	// BusinessUserColumn is the table column denoting the business_user relation/edge.
-	BusinessUserColumn = "business_business_manager"
-	// UserManagerTable is the table that holds the user_manager relation/edge.
-	UserManagerTable = "managers"
-	// UserManagerInverseTable is the table name for the User entity.
+	BusinessInverseTable = "businesses"
+	// BusinessColumn is the table column denoting the business relation/edge.
+	BusinessColumn = "business_id"
+	// UserTable is the table that holds the user relation/edge.
+	UserTable = "managers"
+	// UserInverseTable is the table name for the User entity.
 	// It exists in this package in order to avoid circular dependency with the "user" package.
-	UserManagerInverseTable = "users"
-	// UserManagerColumn is the table column denoting the user_manager relation/edge.
-	UserManagerColumn = "user_user_manager"
+	UserInverseTable = "users"
+	// UserColumn is the table column denoting the user relation/edge.
+	UserColumn = "user_id"
 )
 
 // Columns holds all SQL columns for manager fields.
 var Columns = []string{
 	FieldID,
 	FieldCreatedAt,
-	FieldPosition,
-	FieldDiasbled,
+	FieldUpdatedAt,
+	FieldDeletedAt,
+	FieldUserID,
+	FieldBusinessID,
+	FieldDisabled,
 	FieldDisableReason,
 	FieldDisabledAt,
-}
-
-// ForeignKeys holds the SQL foreign-keys that are owned by the "managers"
-// table and are not defined as standalone fields in the schema.
-var ForeignKeys = []string{
-	"business_business_manager",
-	"user_user_manager",
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -70,21 +72,20 @@ func ValidColumn(column string) bool {
 			return true
 		}
 	}
-	for i := range ForeignKeys {
-		if column == ForeignKeys[i] {
-			return true
-		}
-	}
 	return false
 }
 
 var (
 	// DefaultCreatedAt holds the default value on creation for the "created_at" field.
 	DefaultCreatedAt func() time.Time
-	// PositionValidator is a validator for the "position" field. It is called by the builders before save.
-	PositionValidator func(string) error
-	// DefaultDiasbled holds the default value on creation for the "diasbled" field.
-	DefaultDiasbled bool
+	// DefaultUpdatedAt holds the default value on creation for the "updated_at" field.
+	DefaultUpdatedAt func() time.Time
+	// UpdateDefaultUpdatedAt holds the default value on update for the "updated_at" field.
+	UpdateDefaultUpdatedAt func() time.Time
+	// DefaultDisabled holds the default value on creation for the "disabled" field.
+	DefaultDisabled bool
+	// DefaultID holds the default value on creation for the "id" field.
+	DefaultID func() string
 )
 
 // OrderOption defines the ordering options for the Manager queries.
@@ -100,14 +101,29 @@ func ByCreatedAt(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldCreatedAt, opts...).ToFunc()
 }
 
-// ByPosition orders the results by the position field.
-func ByPosition(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldPosition, opts...).ToFunc()
+// ByUpdatedAt orders the results by the updated_at field.
+func ByUpdatedAt(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldUpdatedAt, opts...).ToFunc()
 }
 
-// ByDiasbled orders the results by the diasbled field.
-func ByDiasbled(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldDiasbled, opts...).ToFunc()
+// ByDeletedAt orders the results by the deleted_at field.
+func ByDeletedAt(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldDeletedAt, opts...).ToFunc()
+}
+
+// ByUserID orders the results by the user_id field.
+func ByUserID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldUserID, opts...).ToFunc()
+}
+
+// ByBusinessID orders the results by the business_id field.
+func ByBusinessID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldBusinessID, opts...).ToFunc()
+}
+
+// ByDisabled orders the results by the disabled field.
+func ByDisabled(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldDisabled, opts...).ToFunc()
 }
 
 // ByDisableReason orders the results by the disable_reason field.
@@ -120,30 +136,30 @@ func ByDisabledAt(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldDisabledAt, opts...).ToFunc()
 }
 
-// ByBusinessUserField orders the results by business_user field.
-func ByBusinessUserField(field string, opts ...sql.OrderTermOption) OrderOption {
+// ByBusinessField orders the results by business field.
+func ByBusinessField(field string, opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newBusinessUserStep(), sql.OrderByField(field, opts...))
+		sqlgraph.OrderByNeighborTerms(s, newBusinessStep(), sql.OrderByField(field, opts...))
 	}
 }
 
-// ByUserManagerField orders the results by user_manager field.
-func ByUserManagerField(field string, opts ...sql.OrderTermOption) OrderOption {
+// ByUserField orders the results by user field.
+func ByUserField(field string, opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newUserManagerStep(), sql.OrderByField(field, opts...))
+		sqlgraph.OrderByNeighborTerms(s, newUserStep(), sql.OrderByField(field, opts...))
 	}
 }
-func newBusinessUserStep() *sqlgraph.Step {
+func newBusinessStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
-		sqlgraph.To(BusinessUserInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.M2O, true, BusinessUserTable, BusinessUserColumn),
+		sqlgraph.To(BusinessInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.M2O, true, BusinessTable, BusinessColumn),
 	)
 }
-func newUserManagerStep() *sqlgraph.Step {
+func newUserStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
-		sqlgraph.To(UserManagerInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.M2O, true, UserManagerTable, UserManagerColumn),
+		sqlgraph.To(UserInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.M2O, true, UserTable, UserColumn),
 	)
 }

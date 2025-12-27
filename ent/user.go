@@ -16,29 +16,35 @@ import (
 type User struct {
 	config `json:"-"`
 	// ID of the ent.
-	ID int `json:"id,omitempty"`
+	ID string `json:"id,omitempty"`
+	// CreatedAt holds the value of the "created_at" field.
+	CreatedAt time.Time `json:"created_at,omitempty"`
+	// UpdatedAt holds the value of the "updated_at" field.
+	UpdatedAt time.Time `json:"updated_at,omitempty"`
+	// DeletedAt holds the value of the "deleted_at" field.
+	DeletedAt *time.Time `json:"deleted_at,omitempty"`
 	// FirstName holds the value of the "first_name" field.
 	FirstName string `json:"first_name,omitempty"`
 	// LastName holds the value of the "last_name" field.
 	LastName string `json:"last_name,omitempty"`
 	// MiddleName holds the value of the "middle_name" field.
-	MiddleName *string `json:"middle_name,omitempty"`
+	MiddleName string `json:"middle_name,omitempty"`
 	// DisplayName holds the value of the "display_name" field.
-	DisplayName *string `json:"display_name,omitempty"`
+	DisplayName string `json:"display_name,omitempty"`
 	// EmailAddress holds the value of the "email_address" field.
 	EmailAddress string `json:"email_address,omitempty"`
+	// EmailVerified holds the value of the "email_verified" field.
+	EmailVerified bool `json:"email_verified,omitempty"`
+	// EmailVerifiedAt holds the value of the "email_verified_at" field.
+	EmailVerifiedAt time.Time `json:"email_verified_at,omitempty"`
 	// PhoneNumber holds the value of the "phone_number" field.
-	PhoneNumber *string `json:"phone_number,omitempty"`
+	PhoneNumber string `json:"phone_number,omitempty"`
 	// Avatar holds the value of the "avatar" field.
-	Avatar *string `json:"avatar,omitempty"`
+	Avatar string `json:"avatar,omitempty"`
 	// Disabled holds the value of the "disabled" field.
 	Disabled bool `json:"disabled,omitempty"`
-	// IdentificationNumber holds the value of the "identification_number" field.
-	IdentificationNumber *string `json:"identification_number,omitempty"`
 	// Tier holds the value of the "tier" field.
 	Tier int8 `json:"tier,omitempty"`
-	// CreatedAt holds the value of the "created_at" field.
-	CreatedAt time.Time `json:"created_at,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the UserQuery when eager-loading is set.
 	Edges        UserEdges `json:"edges"`
@@ -47,20 +53,20 @@ type User struct {
 
 // UserEdges holds the relations/edges for other nodes in the graph.
 type UserEdges struct {
-	// UserManager holds the value of the user_manager edge.
-	UserManager []*Manager `json:"user_manager,omitempty"`
+	// Manages holds the value of the manages edge.
+	Manages []*Manager `json:"manages,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
 	loadedTypes [1]bool
 }
 
-// UserManagerOrErr returns the UserManager value or an error if the edge
+// ManagesOrErr returns the Manages value or an error if the edge
 // was not loaded in eager-loading.
-func (e UserEdges) UserManagerOrErr() ([]*Manager, error) {
+func (e UserEdges) ManagesOrErr() ([]*Manager, error) {
 	if e.loadedTypes[0] {
-		return e.UserManager, nil
+		return e.Manages, nil
 	}
-	return nil, &NotLoadedError{edge: "user_manager"}
+	return nil, &NotLoadedError{edge: "manages"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -68,13 +74,13 @@ func (*User) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case user.FieldDisabled:
+		case user.FieldEmailVerified, user.FieldDisabled:
 			values[i] = new(sql.NullBool)
-		case user.FieldID, user.FieldTier:
+		case user.FieldTier:
 			values[i] = new(sql.NullInt64)
-		case user.FieldFirstName, user.FieldLastName, user.FieldMiddleName, user.FieldDisplayName, user.FieldEmailAddress, user.FieldPhoneNumber, user.FieldAvatar, user.FieldIdentificationNumber:
+		case user.FieldID, user.FieldFirstName, user.FieldLastName, user.FieldMiddleName, user.FieldDisplayName, user.FieldEmailAddress, user.FieldPhoneNumber, user.FieldAvatar:
 			values[i] = new(sql.NullString)
-		case user.FieldCreatedAt:
+		case user.FieldCreatedAt, user.FieldUpdatedAt, user.FieldDeletedAt, user.FieldEmailVerifiedAt:
 			values[i] = new(sql.NullTime)
 		default:
 			values[i] = new(sql.UnknownType)
@@ -92,11 +98,30 @@ func (u *User) assignValues(columns []string, values []any) error {
 	for i := range columns {
 		switch columns[i] {
 		case user.FieldID:
-			value, ok := values[i].(*sql.NullInt64)
-			if !ok {
-				return fmt.Errorf("unexpected type %T for field id", value)
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field id", values[i])
+			} else if value.Valid {
+				u.ID = value.String
 			}
-			u.ID = int(value.Int64)
+		case user.FieldCreatedAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field created_at", values[i])
+			} else if value.Valid {
+				u.CreatedAt = value.Time
+			}
+		case user.FieldUpdatedAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field updated_at", values[i])
+			} else if value.Valid {
+				u.UpdatedAt = value.Time
+			}
+		case user.FieldDeletedAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field deleted_at", values[i])
+			} else if value.Valid {
+				u.DeletedAt = new(time.Time)
+				*u.DeletedAt = value.Time
+			}
 		case user.FieldFirstName:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field first_name", values[i])
@@ -113,15 +138,13 @@ func (u *User) assignValues(columns []string, values []any) error {
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field middle_name", values[i])
 			} else if value.Valid {
-				u.MiddleName = new(string)
-				*u.MiddleName = value.String
+				u.MiddleName = value.String
 			}
 		case user.FieldDisplayName:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field display_name", values[i])
 			} else if value.Valid {
-				u.DisplayName = new(string)
-				*u.DisplayName = value.String
+				u.DisplayName = value.String
 			}
 		case user.FieldEmailAddress:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -129,19 +152,29 @@ func (u *User) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				u.EmailAddress = value.String
 			}
+		case user.FieldEmailVerified:
+			if value, ok := values[i].(*sql.NullBool); !ok {
+				return fmt.Errorf("unexpected type %T for field email_verified", values[i])
+			} else if value.Valid {
+				u.EmailVerified = value.Bool
+			}
+		case user.FieldEmailVerifiedAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field email_verified_at", values[i])
+			} else if value.Valid {
+				u.EmailVerifiedAt = value.Time
+			}
 		case user.FieldPhoneNumber:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field phone_number", values[i])
 			} else if value.Valid {
-				u.PhoneNumber = new(string)
-				*u.PhoneNumber = value.String
+				u.PhoneNumber = value.String
 			}
 		case user.FieldAvatar:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field avatar", values[i])
 			} else if value.Valid {
-				u.Avatar = new(string)
-				*u.Avatar = value.String
+				u.Avatar = value.String
 			}
 		case user.FieldDisabled:
 			if value, ok := values[i].(*sql.NullBool); !ok {
@@ -149,24 +182,11 @@ func (u *User) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				u.Disabled = value.Bool
 			}
-		case user.FieldIdentificationNumber:
-			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field identification_number", values[i])
-			} else if value.Valid {
-				u.IdentificationNumber = new(string)
-				*u.IdentificationNumber = value.String
-			}
 		case user.FieldTier:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field tier", values[i])
 			} else if value.Valid {
 				u.Tier = int8(value.Int64)
-			}
-		case user.FieldCreatedAt:
-			if value, ok := values[i].(*sql.NullTime); !ok {
-				return fmt.Errorf("unexpected type %T for field created_at", values[i])
-			} else if value.Valid {
-				u.CreatedAt = value.Time
 			}
 		default:
 			u.selectValues.Set(columns[i], values[i])
@@ -181,9 +201,9 @@ func (u *User) Value(name string) (ent.Value, error) {
 	return u.selectValues.Get(name)
 }
 
-// QueryUserManager queries the "user_manager" edge of the User entity.
-func (u *User) QueryUserManager() *ManagerQuery {
-	return NewUserClient(u.config).QueryUserManager(u)
+// QueryManages queries the "manages" edge of the User entity.
+func (u *User) QueryManages() *ManagerQuery {
+	return NewUserClient(u.config).QueryManages(u)
 }
 
 // Update returns a builder for updating this User.
@@ -209,48 +229,49 @@ func (u *User) String() string {
 	var builder strings.Builder
 	builder.WriteString("User(")
 	builder.WriteString(fmt.Sprintf("id=%v, ", u.ID))
+	builder.WriteString("created_at=")
+	builder.WriteString(u.CreatedAt.Format(time.ANSIC))
+	builder.WriteString(", ")
+	builder.WriteString("updated_at=")
+	builder.WriteString(u.UpdatedAt.Format(time.ANSIC))
+	builder.WriteString(", ")
+	if v := u.DeletedAt; v != nil {
+		builder.WriteString("deleted_at=")
+		builder.WriteString(v.Format(time.ANSIC))
+	}
+	builder.WriteString(", ")
 	builder.WriteString("first_name=")
 	builder.WriteString(u.FirstName)
 	builder.WriteString(", ")
 	builder.WriteString("last_name=")
 	builder.WriteString(u.LastName)
 	builder.WriteString(", ")
-	if v := u.MiddleName; v != nil {
-		builder.WriteString("middle_name=")
-		builder.WriteString(*v)
-	}
+	builder.WriteString("middle_name=")
+	builder.WriteString(u.MiddleName)
 	builder.WriteString(", ")
-	if v := u.DisplayName; v != nil {
-		builder.WriteString("display_name=")
-		builder.WriteString(*v)
-	}
+	builder.WriteString("display_name=")
+	builder.WriteString(u.DisplayName)
 	builder.WriteString(", ")
 	builder.WriteString("email_address=")
 	builder.WriteString(u.EmailAddress)
 	builder.WriteString(", ")
-	if v := u.PhoneNumber; v != nil {
-		builder.WriteString("phone_number=")
-		builder.WriteString(*v)
-	}
+	builder.WriteString("email_verified=")
+	builder.WriteString(fmt.Sprintf("%v", u.EmailVerified))
 	builder.WriteString(", ")
-	if v := u.Avatar; v != nil {
-		builder.WriteString("avatar=")
-		builder.WriteString(*v)
-	}
+	builder.WriteString("email_verified_at=")
+	builder.WriteString(u.EmailVerifiedAt.Format(time.ANSIC))
+	builder.WriteString(", ")
+	builder.WriteString("phone_number=")
+	builder.WriteString(u.PhoneNumber)
+	builder.WriteString(", ")
+	builder.WriteString("avatar=")
+	builder.WriteString(u.Avatar)
 	builder.WriteString(", ")
 	builder.WriteString("disabled=")
 	builder.WriteString(fmt.Sprintf("%v", u.Disabled))
 	builder.WriteString(", ")
-	if v := u.IdentificationNumber; v != nil {
-		builder.WriteString("identification_number=")
-		builder.WriteString(*v)
-	}
-	builder.WriteString(", ")
 	builder.WriteString("tier=")
 	builder.WriteString(fmt.Sprintf("%v", u.Tier))
-	builder.WriteString(", ")
-	builder.WriteString("created_at=")
-	builder.WriteString(u.CreatedAt.Format(time.ANSIC))
 	builder.WriteByte(')')
 	return builder.String()
 }

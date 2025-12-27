@@ -30,6 +30,32 @@ func (bu *BusinessUpdate) Where(ps ...predicate.Business) *BusinessUpdate {
 	return bu
 }
 
+// SetUpdatedAt sets the "updated_at" field.
+func (bu *BusinessUpdate) SetUpdatedAt(t time.Time) *BusinessUpdate {
+	bu.mutation.SetUpdatedAt(t)
+	return bu
+}
+
+// SetDeletedAt sets the "deleted_at" field.
+func (bu *BusinessUpdate) SetDeletedAt(t time.Time) *BusinessUpdate {
+	bu.mutation.SetDeletedAt(t)
+	return bu
+}
+
+// SetNillableDeletedAt sets the "deleted_at" field if the given value is not nil.
+func (bu *BusinessUpdate) SetNillableDeletedAt(t *time.Time) *BusinessUpdate {
+	if t != nil {
+		bu.SetDeletedAt(*t)
+	}
+	return bu
+}
+
+// ClearDeletedAt clears the value of the "deleted_at" field.
+func (bu *BusinessUpdate) ClearDeletedAt() *BusinessUpdate {
+	bu.mutation.ClearDeletedAt()
+	return bu
+}
+
 // SetCategory sets the "category" field.
 func (bu *BusinessUpdate) SetCategory(s string) *BusinessUpdate {
 	bu.mutation.SetCategory(s)
@@ -58,17 +84,23 @@ func (bu *BusinessUpdate) SetNillableName(s *string) *BusinessUpdate {
 	return bu
 }
 
-// SetLogoURL sets the "logo_url" field.
-func (bu *BusinessUpdate) SetLogoURL(s string) *BusinessUpdate {
-	bu.mutation.SetLogoURL(s)
+// SetLogo sets the "logo" field.
+func (bu *BusinessUpdate) SetLogo(s string) *BusinessUpdate {
+	bu.mutation.SetLogo(s)
 	return bu
 }
 
-// SetNillableLogoURL sets the "logo_url" field if the given value is not nil.
-func (bu *BusinessUpdate) SetNillableLogoURL(s *string) *BusinessUpdate {
+// SetNillableLogo sets the "logo" field if the given value is not nil.
+func (bu *BusinessUpdate) SetNillableLogo(s *string) *BusinessUpdate {
 	if s != nil {
-		bu.SetLogoURL(*s)
+		bu.SetLogo(*s)
 	}
+	return bu
+}
+
+// ClearLogo clears the value of the "logo" field.
+func (bu *BusinessUpdate) ClearLogo() *BusinessUpdate {
+	bu.mutation.ClearLogo()
 	return bu
 }
 
@@ -97,6 +129,12 @@ func (bu *BusinessUpdate) SetNillableWebsite(s *string) *BusinessUpdate {
 	if s != nil {
 		bu.SetWebsite(*s)
 	}
+	return bu
+}
+
+// ClearWebsite clears the value of the "website" field.
+func (bu *BusinessUpdate) ClearWebsite() *BusinessUpdate {
+	bu.mutation.ClearWebsite()
 	return bu
 }
 
@@ -142,6 +180,12 @@ func (bu *BusinessUpdate) SetNillableDisableReason(s *string) *BusinessUpdate {
 	return bu
 }
 
+// ClearDisableReason clears the value of the "disable_reason" field.
+func (bu *BusinessUpdate) ClearDisableReason() *BusinessUpdate {
+	bu.mutation.ClearDisableReason()
+	return bu
+}
+
 // SetVerified sets the "verified" field.
 func (bu *BusinessUpdate) SetVerified(b bool) *BusinessUpdate {
 	bu.mutation.SetVerified(b)
@@ -170,34 +214,40 @@ func (bu *BusinessUpdate) SetNillableVerifiedAt(t *time.Time) *BusinessUpdate {
 	return bu
 }
 
-// AddBusinessSocialIDs adds the "business_social" edge to the Social entity by IDs.
-func (bu *BusinessUpdate) AddBusinessSocialIDs(ids ...int) *BusinessUpdate {
-	bu.mutation.AddBusinessSocialIDs(ids...)
+// ClearVerifiedAt clears the value of the "verified_at" field.
+func (bu *BusinessUpdate) ClearVerifiedAt() *BusinessUpdate {
+	bu.mutation.ClearVerifiedAt()
 	return bu
 }
 
-// AddBusinessSocial adds the "business_social" edges to the Social entity.
-func (bu *BusinessUpdate) AddBusinessSocial(s ...*Social) *BusinessUpdate {
-	ids := make([]int, len(s))
+// AddSocialIDs adds the "socials" edge to the Social entity by IDs.
+func (bu *BusinessUpdate) AddSocialIDs(ids ...string) *BusinessUpdate {
+	bu.mutation.AddSocialIDs(ids...)
+	return bu
+}
+
+// AddSocials adds the "socials" edges to the Social entity.
+func (bu *BusinessUpdate) AddSocials(s ...*Social) *BusinessUpdate {
+	ids := make([]string, len(s))
 	for i := range s {
 		ids[i] = s[i].ID
 	}
-	return bu.AddBusinessSocialIDs(ids...)
+	return bu.AddSocialIDs(ids...)
 }
 
-// AddBusinessManagerIDs adds the "business_manager" edge to the Manager entity by IDs.
-func (bu *BusinessUpdate) AddBusinessManagerIDs(ids ...int) *BusinessUpdate {
-	bu.mutation.AddBusinessManagerIDs(ids...)
+// AddManageIDs adds the "manages" edge to the Manager entity by IDs.
+func (bu *BusinessUpdate) AddManageIDs(ids ...string) *BusinessUpdate {
+	bu.mutation.AddManageIDs(ids...)
 	return bu
 }
 
-// AddBusinessManager adds the "business_manager" edges to the Manager entity.
-func (bu *BusinessUpdate) AddBusinessManager(m ...*Manager) *BusinessUpdate {
-	ids := make([]int, len(m))
+// AddManages adds the "manages" edges to the Manager entity.
+func (bu *BusinessUpdate) AddManages(m ...*Manager) *BusinessUpdate {
+	ids := make([]string, len(m))
 	for i := range m {
 		ids[i] = m[i].ID
 	}
-	return bu.AddBusinessManagerIDs(ids...)
+	return bu.AddManageIDs(ids...)
 }
 
 // Mutation returns the BusinessMutation object of the builder.
@@ -205,50 +255,51 @@ func (bu *BusinessUpdate) Mutation() *BusinessMutation {
 	return bu.mutation
 }
 
-// ClearBusinessSocial clears all "business_social" edges to the Social entity.
-func (bu *BusinessUpdate) ClearBusinessSocial() *BusinessUpdate {
-	bu.mutation.ClearBusinessSocial()
+// ClearSocials clears all "socials" edges to the Social entity.
+func (bu *BusinessUpdate) ClearSocials() *BusinessUpdate {
+	bu.mutation.ClearSocials()
 	return bu
 }
 
-// RemoveBusinessSocialIDs removes the "business_social" edge to Social entities by IDs.
-func (bu *BusinessUpdate) RemoveBusinessSocialIDs(ids ...int) *BusinessUpdate {
-	bu.mutation.RemoveBusinessSocialIDs(ids...)
+// RemoveSocialIDs removes the "socials" edge to Social entities by IDs.
+func (bu *BusinessUpdate) RemoveSocialIDs(ids ...string) *BusinessUpdate {
+	bu.mutation.RemoveSocialIDs(ids...)
 	return bu
 }
 
-// RemoveBusinessSocial removes "business_social" edges to Social entities.
-func (bu *BusinessUpdate) RemoveBusinessSocial(s ...*Social) *BusinessUpdate {
-	ids := make([]int, len(s))
+// RemoveSocials removes "socials" edges to Social entities.
+func (bu *BusinessUpdate) RemoveSocials(s ...*Social) *BusinessUpdate {
+	ids := make([]string, len(s))
 	for i := range s {
 		ids[i] = s[i].ID
 	}
-	return bu.RemoveBusinessSocialIDs(ids...)
+	return bu.RemoveSocialIDs(ids...)
 }
 
-// ClearBusinessManager clears all "business_manager" edges to the Manager entity.
-func (bu *BusinessUpdate) ClearBusinessManager() *BusinessUpdate {
-	bu.mutation.ClearBusinessManager()
+// ClearManages clears all "manages" edges to the Manager entity.
+func (bu *BusinessUpdate) ClearManages() *BusinessUpdate {
+	bu.mutation.ClearManages()
 	return bu
 }
 
-// RemoveBusinessManagerIDs removes the "business_manager" edge to Manager entities by IDs.
-func (bu *BusinessUpdate) RemoveBusinessManagerIDs(ids ...int) *BusinessUpdate {
-	bu.mutation.RemoveBusinessManagerIDs(ids...)
+// RemoveManageIDs removes the "manages" edge to Manager entities by IDs.
+func (bu *BusinessUpdate) RemoveManageIDs(ids ...string) *BusinessUpdate {
+	bu.mutation.RemoveManageIDs(ids...)
 	return bu
 }
 
-// RemoveBusinessManager removes "business_manager" edges to Manager entities.
-func (bu *BusinessUpdate) RemoveBusinessManager(m ...*Manager) *BusinessUpdate {
-	ids := make([]int, len(m))
+// RemoveManages removes "manages" edges to Manager entities.
+func (bu *BusinessUpdate) RemoveManages(m ...*Manager) *BusinessUpdate {
+	ids := make([]string, len(m))
 	for i := range m {
 		ids[i] = m[i].ID
 	}
-	return bu.RemoveBusinessManagerIDs(ids...)
+	return bu.RemoveManageIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (bu *BusinessUpdate) Save(ctx context.Context) (int, error) {
+	bu.defaults()
 	return withHooks(ctx, bu.sqlSave, bu.mutation, bu.hooks)
 }
 
@@ -274,6 +325,14 @@ func (bu *BusinessUpdate) ExecX(ctx context.Context) {
 	}
 }
 
+// defaults sets the default values of the builder before save.
+func (bu *BusinessUpdate) defaults() {
+	if _, ok := bu.mutation.UpdatedAt(); !ok {
+		v := business.UpdateDefaultUpdatedAt()
+		bu.mutation.SetUpdatedAt(v)
+	}
+}
+
 // check runs all checks and user-defined validators on the builder.
 func (bu *BusinessUpdate) check() error {
 	if v, ok := bu.mutation.Name(); ok {
@@ -293,7 +352,7 @@ func (bu *BusinessUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if err := bu.check(); err != nil {
 		return n, err
 	}
-	_spec := sqlgraph.NewUpdateSpec(business.Table, business.Columns, sqlgraph.NewFieldSpec(business.FieldID, field.TypeInt))
+	_spec := sqlgraph.NewUpdateSpec(business.Table, business.Columns, sqlgraph.NewFieldSpec(business.FieldID, field.TypeString))
 	if ps := bu.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
@@ -301,20 +360,35 @@ func (bu *BusinessUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			}
 		}
 	}
+	if value, ok := bu.mutation.UpdatedAt(); ok {
+		_spec.SetField(business.FieldUpdatedAt, field.TypeTime, value)
+	}
+	if value, ok := bu.mutation.DeletedAt(); ok {
+		_spec.SetField(business.FieldDeletedAt, field.TypeTime, value)
+	}
+	if bu.mutation.DeletedAtCleared() {
+		_spec.ClearField(business.FieldDeletedAt, field.TypeTime)
+	}
 	if value, ok := bu.mutation.Category(); ok {
 		_spec.SetField(business.FieldCategory, field.TypeString, value)
 	}
 	if value, ok := bu.mutation.Name(); ok {
 		_spec.SetField(business.FieldName, field.TypeString, value)
 	}
-	if value, ok := bu.mutation.LogoURL(); ok {
-		_spec.SetField(business.FieldLogoURL, field.TypeString, value)
+	if value, ok := bu.mutation.Logo(); ok {
+		_spec.SetField(business.FieldLogo, field.TypeString, value)
+	}
+	if bu.mutation.LogoCleared() {
+		_spec.ClearField(business.FieldLogo, field.TypeString)
 	}
 	if value, ok := bu.mutation.Email(); ok {
 		_spec.SetField(business.FieldEmail, field.TypeString, value)
 	}
 	if value, ok := bu.mutation.Website(); ok {
 		_spec.SetField(business.FieldWebsite, field.TypeString, value)
+	}
+	if bu.mutation.WebsiteCleared() {
+		_spec.ClearField(business.FieldWebsite, field.TypeString)
 	}
 	if value, ok := bu.mutation.Disabled(); ok {
 		_spec.SetField(business.FieldDisabled, field.TypeBool, value)
@@ -325,34 +399,40 @@ func (bu *BusinessUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if value, ok := bu.mutation.DisableReason(); ok {
 		_spec.SetField(business.FieldDisableReason, field.TypeString, value)
 	}
+	if bu.mutation.DisableReasonCleared() {
+		_spec.ClearField(business.FieldDisableReason, field.TypeString)
+	}
 	if value, ok := bu.mutation.Verified(); ok {
 		_spec.SetField(business.FieldVerified, field.TypeBool, value)
 	}
 	if value, ok := bu.mutation.VerifiedAt(); ok {
 		_spec.SetField(business.FieldVerifiedAt, field.TypeTime, value)
 	}
-	if bu.mutation.BusinessSocialCleared() {
+	if bu.mutation.VerifiedAtCleared() {
+		_spec.ClearField(business.FieldVerifiedAt, field.TypeTime)
+	}
+	if bu.mutation.SocialsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   business.BusinessSocialTable,
-			Columns: []string{business.BusinessSocialColumn},
+			Table:   business.SocialsTable,
+			Columns: []string{business.SocialsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(social.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(social.FieldID, field.TypeString),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := bu.mutation.RemovedBusinessSocialIDs(); len(nodes) > 0 && !bu.mutation.BusinessSocialCleared() {
+	if nodes := bu.mutation.RemovedSocialsIDs(); len(nodes) > 0 && !bu.mutation.SocialsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   business.BusinessSocialTable,
-			Columns: []string{business.BusinessSocialColumn},
+			Table:   business.SocialsTable,
+			Columns: []string{business.SocialsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(social.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(social.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {
@@ -360,15 +440,15 @@ func (bu *BusinessUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := bu.mutation.BusinessSocialIDs(); len(nodes) > 0 {
+	if nodes := bu.mutation.SocialsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   business.BusinessSocialTable,
-			Columns: []string{business.BusinessSocialColumn},
+			Table:   business.SocialsTable,
+			Columns: []string{business.SocialsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(social.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(social.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {
@@ -376,28 +456,28 @@ func (bu *BusinessUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if bu.mutation.BusinessManagerCleared() {
+	if bu.mutation.ManagesCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   business.BusinessManagerTable,
-			Columns: []string{business.BusinessManagerColumn},
+			Table:   business.ManagesTable,
+			Columns: []string{business.ManagesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(manager.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(manager.FieldID, field.TypeString),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := bu.mutation.RemovedBusinessManagerIDs(); len(nodes) > 0 && !bu.mutation.BusinessManagerCleared() {
+	if nodes := bu.mutation.RemovedManagesIDs(); len(nodes) > 0 && !bu.mutation.ManagesCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   business.BusinessManagerTable,
-			Columns: []string{business.BusinessManagerColumn},
+			Table:   business.ManagesTable,
+			Columns: []string{business.ManagesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(manager.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(manager.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {
@@ -405,15 +485,15 @@ func (bu *BusinessUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := bu.mutation.BusinessManagerIDs(); len(nodes) > 0 {
+	if nodes := bu.mutation.ManagesIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   business.BusinessManagerTable,
-			Columns: []string{business.BusinessManagerColumn},
+			Table:   business.ManagesTable,
+			Columns: []string{business.ManagesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(manager.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(manager.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {
@@ -439,6 +519,32 @@ type BusinessUpdateOne struct {
 	fields   []string
 	hooks    []Hook
 	mutation *BusinessMutation
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (buo *BusinessUpdateOne) SetUpdatedAt(t time.Time) *BusinessUpdateOne {
+	buo.mutation.SetUpdatedAt(t)
+	return buo
+}
+
+// SetDeletedAt sets the "deleted_at" field.
+func (buo *BusinessUpdateOne) SetDeletedAt(t time.Time) *BusinessUpdateOne {
+	buo.mutation.SetDeletedAt(t)
+	return buo
+}
+
+// SetNillableDeletedAt sets the "deleted_at" field if the given value is not nil.
+func (buo *BusinessUpdateOne) SetNillableDeletedAt(t *time.Time) *BusinessUpdateOne {
+	if t != nil {
+		buo.SetDeletedAt(*t)
+	}
+	return buo
+}
+
+// ClearDeletedAt clears the value of the "deleted_at" field.
+func (buo *BusinessUpdateOne) ClearDeletedAt() *BusinessUpdateOne {
+	buo.mutation.ClearDeletedAt()
+	return buo
 }
 
 // SetCategory sets the "category" field.
@@ -469,17 +575,23 @@ func (buo *BusinessUpdateOne) SetNillableName(s *string) *BusinessUpdateOne {
 	return buo
 }
 
-// SetLogoURL sets the "logo_url" field.
-func (buo *BusinessUpdateOne) SetLogoURL(s string) *BusinessUpdateOne {
-	buo.mutation.SetLogoURL(s)
+// SetLogo sets the "logo" field.
+func (buo *BusinessUpdateOne) SetLogo(s string) *BusinessUpdateOne {
+	buo.mutation.SetLogo(s)
 	return buo
 }
 
-// SetNillableLogoURL sets the "logo_url" field if the given value is not nil.
-func (buo *BusinessUpdateOne) SetNillableLogoURL(s *string) *BusinessUpdateOne {
+// SetNillableLogo sets the "logo" field if the given value is not nil.
+func (buo *BusinessUpdateOne) SetNillableLogo(s *string) *BusinessUpdateOne {
 	if s != nil {
-		buo.SetLogoURL(*s)
+		buo.SetLogo(*s)
 	}
+	return buo
+}
+
+// ClearLogo clears the value of the "logo" field.
+func (buo *BusinessUpdateOne) ClearLogo() *BusinessUpdateOne {
+	buo.mutation.ClearLogo()
 	return buo
 }
 
@@ -508,6 +620,12 @@ func (buo *BusinessUpdateOne) SetNillableWebsite(s *string) *BusinessUpdateOne {
 	if s != nil {
 		buo.SetWebsite(*s)
 	}
+	return buo
+}
+
+// ClearWebsite clears the value of the "website" field.
+func (buo *BusinessUpdateOne) ClearWebsite() *BusinessUpdateOne {
+	buo.mutation.ClearWebsite()
 	return buo
 }
 
@@ -553,6 +671,12 @@ func (buo *BusinessUpdateOne) SetNillableDisableReason(s *string) *BusinessUpdat
 	return buo
 }
 
+// ClearDisableReason clears the value of the "disable_reason" field.
+func (buo *BusinessUpdateOne) ClearDisableReason() *BusinessUpdateOne {
+	buo.mutation.ClearDisableReason()
+	return buo
+}
+
 // SetVerified sets the "verified" field.
 func (buo *BusinessUpdateOne) SetVerified(b bool) *BusinessUpdateOne {
 	buo.mutation.SetVerified(b)
@@ -581,34 +705,40 @@ func (buo *BusinessUpdateOne) SetNillableVerifiedAt(t *time.Time) *BusinessUpdat
 	return buo
 }
 
-// AddBusinessSocialIDs adds the "business_social" edge to the Social entity by IDs.
-func (buo *BusinessUpdateOne) AddBusinessSocialIDs(ids ...int) *BusinessUpdateOne {
-	buo.mutation.AddBusinessSocialIDs(ids...)
+// ClearVerifiedAt clears the value of the "verified_at" field.
+func (buo *BusinessUpdateOne) ClearVerifiedAt() *BusinessUpdateOne {
+	buo.mutation.ClearVerifiedAt()
 	return buo
 }
 
-// AddBusinessSocial adds the "business_social" edges to the Social entity.
-func (buo *BusinessUpdateOne) AddBusinessSocial(s ...*Social) *BusinessUpdateOne {
-	ids := make([]int, len(s))
+// AddSocialIDs adds the "socials" edge to the Social entity by IDs.
+func (buo *BusinessUpdateOne) AddSocialIDs(ids ...string) *BusinessUpdateOne {
+	buo.mutation.AddSocialIDs(ids...)
+	return buo
+}
+
+// AddSocials adds the "socials" edges to the Social entity.
+func (buo *BusinessUpdateOne) AddSocials(s ...*Social) *BusinessUpdateOne {
+	ids := make([]string, len(s))
 	for i := range s {
 		ids[i] = s[i].ID
 	}
-	return buo.AddBusinessSocialIDs(ids...)
+	return buo.AddSocialIDs(ids...)
 }
 
-// AddBusinessManagerIDs adds the "business_manager" edge to the Manager entity by IDs.
-func (buo *BusinessUpdateOne) AddBusinessManagerIDs(ids ...int) *BusinessUpdateOne {
-	buo.mutation.AddBusinessManagerIDs(ids...)
+// AddManageIDs adds the "manages" edge to the Manager entity by IDs.
+func (buo *BusinessUpdateOne) AddManageIDs(ids ...string) *BusinessUpdateOne {
+	buo.mutation.AddManageIDs(ids...)
 	return buo
 }
 
-// AddBusinessManager adds the "business_manager" edges to the Manager entity.
-func (buo *BusinessUpdateOne) AddBusinessManager(m ...*Manager) *BusinessUpdateOne {
-	ids := make([]int, len(m))
+// AddManages adds the "manages" edges to the Manager entity.
+func (buo *BusinessUpdateOne) AddManages(m ...*Manager) *BusinessUpdateOne {
+	ids := make([]string, len(m))
 	for i := range m {
 		ids[i] = m[i].ID
 	}
-	return buo.AddBusinessManagerIDs(ids...)
+	return buo.AddManageIDs(ids...)
 }
 
 // Mutation returns the BusinessMutation object of the builder.
@@ -616,46 +746,46 @@ func (buo *BusinessUpdateOne) Mutation() *BusinessMutation {
 	return buo.mutation
 }
 
-// ClearBusinessSocial clears all "business_social" edges to the Social entity.
-func (buo *BusinessUpdateOne) ClearBusinessSocial() *BusinessUpdateOne {
-	buo.mutation.ClearBusinessSocial()
+// ClearSocials clears all "socials" edges to the Social entity.
+func (buo *BusinessUpdateOne) ClearSocials() *BusinessUpdateOne {
+	buo.mutation.ClearSocials()
 	return buo
 }
 
-// RemoveBusinessSocialIDs removes the "business_social" edge to Social entities by IDs.
-func (buo *BusinessUpdateOne) RemoveBusinessSocialIDs(ids ...int) *BusinessUpdateOne {
-	buo.mutation.RemoveBusinessSocialIDs(ids...)
+// RemoveSocialIDs removes the "socials" edge to Social entities by IDs.
+func (buo *BusinessUpdateOne) RemoveSocialIDs(ids ...string) *BusinessUpdateOne {
+	buo.mutation.RemoveSocialIDs(ids...)
 	return buo
 }
 
-// RemoveBusinessSocial removes "business_social" edges to Social entities.
-func (buo *BusinessUpdateOne) RemoveBusinessSocial(s ...*Social) *BusinessUpdateOne {
-	ids := make([]int, len(s))
+// RemoveSocials removes "socials" edges to Social entities.
+func (buo *BusinessUpdateOne) RemoveSocials(s ...*Social) *BusinessUpdateOne {
+	ids := make([]string, len(s))
 	for i := range s {
 		ids[i] = s[i].ID
 	}
-	return buo.RemoveBusinessSocialIDs(ids...)
+	return buo.RemoveSocialIDs(ids...)
 }
 
-// ClearBusinessManager clears all "business_manager" edges to the Manager entity.
-func (buo *BusinessUpdateOne) ClearBusinessManager() *BusinessUpdateOne {
-	buo.mutation.ClearBusinessManager()
+// ClearManages clears all "manages" edges to the Manager entity.
+func (buo *BusinessUpdateOne) ClearManages() *BusinessUpdateOne {
+	buo.mutation.ClearManages()
 	return buo
 }
 
-// RemoveBusinessManagerIDs removes the "business_manager" edge to Manager entities by IDs.
-func (buo *BusinessUpdateOne) RemoveBusinessManagerIDs(ids ...int) *BusinessUpdateOne {
-	buo.mutation.RemoveBusinessManagerIDs(ids...)
+// RemoveManageIDs removes the "manages" edge to Manager entities by IDs.
+func (buo *BusinessUpdateOne) RemoveManageIDs(ids ...string) *BusinessUpdateOne {
+	buo.mutation.RemoveManageIDs(ids...)
 	return buo
 }
 
-// RemoveBusinessManager removes "business_manager" edges to Manager entities.
-func (buo *BusinessUpdateOne) RemoveBusinessManager(m ...*Manager) *BusinessUpdateOne {
-	ids := make([]int, len(m))
+// RemoveManages removes "manages" edges to Manager entities.
+func (buo *BusinessUpdateOne) RemoveManages(m ...*Manager) *BusinessUpdateOne {
+	ids := make([]string, len(m))
 	for i := range m {
 		ids[i] = m[i].ID
 	}
-	return buo.RemoveBusinessManagerIDs(ids...)
+	return buo.RemoveManageIDs(ids...)
 }
 
 // Where appends a list predicates to the BusinessUpdate builder.
@@ -673,6 +803,7 @@ func (buo *BusinessUpdateOne) Select(field string, fields ...string) *BusinessUp
 
 // Save executes the query and returns the updated Business entity.
 func (buo *BusinessUpdateOne) Save(ctx context.Context) (*Business, error) {
+	buo.defaults()
 	return withHooks(ctx, buo.sqlSave, buo.mutation, buo.hooks)
 }
 
@@ -698,6 +829,14 @@ func (buo *BusinessUpdateOne) ExecX(ctx context.Context) {
 	}
 }
 
+// defaults sets the default values of the builder before save.
+func (buo *BusinessUpdateOne) defaults() {
+	if _, ok := buo.mutation.UpdatedAt(); !ok {
+		v := business.UpdateDefaultUpdatedAt()
+		buo.mutation.SetUpdatedAt(v)
+	}
+}
+
 // check runs all checks and user-defined validators on the builder.
 func (buo *BusinessUpdateOne) check() error {
 	if v, ok := buo.mutation.Name(); ok {
@@ -717,7 +856,7 @@ func (buo *BusinessUpdateOne) sqlSave(ctx context.Context) (_node *Business, err
 	if err := buo.check(); err != nil {
 		return _node, err
 	}
-	_spec := sqlgraph.NewUpdateSpec(business.Table, business.Columns, sqlgraph.NewFieldSpec(business.FieldID, field.TypeInt))
+	_spec := sqlgraph.NewUpdateSpec(business.Table, business.Columns, sqlgraph.NewFieldSpec(business.FieldID, field.TypeString))
 	id, ok := buo.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "Business.id" for update`)}
@@ -742,20 +881,35 @@ func (buo *BusinessUpdateOne) sqlSave(ctx context.Context) (_node *Business, err
 			}
 		}
 	}
+	if value, ok := buo.mutation.UpdatedAt(); ok {
+		_spec.SetField(business.FieldUpdatedAt, field.TypeTime, value)
+	}
+	if value, ok := buo.mutation.DeletedAt(); ok {
+		_spec.SetField(business.FieldDeletedAt, field.TypeTime, value)
+	}
+	if buo.mutation.DeletedAtCleared() {
+		_spec.ClearField(business.FieldDeletedAt, field.TypeTime)
+	}
 	if value, ok := buo.mutation.Category(); ok {
 		_spec.SetField(business.FieldCategory, field.TypeString, value)
 	}
 	if value, ok := buo.mutation.Name(); ok {
 		_spec.SetField(business.FieldName, field.TypeString, value)
 	}
-	if value, ok := buo.mutation.LogoURL(); ok {
-		_spec.SetField(business.FieldLogoURL, field.TypeString, value)
+	if value, ok := buo.mutation.Logo(); ok {
+		_spec.SetField(business.FieldLogo, field.TypeString, value)
+	}
+	if buo.mutation.LogoCleared() {
+		_spec.ClearField(business.FieldLogo, field.TypeString)
 	}
 	if value, ok := buo.mutation.Email(); ok {
 		_spec.SetField(business.FieldEmail, field.TypeString, value)
 	}
 	if value, ok := buo.mutation.Website(); ok {
 		_spec.SetField(business.FieldWebsite, field.TypeString, value)
+	}
+	if buo.mutation.WebsiteCleared() {
+		_spec.ClearField(business.FieldWebsite, field.TypeString)
 	}
 	if value, ok := buo.mutation.Disabled(); ok {
 		_spec.SetField(business.FieldDisabled, field.TypeBool, value)
@@ -766,34 +920,40 @@ func (buo *BusinessUpdateOne) sqlSave(ctx context.Context) (_node *Business, err
 	if value, ok := buo.mutation.DisableReason(); ok {
 		_spec.SetField(business.FieldDisableReason, field.TypeString, value)
 	}
+	if buo.mutation.DisableReasonCleared() {
+		_spec.ClearField(business.FieldDisableReason, field.TypeString)
+	}
 	if value, ok := buo.mutation.Verified(); ok {
 		_spec.SetField(business.FieldVerified, field.TypeBool, value)
 	}
 	if value, ok := buo.mutation.VerifiedAt(); ok {
 		_spec.SetField(business.FieldVerifiedAt, field.TypeTime, value)
 	}
-	if buo.mutation.BusinessSocialCleared() {
+	if buo.mutation.VerifiedAtCleared() {
+		_spec.ClearField(business.FieldVerifiedAt, field.TypeTime)
+	}
+	if buo.mutation.SocialsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   business.BusinessSocialTable,
-			Columns: []string{business.BusinessSocialColumn},
+			Table:   business.SocialsTable,
+			Columns: []string{business.SocialsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(social.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(social.FieldID, field.TypeString),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := buo.mutation.RemovedBusinessSocialIDs(); len(nodes) > 0 && !buo.mutation.BusinessSocialCleared() {
+	if nodes := buo.mutation.RemovedSocialsIDs(); len(nodes) > 0 && !buo.mutation.SocialsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   business.BusinessSocialTable,
-			Columns: []string{business.BusinessSocialColumn},
+			Table:   business.SocialsTable,
+			Columns: []string{business.SocialsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(social.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(social.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {
@@ -801,15 +961,15 @@ func (buo *BusinessUpdateOne) sqlSave(ctx context.Context) (_node *Business, err
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := buo.mutation.BusinessSocialIDs(); len(nodes) > 0 {
+	if nodes := buo.mutation.SocialsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   business.BusinessSocialTable,
-			Columns: []string{business.BusinessSocialColumn},
+			Table:   business.SocialsTable,
+			Columns: []string{business.SocialsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(social.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(social.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {
@@ -817,28 +977,28 @@ func (buo *BusinessUpdateOne) sqlSave(ctx context.Context) (_node *Business, err
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if buo.mutation.BusinessManagerCleared() {
+	if buo.mutation.ManagesCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   business.BusinessManagerTable,
-			Columns: []string{business.BusinessManagerColumn},
+			Table:   business.ManagesTable,
+			Columns: []string{business.ManagesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(manager.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(manager.FieldID, field.TypeString),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := buo.mutation.RemovedBusinessManagerIDs(); len(nodes) > 0 && !buo.mutation.BusinessManagerCleared() {
+	if nodes := buo.mutation.RemovedManagesIDs(); len(nodes) > 0 && !buo.mutation.ManagesCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   business.BusinessManagerTable,
-			Columns: []string{business.BusinessManagerColumn},
+			Table:   business.ManagesTable,
+			Columns: []string{business.ManagesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(manager.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(manager.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {
@@ -846,15 +1006,15 @@ func (buo *BusinessUpdateOne) sqlSave(ctx context.Context) (_node *Business, err
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := buo.mutation.BusinessManagerIDs(); len(nodes) > 0 {
+	if nodes := buo.mutation.ManagesIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   business.BusinessManagerTable,
-			Columns: []string{business.BusinessManagerColumn},
+			Table:   business.ManagesTable,
+			Columns: []string{business.ManagesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(manager.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(manager.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {

@@ -36,22 +36,56 @@ func (mc *ManagerCreate) SetNillableCreatedAt(t *time.Time) *ManagerCreate {
 	return mc
 }
 
-// SetPosition sets the "position" field.
-func (mc *ManagerCreate) SetPosition(s string) *ManagerCreate {
-	mc.mutation.SetPosition(s)
+// SetUpdatedAt sets the "updated_at" field.
+func (mc *ManagerCreate) SetUpdatedAt(t time.Time) *ManagerCreate {
+	mc.mutation.SetUpdatedAt(t)
 	return mc
 }
 
-// SetDiasbled sets the "diasbled" field.
-func (mc *ManagerCreate) SetDiasbled(b bool) *ManagerCreate {
-	mc.mutation.SetDiasbled(b)
+// SetNillableUpdatedAt sets the "updated_at" field if the given value is not nil.
+func (mc *ManagerCreate) SetNillableUpdatedAt(t *time.Time) *ManagerCreate {
+	if t != nil {
+		mc.SetUpdatedAt(*t)
+	}
 	return mc
 }
 
-// SetNillableDiasbled sets the "diasbled" field if the given value is not nil.
-func (mc *ManagerCreate) SetNillableDiasbled(b *bool) *ManagerCreate {
+// SetDeletedAt sets the "deleted_at" field.
+func (mc *ManagerCreate) SetDeletedAt(t time.Time) *ManagerCreate {
+	mc.mutation.SetDeletedAt(t)
+	return mc
+}
+
+// SetNillableDeletedAt sets the "deleted_at" field if the given value is not nil.
+func (mc *ManagerCreate) SetNillableDeletedAt(t *time.Time) *ManagerCreate {
+	if t != nil {
+		mc.SetDeletedAt(*t)
+	}
+	return mc
+}
+
+// SetUserID sets the "user_id" field.
+func (mc *ManagerCreate) SetUserID(s string) *ManagerCreate {
+	mc.mutation.SetUserID(s)
+	return mc
+}
+
+// SetBusinessID sets the "business_id" field.
+func (mc *ManagerCreate) SetBusinessID(s string) *ManagerCreate {
+	mc.mutation.SetBusinessID(s)
+	return mc
+}
+
+// SetDisabled sets the "disabled" field.
+func (mc *ManagerCreate) SetDisabled(b bool) *ManagerCreate {
+	mc.mutation.SetDisabled(b)
+	return mc
+}
+
+// SetNillableDisabled sets the "disabled" field if the given value is not nil.
+func (mc *ManagerCreate) SetNillableDisabled(b *bool) *ManagerCreate {
 	if b != nil {
-		mc.SetDiasbled(*b)
+		mc.SetDisabled(*b)
 	}
 	return mc
 }
@@ -62,32 +96,50 @@ func (mc *ManagerCreate) SetDisableReason(s string) *ManagerCreate {
 	return mc
 }
 
+// SetNillableDisableReason sets the "disable_reason" field if the given value is not nil.
+func (mc *ManagerCreate) SetNillableDisableReason(s *string) *ManagerCreate {
+	if s != nil {
+		mc.SetDisableReason(*s)
+	}
+	return mc
+}
+
 // SetDisabledAt sets the "disabled_at" field.
 func (mc *ManagerCreate) SetDisabledAt(t time.Time) *ManagerCreate {
 	mc.mutation.SetDisabledAt(t)
 	return mc
 }
 
-// SetBusinessUserID sets the "business_user" edge to the Business entity by ID.
-func (mc *ManagerCreate) SetBusinessUserID(id int) *ManagerCreate {
-	mc.mutation.SetBusinessUserID(id)
+// SetNillableDisabledAt sets the "disabled_at" field if the given value is not nil.
+func (mc *ManagerCreate) SetNillableDisabledAt(t *time.Time) *ManagerCreate {
+	if t != nil {
+		mc.SetDisabledAt(*t)
+	}
 	return mc
 }
 
-// SetBusinessUser sets the "business_user" edge to the Business entity.
-func (mc *ManagerCreate) SetBusinessUser(b *Business) *ManagerCreate {
-	return mc.SetBusinessUserID(b.ID)
-}
-
-// SetUserManagerID sets the "user_manager" edge to the User entity by ID.
-func (mc *ManagerCreate) SetUserManagerID(id int) *ManagerCreate {
-	mc.mutation.SetUserManagerID(id)
+// SetID sets the "id" field.
+func (mc *ManagerCreate) SetID(s string) *ManagerCreate {
+	mc.mutation.SetID(s)
 	return mc
 }
 
-// SetUserManager sets the "user_manager" edge to the User entity.
-func (mc *ManagerCreate) SetUserManager(u *User) *ManagerCreate {
-	return mc.SetUserManagerID(u.ID)
+// SetNillableID sets the "id" field if the given value is not nil.
+func (mc *ManagerCreate) SetNillableID(s *string) *ManagerCreate {
+	if s != nil {
+		mc.SetID(*s)
+	}
+	return mc
+}
+
+// SetBusiness sets the "business" edge to the Business entity.
+func (mc *ManagerCreate) SetBusiness(b *Business) *ManagerCreate {
+	return mc.SetBusinessID(b.ID)
+}
+
+// SetUser sets the "user" edge to the User entity.
+func (mc *ManagerCreate) SetUser(u *User) *ManagerCreate {
+	return mc.SetUserID(u.ID)
 }
 
 // Mutation returns the ManagerMutation object of the builder.
@@ -129,9 +181,17 @@ func (mc *ManagerCreate) defaults() {
 		v := manager.DefaultCreatedAt()
 		mc.mutation.SetCreatedAt(v)
 	}
-	if _, ok := mc.mutation.Diasbled(); !ok {
-		v := manager.DefaultDiasbled
-		mc.mutation.SetDiasbled(v)
+	if _, ok := mc.mutation.UpdatedAt(); !ok {
+		v := manager.DefaultUpdatedAt()
+		mc.mutation.SetUpdatedAt(v)
+	}
+	if _, ok := mc.mutation.Disabled(); !ok {
+		v := manager.DefaultDisabled
+		mc.mutation.SetDisabled(v)
+	}
+	if _, ok := mc.mutation.ID(); !ok {
+		v := manager.DefaultID()
+		mc.mutation.SetID(v)
 	}
 }
 
@@ -140,28 +200,23 @@ func (mc *ManagerCreate) check() error {
 	if _, ok := mc.mutation.CreatedAt(); !ok {
 		return &ValidationError{Name: "created_at", err: errors.New(`ent: missing required field "Manager.created_at"`)}
 	}
-	if _, ok := mc.mutation.Position(); !ok {
-		return &ValidationError{Name: "position", err: errors.New(`ent: missing required field "Manager.position"`)}
+	if _, ok := mc.mutation.UpdatedAt(); !ok {
+		return &ValidationError{Name: "updated_at", err: errors.New(`ent: missing required field "Manager.updated_at"`)}
 	}
-	if v, ok := mc.mutation.Position(); ok {
-		if err := manager.PositionValidator(v); err != nil {
-			return &ValidationError{Name: "position", err: fmt.Errorf(`ent: validator failed for field "Manager.position": %w`, err)}
-		}
+	if _, ok := mc.mutation.UserID(); !ok {
+		return &ValidationError{Name: "user_id", err: errors.New(`ent: missing required field "Manager.user_id"`)}
 	}
-	if _, ok := mc.mutation.Diasbled(); !ok {
-		return &ValidationError{Name: "diasbled", err: errors.New(`ent: missing required field "Manager.diasbled"`)}
+	if _, ok := mc.mutation.BusinessID(); !ok {
+		return &ValidationError{Name: "business_id", err: errors.New(`ent: missing required field "Manager.business_id"`)}
 	}
-	if _, ok := mc.mutation.DisableReason(); !ok {
-		return &ValidationError{Name: "disable_reason", err: errors.New(`ent: missing required field "Manager.disable_reason"`)}
+	if _, ok := mc.mutation.Disabled(); !ok {
+		return &ValidationError{Name: "disabled", err: errors.New(`ent: missing required field "Manager.disabled"`)}
 	}
-	if _, ok := mc.mutation.DisabledAt(); !ok {
-		return &ValidationError{Name: "disabled_at", err: errors.New(`ent: missing required field "Manager.disabled_at"`)}
+	if len(mc.mutation.BusinessIDs()) == 0 {
+		return &ValidationError{Name: "business", err: errors.New(`ent: missing required edge "Manager.business"`)}
 	}
-	if len(mc.mutation.BusinessUserIDs()) == 0 {
-		return &ValidationError{Name: "business_user", err: errors.New(`ent: missing required edge "Manager.business_user"`)}
-	}
-	if len(mc.mutation.UserManagerIDs()) == 0 {
-		return &ValidationError{Name: "user_manager", err: errors.New(`ent: missing required edge "Manager.user_manager"`)}
+	if len(mc.mutation.UserIDs()) == 0 {
+		return &ValidationError{Name: "user", err: errors.New(`ent: missing required edge "Manager.user"`)}
 	}
 	return nil
 }
@@ -177,8 +232,13 @@ func (mc *ManagerCreate) sqlSave(ctx context.Context) (*Manager, error) {
 		}
 		return nil, err
 	}
-	id := _spec.ID.Value.(int64)
-	_node.ID = int(id)
+	if _spec.ID.Value != nil {
+		if id, ok := _spec.ID.Value.(string); ok {
+			_node.ID = id
+		} else {
+			return nil, fmt.Errorf("unexpected Manager.ID type: %T", _spec.ID.Value)
+		}
+	}
 	mc.mutation.id = &_node.ID
 	mc.mutation.done = true
 	return _node, nil
@@ -187,60 +247,68 @@ func (mc *ManagerCreate) sqlSave(ctx context.Context) (*Manager, error) {
 func (mc *ManagerCreate) createSpec() (*Manager, *sqlgraph.CreateSpec) {
 	var (
 		_node = &Manager{config: mc.config}
-		_spec = sqlgraph.NewCreateSpec(manager.Table, sqlgraph.NewFieldSpec(manager.FieldID, field.TypeInt))
+		_spec = sqlgraph.NewCreateSpec(manager.Table, sqlgraph.NewFieldSpec(manager.FieldID, field.TypeString))
 	)
+	if id, ok := mc.mutation.ID(); ok {
+		_node.ID = id
+		_spec.ID.Value = id
+	}
 	if value, ok := mc.mutation.CreatedAt(); ok {
 		_spec.SetField(manager.FieldCreatedAt, field.TypeTime, value)
 		_node.CreatedAt = value
 	}
-	if value, ok := mc.mutation.Position(); ok {
-		_spec.SetField(manager.FieldPosition, field.TypeString, value)
-		_node.Position = value
+	if value, ok := mc.mutation.UpdatedAt(); ok {
+		_spec.SetField(manager.FieldUpdatedAt, field.TypeTime, value)
+		_node.UpdatedAt = value
 	}
-	if value, ok := mc.mutation.Diasbled(); ok {
-		_spec.SetField(manager.FieldDiasbled, field.TypeBool, value)
-		_node.Diasbled = value
+	if value, ok := mc.mutation.DeletedAt(); ok {
+		_spec.SetField(manager.FieldDeletedAt, field.TypeTime, value)
+		_node.DeletedAt = &value
+	}
+	if value, ok := mc.mutation.Disabled(); ok {
+		_spec.SetField(manager.FieldDisabled, field.TypeBool, value)
+		_node.Disabled = value
 	}
 	if value, ok := mc.mutation.DisableReason(); ok {
 		_spec.SetField(manager.FieldDisableReason, field.TypeString, value)
-		_node.DisableReason = &value
+		_node.DisableReason = value
 	}
 	if value, ok := mc.mutation.DisabledAt(); ok {
 		_spec.SetField(manager.FieldDisabledAt, field.TypeTime, value)
-		_node.DisabledAt = &value
+		_node.DisabledAt = value
 	}
-	if nodes := mc.mutation.BusinessUserIDs(); len(nodes) > 0 {
+	if nodes := mc.mutation.BusinessIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   manager.BusinessUserTable,
-			Columns: []string{manager.BusinessUserColumn},
+			Table:   manager.BusinessTable,
+			Columns: []string{manager.BusinessColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(business.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(business.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		_node.business_business_manager = &nodes[0]
+		_node.BusinessID = nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := mc.mutation.UserManagerIDs(); len(nodes) > 0 {
+	if nodes := mc.mutation.UserIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   manager.UserManagerTable,
-			Columns: []string{manager.UserManagerColumn},
+			Table:   manager.UserTable,
+			Columns: []string{manager.UserColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		_node.user_user_manager = &nodes[0]
+		_node.UserID = nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec
@@ -291,10 +359,6 @@ func (mcb *ManagerCreateBulk) Save(ctx context.Context) ([]*Manager, error) {
 					return nil, err
 				}
 				mutation.id = &nodes[i].ID
-				if specs[i].ID.Value != nil {
-					id := specs[i].ID.Value.(int64)
-					nodes[i].ID = int(id)
-				}
 				mutation.done = true
 				return nodes[i], nil
 			})

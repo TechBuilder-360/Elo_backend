@@ -14,6 +14,8 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"github.com/Toflex/directory_v2/ent/business"
 	"github.com/Toflex/directory_v2/ent/manager"
+	"github.com/Toflex/directory_v2/ent/permission"
+	"github.com/Toflex/directory_v2/ent/role"
 	"github.com/Toflex/directory_v2/ent/social"
 	"github.com/Toflex/directory_v2/ent/user"
 )
@@ -76,10 +78,12 @@ var (
 func checkColumn(table, column string) error {
 	initCheck.Do(func() {
 		columnCheck = sql.NewColumnCheck(map[string]func(string) bool{
-			business.Table: business.ValidColumn,
-			manager.Table:  manager.ValidColumn,
-			social.Table:   social.ValidColumn,
-			user.Table:     user.ValidColumn,
+			business.Table:   business.ValidColumn,
+			manager.Table:    manager.ValidColumn,
+			permission.Table: permission.ValidColumn,
+			role.Table:       role.ValidColumn,
+			social.Table:     social.ValidColumn,
+			user.Table:       user.ValidColumn,
 		})
 	})
 	return columnCheck(table, column)

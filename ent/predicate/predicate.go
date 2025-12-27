@@ -12,6 +12,12 @@ type Business func(*sql.Selector)
 // Manager is the predicate function for manager builders.
 type Manager func(*sql.Selector)
 
+// Permission is the predicate function for permission builders.
+type Permission func(*sql.Selector)
+
+// Role is the predicate function for role builders.
+type Role func(*sql.Selector)
+
 // Social is the predicate function for social builders.
 type Social func(*sql.Selector)
 
