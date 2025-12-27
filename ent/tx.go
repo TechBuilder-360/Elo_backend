@@ -16,6 +16,10 @@ type Tx struct {
 	Business *BusinessClient
 	// Manager is the client for interacting with the Manager builders.
 	Manager *ManagerClient
+	// Permission is the client for interacting with the Permission builders.
+	Permission *PermissionClient
+	// Role is the client for interacting with the Role builders.
+	Role *RoleClient
 	// Social is the client for interacting with the Social builders.
 	Social *SocialClient
 	// User is the client for interacting with the User builders.
@@ -153,6 +157,8 @@ func (tx *Tx) Client() *Client {
 func (tx *Tx) init() {
 	tx.Business = NewBusinessClient(tx.config)
 	tx.Manager = NewManagerClient(tx.config)
+	tx.Permission = NewPermissionClient(tx.config)
+	tx.Role = NewRoleClient(tx.config)
 	tx.Social = NewSocialClient(tx.config)
 	tx.User = NewUserClient(tx.config)
 }

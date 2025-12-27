@@ -16,6 +16,12 @@ const (
 	FieldID = "id"
 	// FieldCreatedAt holds the string denoting the created_at field in the database.
 	FieldCreatedAt = "created_at"
+	// FieldUpdatedAt holds the string denoting the updated_at field in the database.
+	FieldUpdatedAt = "updated_at"
+	// FieldDeletedAt holds the string denoting the deleted_at field in the database.
+	FieldDeletedAt = "deleted_at"
+	// FieldBusinessID holds the string denoting the business_id field in the database.
+	FieldBusinessID = "business_id"
 	// FieldName holds the string denoting the name field in the database.
 	FieldName = "name"
 	// FieldURL holds the string denoting the url field in the database.
@@ -30,21 +36,18 @@ const (
 	// It exists in this package in order to avoid circular dependency with the "business" package.
 	SocialInverseTable = "businesses"
 	// SocialColumn is the table column denoting the social relation/edge.
-	SocialColumn = "business_business_social"
+	SocialColumn = "business_id"
 )
 
 // Columns holds all SQL columns for social fields.
 var Columns = []string{
 	FieldID,
 	FieldCreatedAt,
+	FieldUpdatedAt,
+	FieldDeletedAt,
+	FieldBusinessID,
 	FieldName,
 	FieldURL,
-}
-
-// ForeignKeys holds the SQL foreign-keys that are owned by the "socials"
-// table and are not defined as standalone fields in the schema.
-var ForeignKeys = []string{
-	"business_business_social",
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -54,21 +57,22 @@ func ValidColumn(column string) bool {
 			return true
 		}
 	}
-	for i := range ForeignKeys {
-		if column == ForeignKeys[i] {
-			return true
-		}
-	}
 	return false
 }
 
 var (
 	// DefaultCreatedAt holds the default value on creation for the "created_at" field.
 	DefaultCreatedAt func() time.Time
+	// DefaultUpdatedAt holds the default value on creation for the "updated_at" field.
+	DefaultUpdatedAt func() time.Time
+	// UpdateDefaultUpdatedAt holds the default value on update for the "updated_at" field.
+	UpdateDefaultUpdatedAt func() time.Time
 	// NameValidator is a validator for the "name" field. It is called by the builders before save.
 	NameValidator func(string) error
 	// URLValidator is a validator for the "url" field. It is called by the builders before save.
 	URLValidator func(string) error
+	// DefaultID holds the default value on creation for the "id" field.
+	DefaultID func() string
 )
 
 // OrderOption defines the ordering options for the Social queries.
@@ -82,6 +86,21 @@ func ByID(opts ...sql.OrderTermOption) OrderOption {
 // ByCreatedAt orders the results by the created_at field.
 func ByCreatedAt(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldCreatedAt, opts...).ToFunc()
+}
+
+// ByUpdatedAt orders the results by the updated_at field.
+func ByUpdatedAt(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldUpdatedAt, opts...).ToFunc()
+}
+
+// ByDeletedAt orders the results by the deleted_at field.
+func ByDeletedAt(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldDeletedAt, opts...).ToFunc()
+}
+
+// ByBusinessID orders the results by the business_id field.
+func ByBusinessID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldBusinessID, opts...).ToFunc()
 }
 
 // ByName orders the results by the name field.

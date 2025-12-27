@@ -20,8 +20,10 @@ type baseConfig struct {
 	BASEURL       string      `env:"BASE_URL"`
 	Port          string      `env:"PORT"`
 	Environment   ENVIRONMENT `env:"ENVIRONMENT"`
-	Secret        string      `env:"SECRET"`
+	JWTSecret     string      `env:"JWT_SECRET"`
 	TOKENLIFESPAN uint        `env:"TOKEN_LIFE_SPAN"`
+	BasicUsername string      `env:"BASIC_USERNAME"`
+	BasicPassword string      `env:"BASIC_PASSWORD"`
 }
 
 func LoadBaseConfiguration() {
@@ -41,18 +43,18 @@ func Load(conf interface{}) interface{} {
 	return conf
 }
 
-func (c *baseConfig) GetEnv() ENVIRONMENT {
-	return c.Environment
+func GetEnv() ENVIRONMENT {
+	return Instance.Environment
 }
 
-func (c *baseConfig) IsProduction() bool {
-	return c.Environment == production
+func IsProduction() bool {
+	return Instance.Environment == production
 }
 
-func (c *baseConfig) IsSandbox() bool {
-	return c.Environment == sandbox
+func IsSandbox() bool {
+	return Instance.Environment == sandbox
 }
 
-func (c *baseConfig) IsDevelopment() bool {
-	return c.Environment == development
+func IsDevelopment() bool {
+	return Instance.Environment == development
 }

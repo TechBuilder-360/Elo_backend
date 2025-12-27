@@ -14,12 +14,18 @@ const (
 	Label = "business"
 	// FieldID holds the string denoting the id field in the database.
 	FieldID = "id"
+	// FieldCreatedAt holds the string denoting the created_at field in the database.
+	FieldCreatedAt = "created_at"
+	// FieldUpdatedAt holds the string denoting the updated_at field in the database.
+	FieldUpdatedAt = "updated_at"
+	// FieldDeletedAt holds the string denoting the deleted_at field in the database.
+	FieldDeletedAt = "deleted_at"
 	// FieldCategory holds the string denoting the category field in the database.
 	FieldCategory = "category"
 	// FieldName holds the string denoting the name field in the database.
 	FieldName = "name"
-	// FieldLogoURL holds the string denoting the logo_url field in the database.
-	FieldLogoURL = "logo_url"
+	// FieldLogo holds the string denoting the logo field in the database.
+	FieldLogo = "logo"
 	// FieldEmail holds the string denoting the email field in the database.
 	FieldEmail = "email"
 	// FieldWebsite holds the string denoting the website field in the database.
@@ -34,36 +40,37 @@ const (
 	FieldVerified = "verified"
 	// FieldVerifiedAt holds the string denoting the verified_at field in the database.
 	FieldVerifiedAt = "verified_at"
-	// FieldCreatedAt holds the string denoting the created_at field in the database.
-	FieldCreatedAt = "created_at"
-	// EdgeBusinessSocial holds the string denoting the business_social edge name in mutations.
-	EdgeBusinessSocial = "business_social"
-	// EdgeBusinessManager holds the string denoting the business_manager edge name in mutations.
-	EdgeBusinessManager = "business_manager"
+	// EdgeSocials holds the string denoting the socials edge name in mutations.
+	EdgeSocials = "socials"
+	// EdgeManages holds the string denoting the manages edge name in mutations.
+	EdgeManages = "manages"
 	// Table holds the table name of the business in the database.
 	Table = "businesses"
-	// BusinessSocialTable is the table that holds the business_social relation/edge.
-	BusinessSocialTable = "socials"
-	// BusinessSocialInverseTable is the table name for the Social entity.
+	// SocialsTable is the table that holds the socials relation/edge.
+	SocialsTable = "socials"
+	// SocialsInverseTable is the table name for the Social entity.
 	// It exists in this package in order to avoid circular dependency with the "social" package.
-	BusinessSocialInverseTable = "socials"
-	// BusinessSocialColumn is the table column denoting the business_social relation/edge.
-	BusinessSocialColumn = "business_business_social"
-	// BusinessManagerTable is the table that holds the business_manager relation/edge.
-	BusinessManagerTable = "managers"
-	// BusinessManagerInverseTable is the table name for the Manager entity.
+	SocialsInverseTable = "socials"
+	// SocialsColumn is the table column denoting the socials relation/edge.
+	SocialsColumn = "business_id"
+	// ManagesTable is the table that holds the manages relation/edge.
+	ManagesTable = "managers"
+	// ManagesInverseTable is the table name for the Manager entity.
 	// It exists in this package in order to avoid circular dependency with the "manager" package.
-	BusinessManagerInverseTable = "managers"
-	// BusinessManagerColumn is the table column denoting the business_manager relation/edge.
-	BusinessManagerColumn = "business_business_manager"
+	ManagesInverseTable = "managers"
+	// ManagesColumn is the table column denoting the manages relation/edge.
+	ManagesColumn = "business_id"
 )
 
 // Columns holds all SQL columns for business fields.
 var Columns = []string{
 	FieldID,
+	FieldCreatedAt,
+	FieldUpdatedAt,
+	FieldDeletedAt,
 	FieldCategory,
 	FieldName,
-	FieldLogoURL,
+	FieldLogo,
 	FieldEmail,
 	FieldWebsite,
 	FieldDisabled,
@@ -71,7 +78,6 @@ var Columns = []string{
 	FieldDisableReason,
 	FieldVerified,
 	FieldVerifiedAt,
-	FieldCreatedAt,
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -85,6 +91,12 @@ func ValidColumn(column string) bool {
 }
 
 var (
+	// DefaultCreatedAt holds the default value on creation for the "created_at" field.
+	DefaultCreatedAt func() time.Time
+	// DefaultUpdatedAt holds the default value on creation for the "updated_at" field.
+	DefaultUpdatedAt func() time.Time
+	// UpdateDefaultUpdatedAt holds the default value on update for the "updated_at" field.
+	UpdateDefaultUpdatedAt func() time.Time
 	// DefaultCategory holds the default value on creation for the "category" field.
 	DefaultCategory string
 	// NameValidator is a validator for the "name" field. It is called by the builders before save.
@@ -97,8 +109,8 @@ var (
 	DefaultDisabledAt func() time.Time
 	// DefaultVerified holds the default value on creation for the "verified" field.
 	DefaultVerified bool
-	// DefaultCreatedAt holds the default value on creation for the "created_at" field.
-	DefaultCreatedAt func() time.Time
+	// DefaultID holds the default value on creation for the "id" field.
+	DefaultID func() string
 )
 
 // OrderOption defines the ordering options for the Business queries.
@@ -107,6 +119,21 @@ type OrderOption func(*sql.Selector)
 // ByID orders the results by the id field.
 func ByID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldID, opts...).ToFunc()
+}
+
+// ByCreatedAt orders the results by the created_at field.
+func ByCreatedAt(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldCreatedAt, opts...).ToFunc()
+}
+
+// ByUpdatedAt orders the results by the updated_at field.
+func ByUpdatedAt(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldUpdatedAt, opts...).ToFunc()
+}
+
+// ByDeletedAt orders the results by the deleted_at field.
+func ByDeletedAt(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldDeletedAt, opts...).ToFunc()
 }
 
 // ByCategory orders the results by the category field.
@@ -119,9 +146,9 @@ func ByName(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldName, opts...).ToFunc()
 }
 
-// ByLogoURL orders the results by the logo_url field.
-func ByLogoURL(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldLogoURL, opts...).ToFunc()
+// ByLogo orders the results by the logo field.
+func ByLogo(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldLogo, opts...).ToFunc()
 }
 
 // ByEmail orders the results by the email field.
@@ -159,49 +186,44 @@ func ByVerifiedAt(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldVerifiedAt, opts...).ToFunc()
 }
 
-// ByCreatedAt orders the results by the created_at field.
-func ByCreatedAt(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldCreatedAt, opts...).ToFunc()
-}
-
-// ByBusinessSocialCount orders the results by business_social count.
-func ByBusinessSocialCount(opts ...sql.OrderTermOption) OrderOption {
+// BySocialsCount orders the results by socials count.
+func BySocialsCount(opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborsCount(s, newBusinessSocialStep(), opts...)
+		sqlgraph.OrderByNeighborsCount(s, newSocialsStep(), opts...)
 	}
 }
 
-// ByBusinessSocial orders the results by business_social terms.
-func ByBusinessSocial(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+// BySocials orders the results by socials terms.
+func BySocials(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newBusinessSocialStep(), append([]sql.OrderTerm{term}, terms...)...)
+		sqlgraph.OrderByNeighborTerms(s, newSocialsStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
 
-// ByBusinessManagerCount orders the results by business_manager count.
-func ByBusinessManagerCount(opts ...sql.OrderTermOption) OrderOption {
+// ByManagesCount orders the results by manages count.
+func ByManagesCount(opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborsCount(s, newBusinessManagerStep(), opts...)
+		sqlgraph.OrderByNeighborsCount(s, newManagesStep(), opts...)
 	}
 }
 
-// ByBusinessManager orders the results by business_manager terms.
-func ByBusinessManager(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+// ByManages orders the results by manages terms.
+func ByManages(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newBusinessManagerStep(), append([]sql.OrderTerm{term}, terms...)...)
+		sqlgraph.OrderByNeighborTerms(s, newManagesStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
-func newBusinessSocialStep() *sqlgraph.Step {
+func newSocialsStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
-		sqlgraph.To(BusinessSocialInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.O2M, false, BusinessSocialTable, BusinessSocialColumn),
+		sqlgraph.To(SocialsInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, SocialsTable, SocialsColumn),
 	)
 }
-func newBusinessManagerStep() *sqlgraph.Step {
+func newManagesStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
-		sqlgraph.To(BusinessManagerInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.O2M, false, BusinessManagerTable, BusinessManagerColumn),
+		sqlgraph.To(ManagesInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, ManagesTable, ManagesColumn),
 	)
 }

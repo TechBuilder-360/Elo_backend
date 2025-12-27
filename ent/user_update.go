@@ -6,6 +6,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"time"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -25,6 +26,32 @@ type UserUpdate struct {
 // Where appends a list predicates to the UserUpdate builder.
 func (uu *UserUpdate) Where(ps ...predicate.User) *UserUpdate {
 	uu.mutation.Where(ps...)
+	return uu
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (uu *UserUpdate) SetUpdatedAt(t time.Time) *UserUpdate {
+	uu.mutation.SetUpdatedAt(t)
+	return uu
+}
+
+// SetDeletedAt sets the "deleted_at" field.
+func (uu *UserUpdate) SetDeletedAt(t time.Time) *UserUpdate {
+	uu.mutation.SetDeletedAt(t)
+	return uu
+}
+
+// SetNillableDeletedAt sets the "deleted_at" field if the given value is not nil.
+func (uu *UserUpdate) SetNillableDeletedAt(t *time.Time) *UserUpdate {
+	if t != nil {
+		uu.SetDeletedAt(*t)
+	}
+	return uu
+}
+
+// ClearDeletedAt clears the value of the "deleted_at" field.
+func (uu *UserUpdate) ClearDeletedAt() *UserUpdate {
+	uu.mutation.ClearDeletedAt()
 	return uu
 }
 
@@ -70,6 +97,12 @@ func (uu *UserUpdate) SetNillableMiddleName(s *string) *UserUpdate {
 	return uu
 }
 
+// ClearMiddleName clears the value of the "middle_name" field.
+func (uu *UserUpdate) ClearMiddleName() *UserUpdate {
+	uu.mutation.ClearMiddleName()
+	return uu
+}
+
 // SetDisplayName sets the "display_name" field.
 func (uu *UserUpdate) SetDisplayName(s string) *UserUpdate {
 	uu.mutation.SetDisplayName(s)
@@ -81,6 +114,12 @@ func (uu *UserUpdate) SetNillableDisplayName(s *string) *UserUpdate {
 	if s != nil {
 		uu.SetDisplayName(*s)
 	}
+	return uu
+}
+
+// ClearDisplayName clears the value of the "display_name" field.
+func (uu *UserUpdate) ClearDisplayName() *UserUpdate {
+	uu.mutation.ClearDisplayName()
 	return uu
 }
 
@@ -98,6 +137,40 @@ func (uu *UserUpdate) SetNillableEmailAddress(s *string) *UserUpdate {
 	return uu
 }
 
+// SetEmailVerified sets the "email_verified" field.
+func (uu *UserUpdate) SetEmailVerified(b bool) *UserUpdate {
+	uu.mutation.SetEmailVerified(b)
+	return uu
+}
+
+// SetNillableEmailVerified sets the "email_verified" field if the given value is not nil.
+func (uu *UserUpdate) SetNillableEmailVerified(b *bool) *UserUpdate {
+	if b != nil {
+		uu.SetEmailVerified(*b)
+	}
+	return uu
+}
+
+// SetEmailVerifiedAt sets the "email_verified_at" field.
+func (uu *UserUpdate) SetEmailVerifiedAt(t time.Time) *UserUpdate {
+	uu.mutation.SetEmailVerifiedAt(t)
+	return uu
+}
+
+// SetNillableEmailVerifiedAt sets the "email_verified_at" field if the given value is not nil.
+func (uu *UserUpdate) SetNillableEmailVerifiedAt(t *time.Time) *UserUpdate {
+	if t != nil {
+		uu.SetEmailVerifiedAt(*t)
+	}
+	return uu
+}
+
+// ClearEmailVerifiedAt clears the value of the "email_verified_at" field.
+func (uu *UserUpdate) ClearEmailVerifiedAt() *UserUpdate {
+	uu.mutation.ClearEmailVerifiedAt()
+	return uu
+}
+
 // SetPhoneNumber sets the "phone_number" field.
 func (uu *UserUpdate) SetPhoneNumber(s string) *UserUpdate {
 	uu.mutation.SetPhoneNumber(s)
@@ -109,6 +182,12 @@ func (uu *UserUpdate) SetNillablePhoneNumber(s *string) *UserUpdate {
 	if s != nil {
 		uu.SetPhoneNumber(*s)
 	}
+	return uu
+}
+
+// ClearPhoneNumber clears the value of the "phone_number" field.
+func (uu *UserUpdate) ClearPhoneNumber() *UserUpdate {
+	uu.mutation.ClearPhoneNumber()
 	return uu
 }
 
@@ -126,6 +205,12 @@ func (uu *UserUpdate) SetNillableAvatar(s *string) *UserUpdate {
 	return uu
 }
 
+// ClearAvatar clears the value of the "avatar" field.
+func (uu *UserUpdate) ClearAvatar() *UserUpdate {
+	uu.mutation.ClearAvatar()
+	return uu
+}
+
 // SetDisabled sets the "disabled" field.
 func (uu *UserUpdate) SetDisabled(b bool) *UserUpdate {
 	uu.mutation.SetDisabled(b)
@@ -136,20 +221,6 @@ func (uu *UserUpdate) SetDisabled(b bool) *UserUpdate {
 func (uu *UserUpdate) SetNillableDisabled(b *bool) *UserUpdate {
 	if b != nil {
 		uu.SetDisabled(*b)
-	}
-	return uu
-}
-
-// SetIdentificationNumber sets the "identification_number" field.
-func (uu *UserUpdate) SetIdentificationNumber(s string) *UserUpdate {
-	uu.mutation.SetIdentificationNumber(s)
-	return uu
-}
-
-// SetNillableIdentificationNumber sets the "identification_number" field if the given value is not nil.
-func (uu *UserUpdate) SetNillableIdentificationNumber(s *string) *UserUpdate {
-	if s != nil {
-		uu.SetIdentificationNumber(*s)
 	}
 	return uu
 }
@@ -175,19 +246,19 @@ func (uu *UserUpdate) AddTier(i int8) *UserUpdate {
 	return uu
 }
 
-// AddUserManagerIDs adds the "user_manager" edge to the Manager entity by IDs.
-func (uu *UserUpdate) AddUserManagerIDs(ids ...int) *UserUpdate {
-	uu.mutation.AddUserManagerIDs(ids...)
+// AddManageIDs adds the "manages" edge to the Manager entity by IDs.
+func (uu *UserUpdate) AddManageIDs(ids ...string) *UserUpdate {
+	uu.mutation.AddManageIDs(ids...)
 	return uu
 }
 
-// AddUserManager adds the "user_manager" edges to the Manager entity.
-func (uu *UserUpdate) AddUserManager(m ...*Manager) *UserUpdate {
-	ids := make([]int, len(m))
+// AddManages adds the "manages" edges to the Manager entity.
+func (uu *UserUpdate) AddManages(m ...*Manager) *UserUpdate {
+	ids := make([]string, len(m))
 	for i := range m {
 		ids[i] = m[i].ID
 	}
-	return uu.AddUserManagerIDs(ids...)
+	return uu.AddManageIDs(ids...)
 }
 
 // Mutation returns the UserMutation object of the builder.
@@ -195,29 +266,30 @@ func (uu *UserUpdate) Mutation() *UserMutation {
 	return uu.mutation
 }
 
-// ClearUserManager clears all "user_manager" edges to the Manager entity.
-func (uu *UserUpdate) ClearUserManager() *UserUpdate {
-	uu.mutation.ClearUserManager()
+// ClearManages clears all "manages" edges to the Manager entity.
+func (uu *UserUpdate) ClearManages() *UserUpdate {
+	uu.mutation.ClearManages()
 	return uu
 }
 
-// RemoveUserManagerIDs removes the "user_manager" edge to Manager entities by IDs.
-func (uu *UserUpdate) RemoveUserManagerIDs(ids ...int) *UserUpdate {
-	uu.mutation.RemoveUserManagerIDs(ids...)
+// RemoveManageIDs removes the "manages" edge to Manager entities by IDs.
+func (uu *UserUpdate) RemoveManageIDs(ids ...string) *UserUpdate {
+	uu.mutation.RemoveManageIDs(ids...)
 	return uu
 }
 
-// RemoveUserManager removes "user_manager" edges to Manager entities.
-func (uu *UserUpdate) RemoveUserManager(m ...*Manager) *UserUpdate {
-	ids := make([]int, len(m))
+// RemoveManages removes "manages" edges to Manager entities.
+func (uu *UserUpdate) RemoveManages(m ...*Manager) *UserUpdate {
+	ids := make([]string, len(m))
 	for i := range m {
 		ids[i] = m[i].ID
 	}
-	return uu.RemoveUserManagerIDs(ids...)
+	return uu.RemoveManageIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (uu *UserUpdate) Save(ctx context.Context) (int, error) {
+	uu.defaults()
 	return withHooks(ctx, uu.sqlSave, uu.mutation, uu.hooks)
 }
 
@@ -240,6 +312,14 @@ func (uu *UserUpdate) Exec(ctx context.Context) error {
 func (uu *UserUpdate) ExecX(ctx context.Context) {
 	if err := uu.Exec(ctx); err != nil {
 		panic(err)
+	}
+}
+
+// defaults sets the default values of the builder before save.
+func (uu *UserUpdate) defaults() {
+	if _, ok := uu.mutation.UpdatedAt(); !ok {
+		v := user.UpdateDefaultUpdatedAt()
+		uu.mutation.SetUpdatedAt(v)
 	}
 }
 
@@ -272,13 +352,22 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if err := uu.check(); err != nil {
 		return n, err
 	}
-	_spec := sqlgraph.NewUpdateSpec(user.Table, user.Columns, sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt))
+	_spec := sqlgraph.NewUpdateSpec(user.Table, user.Columns, sqlgraph.NewFieldSpec(user.FieldID, field.TypeString))
 	if ps := uu.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
+	}
+	if value, ok := uu.mutation.UpdatedAt(); ok {
+		_spec.SetField(user.FieldUpdatedAt, field.TypeTime, value)
+	}
+	if value, ok := uu.mutation.DeletedAt(); ok {
+		_spec.SetField(user.FieldDeletedAt, field.TypeTime, value)
+	}
+	if uu.mutation.DeletedAtCleared() {
+		_spec.ClearField(user.FieldDeletedAt, field.TypeTime)
 	}
 	if value, ok := uu.mutation.FirstName(); ok {
 		_spec.SetField(user.FieldFirstName, field.TypeString, value)
@@ -289,23 +378,41 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if value, ok := uu.mutation.MiddleName(); ok {
 		_spec.SetField(user.FieldMiddleName, field.TypeString, value)
 	}
+	if uu.mutation.MiddleNameCleared() {
+		_spec.ClearField(user.FieldMiddleName, field.TypeString)
+	}
 	if value, ok := uu.mutation.DisplayName(); ok {
 		_spec.SetField(user.FieldDisplayName, field.TypeString, value)
+	}
+	if uu.mutation.DisplayNameCleared() {
+		_spec.ClearField(user.FieldDisplayName, field.TypeString)
 	}
 	if value, ok := uu.mutation.EmailAddress(); ok {
 		_spec.SetField(user.FieldEmailAddress, field.TypeString, value)
 	}
+	if value, ok := uu.mutation.EmailVerified(); ok {
+		_spec.SetField(user.FieldEmailVerified, field.TypeBool, value)
+	}
+	if value, ok := uu.mutation.EmailVerifiedAt(); ok {
+		_spec.SetField(user.FieldEmailVerifiedAt, field.TypeTime, value)
+	}
+	if uu.mutation.EmailVerifiedAtCleared() {
+		_spec.ClearField(user.FieldEmailVerifiedAt, field.TypeTime)
+	}
 	if value, ok := uu.mutation.PhoneNumber(); ok {
 		_spec.SetField(user.FieldPhoneNumber, field.TypeString, value)
+	}
+	if uu.mutation.PhoneNumberCleared() {
+		_spec.ClearField(user.FieldPhoneNumber, field.TypeString)
 	}
 	if value, ok := uu.mutation.Avatar(); ok {
 		_spec.SetField(user.FieldAvatar, field.TypeString, value)
 	}
+	if uu.mutation.AvatarCleared() {
+		_spec.ClearField(user.FieldAvatar, field.TypeString)
+	}
 	if value, ok := uu.mutation.Disabled(); ok {
 		_spec.SetField(user.FieldDisabled, field.TypeBool, value)
-	}
-	if value, ok := uu.mutation.IdentificationNumber(); ok {
-		_spec.SetField(user.FieldIdentificationNumber, field.TypeString, value)
 	}
 	if value, ok := uu.mutation.Tier(); ok {
 		_spec.SetField(user.FieldTier, field.TypeInt8, value)
@@ -313,28 +420,28 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if value, ok := uu.mutation.AddedTier(); ok {
 		_spec.AddField(user.FieldTier, field.TypeInt8, value)
 	}
-	if uu.mutation.UserManagerCleared() {
+	if uu.mutation.ManagesCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   user.UserManagerTable,
-			Columns: []string{user.UserManagerColumn},
+			Table:   user.ManagesTable,
+			Columns: []string{user.ManagesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(manager.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(manager.FieldID, field.TypeString),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := uu.mutation.RemovedUserManagerIDs(); len(nodes) > 0 && !uu.mutation.UserManagerCleared() {
+	if nodes := uu.mutation.RemovedManagesIDs(); len(nodes) > 0 && !uu.mutation.ManagesCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   user.UserManagerTable,
-			Columns: []string{user.UserManagerColumn},
+			Table:   user.ManagesTable,
+			Columns: []string{user.ManagesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(manager.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(manager.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {
@@ -342,15 +449,15 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := uu.mutation.UserManagerIDs(); len(nodes) > 0 {
+	if nodes := uu.mutation.ManagesIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   user.UserManagerTable,
-			Columns: []string{user.UserManagerColumn},
+			Table:   user.ManagesTable,
+			Columns: []string{user.ManagesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(manager.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(manager.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {
@@ -376,6 +483,32 @@ type UserUpdateOne struct {
 	fields   []string
 	hooks    []Hook
 	mutation *UserMutation
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (uuo *UserUpdateOne) SetUpdatedAt(t time.Time) *UserUpdateOne {
+	uuo.mutation.SetUpdatedAt(t)
+	return uuo
+}
+
+// SetDeletedAt sets the "deleted_at" field.
+func (uuo *UserUpdateOne) SetDeletedAt(t time.Time) *UserUpdateOne {
+	uuo.mutation.SetDeletedAt(t)
+	return uuo
+}
+
+// SetNillableDeletedAt sets the "deleted_at" field if the given value is not nil.
+func (uuo *UserUpdateOne) SetNillableDeletedAt(t *time.Time) *UserUpdateOne {
+	if t != nil {
+		uuo.SetDeletedAt(*t)
+	}
+	return uuo
+}
+
+// ClearDeletedAt clears the value of the "deleted_at" field.
+func (uuo *UserUpdateOne) ClearDeletedAt() *UserUpdateOne {
+	uuo.mutation.ClearDeletedAt()
+	return uuo
 }
 
 // SetFirstName sets the "first_name" field.
@@ -420,6 +553,12 @@ func (uuo *UserUpdateOne) SetNillableMiddleName(s *string) *UserUpdateOne {
 	return uuo
 }
 
+// ClearMiddleName clears the value of the "middle_name" field.
+func (uuo *UserUpdateOne) ClearMiddleName() *UserUpdateOne {
+	uuo.mutation.ClearMiddleName()
+	return uuo
+}
+
 // SetDisplayName sets the "display_name" field.
 func (uuo *UserUpdateOne) SetDisplayName(s string) *UserUpdateOne {
 	uuo.mutation.SetDisplayName(s)
@@ -431,6 +570,12 @@ func (uuo *UserUpdateOne) SetNillableDisplayName(s *string) *UserUpdateOne {
 	if s != nil {
 		uuo.SetDisplayName(*s)
 	}
+	return uuo
+}
+
+// ClearDisplayName clears the value of the "display_name" field.
+func (uuo *UserUpdateOne) ClearDisplayName() *UserUpdateOne {
+	uuo.mutation.ClearDisplayName()
 	return uuo
 }
 
@@ -448,6 +593,40 @@ func (uuo *UserUpdateOne) SetNillableEmailAddress(s *string) *UserUpdateOne {
 	return uuo
 }
 
+// SetEmailVerified sets the "email_verified" field.
+func (uuo *UserUpdateOne) SetEmailVerified(b bool) *UserUpdateOne {
+	uuo.mutation.SetEmailVerified(b)
+	return uuo
+}
+
+// SetNillableEmailVerified sets the "email_verified" field if the given value is not nil.
+func (uuo *UserUpdateOne) SetNillableEmailVerified(b *bool) *UserUpdateOne {
+	if b != nil {
+		uuo.SetEmailVerified(*b)
+	}
+	return uuo
+}
+
+// SetEmailVerifiedAt sets the "email_verified_at" field.
+func (uuo *UserUpdateOne) SetEmailVerifiedAt(t time.Time) *UserUpdateOne {
+	uuo.mutation.SetEmailVerifiedAt(t)
+	return uuo
+}
+
+// SetNillableEmailVerifiedAt sets the "email_verified_at" field if the given value is not nil.
+func (uuo *UserUpdateOne) SetNillableEmailVerifiedAt(t *time.Time) *UserUpdateOne {
+	if t != nil {
+		uuo.SetEmailVerifiedAt(*t)
+	}
+	return uuo
+}
+
+// ClearEmailVerifiedAt clears the value of the "email_verified_at" field.
+func (uuo *UserUpdateOne) ClearEmailVerifiedAt() *UserUpdateOne {
+	uuo.mutation.ClearEmailVerifiedAt()
+	return uuo
+}
+
 // SetPhoneNumber sets the "phone_number" field.
 func (uuo *UserUpdateOne) SetPhoneNumber(s string) *UserUpdateOne {
 	uuo.mutation.SetPhoneNumber(s)
@@ -459,6 +638,12 @@ func (uuo *UserUpdateOne) SetNillablePhoneNumber(s *string) *UserUpdateOne {
 	if s != nil {
 		uuo.SetPhoneNumber(*s)
 	}
+	return uuo
+}
+
+// ClearPhoneNumber clears the value of the "phone_number" field.
+func (uuo *UserUpdateOne) ClearPhoneNumber() *UserUpdateOne {
+	uuo.mutation.ClearPhoneNumber()
 	return uuo
 }
 
@@ -476,6 +661,12 @@ func (uuo *UserUpdateOne) SetNillableAvatar(s *string) *UserUpdateOne {
 	return uuo
 }
 
+// ClearAvatar clears the value of the "avatar" field.
+func (uuo *UserUpdateOne) ClearAvatar() *UserUpdateOne {
+	uuo.mutation.ClearAvatar()
+	return uuo
+}
+
 // SetDisabled sets the "disabled" field.
 func (uuo *UserUpdateOne) SetDisabled(b bool) *UserUpdateOne {
 	uuo.mutation.SetDisabled(b)
@@ -486,20 +677,6 @@ func (uuo *UserUpdateOne) SetDisabled(b bool) *UserUpdateOne {
 func (uuo *UserUpdateOne) SetNillableDisabled(b *bool) *UserUpdateOne {
 	if b != nil {
 		uuo.SetDisabled(*b)
-	}
-	return uuo
-}
-
-// SetIdentificationNumber sets the "identification_number" field.
-func (uuo *UserUpdateOne) SetIdentificationNumber(s string) *UserUpdateOne {
-	uuo.mutation.SetIdentificationNumber(s)
-	return uuo
-}
-
-// SetNillableIdentificationNumber sets the "identification_number" field if the given value is not nil.
-func (uuo *UserUpdateOne) SetNillableIdentificationNumber(s *string) *UserUpdateOne {
-	if s != nil {
-		uuo.SetIdentificationNumber(*s)
 	}
 	return uuo
 }
@@ -525,19 +702,19 @@ func (uuo *UserUpdateOne) AddTier(i int8) *UserUpdateOne {
 	return uuo
 }
 
-// AddUserManagerIDs adds the "user_manager" edge to the Manager entity by IDs.
-func (uuo *UserUpdateOne) AddUserManagerIDs(ids ...int) *UserUpdateOne {
-	uuo.mutation.AddUserManagerIDs(ids...)
+// AddManageIDs adds the "manages" edge to the Manager entity by IDs.
+func (uuo *UserUpdateOne) AddManageIDs(ids ...string) *UserUpdateOne {
+	uuo.mutation.AddManageIDs(ids...)
 	return uuo
 }
 
-// AddUserManager adds the "user_manager" edges to the Manager entity.
-func (uuo *UserUpdateOne) AddUserManager(m ...*Manager) *UserUpdateOne {
-	ids := make([]int, len(m))
+// AddManages adds the "manages" edges to the Manager entity.
+func (uuo *UserUpdateOne) AddManages(m ...*Manager) *UserUpdateOne {
+	ids := make([]string, len(m))
 	for i := range m {
 		ids[i] = m[i].ID
 	}
-	return uuo.AddUserManagerIDs(ids...)
+	return uuo.AddManageIDs(ids...)
 }
 
 // Mutation returns the UserMutation object of the builder.
@@ -545,25 +722,25 @@ func (uuo *UserUpdateOne) Mutation() *UserMutation {
 	return uuo.mutation
 }
 
-// ClearUserManager clears all "user_manager" edges to the Manager entity.
-func (uuo *UserUpdateOne) ClearUserManager() *UserUpdateOne {
-	uuo.mutation.ClearUserManager()
+// ClearManages clears all "manages" edges to the Manager entity.
+func (uuo *UserUpdateOne) ClearManages() *UserUpdateOne {
+	uuo.mutation.ClearManages()
 	return uuo
 }
 
-// RemoveUserManagerIDs removes the "user_manager" edge to Manager entities by IDs.
-func (uuo *UserUpdateOne) RemoveUserManagerIDs(ids ...int) *UserUpdateOne {
-	uuo.mutation.RemoveUserManagerIDs(ids...)
+// RemoveManageIDs removes the "manages" edge to Manager entities by IDs.
+func (uuo *UserUpdateOne) RemoveManageIDs(ids ...string) *UserUpdateOne {
+	uuo.mutation.RemoveManageIDs(ids...)
 	return uuo
 }
 
-// RemoveUserManager removes "user_manager" edges to Manager entities.
-func (uuo *UserUpdateOne) RemoveUserManager(m ...*Manager) *UserUpdateOne {
-	ids := make([]int, len(m))
+// RemoveManages removes "manages" edges to Manager entities.
+func (uuo *UserUpdateOne) RemoveManages(m ...*Manager) *UserUpdateOne {
+	ids := make([]string, len(m))
 	for i := range m {
 		ids[i] = m[i].ID
 	}
-	return uuo.RemoveUserManagerIDs(ids...)
+	return uuo.RemoveManageIDs(ids...)
 }
 
 // Where appends a list predicates to the UserUpdate builder.
@@ -581,6 +758,7 @@ func (uuo *UserUpdateOne) Select(field string, fields ...string) *UserUpdateOne 
 
 // Save executes the query and returns the updated User entity.
 func (uuo *UserUpdateOne) Save(ctx context.Context) (*User, error) {
+	uuo.defaults()
 	return withHooks(ctx, uuo.sqlSave, uuo.mutation, uuo.hooks)
 }
 
@@ -603,6 +781,14 @@ func (uuo *UserUpdateOne) Exec(ctx context.Context) error {
 func (uuo *UserUpdateOne) ExecX(ctx context.Context) {
 	if err := uuo.Exec(ctx); err != nil {
 		panic(err)
+	}
+}
+
+// defaults sets the default values of the builder before save.
+func (uuo *UserUpdateOne) defaults() {
+	if _, ok := uuo.mutation.UpdatedAt(); !ok {
+		v := user.UpdateDefaultUpdatedAt()
+		uuo.mutation.SetUpdatedAt(v)
 	}
 }
 
@@ -635,7 +821,7 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 	if err := uuo.check(); err != nil {
 		return _node, err
 	}
-	_spec := sqlgraph.NewUpdateSpec(user.Table, user.Columns, sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt))
+	_spec := sqlgraph.NewUpdateSpec(user.Table, user.Columns, sqlgraph.NewFieldSpec(user.FieldID, field.TypeString))
 	id, ok := uuo.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "User.id" for update`)}
@@ -660,6 +846,15 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 			}
 		}
 	}
+	if value, ok := uuo.mutation.UpdatedAt(); ok {
+		_spec.SetField(user.FieldUpdatedAt, field.TypeTime, value)
+	}
+	if value, ok := uuo.mutation.DeletedAt(); ok {
+		_spec.SetField(user.FieldDeletedAt, field.TypeTime, value)
+	}
+	if uuo.mutation.DeletedAtCleared() {
+		_spec.ClearField(user.FieldDeletedAt, field.TypeTime)
+	}
 	if value, ok := uuo.mutation.FirstName(); ok {
 		_spec.SetField(user.FieldFirstName, field.TypeString, value)
 	}
@@ -669,23 +864,41 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 	if value, ok := uuo.mutation.MiddleName(); ok {
 		_spec.SetField(user.FieldMiddleName, field.TypeString, value)
 	}
+	if uuo.mutation.MiddleNameCleared() {
+		_spec.ClearField(user.FieldMiddleName, field.TypeString)
+	}
 	if value, ok := uuo.mutation.DisplayName(); ok {
 		_spec.SetField(user.FieldDisplayName, field.TypeString, value)
+	}
+	if uuo.mutation.DisplayNameCleared() {
+		_spec.ClearField(user.FieldDisplayName, field.TypeString)
 	}
 	if value, ok := uuo.mutation.EmailAddress(); ok {
 		_spec.SetField(user.FieldEmailAddress, field.TypeString, value)
 	}
+	if value, ok := uuo.mutation.EmailVerified(); ok {
+		_spec.SetField(user.FieldEmailVerified, field.TypeBool, value)
+	}
+	if value, ok := uuo.mutation.EmailVerifiedAt(); ok {
+		_spec.SetField(user.FieldEmailVerifiedAt, field.TypeTime, value)
+	}
+	if uuo.mutation.EmailVerifiedAtCleared() {
+		_spec.ClearField(user.FieldEmailVerifiedAt, field.TypeTime)
+	}
 	if value, ok := uuo.mutation.PhoneNumber(); ok {
 		_spec.SetField(user.FieldPhoneNumber, field.TypeString, value)
+	}
+	if uuo.mutation.PhoneNumberCleared() {
+		_spec.ClearField(user.FieldPhoneNumber, field.TypeString)
 	}
 	if value, ok := uuo.mutation.Avatar(); ok {
 		_spec.SetField(user.FieldAvatar, field.TypeString, value)
 	}
+	if uuo.mutation.AvatarCleared() {
+		_spec.ClearField(user.FieldAvatar, field.TypeString)
+	}
 	if value, ok := uuo.mutation.Disabled(); ok {
 		_spec.SetField(user.FieldDisabled, field.TypeBool, value)
-	}
-	if value, ok := uuo.mutation.IdentificationNumber(); ok {
-		_spec.SetField(user.FieldIdentificationNumber, field.TypeString, value)
 	}
 	if value, ok := uuo.mutation.Tier(); ok {
 		_spec.SetField(user.FieldTier, field.TypeInt8, value)
@@ -693,28 +906,28 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 	if value, ok := uuo.mutation.AddedTier(); ok {
 		_spec.AddField(user.FieldTier, field.TypeInt8, value)
 	}
-	if uuo.mutation.UserManagerCleared() {
+	if uuo.mutation.ManagesCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   user.UserManagerTable,
-			Columns: []string{user.UserManagerColumn},
+			Table:   user.ManagesTable,
+			Columns: []string{user.ManagesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(manager.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(manager.FieldID, field.TypeString),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := uuo.mutation.RemovedUserManagerIDs(); len(nodes) > 0 && !uuo.mutation.UserManagerCleared() {
+	if nodes := uuo.mutation.RemovedManagesIDs(); len(nodes) > 0 && !uuo.mutation.ManagesCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   user.UserManagerTable,
-			Columns: []string{user.UserManagerColumn},
+			Table:   user.ManagesTable,
+			Columns: []string{user.ManagesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(manager.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(manager.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {
@@ -722,15 +935,15 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := uuo.mutation.UserManagerIDs(); len(nodes) > 0 {
+	if nodes := uuo.mutation.ManagesIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   user.UserManagerTable,
-			Columns: []string{user.UserManagerColumn},
+			Table:   user.ManagesTable,
+			Columns: []string{user.ManagesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(manager.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(manager.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {

@@ -22,6 +22,48 @@ type BusinessCreate struct {
 	hooks    []Hook
 }
 
+// SetCreatedAt sets the "created_at" field.
+func (bc *BusinessCreate) SetCreatedAt(t time.Time) *BusinessCreate {
+	bc.mutation.SetCreatedAt(t)
+	return bc
+}
+
+// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
+func (bc *BusinessCreate) SetNillableCreatedAt(t *time.Time) *BusinessCreate {
+	if t != nil {
+		bc.SetCreatedAt(*t)
+	}
+	return bc
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (bc *BusinessCreate) SetUpdatedAt(t time.Time) *BusinessCreate {
+	bc.mutation.SetUpdatedAt(t)
+	return bc
+}
+
+// SetNillableUpdatedAt sets the "updated_at" field if the given value is not nil.
+func (bc *BusinessCreate) SetNillableUpdatedAt(t *time.Time) *BusinessCreate {
+	if t != nil {
+		bc.SetUpdatedAt(*t)
+	}
+	return bc
+}
+
+// SetDeletedAt sets the "deleted_at" field.
+func (bc *BusinessCreate) SetDeletedAt(t time.Time) *BusinessCreate {
+	bc.mutation.SetDeletedAt(t)
+	return bc
+}
+
+// SetNillableDeletedAt sets the "deleted_at" field if the given value is not nil.
+func (bc *BusinessCreate) SetNillableDeletedAt(t *time.Time) *BusinessCreate {
+	if t != nil {
+		bc.SetDeletedAt(*t)
+	}
+	return bc
+}
+
 // SetCategory sets the "category" field.
 func (bc *BusinessCreate) SetCategory(s string) *BusinessCreate {
 	bc.mutation.SetCategory(s)
@@ -42,9 +84,17 @@ func (bc *BusinessCreate) SetName(s string) *BusinessCreate {
 	return bc
 }
 
-// SetLogoURL sets the "logo_url" field.
-func (bc *BusinessCreate) SetLogoURL(s string) *BusinessCreate {
-	bc.mutation.SetLogoURL(s)
+// SetLogo sets the "logo" field.
+func (bc *BusinessCreate) SetLogo(s string) *BusinessCreate {
+	bc.mutation.SetLogo(s)
+	return bc
+}
+
+// SetNillableLogo sets the "logo" field if the given value is not nil.
+func (bc *BusinessCreate) SetNillableLogo(s *string) *BusinessCreate {
+	if s != nil {
+		bc.SetLogo(*s)
+	}
 	return bc
 }
 
@@ -57,6 +107,14 @@ func (bc *BusinessCreate) SetEmail(s string) *BusinessCreate {
 // SetWebsite sets the "website" field.
 func (bc *BusinessCreate) SetWebsite(s string) *BusinessCreate {
 	bc.mutation.SetWebsite(s)
+	return bc
+}
+
+// SetNillableWebsite sets the "website" field if the given value is not nil.
+func (bc *BusinessCreate) SetNillableWebsite(s *string) *BusinessCreate {
+	if s != nil {
+		bc.SetWebsite(*s)
+	}
 	return bc
 }
 
@@ -94,6 +152,14 @@ func (bc *BusinessCreate) SetDisableReason(s string) *BusinessCreate {
 	return bc
 }
 
+// SetNillableDisableReason sets the "disable_reason" field if the given value is not nil.
+func (bc *BusinessCreate) SetNillableDisableReason(s *string) *BusinessCreate {
+	if s != nil {
+		bc.SetDisableReason(*s)
+	}
+	return bc
+}
+
 // SetVerified sets the "verified" field.
 func (bc *BusinessCreate) SetVerified(b bool) *BusinessCreate {
 	bc.mutation.SetVerified(b)
@@ -114,48 +180,56 @@ func (bc *BusinessCreate) SetVerifiedAt(t time.Time) *BusinessCreate {
 	return bc
 }
 
-// SetCreatedAt sets the "created_at" field.
-func (bc *BusinessCreate) SetCreatedAt(t time.Time) *BusinessCreate {
-	bc.mutation.SetCreatedAt(t)
-	return bc
-}
-
-// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
-func (bc *BusinessCreate) SetNillableCreatedAt(t *time.Time) *BusinessCreate {
+// SetNillableVerifiedAt sets the "verified_at" field if the given value is not nil.
+func (bc *BusinessCreate) SetNillableVerifiedAt(t *time.Time) *BusinessCreate {
 	if t != nil {
-		bc.SetCreatedAt(*t)
+		bc.SetVerifiedAt(*t)
 	}
 	return bc
 }
 
-// AddBusinessSocialIDs adds the "business_social" edge to the Social entity by IDs.
-func (bc *BusinessCreate) AddBusinessSocialIDs(ids ...int) *BusinessCreate {
-	bc.mutation.AddBusinessSocialIDs(ids...)
+// SetID sets the "id" field.
+func (bc *BusinessCreate) SetID(s string) *BusinessCreate {
+	bc.mutation.SetID(s)
 	return bc
 }
 
-// AddBusinessSocial adds the "business_social" edges to the Social entity.
-func (bc *BusinessCreate) AddBusinessSocial(s ...*Social) *BusinessCreate {
-	ids := make([]int, len(s))
+// SetNillableID sets the "id" field if the given value is not nil.
+func (bc *BusinessCreate) SetNillableID(s *string) *BusinessCreate {
+	if s != nil {
+		bc.SetID(*s)
+	}
+	return bc
+}
+
+// AddSocialIDs adds the "socials" edge to the Social entity by IDs.
+func (bc *BusinessCreate) AddSocialIDs(ids ...string) *BusinessCreate {
+	bc.mutation.AddSocialIDs(ids...)
+	return bc
+}
+
+// AddSocials adds the "socials" edges to the Social entity.
+func (bc *BusinessCreate) AddSocials(s ...*Social) *BusinessCreate {
+	ids := make([]string, len(s))
 	for i := range s {
 		ids[i] = s[i].ID
 	}
-	return bc.AddBusinessSocialIDs(ids...)
+	return bc.AddSocialIDs(ids...)
 }
 
-// AddBusinessManagerIDs adds the "business_manager" edge to the Manager entity by IDs.
-func (bc *BusinessCreate) AddBusinessManagerIDs(ids ...int) *BusinessCreate {
-	bc.mutation.AddBusinessManagerIDs(ids...)
+// AddManageIDs adds the "manages" edge to the Manager entity by IDs.
+func (bc *BusinessCreate) AddManageIDs(ids ...string) *BusinessCreate {
+	bc.mutation.AddManageIDs(ids...)
 	return bc
 }
 
-// AddBusinessManager adds the "business_manager" edges to the Manager entity.
-func (bc *BusinessCreate) AddBusinessManager(m ...*Manager) *BusinessCreate {
-	ids := make([]int, len(m))
+// AddManages adds the "manages" edges to the Manager entity.
+func (bc *BusinessCreate) AddManages(m ...*Manager) *BusinessCreate {
+	ids := make([]string, len(m))
 	for i := range m {
 		ids[i] = m[i].ID
 	}
-	return bc.AddBusinessManagerIDs(ids...)
+	return bc.AddManageIDs(ids...)
 }
 
 // Mutation returns the BusinessMutation object of the builder.
@@ -193,6 +267,14 @@ func (bc *BusinessCreate) ExecX(ctx context.Context) {
 
 // defaults sets the default values of the builder before save.
 func (bc *BusinessCreate) defaults() {
+	if _, ok := bc.mutation.CreatedAt(); !ok {
+		v := business.DefaultCreatedAt()
+		bc.mutation.SetCreatedAt(v)
+	}
+	if _, ok := bc.mutation.UpdatedAt(); !ok {
+		v := business.DefaultUpdatedAt()
+		bc.mutation.SetUpdatedAt(v)
+	}
 	if _, ok := bc.mutation.Category(); !ok {
 		v := business.DefaultCategory
 		bc.mutation.SetCategory(v)
@@ -209,14 +291,20 @@ func (bc *BusinessCreate) defaults() {
 		v := business.DefaultVerified
 		bc.mutation.SetVerified(v)
 	}
-	if _, ok := bc.mutation.CreatedAt(); !ok {
-		v := business.DefaultCreatedAt()
-		bc.mutation.SetCreatedAt(v)
+	if _, ok := bc.mutation.ID(); !ok {
+		v := business.DefaultID()
+		bc.mutation.SetID(v)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
 func (bc *BusinessCreate) check() error {
+	if _, ok := bc.mutation.CreatedAt(); !ok {
+		return &ValidationError{Name: "created_at", err: errors.New(`ent: missing required field "Business.created_at"`)}
+	}
+	if _, ok := bc.mutation.UpdatedAt(); !ok {
+		return &ValidationError{Name: "updated_at", err: errors.New(`ent: missing required field "Business.updated_at"`)}
+	}
 	if _, ok := bc.mutation.Category(); !ok {
 		return &ValidationError{Name: "category", err: errors.New(`ent: missing required field "Business.category"`)}
 	}
@@ -228,9 +316,6 @@ func (bc *BusinessCreate) check() error {
 			return &ValidationError{Name: "name", err: fmt.Errorf(`ent: validator failed for field "Business.name": %w`, err)}
 		}
 	}
-	if _, ok := bc.mutation.LogoURL(); !ok {
-		return &ValidationError{Name: "logo_url", err: errors.New(`ent: missing required field "Business.logo_url"`)}
-	}
 	if _, ok := bc.mutation.Email(); !ok {
 		return &ValidationError{Name: "email", err: errors.New(`ent: missing required field "Business.email"`)}
 	}
@@ -239,26 +324,14 @@ func (bc *BusinessCreate) check() error {
 			return &ValidationError{Name: "email", err: fmt.Errorf(`ent: validator failed for field "Business.email": %w`, err)}
 		}
 	}
-	if _, ok := bc.mutation.Website(); !ok {
-		return &ValidationError{Name: "website", err: errors.New(`ent: missing required field "Business.website"`)}
-	}
 	if _, ok := bc.mutation.Disabled(); !ok {
 		return &ValidationError{Name: "disabled", err: errors.New(`ent: missing required field "Business.disabled"`)}
 	}
 	if _, ok := bc.mutation.DisabledAt(); !ok {
 		return &ValidationError{Name: "disabled_at", err: errors.New(`ent: missing required field "Business.disabled_at"`)}
 	}
-	if _, ok := bc.mutation.DisableReason(); !ok {
-		return &ValidationError{Name: "disable_reason", err: errors.New(`ent: missing required field "Business.disable_reason"`)}
-	}
 	if _, ok := bc.mutation.Verified(); !ok {
 		return &ValidationError{Name: "verified", err: errors.New(`ent: missing required field "Business.verified"`)}
-	}
-	if _, ok := bc.mutation.VerifiedAt(); !ok {
-		return &ValidationError{Name: "verified_at", err: errors.New(`ent: missing required field "Business.verified_at"`)}
-	}
-	if _, ok := bc.mutation.CreatedAt(); !ok {
-		return &ValidationError{Name: "created_at", err: errors.New(`ent: missing required field "Business.created_at"`)}
 	}
 	return nil
 }
@@ -274,8 +347,13 @@ func (bc *BusinessCreate) sqlSave(ctx context.Context) (*Business, error) {
 		}
 		return nil, err
 	}
-	id := _spec.ID.Value.(int64)
-	_node.ID = int(id)
+	if _spec.ID.Value != nil {
+		if id, ok := _spec.ID.Value.(string); ok {
+			_node.ID = id
+		} else {
+			return nil, fmt.Errorf("unexpected Business.ID type: %T", _spec.ID.Value)
+		}
+	}
 	bc.mutation.id = &_node.ID
 	bc.mutation.done = true
 	return _node, nil
@@ -284,8 +362,24 @@ func (bc *BusinessCreate) sqlSave(ctx context.Context) (*Business, error) {
 func (bc *BusinessCreate) createSpec() (*Business, *sqlgraph.CreateSpec) {
 	var (
 		_node = &Business{config: bc.config}
-		_spec = sqlgraph.NewCreateSpec(business.Table, sqlgraph.NewFieldSpec(business.FieldID, field.TypeInt))
+		_spec = sqlgraph.NewCreateSpec(business.Table, sqlgraph.NewFieldSpec(business.FieldID, field.TypeString))
 	)
+	if id, ok := bc.mutation.ID(); ok {
+		_node.ID = id
+		_spec.ID.Value = id
+	}
+	if value, ok := bc.mutation.CreatedAt(); ok {
+		_spec.SetField(business.FieldCreatedAt, field.TypeTime, value)
+		_node.CreatedAt = value
+	}
+	if value, ok := bc.mutation.UpdatedAt(); ok {
+		_spec.SetField(business.FieldUpdatedAt, field.TypeTime, value)
+		_node.UpdatedAt = value
+	}
+	if value, ok := bc.mutation.DeletedAt(); ok {
+		_spec.SetField(business.FieldDeletedAt, field.TypeTime, value)
+		_node.DeletedAt = &value
+	}
 	if value, ok := bc.mutation.Category(); ok {
 		_spec.SetField(business.FieldCategory, field.TypeString, value)
 		_node.Category = value
@@ -294,9 +388,9 @@ func (bc *BusinessCreate) createSpec() (*Business, *sqlgraph.CreateSpec) {
 		_spec.SetField(business.FieldName, field.TypeString, value)
 		_node.Name = value
 	}
-	if value, ok := bc.mutation.LogoURL(); ok {
-		_spec.SetField(business.FieldLogoURL, field.TypeString, value)
-		_node.LogoURL = &value
+	if value, ok := bc.mutation.Logo(); ok {
+		_spec.SetField(business.FieldLogo, field.TypeString, value)
+		_node.Logo = value
 	}
 	if value, ok := bc.mutation.Email(); ok {
 		_spec.SetField(business.FieldEmail, field.TypeString, value)
@@ -304,7 +398,7 @@ func (bc *BusinessCreate) createSpec() (*Business, *sqlgraph.CreateSpec) {
 	}
 	if value, ok := bc.mutation.Website(); ok {
 		_spec.SetField(business.FieldWebsite, field.TypeString, value)
-		_node.Website = &value
+		_node.Website = value
 	}
 	if value, ok := bc.mutation.Disabled(); ok {
 		_spec.SetField(business.FieldDisabled, field.TypeBool, value)
@@ -316,7 +410,7 @@ func (bc *BusinessCreate) createSpec() (*Business, *sqlgraph.CreateSpec) {
 	}
 	if value, ok := bc.mutation.DisableReason(); ok {
 		_spec.SetField(business.FieldDisableReason, field.TypeString, value)
-		_node.DisableReason = &value
+		_node.DisableReason = value
 	}
 	if value, ok := bc.mutation.Verified(); ok {
 		_spec.SetField(business.FieldVerified, field.TypeBool, value)
@@ -324,21 +418,17 @@ func (bc *BusinessCreate) createSpec() (*Business, *sqlgraph.CreateSpec) {
 	}
 	if value, ok := bc.mutation.VerifiedAt(); ok {
 		_spec.SetField(business.FieldVerifiedAt, field.TypeTime, value)
-		_node.VerifiedAt = &value
+		_node.VerifiedAt = value
 	}
-	if value, ok := bc.mutation.CreatedAt(); ok {
-		_spec.SetField(business.FieldCreatedAt, field.TypeTime, value)
-		_node.CreatedAt = value
-	}
-	if nodes := bc.mutation.BusinessSocialIDs(); len(nodes) > 0 {
+	if nodes := bc.mutation.SocialsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   business.BusinessSocialTable,
-			Columns: []string{business.BusinessSocialColumn},
+			Table:   business.SocialsTable,
+			Columns: []string{business.SocialsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(social.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(social.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {
@@ -346,15 +436,15 @@ func (bc *BusinessCreate) createSpec() (*Business, *sqlgraph.CreateSpec) {
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := bc.mutation.BusinessManagerIDs(); len(nodes) > 0 {
+	if nodes := bc.mutation.ManagesIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   business.BusinessManagerTable,
-			Columns: []string{business.BusinessManagerColumn},
+			Table:   business.ManagesTable,
+			Columns: []string{business.ManagesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(manager.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(manager.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {
@@ -410,10 +500,6 @@ func (bcb *BusinessCreateBulk) Save(ctx context.Context) ([]*Business, error) {
 					return nil, err
 				}
 				mutation.id = &nodes[i].ID
-				if specs[i].ID.Value != nil {
-					id := specs[i].ID.Value.(int64)
-					nodes[i].ID = int(id)
-				}
 				mutation.done = true
 				return nodes[i], nil
 			})

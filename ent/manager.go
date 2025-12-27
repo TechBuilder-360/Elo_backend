@@ -18,56 +18,60 @@ import (
 type Manager struct {
 	config `json:"-"`
 	// ID of the ent.
-	ID int `json:"id,omitempty"`
+	ID string `json:"id,omitempty"`
 	// CreatedAt holds the value of the "created_at" field.
 	CreatedAt time.Time `json:"created_at,omitempty"`
-	// Position holds the value of the "position" field.
-	Position string `json:"position,omitempty"`
-	// Diasbled holds the value of the "diasbled" field.
-	Diasbled bool `json:"diasbled,omitempty"`
+	// UpdatedAt holds the value of the "updated_at" field.
+	UpdatedAt time.Time `json:"updated_at,omitempty"`
+	// DeletedAt holds the value of the "deleted_at" field.
+	DeletedAt *time.Time `json:"deleted_at,omitempty"`
+	// UserID holds the value of the "user_id" field.
+	UserID string `json:"user_id,omitempty"`
+	// BusinessID holds the value of the "business_id" field.
+	BusinessID string `json:"business_id,omitempty"`
+	// Disabled holds the value of the "disabled" field.
+	Disabled bool `json:"disabled,omitempty"`
 	// DisableReason holds the value of the "disable_reason" field.
-	DisableReason *string `json:"disable_reason,omitempty"`
+	DisableReason string `json:"disable_reason,omitempty"`
 	// DisabledAt holds the value of the "disabled_at" field.
-	DisabledAt *time.Time `json:"disabled_at,omitempty"`
+	DisabledAt time.Time `json:"disabled_at,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the ManagerQuery when eager-loading is set.
-	Edges                     ManagerEdges `json:"edges"`
-	business_business_manager *int
-	user_user_manager         *int
-	selectValues              sql.SelectValues
+	Edges        ManagerEdges `json:"edges"`
+	selectValues sql.SelectValues
 }
 
 // ManagerEdges holds the relations/edges for other nodes in the graph.
 type ManagerEdges struct {
-	// BusinessUser holds the value of the business_user edge.
-	BusinessUser *Business `json:"business_user,omitempty"`
-	// UserManager holds the value of the user_manager edge.
-	UserManager *User `json:"user_manager,omitempty"`
+	// Business holds the value of the business edge.
+	Business *Business `json:"business,omitempty"`
+	// User holds the value of the user edge.
+	User *User `json:"user,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
 	loadedTypes [2]bool
 }
 
-// BusinessUserOrErr returns the BusinessUser value or an error if the edge
+// BusinessOrErr returns the Business value or an error if the edge
 // was not loaded in eager-loading, or loaded but was not found.
-func (e ManagerEdges) BusinessUserOrErr() (*Business, error) {
-	if e.BusinessUser != nil {
-		return e.BusinessUser, nil
+func (e ManagerEdges) BusinessOrErr() (*Business, error) {
+	if e.Business != nil {
+		return e.Business, nil
 	} else if e.loadedTypes[0] {
 		return nil, &NotFoundError{label: business.Label}
 	}
-	return nil, &NotLoadedError{edge: "business_user"}
+	return nil, &NotLoadedError{edge: "business"}
 }
 
-// UserManagerOrErr returns the UserManager value or an error if the edge
+// UserOrErr returns the User value or an error if the edge
 // was not loaded in eager-loading, or loaded but was not found.
-func (e ManagerEdges) UserManagerOrErr() (*User, error) {
-	if e.UserManager != nil {
-		return e.UserManager, nil
+func (e ManagerEdges) UserOrErr() (*User, error) {
+	if e.User != nil {
+		return e.User, nil
 	} else if e.loadedTypes[1] {
 		return nil, &NotFoundError{label: user.Label}
 	}
-	return nil, &NotLoadedError{edge: "user_manager"}
+	return nil, &NotLoadedError{edge: "user"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -75,18 +79,12 @@ func (*Manager) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case manager.FieldDiasbled:
+		case manager.FieldDisabled:
 			values[i] = new(sql.NullBool)
-		case manager.FieldID:
-			values[i] = new(sql.NullInt64)
-		case manager.FieldPosition, manager.FieldDisableReason:
+		case manager.FieldID, manager.FieldUserID, manager.FieldBusinessID, manager.FieldDisableReason:
 			values[i] = new(sql.NullString)
-		case manager.FieldCreatedAt, manager.FieldDisabledAt:
+		case manager.FieldCreatedAt, manager.FieldUpdatedAt, manager.FieldDeletedAt, manager.FieldDisabledAt:
 			values[i] = new(sql.NullTime)
-		case manager.ForeignKeys[0]: // business_business_manager
-			values[i] = new(sql.NullInt64)
-		case manager.ForeignKeys[1]: // user_user_manager
-			values[i] = new(sql.NullInt64)
 		default:
 			values[i] = new(sql.UnknownType)
 		}
@@ -103,56 +101,59 @@ func (m *Manager) assignValues(columns []string, values []any) error {
 	for i := range columns {
 		switch columns[i] {
 		case manager.FieldID:
-			value, ok := values[i].(*sql.NullInt64)
-			if !ok {
-				return fmt.Errorf("unexpected type %T for field id", value)
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field id", values[i])
+			} else if value.Valid {
+				m.ID = value.String
 			}
-			m.ID = int(value.Int64)
 		case manager.FieldCreatedAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field created_at", values[i])
 			} else if value.Valid {
 				m.CreatedAt = value.Time
 			}
-		case manager.FieldPosition:
-			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field position", values[i])
+		case manager.FieldUpdatedAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field updated_at", values[i])
 			} else if value.Valid {
-				m.Position = value.String
+				m.UpdatedAt = value.Time
 			}
-		case manager.FieldDiasbled:
-			if value, ok := values[i].(*sql.NullBool); !ok {
-				return fmt.Errorf("unexpected type %T for field diasbled", values[i])
+		case manager.FieldDeletedAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field deleted_at", values[i])
 			} else if value.Valid {
-				m.Diasbled = value.Bool
+				m.DeletedAt = new(time.Time)
+				*m.DeletedAt = value.Time
+			}
+		case manager.FieldUserID:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field user_id", values[i])
+			} else if value.Valid {
+				m.UserID = value.String
+			}
+		case manager.FieldBusinessID:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field business_id", values[i])
+			} else if value.Valid {
+				m.BusinessID = value.String
+			}
+		case manager.FieldDisabled:
+			if value, ok := values[i].(*sql.NullBool); !ok {
+				return fmt.Errorf("unexpected type %T for field disabled", values[i])
+			} else if value.Valid {
+				m.Disabled = value.Bool
 			}
 		case manager.FieldDisableReason:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field disable_reason", values[i])
 			} else if value.Valid {
-				m.DisableReason = new(string)
-				*m.DisableReason = value.String
+				m.DisableReason = value.String
 			}
 		case manager.FieldDisabledAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field disabled_at", values[i])
 			} else if value.Valid {
-				m.DisabledAt = new(time.Time)
-				*m.DisabledAt = value.Time
-			}
-		case manager.ForeignKeys[0]:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for edge-field business_business_manager", value)
-			} else if value.Valid {
-				m.business_business_manager = new(int)
-				*m.business_business_manager = int(value.Int64)
-			}
-		case manager.ForeignKeys[1]:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for edge-field user_user_manager", value)
-			} else if value.Valid {
-				m.user_user_manager = new(int)
-				*m.user_user_manager = int(value.Int64)
+				m.DisabledAt = value.Time
 			}
 		default:
 			m.selectValues.Set(columns[i], values[i])
@@ -167,14 +168,14 @@ func (m *Manager) Value(name string) (ent.Value, error) {
 	return m.selectValues.Get(name)
 }
 
-// QueryBusinessUser queries the "business_user" edge of the Manager entity.
-func (m *Manager) QueryBusinessUser() *BusinessQuery {
-	return NewManagerClient(m.config).QueryBusinessUser(m)
+// QueryBusiness queries the "business" edge of the Manager entity.
+func (m *Manager) QueryBusiness() *BusinessQuery {
+	return NewManagerClient(m.config).QueryBusiness(m)
 }
 
-// QueryUserManager queries the "user_manager" edge of the Manager entity.
-func (m *Manager) QueryUserManager() *UserQuery {
-	return NewManagerClient(m.config).QueryUserManager(m)
+// QueryUser queries the "user" edge of the Manager entity.
+func (m *Manager) QueryUser() *UserQuery {
+	return NewManagerClient(m.config).QueryUser(m)
 }
 
 // Update returns a builder for updating this Manager.
@@ -203,21 +204,28 @@ func (m *Manager) String() string {
 	builder.WriteString("created_at=")
 	builder.WriteString(m.CreatedAt.Format(time.ANSIC))
 	builder.WriteString(", ")
-	builder.WriteString("position=")
-	builder.WriteString(m.Position)
+	builder.WriteString("updated_at=")
+	builder.WriteString(m.UpdatedAt.Format(time.ANSIC))
 	builder.WriteString(", ")
-	builder.WriteString("diasbled=")
-	builder.WriteString(fmt.Sprintf("%v", m.Diasbled))
-	builder.WriteString(", ")
-	if v := m.DisableReason; v != nil {
-		builder.WriteString("disable_reason=")
-		builder.WriteString(*v)
-	}
-	builder.WriteString(", ")
-	if v := m.DisabledAt; v != nil {
-		builder.WriteString("disabled_at=")
+	if v := m.DeletedAt; v != nil {
+		builder.WriteString("deleted_at=")
 		builder.WriteString(v.Format(time.ANSIC))
 	}
+	builder.WriteString(", ")
+	builder.WriteString("user_id=")
+	builder.WriteString(m.UserID)
+	builder.WriteString(", ")
+	builder.WriteString("business_id=")
+	builder.WriteString(m.BusinessID)
+	builder.WriteString(", ")
+	builder.WriteString("disabled=")
+	builder.WriteString(fmt.Sprintf("%v", m.Disabled))
+	builder.WriteString(", ")
+	builder.WriteString("disable_reason=")
+	builder.WriteString(m.DisableReason)
+	builder.WriteString(", ")
+	builder.WriteString("disabled_at=")
+	builder.WriteString(m.DisabledAt.Format(time.ANSIC))
 	builder.WriteByte(')')
 	return builder.String()
 }

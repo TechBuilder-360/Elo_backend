@@ -10,18 +10,20 @@ import (
 var (
 	// BusinessesColumns holds the columns for the "businesses" table.
 	BusinessesColumns = []*schema.Column{
-		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "id", Type: field.TypeString},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "deleted_at", Type: field.TypeTime, Nullable: true},
 		{Name: "category", Type: field.TypeString, Default: "others"},
 		{Name: "name", Type: field.TypeString, Unique: true},
-		{Name: "logo_url", Type: field.TypeString},
+		{Name: "logo", Type: field.TypeString, Nullable: true},
 		{Name: "email", Type: field.TypeString},
-		{Name: "website", Type: field.TypeString},
+		{Name: "website", Type: field.TypeString, Nullable: true},
 		{Name: "disabled", Type: field.TypeBool, Default: true},
 		{Name: "disabled_at", Type: field.TypeTime},
-		{Name: "disable_reason", Type: field.TypeString},
+		{Name: "disable_reason", Type: field.TypeString, Nullable: true},
 		{Name: "verified", Type: field.TypeBool, Default: false},
-		{Name: "verified_at", Type: field.TypeTime},
-		{Name: "created_at", Type: field.TypeTime},
+		{Name: "verified_at", Type: field.TypeTime, Nullable: true},
 	}
 	// BusinessesTable holds the schema information for the "businesses" table.
 	BusinessesTable = &schema.Table{
@@ -31,14 +33,15 @@ var (
 	}
 	// ManagersColumns holds the columns for the "managers" table.
 	ManagersColumns = []*schema.Column{
-		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "id", Type: field.TypeString},
 		{Name: "created_at", Type: field.TypeTime},
-		{Name: "position", Type: field.TypeString},
-		{Name: "diasbled", Type: field.TypeBool, Default: false},
-		{Name: "disable_reason", Type: field.TypeString},
-		{Name: "disabled_at", Type: field.TypeTime},
-		{Name: "business_business_manager", Type: field.TypeInt},
-		{Name: "user_user_manager", Type: field.TypeInt},
+		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "deleted_at", Type: field.TypeTime, Nullable: true},
+		{Name: "disabled", Type: field.TypeBool, Default: false},
+		{Name: "disable_reason", Type: field.TypeString, Nullable: true},
+		{Name: "disabled_at", Type: field.TypeTime, Nullable: true},
+		{Name: "business_id", Type: field.TypeString},
+		{Name: "user_id", Type: field.TypeString},
 	}
 	// ManagersTable holds the schema information for the "managers" table.
 	ManagersTable = &schema.Table{
@@ -47,26 +50,58 @@ var (
 		PrimaryKey: []*schema.Column{ManagersColumns[0]},
 		ForeignKeys: []*schema.ForeignKey{
 			{
-				Symbol:     "managers_businesses_business_manager",
-				Columns:    []*schema.Column{ManagersColumns[6]},
+				Symbol:     "managers_businesses_manages",
+				Columns:    []*schema.Column{ManagersColumns[7]},
 				RefColumns: []*schema.Column{BusinessesColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
 			{
-				Symbol:     "managers_users_user_manager",
-				Columns:    []*schema.Column{ManagersColumns[7]},
+				Symbol:     "managers_users_manages",
+				Columns:    []*schema.Column{ManagersColumns[8]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
 		},
 	}
+	// PermissionsColumns holds the columns for the "permissions" table.
+	PermissionsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeString},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "deleted_at", Type: field.TypeTime, Nullable: true},
+		{Name: "name", Type: field.TypeString},
+		{Name: "description", Type: field.TypeString},
+	}
+	// PermissionsTable holds the schema information for the "permissions" table.
+	PermissionsTable = &schema.Table{
+		Name:       "permissions",
+		Columns:    PermissionsColumns,
+		PrimaryKey: []*schema.Column{PermissionsColumns[0]},
+	}
+	// RolesColumns holds the columns for the "roles" table.
+	RolesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeString},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "deleted_at", Type: field.TypeTime, Nullable: true},
+		{Name: "name", Type: field.TypeString},
+		{Name: "description", Type: field.TypeString},
+	}
+	// RolesTable holds the schema information for the "roles" table.
+	RolesTable = &schema.Table{
+		Name:       "roles",
+		Columns:    RolesColumns,
+		PrimaryKey: []*schema.Column{RolesColumns[0]},
+	}
 	// SocialsColumns holds the columns for the "socials" table.
 	SocialsColumns = []*schema.Column{
-		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "id", Type: field.TypeString},
 		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "deleted_at", Type: field.TypeTime, Nullable: true},
 		{Name: "name", Type: field.TypeString},
 		{Name: "url", Type: field.TypeString},
-		{Name: "business_business_social", Type: field.TypeInt},
+		{Name: "business_id", Type: field.TypeString},
 	}
 	// SocialsTable holds the schema information for the "socials" table.
 	SocialsTable = &schema.Table{
@@ -75,8 +110,8 @@ var (
 		PrimaryKey: []*schema.Column{SocialsColumns[0]},
 		ForeignKeys: []*schema.ForeignKey{
 			{
-				Symbol:     "socials_businesses_business_social",
-				Columns:    []*schema.Column{SocialsColumns[4]},
+				Symbol:     "socials_businesses_socials",
+				Columns:    []*schema.Column{SocialsColumns[6]},
 				RefColumns: []*schema.Column{BusinessesColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
@@ -84,18 +119,21 @@ var (
 	}
 	// UsersColumns holds the columns for the "users" table.
 	UsersColumns = []*schema.Column{
-		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "id", Type: field.TypeString},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "deleted_at", Type: field.TypeTime, Nullable: true},
 		{Name: "first_name", Type: field.TypeString},
 		{Name: "last_name", Type: field.TypeString},
-		{Name: "middle_name", Type: field.TypeString},
-		{Name: "display_name", Type: field.TypeString},
+		{Name: "middle_name", Type: field.TypeString, Nullable: true},
+		{Name: "display_name", Type: field.TypeString, Nullable: true},
 		{Name: "email_address", Type: field.TypeString, Unique: true},
-		{Name: "phone_number", Type: field.TypeString},
-		{Name: "avatar", Type: field.TypeString},
+		{Name: "email_verified", Type: field.TypeBool, Default: false},
+		{Name: "email_verified_at", Type: field.TypeTime, Nullable: true},
+		{Name: "phone_number", Type: field.TypeString, Nullable: true},
+		{Name: "avatar", Type: field.TypeString, Nullable: true},
 		{Name: "disabled", Type: field.TypeBool, Default: false},
-		{Name: "identification_number", Type: field.TypeString},
 		{Name: "tier", Type: field.TypeInt8, Default: 0},
-		{Name: "created_at", Type: field.TypeTime},
 	}
 	// UsersTable holds the schema information for the "users" table.
 	UsersTable = &schema.Table{
@@ -103,12 +141,40 @@ var (
 		Columns:    UsersColumns,
 		PrimaryKey: []*schema.Column{UsersColumns[0]},
 	}
+	// RolePermissionsColumns holds the columns for the "role_permissions" table.
+	RolePermissionsColumns = []*schema.Column{
+		{Name: "role_id", Type: field.TypeString},
+		{Name: "permission_id", Type: field.TypeString},
+	}
+	// RolePermissionsTable holds the schema information for the "role_permissions" table.
+	RolePermissionsTable = &schema.Table{
+		Name:       "role_permissions",
+		Columns:    RolePermissionsColumns,
+		PrimaryKey: []*schema.Column{RolePermissionsColumns[0], RolePermissionsColumns[1]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "role_permissions_role_id",
+				Columns:    []*schema.Column{RolePermissionsColumns[0]},
+				RefColumns: []*schema.Column{RolesColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+			{
+				Symbol:     "role_permissions_permission_id",
+				Columns:    []*schema.Column{RolePermissionsColumns[1]},
+				RefColumns: []*schema.Column{PermissionsColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+		},
+	}
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
 		BusinessesTable,
 		ManagersTable,
+		PermissionsTable,
+		RolesTable,
 		SocialsTable,
 		UsersTable,
+		RolePermissionsTable,
 	}
 )
 
@@ -116,4 +182,6 @@ func init() {
 	ManagersTable.ForeignKeys[0].RefTable = BusinessesTable
 	ManagersTable.ForeignKeys[1].RefTable = UsersTable
 	SocialsTable.ForeignKeys[0].RefTable = BusinessesTable
+	RolePermissionsTable.ForeignKeys[0].RefTable = RolesTable
+	RolePermissionsTable.ForeignKeys[1].RefTable = PermissionsTable
 }

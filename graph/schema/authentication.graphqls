@@ -1,0 +1,41 @@
+
+scalar Int64
+
+input Registration {
+  display_name: String
+  email_address: String!
+  first_name: String!
+  last_name: String!
+  phone_number: String
+  avatar: String
+}
+
+type RegistrationResponse {
+  user_id: String!
+}
+
+input Login {
+  otp: String!
+  identifier: String!
+}
+
+type LoginResponse {
+  access_token: String!
+  expire_at: Int64!
+}
+
+input RequestOTP {
+  email_address: String!
+}
+
+type OTPResponse {
+  Identifier: String!
+}
+
+type Mutation {
+  registration(input: Registration!): RegistrationResponse!
+  login(input: Login!): LoginResponse!
+  requestOtp(input: RequestOTP): OTPResponse!
+}
+
+

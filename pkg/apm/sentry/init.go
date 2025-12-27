@@ -29,9 +29,9 @@ func initClientOpt() {
 	client = sentry.ClientOptions{
 		Dsn:              conf.SentryURL,
 		TracesSampleRate: 0.5,
-		Debug:            !configuration.Instance.IsProduction(),
+		Debug:            !configuration.IsProduction(),
 		AttachStacktrace: true,
-		EnableTracing:    configuration.Instance.IsProduction(),
+		EnableTracing:    configuration.IsProduction(),
 	}
 }
 
