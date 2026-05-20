@@ -27,12 +27,16 @@ type Business struct {
 	Category string `json:"category,omitempty"`
 	// Name holds the value of the "name" field.
 	Name string `json:"name,omitempty"`
+	// About holds the value of the "about" field.
+	About string `json:"about,omitempty"`
 	// Logo holds the value of the "logo" field.
 	Logo string `json:"logo,omitempty"`
 	// Email holds the value of the "email" field.
 	Email string `json:"email,omitempty"`
 	// Website holds the value of the "website" field.
 	Website string `json:"website,omitempty"`
+	// Active holds the value of the "active" field.
+	Active bool `json:"active,omitempty"`
 	// Disabled holds the value of the "disabled" field.
 	Disabled bool `json:"disabled,omitempty"`
 	// DisabledAt holds the value of the "disabled_at" field.
@@ -53,11 +57,13 @@ type Business struct {
 type BusinessEdges struct {
 	// Socials holds the value of the socials edge.
 	Socials []*Social `json:"socials,omitempty"`
+	// Services holds the value of the services edge.
+	Services []*BusinessServices `json:"services,omitempty"`
 	// Manages holds the value of the manages edge.
 	Manages []*Manager `json:"manages,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [2]bool
+	loadedTypes [3]bool
 }
 
 // SocialsOrErr returns the Socials value or an error if the edge
@@ -69,10 +75,19 @@ func (e BusinessEdges) SocialsOrErr() ([]*Social, error) {
 	return nil, &NotLoadedError{edge: "socials"}
 }
 
+// ServicesOrErr returns the Services value or an error if the edge
+// was not loaded in eager-loading.
+func (e BusinessEdges) ServicesOrErr() ([]*BusinessServices, error) {
+	if e.loadedTypes[1] {
+		return e.Services, nil
+	}
+	return nil, &NotLoadedError{edge: "services"}
+}
+
 // ManagesOrErr returns the Manages value or an error if the edge
 // was not loaded in eager-loading.
 func (e BusinessEdges) ManagesOrErr() ([]*Manager, error) {
-	if e.loadedTypes[1] {
+	if e.loadedTypes[2] {
 		return e.Manages, nil
 	}
 	return nil, &NotLoadedError{edge: "manages"}
@@ -83,9 +98,9 @@ func (*Business) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case business.FieldDisabled, business.FieldVerified:
+		case business.FieldActive, business.FieldDisabled, business.FieldVerified:
 			values[i] = new(sql.NullBool)
-		case business.FieldID, business.FieldCategory, business.FieldName, business.FieldLogo, business.FieldEmail, business.FieldWebsite, business.FieldDisableReason:
+		case business.FieldID, business.FieldCategory, business.FieldName, business.FieldAbout, business.FieldLogo, business.FieldEmail, business.FieldWebsite, business.FieldDisableReason:
 			values[i] = new(sql.NullString)
 		case business.FieldCreatedAt, business.FieldUpdatedAt, business.FieldDeletedAt, business.FieldDisabledAt, business.FieldVerifiedAt:
 			values[i] = new(sql.NullTime)
@@ -141,6 +156,12 @@ func (b *Business) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				b.Name = value.String
 			}
+		case business.FieldAbout:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field about", values[i])
+			} else if value.Valid {
+				b.About = value.String
+			}
 		case business.FieldLogo:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field logo", values[i])
@@ -158,6 +179,12 @@ func (b *Business) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field website", values[i])
 			} else if value.Valid {
 				b.Website = value.String
+			}
+		case business.FieldActive:
+			if value, ok := values[i].(*sql.NullBool); !ok {
+				return fmt.Errorf("unexpected type %T for field active", values[i])
+			} else if value.Valid {
+				b.Active = value.Bool
 			}
 		case business.FieldDisabled:
 			if value, ok := values[i].(*sql.NullBool); !ok {
@@ -207,6 +234,11 @@ func (b *Business) QuerySocials() *SocialQuery {
 	return NewBusinessClient(b.config).QuerySocials(b)
 }
 
+// QueryServices queries the "services" edge of the Business entity.
+func (b *Business) QueryServices() *BusinessServicesQuery {
+	return NewBusinessClient(b.config).QueryServices(b)
+}
+
 // QueryManages queries the "manages" edge of the Business entity.
 func (b *Business) QueryManages() *ManagerQuery {
 	return NewBusinessClient(b.config).QueryManages(b)
@@ -252,6 +284,9 @@ func (b *Business) String() string {
 	builder.WriteString("name=")
 	builder.WriteString(b.Name)
 	builder.WriteString(", ")
+	builder.WriteString("about=")
+	builder.WriteString(b.About)
+	builder.WriteString(", ")
 	builder.WriteString("logo=")
 	builder.WriteString(b.Logo)
 	builder.WriteString(", ")
@@ -260,6 +295,9 @@ func (b *Business) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("website=")
 	builder.WriteString(b.Website)
+	builder.WriteString(", ")
+	builder.WriteString("active=")
+	builder.WriteString(fmt.Sprintf("%v", b.Active))
 	builder.WriteString(", ")
 	builder.WriteString("disabled=")
 	builder.WriteString(fmt.Sprintf("%v", b.Disabled))

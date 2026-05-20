@@ -12,6 +12,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/Toflex/directory_v2/ent/business"
+	"github.com/Toflex/directory_v2/ent/businessservices"
 	"github.com/Toflex/directory_v2/ent/manager"
 	"github.com/Toflex/directory_v2/ent/predicate"
 	"github.com/Toflex/directory_v2/ent/social"
@@ -84,6 +85,26 @@ func (bu *BusinessUpdate) SetNillableName(s *string) *BusinessUpdate {
 	return bu
 }
 
+// SetAbout sets the "about" field.
+func (bu *BusinessUpdate) SetAbout(s string) *BusinessUpdate {
+	bu.mutation.SetAbout(s)
+	return bu
+}
+
+// SetNillableAbout sets the "about" field if the given value is not nil.
+func (bu *BusinessUpdate) SetNillableAbout(s *string) *BusinessUpdate {
+	if s != nil {
+		bu.SetAbout(*s)
+	}
+	return bu
+}
+
+// ClearAbout clears the value of the "about" field.
+func (bu *BusinessUpdate) ClearAbout() *BusinessUpdate {
+	bu.mutation.ClearAbout()
+	return bu
+}
+
 // SetLogo sets the "logo" field.
 func (bu *BusinessUpdate) SetLogo(s string) *BusinessUpdate {
 	bu.mutation.SetLogo(s)
@@ -135,6 +156,20 @@ func (bu *BusinessUpdate) SetNillableWebsite(s *string) *BusinessUpdate {
 // ClearWebsite clears the value of the "website" field.
 func (bu *BusinessUpdate) ClearWebsite() *BusinessUpdate {
 	bu.mutation.ClearWebsite()
+	return bu
+}
+
+// SetActive sets the "active" field.
+func (bu *BusinessUpdate) SetActive(b bool) *BusinessUpdate {
+	bu.mutation.SetActive(b)
+	return bu
+}
+
+// SetNillableActive sets the "active" field if the given value is not nil.
+func (bu *BusinessUpdate) SetNillableActive(b *bool) *BusinessUpdate {
+	if b != nil {
+		bu.SetActive(*b)
+	}
 	return bu
 }
 
@@ -235,6 +270,21 @@ func (bu *BusinessUpdate) AddSocials(s ...*Social) *BusinessUpdate {
 	return bu.AddSocialIDs(ids...)
 }
 
+// AddServiceIDs adds the "services" edge to the BusinessServices entity by IDs.
+func (bu *BusinessUpdate) AddServiceIDs(ids ...int) *BusinessUpdate {
+	bu.mutation.AddServiceIDs(ids...)
+	return bu
+}
+
+// AddServices adds the "services" edges to the BusinessServices entity.
+func (bu *BusinessUpdate) AddServices(b ...*BusinessServices) *BusinessUpdate {
+	ids := make([]int, len(b))
+	for i := range b {
+		ids[i] = b[i].ID
+	}
+	return bu.AddServiceIDs(ids...)
+}
+
 // AddManageIDs adds the "manages" edge to the Manager entity by IDs.
 func (bu *BusinessUpdate) AddManageIDs(ids ...string) *BusinessUpdate {
 	bu.mutation.AddManageIDs(ids...)
@@ -274,6 +324,27 @@ func (bu *BusinessUpdate) RemoveSocials(s ...*Social) *BusinessUpdate {
 		ids[i] = s[i].ID
 	}
 	return bu.RemoveSocialIDs(ids...)
+}
+
+// ClearServices clears all "services" edges to the BusinessServices entity.
+func (bu *BusinessUpdate) ClearServices() *BusinessUpdate {
+	bu.mutation.ClearServices()
+	return bu
+}
+
+// RemoveServiceIDs removes the "services" edge to BusinessServices entities by IDs.
+func (bu *BusinessUpdate) RemoveServiceIDs(ids ...int) *BusinessUpdate {
+	bu.mutation.RemoveServiceIDs(ids...)
+	return bu
+}
+
+// RemoveServices removes "services" edges to BusinessServices entities.
+func (bu *BusinessUpdate) RemoveServices(b ...*BusinessServices) *BusinessUpdate {
+	ids := make([]int, len(b))
+	for i := range b {
+		ids[i] = b[i].ID
+	}
+	return bu.RemoveServiceIDs(ids...)
 }
 
 // ClearManages clears all "manages" edges to the Manager entity.
@@ -345,6 +416,11 @@ func (bu *BusinessUpdate) check() error {
 			return &ValidationError{Name: "email", err: fmt.Errorf(`ent: validator failed for field "Business.email": %w`, err)}
 		}
 	}
+	if v, ok := bu.mutation.Website(); ok {
+		if err := business.WebsiteValidator(v); err != nil {
+			return &ValidationError{Name: "website", err: fmt.Errorf(`ent: validator failed for field "Business.website": %w`, err)}
+		}
+	}
 	return nil
 }
 
@@ -375,6 +451,12 @@ func (bu *BusinessUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if value, ok := bu.mutation.Name(); ok {
 		_spec.SetField(business.FieldName, field.TypeString, value)
 	}
+	if value, ok := bu.mutation.About(); ok {
+		_spec.SetField(business.FieldAbout, field.TypeString, value)
+	}
+	if bu.mutation.AboutCleared() {
+		_spec.ClearField(business.FieldAbout, field.TypeString)
+	}
 	if value, ok := bu.mutation.Logo(); ok {
 		_spec.SetField(business.FieldLogo, field.TypeString, value)
 	}
@@ -389,6 +471,9 @@ func (bu *BusinessUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if bu.mutation.WebsiteCleared() {
 		_spec.ClearField(business.FieldWebsite, field.TypeString)
+	}
+	if value, ok := bu.mutation.Active(); ok {
+		_spec.SetField(business.FieldActive, field.TypeBool, value)
 	}
 	if value, ok := bu.mutation.Disabled(); ok {
 		_spec.SetField(business.FieldDisabled, field.TypeBool, value)
@@ -449,6 +534,51 @@ func (bu *BusinessUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(social.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if bu.mutation.ServicesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   business.ServicesTable,
+			Columns: []string{business.ServicesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(businessservices.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := bu.mutation.RemovedServicesIDs(); len(nodes) > 0 && !bu.mutation.ServicesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   business.ServicesTable,
+			Columns: []string{business.ServicesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(businessservices.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := bu.mutation.ServicesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   business.ServicesTable,
+			Columns: []string{business.ServicesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(businessservices.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -575,6 +705,26 @@ func (buo *BusinessUpdateOne) SetNillableName(s *string) *BusinessUpdateOne {
 	return buo
 }
 
+// SetAbout sets the "about" field.
+func (buo *BusinessUpdateOne) SetAbout(s string) *BusinessUpdateOne {
+	buo.mutation.SetAbout(s)
+	return buo
+}
+
+// SetNillableAbout sets the "about" field if the given value is not nil.
+func (buo *BusinessUpdateOne) SetNillableAbout(s *string) *BusinessUpdateOne {
+	if s != nil {
+		buo.SetAbout(*s)
+	}
+	return buo
+}
+
+// ClearAbout clears the value of the "about" field.
+func (buo *BusinessUpdateOne) ClearAbout() *BusinessUpdateOne {
+	buo.mutation.ClearAbout()
+	return buo
+}
+
 // SetLogo sets the "logo" field.
 func (buo *BusinessUpdateOne) SetLogo(s string) *BusinessUpdateOne {
 	buo.mutation.SetLogo(s)
@@ -626,6 +776,20 @@ func (buo *BusinessUpdateOne) SetNillableWebsite(s *string) *BusinessUpdateOne {
 // ClearWebsite clears the value of the "website" field.
 func (buo *BusinessUpdateOne) ClearWebsite() *BusinessUpdateOne {
 	buo.mutation.ClearWebsite()
+	return buo
+}
+
+// SetActive sets the "active" field.
+func (buo *BusinessUpdateOne) SetActive(b bool) *BusinessUpdateOne {
+	buo.mutation.SetActive(b)
+	return buo
+}
+
+// SetNillableActive sets the "active" field if the given value is not nil.
+func (buo *BusinessUpdateOne) SetNillableActive(b *bool) *BusinessUpdateOne {
+	if b != nil {
+		buo.SetActive(*b)
+	}
 	return buo
 }
 
@@ -726,6 +890,21 @@ func (buo *BusinessUpdateOne) AddSocials(s ...*Social) *BusinessUpdateOne {
 	return buo.AddSocialIDs(ids...)
 }
 
+// AddServiceIDs adds the "services" edge to the BusinessServices entity by IDs.
+func (buo *BusinessUpdateOne) AddServiceIDs(ids ...int) *BusinessUpdateOne {
+	buo.mutation.AddServiceIDs(ids...)
+	return buo
+}
+
+// AddServices adds the "services" edges to the BusinessServices entity.
+func (buo *BusinessUpdateOne) AddServices(b ...*BusinessServices) *BusinessUpdateOne {
+	ids := make([]int, len(b))
+	for i := range b {
+		ids[i] = b[i].ID
+	}
+	return buo.AddServiceIDs(ids...)
+}
+
 // AddManageIDs adds the "manages" edge to the Manager entity by IDs.
 func (buo *BusinessUpdateOne) AddManageIDs(ids ...string) *BusinessUpdateOne {
 	buo.mutation.AddManageIDs(ids...)
@@ -765,6 +944,27 @@ func (buo *BusinessUpdateOne) RemoveSocials(s ...*Social) *BusinessUpdateOne {
 		ids[i] = s[i].ID
 	}
 	return buo.RemoveSocialIDs(ids...)
+}
+
+// ClearServices clears all "services" edges to the BusinessServices entity.
+func (buo *BusinessUpdateOne) ClearServices() *BusinessUpdateOne {
+	buo.mutation.ClearServices()
+	return buo
+}
+
+// RemoveServiceIDs removes the "services" edge to BusinessServices entities by IDs.
+func (buo *BusinessUpdateOne) RemoveServiceIDs(ids ...int) *BusinessUpdateOne {
+	buo.mutation.RemoveServiceIDs(ids...)
+	return buo
+}
+
+// RemoveServices removes "services" edges to BusinessServices entities.
+func (buo *BusinessUpdateOne) RemoveServices(b ...*BusinessServices) *BusinessUpdateOne {
+	ids := make([]int, len(b))
+	for i := range b {
+		ids[i] = b[i].ID
+	}
+	return buo.RemoveServiceIDs(ids...)
 }
 
 // ClearManages clears all "manages" edges to the Manager entity.
@@ -849,6 +1049,11 @@ func (buo *BusinessUpdateOne) check() error {
 			return &ValidationError{Name: "email", err: fmt.Errorf(`ent: validator failed for field "Business.email": %w`, err)}
 		}
 	}
+	if v, ok := buo.mutation.Website(); ok {
+		if err := business.WebsiteValidator(v); err != nil {
+			return &ValidationError{Name: "website", err: fmt.Errorf(`ent: validator failed for field "Business.website": %w`, err)}
+		}
+	}
 	return nil
 }
 
@@ -896,6 +1101,12 @@ func (buo *BusinessUpdateOne) sqlSave(ctx context.Context) (_node *Business, err
 	if value, ok := buo.mutation.Name(); ok {
 		_spec.SetField(business.FieldName, field.TypeString, value)
 	}
+	if value, ok := buo.mutation.About(); ok {
+		_spec.SetField(business.FieldAbout, field.TypeString, value)
+	}
+	if buo.mutation.AboutCleared() {
+		_spec.ClearField(business.FieldAbout, field.TypeString)
+	}
 	if value, ok := buo.mutation.Logo(); ok {
 		_spec.SetField(business.FieldLogo, field.TypeString, value)
 	}
@@ -910,6 +1121,9 @@ func (buo *BusinessUpdateOne) sqlSave(ctx context.Context) (_node *Business, err
 	}
 	if buo.mutation.WebsiteCleared() {
 		_spec.ClearField(business.FieldWebsite, field.TypeString)
+	}
+	if value, ok := buo.mutation.Active(); ok {
+		_spec.SetField(business.FieldActive, field.TypeBool, value)
 	}
 	if value, ok := buo.mutation.Disabled(); ok {
 		_spec.SetField(business.FieldDisabled, field.TypeBool, value)
@@ -970,6 +1184,51 @@ func (buo *BusinessUpdateOne) sqlSave(ctx context.Context) (_node *Business, err
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(social.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if buo.mutation.ServicesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   business.ServicesTable,
+			Columns: []string{business.ServicesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(businessservices.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := buo.mutation.RemovedServicesIDs(); len(nodes) > 0 && !buo.mutation.ServicesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   business.ServicesTable,
+			Columns: []string{business.ServicesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(businessservices.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := buo.mutation.ServicesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   business.ServicesTable,
+			Columns: []string{business.ServicesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(businessservices.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {

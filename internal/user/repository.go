@@ -3,26 +3,20 @@ package user
 import (
 	"context"
 
-	"github.com/Toflex/directory_v2/database/database"
+	"github.com/Toflex/directory_v2/ent"
 )
 
-type IUserRepository interface {
+type IRepository interface {
 	GetByID(context.Context, string) (*User, error)
 	GetByEmail(ctx context.Context, email string) (*User, error)
 }
 
-type UserRepository struct {
-	db *database.Client
+type repository struct {
+	db *ent.Client
 }
 
-func NewUserRepository(db *database.Client) IUserRepository {
-	return &UserRepository{
+func NewRepository(db *ent.Client) IRepository {
+	return &repository{
 		db: db,
-	}
-}
-
-func (ur *UserRepository) WithTx(tx *database.Client) IUserRepository {
-	return &UserRepository{
-		db: tx,
 	}
 }

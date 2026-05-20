@@ -41,6 +41,15 @@ type DirectiveRoot struct {
 }
 
 type ComplexityRoot struct {
+	Business struct {
+		About    func(childComplexity int) int
+		Email    func(childComplexity int) int
+		Logo     func(childComplexity int) int
+		Name     func(childComplexity int) int
+		Services func(childComplexity int) int
+		Socials  func(childComplexity int) int
+	}
+
 	LoginResponse struct {
 		AccessToken func(childComplexity int) int
 		ExpireAt    func(childComplexity int) int
@@ -58,11 +67,23 @@ type ComplexityRoot struct {
 	}
 
 	Query struct {
-		GetUser func(childComplexity int) int
+		FindBusiness func(childComplexity int, name *string, service *string, limit *int32) int
+		GetBusiness  func(childComplexity int, id string) int
+		GetUser      func(childComplexity int) int
 	}
 
 	RegistrationResponse struct {
 		UserID func(childComplexity int) int
+	}
+
+	SearchBusiness struct {
+		Logo func(childComplexity int) int
+		Name func(childComplexity int) int
+	}
+
+	Social struct {
+		Name func(childComplexity int) int
+		URL  func(childComplexity int) int
 	}
 
 	User struct {
@@ -89,6 +110,48 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 	ec := executionContext{nil, e, 0, 0, nil}
 	_ = ec
 	switch typeName + "." + field {
+
+	case "Business.about":
+		if e.complexity.Business.About == nil {
+			break
+		}
+
+		return e.complexity.Business.About(childComplexity), true
+
+	case "Business.email":
+		if e.complexity.Business.Email == nil {
+			break
+		}
+
+		return e.complexity.Business.Email(childComplexity), true
+
+	case "Business.logo":
+		if e.complexity.Business.Logo == nil {
+			break
+		}
+
+		return e.complexity.Business.Logo(childComplexity), true
+
+	case "Business.name":
+		if e.complexity.Business.Name == nil {
+			break
+		}
+
+		return e.complexity.Business.Name(childComplexity), true
+
+	case "Business.services":
+		if e.complexity.Business.Services == nil {
+			break
+		}
+
+		return e.complexity.Business.Services(childComplexity), true
+
+	case "Business.socials":
+		if e.complexity.Business.Socials == nil {
+			break
+		}
+
+		return e.complexity.Business.Socials(childComplexity), true
 
 	case "LoginResponse.access_token":
 		if e.complexity.LoginResponse.AccessToken == nil {
@@ -159,6 +222,30 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 
 		return e.complexity.OTPResponse.Identifier(childComplexity), true
 
+	case "Query.findBusiness":
+		if e.complexity.Query.FindBusiness == nil {
+			break
+		}
+
+		args, err := ec.field_Query_findBusiness_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.FindBusiness(childComplexity, args["name"].(*string), args["service"].(*string), args["limit"].(*int32)), true
+
+	case "Query.getBusiness":
+		if e.complexity.Query.GetBusiness == nil {
+			break
+		}
+
+		args, err := ec.field_Query_getBusiness_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.GetBusiness(childComplexity, args["id"].(string)), true
+
 	case "Query.getUser":
 		if e.complexity.Query.GetUser == nil {
 			break
@@ -172,6 +259,34 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.complexity.RegistrationResponse.UserID(childComplexity), true
+
+	case "SearchBusiness.logo":
+		if e.complexity.SearchBusiness.Logo == nil {
+			break
+		}
+
+		return e.complexity.SearchBusiness.Logo(childComplexity), true
+
+	case "SearchBusiness.name":
+		if e.complexity.SearchBusiness.Name == nil {
+			break
+		}
+
+		return e.complexity.SearchBusiness.Name(childComplexity), true
+
+	case "Social.name":
+		if e.complexity.Social.Name == nil {
+			break
+		}
+
+		return e.complexity.Social.Name(childComplexity), true
+
+	case "Social.url":
+		if e.complexity.Social.URL == nil {
+			break
+		}
+
+		return e.complexity.Social.URL(childComplexity), true
 
 	case "User.id":
 		if e.complexity.User.ID == nil {
@@ -296,8 +411,7 @@ func (ec *executionContext) introspectType(name string) (*introspection.Type, er
 }
 
 var sources = []*ast.Source{
-	{Name: "../schema/authentication.graphqls", Input: `
-scalar Int64
+	{Name: "../schema/authentication.graphqls", Input: `scalar Int64
 
 input Registration {
   display_name: String
@@ -306,6 +420,7 @@ input Registration {
   last_name: String!
   phone_number: String
   avatar: String
+  password: String!
 }
 
 type RegistrationResponse {
@@ -324,6 +439,7 @@ type LoginResponse {
 
 input RequestOTP {
   email_address: String!
+  password: String!
 }
 
 type OTPResponse {
@@ -335,8 +451,30 @@ type Mutation {
   login(input: Login!): LoginResponse!
   requestOtp(input: RequestOTP): OTPResponse!
 }
+`, BuiltIn: false},
+	{Name: "../schema/business.graphqls", Input: `type Business {
+    name: String!
+    logo: String
+    email: String
+    about: String
+    services: [String]!
+    socials: [Social]!
+}
 
+type SearchBusiness {
+  name: String!
+  logo: String
+}
 
+type Social {
+    name: String!
+    url: String!
+}
+
+extend type Query {
+  getBusiness(id: String!): Business
+  findBusiness(name: String, service: String, limit: Int=20): [SearchBusiness!]!
+}
 `, BuiltIn: false},
 	{Name: "../schema/user.graphqls", Input: `type User {
   id: String!

@@ -179,16 +179,30 @@ func (uc *UserCreate) SetNillableDisabled(b *bool) *UserCreate {
 	return uc
 }
 
-// SetTier sets the "tier" field.
-func (uc *UserCreate) SetTier(i int8) *UserCreate {
-	uc.mutation.SetTier(i)
+// SetDisableReason sets the "disable_reason" field.
+func (uc *UserCreate) SetDisableReason(b bool) *UserCreate {
+	uc.mutation.SetDisableReason(b)
 	return uc
 }
 
-// SetNillableTier sets the "tier" field if the given value is not nil.
-func (uc *UserCreate) SetNillableTier(i *int8) *UserCreate {
-	if i != nil {
-		uc.SetTier(*i)
+// SetNillableDisableReason sets the "disable_reason" field if the given value is not nil.
+func (uc *UserCreate) SetNillableDisableReason(b *bool) *UserCreate {
+	if b != nil {
+		uc.SetDisableReason(*b)
+	}
+	return uc
+}
+
+// SetVerified sets the "verified" field.
+func (uc *UserCreate) SetVerified(b bool) *UserCreate {
+	uc.mutation.SetVerified(b)
+	return uc
+}
+
+// SetNillableVerified sets the "verified" field if the given value is not nil.
+func (uc *UserCreate) SetNillableVerified(b *bool) *UserCreate {
+	if b != nil {
+		uc.SetVerified(*b)
 	}
 	return uc
 }
@@ -273,9 +287,9 @@ func (uc *UserCreate) defaults() {
 		v := user.DefaultDisabled
 		uc.mutation.SetDisabled(v)
 	}
-	if _, ok := uc.mutation.Tier(); !ok {
-		v := user.DefaultTier
-		uc.mutation.SetTier(v)
+	if _, ok := uc.mutation.Verified(); !ok {
+		v := user.DefaultVerified
+		uc.mutation.SetVerified(v)
 	}
 	if _, ok := uc.mutation.ID(); !ok {
 		v := user.DefaultID()
@@ -326,8 +340,8 @@ func (uc *UserCreate) check() error {
 	if _, ok := uc.mutation.Disabled(); !ok {
 		return &ValidationError{Name: "disabled", err: errors.New(`ent: missing required field "User.disabled"`)}
 	}
-	if _, ok := uc.mutation.Tier(); !ok {
-		return &ValidationError{Name: "tier", err: errors.New(`ent: missing required field "User.tier"`)}
+	if _, ok := uc.mutation.Verified(); !ok {
+		return &ValidationError{Name: "verified", err: errors.New(`ent: missing required field "User.verified"`)}
 	}
 	return nil
 }
@@ -416,9 +430,13 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 		_spec.SetField(user.FieldDisabled, field.TypeBool, value)
 		_node.Disabled = value
 	}
-	if value, ok := uc.mutation.Tier(); ok {
-		_spec.SetField(user.FieldTier, field.TypeInt8, value)
-		_node.Tier = value
+	if value, ok := uc.mutation.DisableReason(); ok {
+		_spec.SetField(user.FieldDisableReason, field.TypeBool, value)
+		_node.DisableReason = &value
+	}
+	if value, ok := uc.mutation.Verified(); ok {
+		_spec.SetField(user.FieldVerified, field.TypeBool, value)
+		_node.Verified = value
 	}
 	if nodes := uc.mutation.ManagesIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{

@@ -9,14 +9,26 @@ import (
 // Business is the predicate function for business builders.
 type Business func(*sql.Selector)
 
+// BusinessFeature is the predicate function for businessfeature builders.
+type BusinessFeature func(*sql.Selector)
+
+// BusinessServices is the predicate function for businessservices builders.
+type BusinessServices func(*sql.Selector)
+
 // Manager is the predicate function for manager builders.
 type Manager func(*sql.Selector)
 
 // Permission is the predicate function for permission builders.
 type Permission func(*sql.Selector)
 
+// Provider is the predicate function for provider builders.
+type Provider func(*sql.Selector)
+
 // Role is the predicate function for role builders.
 type Role func(*sql.Selector)
+
+// Service is the predicate function for service builders.
+type Service func(*sql.Selector)
 
 // Social is the predicate function for social builders.
 type Social func(*sql.Selector)

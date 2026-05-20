@@ -3,7 +3,6 @@ package sentry
 import (
 	"time"
 
-	"github.com/Toflex/directory_v2/cmd/http/runtime"
 	"github.com/Toflex/directory_v2/pkg/configuration"
 	"github.com/Toflex/directory_v2/pkg/log"
 	"github.com/getsentry/sentry-go"
@@ -39,7 +38,7 @@ func ClientOpt() sentry.ClientOptions {
 	return client
 }
 
-func InitializeSentry(l *logrus.Logger) (*sentrylogrus.Hook, error) {
+func InitializeSentry(i do.Injector, l *logrus.Logger) (*sentrylogrus.Hook, error) {
 	initClientOpt()
 
 	if err := sentry.Init(ClientOpt()); err != nil {
@@ -65,7 +64,7 @@ func InitializeSentry(l *logrus.Logger) (*sentrylogrus.Hook, error) {
 		WaitForDelivery: false,
 	})
 
-	engine := do.MustInvoke[*gin.Engine](runtime.Injector)
+	engine := do.MustInvoke[*gin.Engine](i)
 	engine.Use(sentryGin)
 
 	return sentryHook, nil

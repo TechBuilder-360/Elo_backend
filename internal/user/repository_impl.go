@@ -8,8 +8,8 @@ import (
 )
 
 // GetUserByID implements IUserRepository.
-func (ur *UserRepository) GetByID(ctx context.Context, id string) (*User, error) {
-	result, err := ur.db.DBClient.
+func (ur *repository) GetByID(ctx context.Context, id string) (*User, error) {
+	result, err := ur.db.
 		User.
 		Query().
 		Where(user.IDEQ(id)).
@@ -32,10 +32,10 @@ func (ur *UserRepository) GetByID(ctx context.Context, id string) (*User, error)
 }
 
 // GetUserByEmail implements IUserRepository.
-func (ur *UserRepository) GetByEmail(ctx context.Context, email string) (*User, error) {
+func (ur *repository) GetByEmail(ctx context.Context, email string) (*User, error) {
 	var users []*ent.User
 
-	err := ur.db.DBClient.
+	err := ur.db.
 		User.
 		Query().
 		Where(user.EmailAddressEQ(email)).

@@ -6,10 +6,14 @@ import (
 	"time"
 
 	"github.com/Toflex/directory_v2/ent/business"
+	"github.com/Toflex/directory_v2/ent/businessfeature"
+	"github.com/Toflex/directory_v2/ent/businessservices"
 	"github.com/Toflex/directory_v2/ent/manager"
 	"github.com/Toflex/directory_v2/ent/permission"
+	"github.com/Toflex/directory_v2/ent/provider"
 	"github.com/Toflex/directory_v2/ent/role"
 	"github.com/Toflex/directory_v2/ent/schema"
+	"github.com/Toflex/directory_v2/ent/service"
 	"github.com/Toflex/directory_v2/ent/social"
 	"github.com/Toflex/directory_v2/ent/user"
 )
@@ -42,7 +46,7 @@ func init() {
 	// business.NameValidator is a validator for the "name" field. It is called by the builders before save.
 	business.NameValidator = businessDescName.Validators[0].(func(string) error)
 	// businessDescEmail is the schema descriptor for email field.
-	businessDescEmail := businessFields[3].Descriptor()
+	businessDescEmail := businessFields[4].Descriptor()
 	// business.EmailValidator is a validator for the "email" field. It is called by the builders before save.
 	business.EmailValidator = func() func(string) error {
 		validators := businessDescEmail.Validators
@@ -59,22 +63,83 @@ func init() {
 			return nil
 		}
 	}()
+	// businessDescWebsite is the schema descriptor for website field.
+	businessDescWebsite := businessFields[5].Descriptor()
+	// business.WebsiteValidator is a validator for the "website" field. It is called by the builders before save.
+	business.WebsiteValidator = businessDescWebsite.Validators[0].(func(string) error)
+	// businessDescActive is the schema descriptor for active field.
+	businessDescActive := businessFields[6].Descriptor()
+	// business.DefaultActive holds the default value on creation for the active field.
+	business.DefaultActive = businessDescActive.Default.(bool)
 	// businessDescDisabled is the schema descriptor for disabled field.
-	businessDescDisabled := businessFields[5].Descriptor()
+	businessDescDisabled := businessFields[7].Descriptor()
 	// business.DefaultDisabled holds the default value on creation for the disabled field.
 	business.DefaultDisabled = businessDescDisabled.Default.(bool)
 	// businessDescDisabledAt is the schema descriptor for disabled_at field.
-	businessDescDisabledAt := businessFields[6].Descriptor()
+	businessDescDisabledAt := businessFields[8].Descriptor()
 	// business.DefaultDisabledAt holds the default value on creation for the disabled_at field.
 	business.DefaultDisabledAt = businessDescDisabledAt.Default.(func() time.Time)
 	// businessDescVerified is the schema descriptor for verified field.
-	businessDescVerified := businessFields[8].Descriptor()
+	businessDescVerified := businessFields[10].Descriptor()
 	// business.DefaultVerified holds the default value on creation for the verified field.
 	business.DefaultVerified = businessDescVerified.Default.(bool)
 	// businessDescID is the schema descriptor for id field.
 	businessDescID := businessMixinFields0[0].Descriptor()
 	// business.DefaultID holds the default value on creation for the id field.
 	business.DefaultID = businessDescID.Default.(func() string)
+	businessfeatureMixin := schema.BusinessFeature{}.Mixin()
+	businessfeatureMixinFields0 := businessfeatureMixin[0].Fields()
+	_ = businessfeatureMixinFields0
+	businessfeatureFields := schema.BusinessFeature{}.Fields()
+	_ = businessfeatureFields
+	// businessfeatureDescCreatedAt is the schema descriptor for created_at field.
+	businessfeatureDescCreatedAt := businessfeatureMixinFields0[1].Descriptor()
+	// businessfeature.DefaultCreatedAt holds the default value on creation for the created_at field.
+	businessfeature.DefaultCreatedAt = businessfeatureDescCreatedAt.Default.(func() time.Time)
+	// businessfeatureDescUpdatedAt is the schema descriptor for updated_at field.
+	businessfeatureDescUpdatedAt := businessfeatureMixinFields0[2].Descriptor()
+	// businessfeature.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	businessfeature.DefaultUpdatedAt = businessfeatureDescUpdatedAt.Default.(func() time.Time)
+	// businessfeature.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	businessfeature.UpdateDefaultUpdatedAt = businessfeatureDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// businessfeatureDescName is the schema descriptor for name field.
+	businessfeatureDescName := businessfeatureFields[0].Descriptor()
+	// businessfeature.NameValidator is a validator for the "name" field. It is called by the builders before save.
+	businessfeature.NameValidator = businessfeatureDescName.Validators[0].(func(string) error)
+	// businessfeatureDescIdentifier is the schema descriptor for identifier field.
+	businessfeatureDescIdentifier := businessfeatureFields[1].Descriptor()
+	// businessfeature.IdentifierValidator is a validator for the "identifier" field. It is called by the builders before save.
+	businessfeature.IdentifierValidator = businessfeatureDescIdentifier.Validators[0].(func(string) error)
+	// businessfeatureDescRequireSubscription is the schema descriptor for require_subscription field.
+	businessfeatureDescRequireSubscription := businessfeatureFields[2].Descriptor()
+	// businessfeature.DefaultRequireSubscription holds the default value on creation for the require_subscription field.
+	businessfeature.DefaultRequireSubscription = businessfeatureDescRequireSubscription.Default.(bool)
+	// businessfeatureDescActive is the schema descriptor for active field.
+	businessfeatureDescActive := businessfeatureFields[3].Descriptor()
+	// businessfeature.DefaultActive holds the default value on creation for the active field.
+	businessfeature.DefaultActive = businessfeatureDescActive.Default.(bool)
+	// businessfeatureDescMin is the schema descriptor for min field.
+	businessfeatureDescMin := businessfeatureFields[4].Descriptor()
+	// businessfeature.DefaultMin holds the default value on creation for the min field.
+	businessfeature.DefaultMin = businessfeatureDescMin.Default.(int)
+	// businessfeatureDescMax is the schema descriptor for max field.
+	businessfeatureDescMax := businessfeatureFields[5].Descriptor()
+	// businessfeature.DefaultMax holds the default value on creation for the max field.
+	businessfeature.DefaultMax = businessfeatureDescMax.Default.(int)
+	// businessfeatureDescID is the schema descriptor for id field.
+	businessfeatureDescID := businessfeatureMixinFields0[0].Descriptor()
+	// businessfeature.DefaultID holds the default value on creation for the id field.
+	businessfeature.DefaultID = businessfeatureDescID.Default.(func() string)
+	businessservicesFields := schema.BusinessServices{}.Fields()
+	_ = businessservicesFields
+	// businessservicesDescTitle is the schema descriptor for title field.
+	businessservicesDescTitle := businessservicesFields[1].Descriptor()
+	// businessservices.TitleValidator is a validator for the "title" field. It is called by the builders before save.
+	businessservices.TitleValidator = businessservicesDescTitle.Validators[0].(func(string) error)
+	// businessservicesDescDescription is the schema descriptor for description field.
+	businessservicesDescDescription := businessservicesFields[2].Descriptor()
+	// businessservices.DescriptionValidator is a validator for the "description" field. It is called by the builders before save.
+	businessservices.DescriptionValidator = businessservicesDescDescription.Validators[0].(func(string) error)
 	managerMixin := schema.Manager{}.Mixin()
 	managerMixinFields0 := managerMixin[0].Fields()
 	_ = managerMixinFields0
@@ -125,6 +190,16 @@ func init() {
 	permissionDescID := permissionMixinFields0[0].Descriptor()
 	// permission.DefaultID holds the default value on creation for the id field.
 	permission.DefaultID = permissionDescID.Default.(func() string)
+	providerFields := schema.Provider{}.Fields()
+	_ = providerFields
+	// providerDescName is the schema descriptor for name field.
+	providerDescName := providerFields[0].Descriptor()
+	// provider.NameValidator is a validator for the "name" field. It is called by the builders before save.
+	provider.NameValidator = providerDescName.Validators[0].(func(string) error)
+	// providerDescSlug is the schema descriptor for slug field.
+	providerDescSlug := providerFields[1].Descriptor()
+	// provider.SlugValidator is a validator for the "slug" field. It is called by the builders before save.
+	provider.SlugValidator = providerDescSlug.Validators[0].(func(string) error)
 	roleMixin := schema.Role{}.Mixin()
 	roleMixinFields0 := roleMixin[0].Fields()
 	_ = roleMixinFields0
@@ -152,6 +227,53 @@ func init() {
 	roleDescID := roleMixinFields0[0].Descriptor()
 	// role.DefaultID holds the default value on creation for the id field.
 	role.DefaultID = roleDescID.Default.(func() string)
+	serviceMixin := schema.Service{}.Mixin()
+	serviceMixinFields0 := serviceMixin[0].Fields()
+	_ = serviceMixinFields0
+	serviceFields := schema.Service{}.Fields()
+	_ = serviceFields
+	// serviceDescCreatedAt is the schema descriptor for created_at field.
+	serviceDescCreatedAt := serviceMixinFields0[1].Descriptor()
+	// service.DefaultCreatedAt holds the default value on creation for the created_at field.
+	service.DefaultCreatedAt = serviceDescCreatedAt.Default.(func() time.Time)
+	// serviceDescUpdatedAt is the schema descriptor for updated_at field.
+	serviceDescUpdatedAt := serviceMixinFields0[2].Descriptor()
+	// service.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	service.DefaultUpdatedAt = serviceDescUpdatedAt.Default.(func() time.Time)
+	// service.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	service.UpdateDefaultUpdatedAt = serviceDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// serviceDescName is the schema descriptor for name field.
+	serviceDescName := serviceFields[0].Descriptor()
+	// service.NameValidator is a validator for the "name" field. It is called by the builders before save.
+	service.NameValidator = serviceDescName.Validators[0].(func(string) error)
+	// serviceDescIdentifier is the schema descriptor for identifier field.
+	serviceDescIdentifier := serviceFields[1].Descriptor()
+	// service.IdentifierValidator is a validator for the "identifier" field. It is called by the builders before save.
+	service.IdentifierValidator = serviceDescIdentifier.Validators[0].(func(string) error)
+	// serviceDescProvider is the schema descriptor for provider field.
+	serviceDescProvider := serviceFields[2].Descriptor()
+	// service.ProviderValidator is a validator for the "provider" field. It is called by the builders before save.
+	service.ProviderValidator = serviceDescProvider.Validators[0].(func(string) error)
+	// serviceDescRequireSubscription is the schema descriptor for require_subscription field.
+	serviceDescRequireSubscription := serviceFields[3].Descriptor()
+	// service.DefaultRequireSubscription holds the default value on creation for the require_subscription field.
+	service.DefaultRequireSubscription = serviceDescRequireSubscription.Default.(bool)
+	// serviceDescActive is the schema descriptor for active field.
+	serviceDescActive := serviceFields[4].Descriptor()
+	// service.DefaultActive holds the default value on creation for the active field.
+	service.DefaultActive = serviceDescActive.Default.(bool)
+	// serviceDescMin is the schema descriptor for min field.
+	serviceDescMin := serviceFields[5].Descriptor()
+	// service.DefaultMin holds the default value on creation for the min field.
+	service.DefaultMin = serviceDescMin.Default.(int)
+	// serviceDescMax is the schema descriptor for max field.
+	serviceDescMax := serviceFields[6].Descriptor()
+	// service.DefaultMax holds the default value on creation for the max field.
+	service.DefaultMax = serviceDescMax.Default.(int)
+	// serviceDescID is the schema descriptor for id field.
+	serviceDescID := serviceMixinFields0[0].Descriptor()
+	// service.DefaultID holds the default value on creation for the id field.
+	service.DefaultID = serviceDescID.Default.(func() string)
 	socialMixin := schema.Social{}.Mixin()
 	socialMixinFields0 := socialMixin[0].Fields()
 	_ = socialMixinFields0
@@ -232,10 +354,10 @@ func init() {
 	userDescDisabled := userFields[9].Descriptor()
 	// user.DefaultDisabled holds the default value on creation for the disabled field.
 	user.DefaultDisabled = userDescDisabled.Default.(bool)
-	// userDescTier is the schema descriptor for tier field.
-	userDescTier := userFields[10].Descriptor()
-	// user.DefaultTier holds the default value on creation for the tier field.
-	user.DefaultTier = userDescTier.Default.(int8)
+	// userDescVerified is the schema descriptor for verified field.
+	userDescVerified := userFields[11].Descriptor()
+	// user.DefaultVerified holds the default value on creation for the verified field.
+	user.DefaultVerified = userDescVerified.Default.(bool)
 	// userDescID is the schema descriptor for id field.
 	userDescID := userMixinFields0[0].Descriptor()
 	// user.DefaultID holds the default value on creation for the id field.

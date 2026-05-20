@@ -3,7 +3,7 @@ package authentication
 import (
 	"context"
 
-	"github.com/Toflex/directory_v2/database/database"
+	"github.com/Toflex/directory_v2/ent"
 )
 
 type IRepository interface {
@@ -13,10 +13,10 @@ type IRepository interface {
 }
 
 type repository struct {
-	db *database.Client
+	db *ent.Client
 }
 
-func Newrepository(db *database.Client) IRepository {
+func Newrepository(db *ent.Client) IRepository {
 	return &repository{
 		db: db,
 	}

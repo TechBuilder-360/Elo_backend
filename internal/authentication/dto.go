@@ -1,13 +1,15 @@
 package authentication
 
 import (
+	"fmt"
 	"regexp"
 	"strings"
 	"time"
 
 	"github.com/Toflex/directory_v2/ent"
 	"github.com/Toflex/directory_v2/pkg/errors"
-	"github.com/Toflex/directory_v2/pkg/utils"
+	"github.com/Toflex/directory_v2/pkg/log"
+	"github.com/Toflex/directory_v2/pkg/util"
 )
 
 type Registration struct {
@@ -15,6 +17,7 @@ type Registration struct {
 	EmailAddress string  `json:"email_address"`
 	FirstName    string  `json:"first_name"`
 	LastName     string  `json:"last_name"`
+	Password     string  `json:"password"`
 	PhoneNumber  *string `json:"phone_number,omitempty"`
 	Avatar       *string `json:"avatar,omitempty"`
 }
@@ -24,6 +27,7 @@ type Onboarding struct {
 	EmailAddress    string
 	FirstName       string
 	LastName        string
+	Password        string
 	PhoneNumber     *string
 	Avatar          *string
 	EmailVerifiedAt time.Time
@@ -34,18 +38,18 @@ func (r *Registration) Validate() error {
 	re := regexp.MustCompile(`[^a-zA-Z0-9-]`)
 
 	// validate display name field
-	disaplayName := utils.AddressToString(r.DisplayName)
-	if len(disaplayName) == 0 {
-		disaplayName = r.FirstName
+	displayName := util.AddressToString(r.DisplayName)
+	if len(displayName) == 0 {
+		displayName = fmt.Sprintf("%s_%s", r.FirstName, util.RandomString(4))
 	}
 
-	if len(disaplayName) > 10 {
-		disaplayName = disaplayName[:10]
+	if len(displayName) > 10 {
+		displayName = displayName[:10]
 	}
 
 	// validate email field
 	email := r.EmailAddress
-	err := utils.ValidateEmail(email)
+	err := util.ValidateEmail(email)
 	if err != nil {
 		return errors.New(errors.ErrInvalidInput, err.Error())
 	}
@@ -66,7 +70,7 @@ func (r *Registration) Validate() error {
 
 	// validate phone number
 	if r.PhoneNumber == nil {
-		err = utils.IsValidPhoneNumber(utils.AddressToString(r.PhoneNumber))
+		err = util.IsValidPhoneNumber(util.AddressToString(r.PhoneNumber))
 		if err != nil {
 			return errors.New(errors.ErrInvalidInput, err.Error())
 		}
@@ -78,10 +82,23 @@ func (r *Registration) Validate() error {
 		r.Avatar = &avatar
 	}
 
-	r.DisplayName = &disaplayName
+	// password validation
+	isValid, err := util.PasswordStrength(r.Password)
+	if err != nil {
+		log.WithError(err).WithField("email", r.EmailAddress).Error("error: occurred while validating password strength.")
+		return errors.New(errors.ErrFailed, "invalid password")
+	}
+
+	if !isValid {
+		log.WithField("email", r.EmailAddress).Error("error: password does not meet strength requirements.")
+		return errors.New(errors.ErrFailed, "password does not meet strength requirements")
+	}
+
+	r.DisplayName = &displayName
 	r.EmailAddress = email
 	r.FirstName = firstname
 	r.LastName = lastname
+	r.Password = util.EncryptPassword(r.Password)
 
 	return nil
 }
@@ -103,4 +120,25 @@ type CacheOTP struct {
 
 type JWTToken struct {
 	UserID string
+}
+
+type OTPRequest struct {
+	Email    string
+	Password string
+}
+
+func (r *OTPRequest) Validate() error {
+	// validate email field
+	email := r.Email
+	err := util.ValidateEmail(email)
+	if err != nil {
+		return errors.New(errors.ErrInvalidInput, err.Error())
+	}
+
+	r.Email = strings.ToLower(email)
+
+	// password validation
+	r.Password = util.EncryptPassword(r.Password)
+
+	return nil
 }

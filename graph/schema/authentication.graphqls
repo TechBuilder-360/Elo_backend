@@ -1,4 +1,3 @@
-
 scalar Int64
 
 input Registration {
@@ -8,6 +7,7 @@ input Registration {
   last_name: String!
   phone_number: String
   avatar: String
+  password: String!
 }
 
 type RegistrationResponse {
@@ -26,6 +26,7 @@ type LoginResponse {
 
 input RequestOTP {
   email_address: String!
+  password: String!
 }
 
 type OTPResponse {
@@ -37,5 +38,3 @@ type Mutation {
   login(input: Login!): LoginResponse!
   requestOtp(input: RequestOTP): OTPResponse!
 }
-
-

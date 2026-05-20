@@ -6,7 +6,7 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
-	"github.com/Toflex/directory_v2/pkg/utils"
+	"github.com/Toflex/directory_v2/pkg/util"
 )
 
 // Business holds the schema definition for the Business entity.
@@ -25,10 +25,13 @@ func (Business) Fields() []ent.Field {
 	return []ent.Field{
 		field.String("category").Default("others"),
 		field.String("name").Unique().NotEmpty(),
+		field.String("about").Optional(),
 		field.String("logo").Optional(),
 		field.String("email").NotEmpty().
-			Validate(utils.ValidateEmail),
-		field.String("website").Optional(),
+			Validate(util.ValidateEmail),
+		field.String("website").Optional().
+			Validate(util.ValidateURL),
+		field.Bool("active").Default(false),
 		field.Bool("disabled").Default(true),
 		field.Time("disabled_at").Default(time.Now),
 		field.String("disable_reason").Optional(),
@@ -41,6 +44,8 @@ func (Business) Fields() []ent.Field {
 func (Business) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.To("socials", Social.Type),
+		edge.To("services", BusinessServices.Type),
 		edge.To("manages", Manager.Type),
+		edge.To("business_documents", BusinessDocument.Type),
 	}
 }

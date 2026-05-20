@@ -13,6 +13,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/Toflex/directory_v2/ent/business"
+	"github.com/Toflex/directory_v2/ent/businessservices"
 	"github.com/Toflex/directory_v2/ent/manager"
 	"github.com/Toflex/directory_v2/ent/predicate"
 	"github.com/Toflex/directory_v2/ent/social"
@@ -21,12 +22,13 @@ import (
 // BusinessQuery is the builder for querying Business entities.
 type BusinessQuery struct {
 	config
-	ctx         *QueryContext
-	order       []business.OrderOption
-	inters      []Interceptor
-	predicates  []predicate.Business
-	withSocials *SocialQuery
-	withManages *ManagerQuery
+	ctx          *QueryContext
+	order        []business.OrderOption
+	inters       []Interceptor
+	predicates   []predicate.Business
+	withSocials  *SocialQuery
+	withServices *BusinessServicesQuery
+	withManages  *ManagerQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -78,6 +80,28 @@ func (bq *BusinessQuery) QuerySocials() *SocialQuery {
 			sqlgraph.From(business.Table, business.FieldID, selector),
 			sqlgraph.To(social.Table, social.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, business.SocialsTable, business.SocialsColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(bq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryServices chains the current query on the "services" edge.
+func (bq *BusinessQuery) QueryServices() *BusinessServicesQuery {
+	query := (&BusinessServicesClient{config: bq.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := bq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := bq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(business.Table, business.FieldID, selector),
+			sqlgraph.To(businessservices.Table, businessservices.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, business.ServicesTable, business.ServicesColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(bq.driver.Dialect(), step)
 		return fromU, nil
@@ -294,13 +318,14 @@ func (bq *BusinessQuery) Clone() *BusinessQuery {
 		return nil
 	}
 	return &BusinessQuery{
-		config:      bq.config,
-		ctx:         bq.ctx.Clone(),
-		order:       append([]business.OrderOption{}, bq.order...),
-		inters:      append([]Interceptor{}, bq.inters...),
-		predicates:  append([]predicate.Business{}, bq.predicates...),
-		withSocials: bq.withSocials.Clone(),
-		withManages: bq.withManages.Clone(),
+		config:       bq.config,
+		ctx:          bq.ctx.Clone(),
+		order:        append([]business.OrderOption{}, bq.order...),
+		inters:       append([]Interceptor{}, bq.inters...),
+		predicates:   append([]predicate.Business{}, bq.predicates...),
+		withSocials:  bq.withSocials.Clone(),
+		withServices: bq.withServices.Clone(),
+		withManages:  bq.withManages.Clone(),
 		// clone intermediate query.
 		sql:  bq.sql.Clone(),
 		path: bq.path,
@@ -315,6 +340,17 @@ func (bq *BusinessQuery) WithSocials(opts ...func(*SocialQuery)) *BusinessQuery 
 		opt(query)
 	}
 	bq.withSocials = query
+	return bq
+}
+
+// WithServices tells the query-builder to eager-load the nodes that are connected to
+// the "services" edge. The optional arguments are used to configure the query builder of the edge.
+func (bq *BusinessQuery) WithServices(opts ...func(*BusinessServicesQuery)) *BusinessQuery {
+	query := (&BusinessServicesClient{config: bq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	bq.withServices = query
 	return bq
 }
 
@@ -407,8 +443,9 @@ func (bq *BusinessQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Bus
 	var (
 		nodes       = []*Business{}
 		_spec       = bq.querySpec()
-		loadedTypes = [2]bool{
+		loadedTypes = [3]bool{
 			bq.withSocials != nil,
+			bq.withServices != nil,
 			bq.withManages != nil,
 		}
 	)
@@ -437,6 +474,13 @@ func (bq *BusinessQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Bus
 			return nil, err
 		}
 	}
+	if query := bq.withServices; query != nil {
+		if err := bq.loadServices(ctx, query, nodes,
+			func(n *Business) { n.Edges.Services = []*BusinessServices{} },
+			func(n *Business, e *BusinessServices) { n.Edges.Services = append(n.Edges.Services, e) }); err != nil {
+			return nil, err
+		}
+	}
 	if query := bq.withManages; query != nil {
 		if err := bq.loadManages(ctx, query, nodes,
 			func(n *Business) { n.Edges.Manages = []*Manager{} },
@@ -462,6 +506,36 @@ func (bq *BusinessQuery) loadSocials(ctx context.Context, query *SocialQuery, no
 	}
 	query.Where(predicate.Social(func(s *sql.Selector) {
 		s.Where(sql.InValues(s.C(business.SocialsColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.BusinessID
+		node, ok := nodeids[fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "business_id" returned %v for node %v`, fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (bq *BusinessQuery) loadServices(ctx context.Context, query *BusinessServicesQuery, nodes []*Business, init func(*Business), assign func(*Business, *BusinessServices)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[string]*Business)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(businessservices.FieldBusinessID)
+	}
+	query.Where(predicate.BusinessServices(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(business.ServicesColumn), fks...))
 	}))
 	neighbors, err := query.All(ctx)
 	if err != nil {

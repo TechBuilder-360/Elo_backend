@@ -8,25 +8,32 @@ import (
 	"context"
 
 	"github.com/99designs/gqlgen/graphql"
-	"github.com/Toflex/directory_v2/graph/generated"
 	"github.com/Toflex/directory_v2/graph/model"
 	m "github.com/Toflex/directory_v2/internal/authentication"
 	"github.com/Toflex/directory_v2/pkg/log"
-	"github.com/Toflex/directory_v2/pkg/utils"
+	"github.com/Toflex/directory_v2/pkg/util"
 )
 
 // Registration is the resolver for the registration field.
 func (r *mutationResolver) Registration(ctx context.Context, input model.Registration) (*model.RegistrationResponse, error) {
 	logger := log.LoggerInContext(ctx)
-	userId, err := r.AuthenticationService.RegisterUser(ctx, m.Registration{
+
+	payload := m.Registration{
 		FirstName:    input.FirstName,
 		LastName:     input.LastName,
 		Avatar:       input.Avatar,
 		EmailAddress: input.EmailAddress,
 		DisplayName:  input.DisplayName,
 		PhoneNumber:  input.PhoneNumber,
-	}, logger)
+	}
 
+	// validate input
+	err := payload.Validate()
+	if err != nil {
+		return nil, err
+	}
+
+	userId, err := r.AuthenticationService.RegisterUser(ctx, payload, logger)
 	if err != nil {
 		logger.Error("Registration failed %+v", err)
 		graphql.AddError(ctx, err)
@@ -34,7 +41,7 @@ func (r *mutationResolver) Registration(ctx context.Context, input model.Registr
 	}
 
 	return &model.RegistrationResponse{
-		UserID: utils.AddressToString(userId),
+		UserID: util.AddressToString(userId),
 	}, nil
 }
 
@@ -58,22 +65,12 @@ func (r *mutationResolver) Login(ctx context.Context, input model.Login) (*model
 func (r *mutationResolver) RequestOtp(ctx context.Context, input *model.RequestOtp) (*model.OTPResponse, error) {
 	logger := log.LoggerInContext(ctx)
 
-	identifier, err := r.AuthenticationService.RequestOTP(ctx, input.EmailAddress, logger)
+	identifier, err := r.AuthenticationService.RequestOTP(ctx, m.OTPRequest{Email: input.EmailAddress, Password: input.Password}, logger)
 	if err != nil {
 		logger.Error("OTP Request failed %+v", err)
 		graphql.AddError(ctx, err)
 		return nil, err
 	}
 
-	return &model.OTPResponse{Identifier: utils.AddressToString(identifier)}, nil
+	return &model.OTPResponse{Identifier: util.AddressToString(identifier)}, nil
 }
-
-// Mutation returns generated.MutationResolver implementation.
-func (r *Resolver) Mutation() generated.MutationResolver { return &mutationResolver{r} }
-
-// Query returns generated.QueryResolver implementation.
-func (r *Resolver) Query() generated.QueryResolver { return &queryResolver{r} }
-
-type mutationResolver struct{ *Resolver }
-
-type queryResolver struct{ *Resolver }
