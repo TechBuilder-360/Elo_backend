@@ -3,38 +3,36 @@ package authentication
 import (
 	"context"
 
-	"github.com/Toflex/directory_v2/database/database"
 	"github.com/Toflex/directory_v2/database/redis"
+	"github.com/Toflex/directory_v2/ent"
 	"github.com/Toflex/directory_v2/graph/model"
 	"github.com/Toflex/directory_v2/pkg/log"
+	"github.com/Toflex/directory_v2/pkg/provider"
+
 	"github.com/samber/do/v2"
 )
 
 type IService interface {
 	RegisterUser(ctx context.Context, body Registration, log log.Entry) (*string, error)
-	RequestOTP(ctx context.Context, email string, log log.Entry) (*string, error)
+	RequestOTP(ctx context.Context, payload OTPRequest, log log.Entry) (*string, error)
 	Login(ctx context.Context, payload Login, log log.Entry) (*model.LoginResponse, error)
 }
 
 type Service struct {
-	repo  IRepository
-	cache *redis.Client
+	serviceLocator provider.IService
+	repo           IRepository
+	cache          *redis.Client
 }
 
 func NewService(i do.Injector) IService {
-	db := do.MustInvoke[*database.Client](i)
+	db := do.MustInvoke[*ent.Client](i)
+	serviceLocator := do.MustInvoke[provider.IService](i)
 	return &Service{
-		repo:  Newrepository(db),
-		cache: do.MustInvoke[*redis.Client](i),
+		serviceLocator: serviceLocator,
+		repo:           Newrepository(db),
+		cache:          do.MustInvoke[*redis.Client](i),
 	}
 }
-
-// func (a *authenticationService) ActivateEmail(ctx context.Context, token string, logger log.Entry) error {
-// 	uid, err := a.rdb.Get(ctx, token)
-// 	if err != nil {
-// 		logger.Error("error occurred activating email %s", err.Error())
-// 		return errors.New("account activation failed")
-// 	}
 
 // 	if len(uid) == 0 {
 // 		return errors.New("token has expired")
@@ -71,7 +69,7 @@ func NewService(i do.Injector) IService {
 // func (a *authenticationService) Login(body *types.AuthRequest) (*types.LoginResponse, error) {
 // 	response := new(types.LoginResponse)
 
-// 	user, err := d.userRepo.GetByEmail(utils.ToLower(body.EmailAddress))
+// 	user, err := d.userRepo.GetByEmail(util.ToLower(body.EmailAddress))
 // 	if err != nil {
 // 		log.Error("An error occurred when fetching user profile. %s", err.Error())
 // 		return nil, errors.New(constant.InternalServerError)
@@ -95,7 +93,7 @@ func NewService(i do.Injector) IService {
 // 		return nil, errors.New("invalid OTP")
 // 	}
 
-// 	err = bcrypt.CompareHashAndPassword([]byte(utils.AddToStr(token)), []byte(body.Otp))
+// 	err = bcrypt.CompareHashAndPassword([]byte(util.AddToStr(token)), []byte(body.Otp))
 // 	if err != nil {
 // 		log.Error("An Error occurred when comparing login token. %s", err.Error())
 // 		return nil, errors.New("invalid OTP")
@@ -136,7 +134,7 @@ func NewService(i do.Injector) IService {
 // }
 
 // func (a *authenticationService) RequestToken(body *types.EmailRequest, logger log.Entry) error {
-// 	if !utils.ValidateEmail(body.EmailAddress) {
+// 	if !util.ValidateEmail(body.EmailAddress) {
 // 		return errors.New("account not found")
 // 	}
 // 	email := strings.ToLower(body.EmailAddress)
@@ -157,7 +155,7 @@ func NewService(i do.Injector) IService {
 // 	otp := "123456"
 
 // 	if configs.IsProduction() {
-// 		otp = utils.GenerateNumericToken(6)
+// 		otp = util.GenerateNumericToken(6)
 
 // 		mailTemplate := &sendgrid.OTPMailRequest{
 // 			Code:     otp,
@@ -201,7 +199,7 @@ func NewService(i do.Injector) IService {
 
 // 		tk := AuthToken{}
 
-// 		err = json.Unmarshal([]byte(utils.AddToStr(authToken)), &tk)
+// 		err = json.Unmarshal([]byte(util.AddToStr(authToken)), &tk)
 // 		if err != nil {
 // 			return nil, err
 // 		}

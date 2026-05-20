@@ -1,9 +1,7 @@
 package database
 
 import (
-	"context"
 	"fmt"
-	"time"
 
 	"github.com/Toflex/directory_v2/ent"
 	"github.com/Toflex/directory_v2/pkg/configuration"
@@ -21,10 +19,9 @@ type config struct {
 	DbPort uint   `env:"DB_PORT"`
 }
 
-type Client struct {
-	DBClient      *ent.Client
-	DBTransaction *ent.Tx
-}
+// type Client struct {
+// 	DBClient *ent.Client
+// }
 
 var dbInstance *ent.Client
 
@@ -41,27 +38,31 @@ func initializeDB() {
 	dbInstance = client
 }
 
-func NewClient(i do.Injector) (*Client, error) {
+func NewClient(i do.Injector) (*ent.Client, error) {
 	if dbInstance == nil {
 		initializeDB()
 	}
 
-	return &Client{DBClient: dbInstance}, nil
+	return dbInstance, nil
 }
 
-func (c *Client) MigrateDBSchema() {
-	// Run the auto migration tool.
-	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Minute)
-	defer cancel()
-
-	if err := c.DBClient.Schema.Create(ctx); err != nil {
-		log.Panic("failed creating schema resources: %v", err)
-	}
+func DBInstance() *ent.Client {
+	return dbInstance
 }
 
-func (c *Client) Close() {
-	err := c.DBClient.Close()
-	if err != nil {
-		log.Errorf("Failed to close DB client: %v", err)
-	}
-}
+// func (c *Client) MigrateDBSchema() {
+// 	// Run the auto migration tool.
+// 	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Minute)
+// 	defer cancel()
+
+// 	if err := c.DBClient.Schema.Create(ctx); err != nil {
+// 		log.Panic("failed creating schema resources: %v", err)
+// 	}
+// }
+
+// func (c *Client) Close() {
+// 	err := c.DBClient.Close()
+// 	if err != nil {
+// 		log.Errorf("Failed to close DB client: %v", err)
+// 	}
+// }

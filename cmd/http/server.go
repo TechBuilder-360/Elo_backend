@@ -6,8 +6,8 @@ import (
 
 	"github.com/Toflex/directory_v2/cmd/http/router"
 	"github.com/Toflex/directory_v2/cmd/http/runtime"
-	"github.com/Toflex/directory_v2/database/database"
 	r "github.com/Toflex/directory_v2/database/redis"
+	"github.com/Toflex/directory_v2/ent"
 	"github.com/Toflex/directory_v2/pkg/apm/sentry"
 	"github.com/Toflex/directory_v2/pkg/configuration"
 	"github.com/gin-gonic/gin"
@@ -40,7 +40,7 @@ func main() {
 	runtime.InitializeDI()
 
 	// close database
-	db := do.MustInvoke[*database.Client](runtime.Injector)
+	db := do.MustInvoke[*ent.Client](runtime.Injector)
 	defer db.Close()
 
 	// close redis database
@@ -56,7 +56,7 @@ func main() {
 	router.InitializeRoutes(engine)
 
 	// initialize Sentry
-	sentry.InitializeSentry(l)
+	sentry.InitializeSentry(runtime.Injector, l)
 
 	port := configuration.Instance.Port
 	addr := fmt.Sprintf("%s:%s", configuration.Instance.BASEURL, port)

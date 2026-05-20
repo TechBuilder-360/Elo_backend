@@ -2,6 +2,15 @@
 
 package model
 
+type Business struct {
+	Name     string    `json:"name"`
+	Logo     *string   `json:"logo,omitempty"`
+	Email    *string   `json:"email,omitempty"`
+	About    *string   `json:"about,omitempty"`
+	Services []*string `json:"services"`
+	Socials  []*Social `json:"socials"`
+}
+
 type Login struct {
 	Otp        string `json:"otp"`
 	Identifier string `json:"identifier"`
@@ -33,6 +42,7 @@ type Registration struct {
 	LastName     string  `json:"last_name"`
 	PhoneNumber  *string `json:"phone_number,omitempty"`
 	Avatar       *string `json:"avatar,omitempty"`
+	Password     string  `json:"password"`
 }
 
 type RegistrationResponse struct {
@@ -41,6 +51,17 @@ type RegistrationResponse struct {
 
 type RequestOtp struct {
 	EmailAddress string `json:"email_address"`
+	Password     string `json:"password"`
+}
+
+type SearchBusiness struct {
+	Name string  `json:"name"`
+	Logo *string `json:"logo,omitempty"`
+}
+
+type Social struct {
+	Name string `json:"name"`
+	URL  string `json:"url"`
 }
 
 type User struct {

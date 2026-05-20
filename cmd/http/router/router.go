@@ -12,6 +12,7 @@ import (
 	"github.com/Toflex/directory_v2/graph/generated"
 	resolver "github.com/Toflex/directory_v2/graph/resolvers"
 	"github.com/Toflex/directory_v2/internal/authentication"
+	"github.com/Toflex/directory_v2/middlewares"
 	"github.com/Toflex/directory_v2/pkg/configuration"
 	"github.com/Toflex/directory_v2/pkg/log"
 	"github.com/gin-gonic/gin"
@@ -21,6 +22,10 @@ import (
 )
 
 func InitializeRoutes(engine *gin.Engine) {
+
+	// TODO: move middlewares to middlewares init folder
+	engine.Use(middlewares.Logger())
+
 	resolverStruct := resolver.Resolver{
 		AuthenticationService: do.MustInvoke[authentication.IService](runtime.Injector),
 	}

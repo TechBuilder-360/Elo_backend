@@ -2,10 +2,11 @@ package log
 
 import (
 	"context"
-	"github.com/Toflex/directory_v2/pkg/utils"
-	"github.com/google/uuid"
 	"io"
 	"os"
+
+	"github.com/Toflex/directory_v2/pkg/util"
+	"github.com/google/uuid"
 
 	"github.com/sirupsen/logrus"
 )
@@ -22,7 +23,9 @@ const (
 
 type Level string
 
-const LoggerInCtx = "logger_ctx"
+type loggerKeyType struct{}
+
+var LoggerInCtx = loggerKeyType{}
 
 const (
 	LevelUnknown = Level("unknown")
@@ -212,5 +215,13 @@ func LoggerInContext(ctx context.Context) Entry {
 	if data, ok := ctx.Value(LoggerInCtx).(Entry); ok {
 		return data
 	}
-	return WithField("REQUEST_ID", utils.GenerateUUID())
+	return WithField("REQUEST_ID", util.GenerateUUID())
+}
+
+func SetLoggerInContext(ctx context.Context) context.Context {
+	if _, ok := ctx.Value(LoggerInCtx).(Entry); ok {
+		return ctx
+	}
+
+	return context.WithValue(ctx, LoggerInCtx, LoggerInContext(ctx))
 }

@@ -1,0 +1,23 @@
+type Business {
+    name: String!
+    logo: String
+    email: String
+    about: String
+    services: [String]!
+    socials: [Social]!
+}
+
+type SearchBusiness {
+  name: String!
+  logo: String
+}
+
+type Social {
+    name: String!
+    url: String!
+}
+
+extend type Query {
+  getBusiness(id: String!): Business
+  findBusiness(name: String, service: String, limit: Int=20): [SearchBusiness!]!
+}

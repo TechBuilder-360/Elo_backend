@@ -5,20 +5,20 @@ import (
 
 	"github.com/Toflex/directory_v2/ent"
 	"github.com/Toflex/directory_v2/ent/user"
-	"github.com/Toflex/directory_v2/pkg/utils"
+	"github.com/Toflex/directory_v2/pkg/util"
 )
 
 func (r *repository) Create(ctx context.Context, payload Onboarding) (*string, error) {
-	u, err := r.db.DBClient.User.
+	u, err := r.db.User.
 		Create().
 		SetFirstName(payload.FirstName).
 		SetLastName(payload.LastName).
-		SetAvatar(utils.AddressToString(payload.Avatar)).
+		SetAvatar(util.AddressToString(payload.Avatar)).
 		SetEmailAddress(payload.EmailAddress).
 		SetEmailVerifiedAt(payload.EmailVerifiedAt).
 		SetEmailVerified(payload.EmailVerified).
-		SetDisplayName(utils.AddressToString(payload.DisplayName)).
-		SetPhoneNumber(utils.AddressToString(payload.PhoneNumber)).
+		SetDisplayName(util.AddressToString(payload.DisplayName)).
+		SetPhoneNumber(util.AddressToString(payload.PhoneNumber)).
 		Save(ctx)
 
 	if err != nil {
@@ -30,7 +30,7 @@ func (r *repository) Create(ctx context.Context, payload Onboarding) (*string, e
 
 // GetUserByEmail implements IRepository.
 func (r *repository) GetUserByEmail(ctx context.Context, email string) (*User, error) {
-	u, err := r.db.DBClient.User.
+	u, err := r.db.User.
 		Query().
 		Where(user.EmailAddressEQ(email)).
 		Only(ctx)
@@ -47,7 +47,7 @@ func (r *repository) GetUserByEmail(ctx context.Context, email string) (*User, e
 
 // GetUserById implements IRepository.
 func (r *repository) GetUserByID(ctx context.Context, id string) (*User, error) {
-	u, err := r.db.DBClient.User.
+	u, err := r.db.User.
 		Query().
 		Where(user.IDEQ(id)).
 		Only(ctx)

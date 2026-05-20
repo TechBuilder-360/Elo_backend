@@ -90,6 +90,11 @@ func Name(v string) predicate.Business {
 	return predicate.Business(sql.FieldEQ(FieldName, v))
 }
 
+// About applies equality check predicate on the "about" field. It's identical to AboutEQ.
+func About(v string) predicate.Business {
+	return predicate.Business(sql.FieldEQ(FieldAbout, v))
+}
+
 // Logo applies equality check predicate on the "logo" field. It's identical to LogoEQ.
 func Logo(v string) predicate.Business {
 	return predicate.Business(sql.FieldEQ(FieldLogo, v))
@@ -103,6 +108,11 @@ func Email(v string) predicate.Business {
 // Website applies equality check predicate on the "website" field. It's identical to WebsiteEQ.
 func Website(v string) predicate.Business {
 	return predicate.Business(sql.FieldEQ(FieldWebsite, v))
+}
+
+// Active applies equality check predicate on the "active" field. It's identical to ActiveEQ.
+func Active(v bool) predicate.Business {
+	return predicate.Business(sql.FieldEQ(FieldActive, v))
 }
 
 // Disabled applies equality check predicate on the "disabled" field. It's identical to DisabledEQ.
@@ -390,6 +400,81 @@ func NameContainsFold(v string) predicate.Business {
 	return predicate.Business(sql.FieldContainsFold(FieldName, v))
 }
 
+// AboutEQ applies the EQ predicate on the "about" field.
+func AboutEQ(v string) predicate.Business {
+	return predicate.Business(sql.FieldEQ(FieldAbout, v))
+}
+
+// AboutNEQ applies the NEQ predicate on the "about" field.
+func AboutNEQ(v string) predicate.Business {
+	return predicate.Business(sql.FieldNEQ(FieldAbout, v))
+}
+
+// AboutIn applies the In predicate on the "about" field.
+func AboutIn(vs ...string) predicate.Business {
+	return predicate.Business(sql.FieldIn(FieldAbout, vs...))
+}
+
+// AboutNotIn applies the NotIn predicate on the "about" field.
+func AboutNotIn(vs ...string) predicate.Business {
+	return predicate.Business(sql.FieldNotIn(FieldAbout, vs...))
+}
+
+// AboutGT applies the GT predicate on the "about" field.
+func AboutGT(v string) predicate.Business {
+	return predicate.Business(sql.FieldGT(FieldAbout, v))
+}
+
+// AboutGTE applies the GTE predicate on the "about" field.
+func AboutGTE(v string) predicate.Business {
+	return predicate.Business(sql.FieldGTE(FieldAbout, v))
+}
+
+// AboutLT applies the LT predicate on the "about" field.
+func AboutLT(v string) predicate.Business {
+	return predicate.Business(sql.FieldLT(FieldAbout, v))
+}
+
+// AboutLTE applies the LTE predicate on the "about" field.
+func AboutLTE(v string) predicate.Business {
+	return predicate.Business(sql.FieldLTE(FieldAbout, v))
+}
+
+// AboutContains applies the Contains predicate on the "about" field.
+func AboutContains(v string) predicate.Business {
+	return predicate.Business(sql.FieldContains(FieldAbout, v))
+}
+
+// AboutHasPrefix applies the HasPrefix predicate on the "about" field.
+func AboutHasPrefix(v string) predicate.Business {
+	return predicate.Business(sql.FieldHasPrefix(FieldAbout, v))
+}
+
+// AboutHasSuffix applies the HasSuffix predicate on the "about" field.
+func AboutHasSuffix(v string) predicate.Business {
+	return predicate.Business(sql.FieldHasSuffix(FieldAbout, v))
+}
+
+// AboutIsNil applies the IsNil predicate on the "about" field.
+func AboutIsNil() predicate.Business {
+	return predicate.Business(sql.FieldIsNull(FieldAbout))
+}
+
+// AboutNotNil applies the NotNil predicate on the "about" field.
+func AboutNotNil() predicate.Business {
+	return predicate.Business(sql.FieldNotNull(FieldAbout))
+}
+
+// AboutEqualFold applies the EqualFold predicate on the "about" field.
+func AboutEqualFold(v string) predicate.Business {
+	return predicate.Business(sql.FieldEqualFold(FieldAbout, v))
+}
+
+// AboutContainsFold applies the ContainsFold predicate on the "about" field.
+func AboutContainsFold(v string) predicate.Business {
+	return predicate.Business(sql.FieldContainsFold(FieldAbout, v))
+}
+
 // LogoEQ applies the EQ predicate on the "logo" field.
 func LogoEQ(v string) predicate.Business {
 	return predicate.Business(sql.FieldEQ(FieldLogo, v))
@@ -605,6 +690,16 @@ func WebsiteContainsFold(v string) predicate.Business {
 	return predicate.Business(sql.FieldContainsFold(FieldWebsite, v))
 }
 
+// ActiveEQ applies the EQ predicate on the "active" field.
+func ActiveEQ(v bool) predicate.Business {
+	return predicate.Business(sql.FieldEQ(FieldActive, v))
+}
+
+// ActiveNEQ applies the NEQ predicate on the "active" field.
+func ActiveNEQ(v bool) predicate.Business {
+	return predicate.Business(sql.FieldNEQ(FieldActive, v))
+}
+
 // DisabledEQ applies the EQ predicate on the "disabled" field.
 func DisabledEQ(v bool) predicate.Business {
 	return predicate.Business(sql.FieldEQ(FieldDisabled, v))
@@ -805,6 +900,29 @@ func HasSocials() predicate.Business {
 func HasSocialsWith(preds ...predicate.Social) predicate.Business {
 	return predicate.Business(func(s *sql.Selector) {
 		step := newSocialsStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasServices applies the HasEdge predicate on the "services" edge.
+func HasServices() predicate.Business {
+	return predicate.Business(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, ServicesTable, ServicesColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasServicesWith applies the HasEdge predicate on the "services" edge with a given conditions (other predicates).
+func HasServicesWith(preds ...predicate.BusinessServices) predicate.Business {
+	return predicate.Business(func(s *sql.Selector) {
+		step := newServicesStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)

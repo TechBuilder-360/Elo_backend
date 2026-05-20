@@ -225,24 +225,37 @@ func (uu *UserUpdate) SetNillableDisabled(b *bool) *UserUpdate {
 	return uu
 }
 
-// SetTier sets the "tier" field.
-func (uu *UserUpdate) SetTier(i int8) *UserUpdate {
-	uu.mutation.ResetTier()
-	uu.mutation.SetTier(i)
+// SetDisableReason sets the "disable_reason" field.
+func (uu *UserUpdate) SetDisableReason(b bool) *UserUpdate {
+	uu.mutation.SetDisableReason(b)
 	return uu
 }
 
-// SetNillableTier sets the "tier" field if the given value is not nil.
-func (uu *UserUpdate) SetNillableTier(i *int8) *UserUpdate {
-	if i != nil {
-		uu.SetTier(*i)
+// SetNillableDisableReason sets the "disable_reason" field if the given value is not nil.
+func (uu *UserUpdate) SetNillableDisableReason(b *bool) *UserUpdate {
+	if b != nil {
+		uu.SetDisableReason(*b)
 	}
 	return uu
 }
 
-// AddTier adds i to the "tier" field.
-func (uu *UserUpdate) AddTier(i int8) *UserUpdate {
-	uu.mutation.AddTier(i)
+// ClearDisableReason clears the value of the "disable_reason" field.
+func (uu *UserUpdate) ClearDisableReason() *UserUpdate {
+	uu.mutation.ClearDisableReason()
+	return uu
+}
+
+// SetVerified sets the "verified" field.
+func (uu *UserUpdate) SetVerified(b bool) *UserUpdate {
+	uu.mutation.SetVerified(b)
+	return uu
+}
+
+// SetNillableVerified sets the "verified" field if the given value is not nil.
+func (uu *UserUpdate) SetNillableVerified(b *bool) *UserUpdate {
+	if b != nil {
+		uu.SetVerified(*b)
+	}
 	return uu
 }
 
@@ -414,11 +427,14 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if value, ok := uu.mutation.Disabled(); ok {
 		_spec.SetField(user.FieldDisabled, field.TypeBool, value)
 	}
-	if value, ok := uu.mutation.Tier(); ok {
-		_spec.SetField(user.FieldTier, field.TypeInt8, value)
+	if value, ok := uu.mutation.DisableReason(); ok {
+		_spec.SetField(user.FieldDisableReason, field.TypeBool, value)
 	}
-	if value, ok := uu.mutation.AddedTier(); ok {
-		_spec.AddField(user.FieldTier, field.TypeInt8, value)
+	if uu.mutation.DisableReasonCleared() {
+		_spec.ClearField(user.FieldDisableReason, field.TypeBool)
+	}
+	if value, ok := uu.mutation.Verified(); ok {
+		_spec.SetField(user.FieldVerified, field.TypeBool, value)
 	}
 	if uu.mutation.ManagesCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -681,24 +697,37 @@ func (uuo *UserUpdateOne) SetNillableDisabled(b *bool) *UserUpdateOne {
 	return uuo
 }
 
-// SetTier sets the "tier" field.
-func (uuo *UserUpdateOne) SetTier(i int8) *UserUpdateOne {
-	uuo.mutation.ResetTier()
-	uuo.mutation.SetTier(i)
+// SetDisableReason sets the "disable_reason" field.
+func (uuo *UserUpdateOne) SetDisableReason(b bool) *UserUpdateOne {
+	uuo.mutation.SetDisableReason(b)
 	return uuo
 }
 
-// SetNillableTier sets the "tier" field if the given value is not nil.
-func (uuo *UserUpdateOne) SetNillableTier(i *int8) *UserUpdateOne {
-	if i != nil {
-		uuo.SetTier(*i)
+// SetNillableDisableReason sets the "disable_reason" field if the given value is not nil.
+func (uuo *UserUpdateOne) SetNillableDisableReason(b *bool) *UserUpdateOne {
+	if b != nil {
+		uuo.SetDisableReason(*b)
 	}
 	return uuo
 }
 
-// AddTier adds i to the "tier" field.
-func (uuo *UserUpdateOne) AddTier(i int8) *UserUpdateOne {
-	uuo.mutation.AddTier(i)
+// ClearDisableReason clears the value of the "disable_reason" field.
+func (uuo *UserUpdateOne) ClearDisableReason() *UserUpdateOne {
+	uuo.mutation.ClearDisableReason()
+	return uuo
+}
+
+// SetVerified sets the "verified" field.
+func (uuo *UserUpdateOne) SetVerified(b bool) *UserUpdateOne {
+	uuo.mutation.SetVerified(b)
+	return uuo
+}
+
+// SetNillableVerified sets the "verified" field if the given value is not nil.
+func (uuo *UserUpdateOne) SetNillableVerified(b *bool) *UserUpdateOne {
+	if b != nil {
+		uuo.SetVerified(*b)
+	}
 	return uuo
 }
 
@@ -900,11 +929,14 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 	if value, ok := uuo.mutation.Disabled(); ok {
 		_spec.SetField(user.FieldDisabled, field.TypeBool, value)
 	}
-	if value, ok := uuo.mutation.Tier(); ok {
-		_spec.SetField(user.FieldTier, field.TypeInt8, value)
+	if value, ok := uuo.mutation.DisableReason(); ok {
+		_spec.SetField(user.FieldDisableReason, field.TypeBool, value)
 	}
-	if value, ok := uuo.mutation.AddedTier(); ok {
-		_spec.AddField(user.FieldTier, field.TypeInt8, value)
+	if uuo.mutation.DisableReasonCleared() {
+		_spec.ClearField(user.FieldDisableReason, field.TypeBool)
+	}
+	if value, ok := uuo.mutation.Verified(); ok {
+		_spec.SetField(user.FieldVerified, field.TypeBool, value)
 	}
 	if uuo.mutation.ManagesCleared() {
 		edge := &sqlgraph.EdgeSpec{

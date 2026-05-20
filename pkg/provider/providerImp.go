@@ -25,18 +25,12 @@ func RegisterProvider(provider ...Impl) {
 
 // GetImpl returns a provider implementation
 func GetImpl(slug string) (Impl, bool) {
-	mutex.RLock()
-	defer mutex.RUnlock()
-
 	p, ok := providers[strings.ToLower(slug)]
 	return p, ok
 }
 
 // ConformsTo checks if a provider conforms to a type
 func ConformsTo[T any](p Impl) (T, bool) {
-	mutex.RLock()
-	defer mutex.RUnlock()
-
 	var result T
 
 	if v, ok := p.(T); ok {

@@ -24,12 +24,16 @@ const (
 	FieldCategory = "category"
 	// FieldName holds the string denoting the name field in the database.
 	FieldName = "name"
+	// FieldAbout holds the string denoting the about field in the database.
+	FieldAbout = "about"
 	// FieldLogo holds the string denoting the logo field in the database.
 	FieldLogo = "logo"
 	// FieldEmail holds the string denoting the email field in the database.
 	FieldEmail = "email"
 	// FieldWebsite holds the string denoting the website field in the database.
 	FieldWebsite = "website"
+	// FieldActive holds the string denoting the active field in the database.
+	FieldActive = "active"
 	// FieldDisabled holds the string denoting the disabled field in the database.
 	FieldDisabled = "disabled"
 	// FieldDisabledAt holds the string denoting the disabled_at field in the database.
@@ -42,6 +46,8 @@ const (
 	FieldVerifiedAt = "verified_at"
 	// EdgeSocials holds the string denoting the socials edge name in mutations.
 	EdgeSocials = "socials"
+	// EdgeServices holds the string denoting the services edge name in mutations.
+	EdgeServices = "services"
 	// EdgeManages holds the string denoting the manages edge name in mutations.
 	EdgeManages = "manages"
 	// Table holds the table name of the business in the database.
@@ -53,6 +59,13 @@ const (
 	SocialsInverseTable = "socials"
 	// SocialsColumn is the table column denoting the socials relation/edge.
 	SocialsColumn = "business_id"
+	// ServicesTable is the table that holds the services relation/edge.
+	ServicesTable = "business_services"
+	// ServicesInverseTable is the table name for the BusinessServices entity.
+	// It exists in this package in order to avoid circular dependency with the "businessservices" package.
+	ServicesInverseTable = "business_services"
+	// ServicesColumn is the table column denoting the services relation/edge.
+	ServicesColumn = "business_id"
 	// ManagesTable is the table that holds the manages relation/edge.
 	ManagesTable = "managers"
 	// ManagesInverseTable is the table name for the Manager entity.
@@ -70,9 +83,11 @@ var Columns = []string{
 	FieldDeletedAt,
 	FieldCategory,
 	FieldName,
+	FieldAbout,
 	FieldLogo,
 	FieldEmail,
 	FieldWebsite,
+	FieldActive,
 	FieldDisabled,
 	FieldDisabledAt,
 	FieldDisableReason,
@@ -103,6 +118,10 @@ var (
 	NameValidator func(string) error
 	// EmailValidator is a validator for the "email" field. It is called by the builders before save.
 	EmailValidator func(string) error
+	// WebsiteValidator is a validator for the "website" field. It is called by the builders before save.
+	WebsiteValidator func(string) error
+	// DefaultActive holds the default value on creation for the "active" field.
+	DefaultActive bool
 	// DefaultDisabled holds the default value on creation for the "disabled" field.
 	DefaultDisabled bool
 	// DefaultDisabledAt holds the default value on creation for the "disabled_at" field.
@@ -146,6 +165,11 @@ func ByName(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldName, opts...).ToFunc()
 }
 
+// ByAbout orders the results by the about field.
+func ByAbout(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldAbout, opts...).ToFunc()
+}
+
 // ByLogo orders the results by the logo field.
 func ByLogo(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldLogo, opts...).ToFunc()
@@ -159,6 +183,11 @@ func ByEmail(opts ...sql.OrderTermOption) OrderOption {
 // ByWebsite orders the results by the website field.
 func ByWebsite(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldWebsite, opts...).ToFunc()
+}
+
+// ByActive orders the results by the active field.
+func ByActive(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldActive, opts...).ToFunc()
 }
 
 // ByDisabled orders the results by the disabled field.
@@ -200,6 +229,20 @@ func BySocials(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 	}
 }
 
+// ByServicesCount orders the results by services count.
+func ByServicesCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newServicesStep(), opts...)
+	}
+}
+
+// ByServices orders the results by services terms.
+func ByServices(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newServicesStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+
 // ByManagesCount orders the results by manages count.
 func ByManagesCount(opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
@@ -218,6 +261,13 @@ func newSocialsStep() *sqlgraph.Step {
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(SocialsInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.O2M, false, SocialsTable, SocialsColumn),
+	)
+}
+func newServicesStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(ServicesInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, ServicesTable, ServicesColumn),
 	)
 }
 func newManagesStep() *sqlgraph.Step {

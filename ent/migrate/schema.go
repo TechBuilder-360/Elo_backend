@@ -16,9 +16,11 @@ var (
 		{Name: "deleted_at", Type: field.TypeTime, Nullable: true},
 		{Name: "category", Type: field.TypeString, Default: "others"},
 		{Name: "name", Type: field.TypeString, Unique: true},
+		{Name: "about", Type: field.TypeString, Nullable: true},
 		{Name: "logo", Type: field.TypeString, Nullable: true},
 		{Name: "email", Type: field.TypeString},
 		{Name: "website", Type: field.TypeString, Nullable: true},
+		{Name: "active", Type: field.TypeBool, Default: false},
 		{Name: "disabled", Type: field.TypeBool, Default: true},
 		{Name: "disabled_at", Type: field.TypeTime},
 		{Name: "disable_reason", Type: field.TypeString, Nullable: true},
@@ -30,6 +32,47 @@ var (
 		Name:       "businesses",
 		Columns:    BusinessesColumns,
 		PrimaryKey: []*schema.Column{BusinessesColumns[0]},
+	}
+	// BusinessFeaturesColumns holds the columns for the "business_features" table.
+	BusinessFeaturesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeString},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "deleted_at", Type: field.TypeTime, Nullable: true},
+		{Name: "name", Type: field.TypeString, Unique: true},
+		{Name: "identifier", Type: field.TypeString, Unique: true},
+		{Name: "require_subscription", Type: field.TypeBool, Default: false},
+		{Name: "active", Type: field.TypeBool, Default: true},
+		{Name: "min", Type: field.TypeInt, Default: 0},
+		{Name: "max", Type: field.TypeInt, Default: 0},
+		{Name: "fee", Type: field.TypeJSON},
+	}
+	// BusinessFeaturesTable holds the schema information for the "business_features" table.
+	BusinessFeaturesTable = &schema.Table{
+		Name:       "business_features",
+		Columns:    BusinessFeaturesColumns,
+		PrimaryKey: []*schema.Column{BusinessFeaturesColumns[0]},
+	}
+	// BusinessServicesColumns holds the columns for the "business_services" table.
+	BusinessServicesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "title", Type: field.TypeString},
+		{Name: "description", Type: field.TypeString},
+		{Name: "business_id", Type: field.TypeString},
+	}
+	// BusinessServicesTable holds the schema information for the "business_services" table.
+	BusinessServicesTable = &schema.Table{
+		Name:       "business_services",
+		Columns:    BusinessServicesColumns,
+		PrimaryKey: []*schema.Column{BusinessServicesColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "business_services_businesses_services",
+				Columns:    []*schema.Column{BusinessServicesColumns[3]},
+				RefColumns: []*schema.Column{BusinessesColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+		},
 	}
 	// ManagersColumns holds the columns for the "managers" table.
 	ManagersColumns = []*schema.Column{
@@ -78,6 +121,19 @@ var (
 		Columns:    PermissionsColumns,
 		PrimaryKey: []*schema.Column{PermissionsColumns[0]},
 	}
+	// ProvidersColumns holds the columns for the "providers" table.
+	ProvidersColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "name", Type: field.TypeString, Unique: true},
+		{Name: "slug", Type: field.TypeString, Unique: true},
+		{Name: "active", Type: field.TypeBool},
+	}
+	// ProvidersTable holds the schema information for the "providers" table.
+	ProvidersTable = &schema.Table{
+		Name:       "providers",
+		Columns:    ProvidersColumns,
+		PrimaryKey: []*schema.Column{ProvidersColumns[0]},
+	}
 	// RolesColumns holds the columns for the "roles" table.
 	RolesColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeString},
@@ -92,6 +148,27 @@ var (
 		Name:       "roles",
 		Columns:    RolesColumns,
 		PrimaryKey: []*schema.Column{RolesColumns[0]},
+	}
+	// ServicesColumns holds the columns for the "services" table.
+	ServicesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeString},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "deleted_at", Type: field.TypeTime, Nullable: true},
+		{Name: "name", Type: field.TypeString, Unique: true},
+		{Name: "identifier", Type: field.TypeString, Unique: true},
+		{Name: "provider", Type: field.TypeString, Unique: true},
+		{Name: "require_subscription", Type: field.TypeBool, Default: false},
+		{Name: "active", Type: field.TypeBool, Default: true},
+		{Name: "min", Type: field.TypeInt, Default: 0},
+		{Name: "max", Type: field.TypeInt, Default: 0},
+		{Name: "fee", Type: field.TypeJSON},
+	}
+	// ServicesTable holds the schema information for the "services" table.
+	ServicesTable = &schema.Table{
+		Name:       "services",
+		Columns:    ServicesColumns,
+		PrimaryKey: []*schema.Column{ServicesColumns[0]},
 	}
 	// SocialsColumns holds the columns for the "socials" table.
 	SocialsColumns = []*schema.Column{
@@ -133,7 +210,8 @@ var (
 		{Name: "phone_number", Type: field.TypeString, Nullable: true},
 		{Name: "avatar", Type: field.TypeString, Nullable: true},
 		{Name: "disabled", Type: field.TypeBool, Default: false},
-		{Name: "tier", Type: field.TypeInt8, Default: 0},
+		{Name: "disable_reason", Type: field.TypeBool, Nullable: true},
+		{Name: "verified", Type: field.TypeBool, Default: false},
 	}
 	// UsersTable holds the schema information for the "users" table.
 	UsersTable = &schema.Table{
@@ -169,9 +247,13 @@ var (
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
 		BusinessesTable,
+		BusinessFeaturesTable,
+		BusinessServicesTable,
 		ManagersTable,
 		PermissionsTable,
+		ProvidersTable,
 		RolesTable,
+		ServicesTable,
 		SocialsTable,
 		UsersTable,
 		RolePermissionsTable,
@@ -179,6 +261,7 @@ var (
 )
 
 func init() {
+	BusinessServicesTable.ForeignKeys[0].RefTable = BusinessesTable
 	ManagersTable.ForeignKeys[0].RefTable = BusinessesTable
 	ManagersTable.ForeignKeys[1].RefTable = UsersTable
 	SocialsTable.ForeignKeys[0].RefTable = BusinessesTable

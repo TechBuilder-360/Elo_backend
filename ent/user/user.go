@@ -40,8 +40,10 @@ const (
 	FieldAvatar = "avatar"
 	// FieldDisabled holds the string denoting the disabled field in the database.
 	FieldDisabled = "disabled"
-	// FieldTier holds the string denoting the tier field in the database.
-	FieldTier = "tier"
+	// FieldDisableReason holds the string denoting the disable_reason field in the database.
+	FieldDisableReason = "disable_reason"
+	// FieldVerified holds the string denoting the verified field in the database.
+	FieldVerified = "verified"
 	// EdgeManages holds the string denoting the manages edge name in mutations.
 	EdgeManages = "manages"
 	// Table holds the table name of the user in the database.
@@ -71,7 +73,8 @@ var Columns = []string{
 	FieldPhoneNumber,
 	FieldAvatar,
 	FieldDisabled,
-	FieldTier,
+	FieldDisableReason,
+	FieldVerified,
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -103,8 +106,8 @@ var (
 	PhoneNumberValidator func(string) error
 	// DefaultDisabled holds the default value on creation for the "disabled" field.
 	DefaultDisabled bool
-	// DefaultTier holds the default value on creation for the "tier" field.
-	DefaultTier int8
+	// DefaultVerified holds the default value on creation for the "verified" field.
+	DefaultVerified bool
 	// DefaultID holds the default value on creation for the "id" field.
 	DefaultID func() string
 )
@@ -182,9 +185,14 @@ func ByDisabled(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldDisabled, opts...).ToFunc()
 }
 
-// ByTier orders the results by the tier field.
-func ByTier(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldTier, opts...).ToFunc()
+// ByDisableReason orders the results by the disable_reason field.
+func ByDisableReason(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldDisableReason, opts...).ToFunc()
+}
+
+// ByVerified orders the results by the verified field.
+func ByVerified(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldVerified, opts...).ToFunc()
 }
 
 // ByManagesCount orders the results by manages count.

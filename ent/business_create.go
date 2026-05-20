@@ -11,6 +11,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/Toflex/directory_v2/ent/business"
+	"github.com/Toflex/directory_v2/ent/businessservices"
 	"github.com/Toflex/directory_v2/ent/manager"
 	"github.com/Toflex/directory_v2/ent/social"
 )
@@ -84,6 +85,20 @@ func (bc *BusinessCreate) SetName(s string) *BusinessCreate {
 	return bc
 }
 
+// SetAbout sets the "about" field.
+func (bc *BusinessCreate) SetAbout(s string) *BusinessCreate {
+	bc.mutation.SetAbout(s)
+	return bc
+}
+
+// SetNillableAbout sets the "about" field if the given value is not nil.
+func (bc *BusinessCreate) SetNillableAbout(s *string) *BusinessCreate {
+	if s != nil {
+		bc.SetAbout(*s)
+	}
+	return bc
+}
+
 // SetLogo sets the "logo" field.
 func (bc *BusinessCreate) SetLogo(s string) *BusinessCreate {
 	bc.mutation.SetLogo(s)
@@ -114,6 +129,20 @@ func (bc *BusinessCreate) SetWebsite(s string) *BusinessCreate {
 func (bc *BusinessCreate) SetNillableWebsite(s *string) *BusinessCreate {
 	if s != nil {
 		bc.SetWebsite(*s)
+	}
+	return bc
+}
+
+// SetActive sets the "active" field.
+func (bc *BusinessCreate) SetActive(b bool) *BusinessCreate {
+	bc.mutation.SetActive(b)
+	return bc
+}
+
+// SetNillableActive sets the "active" field if the given value is not nil.
+func (bc *BusinessCreate) SetNillableActive(b *bool) *BusinessCreate {
+	if b != nil {
+		bc.SetActive(*b)
 	}
 	return bc
 }
@@ -217,6 +246,21 @@ func (bc *BusinessCreate) AddSocials(s ...*Social) *BusinessCreate {
 	return bc.AddSocialIDs(ids...)
 }
 
+// AddServiceIDs adds the "services" edge to the BusinessServices entity by IDs.
+func (bc *BusinessCreate) AddServiceIDs(ids ...int) *BusinessCreate {
+	bc.mutation.AddServiceIDs(ids...)
+	return bc
+}
+
+// AddServices adds the "services" edges to the BusinessServices entity.
+func (bc *BusinessCreate) AddServices(b ...*BusinessServices) *BusinessCreate {
+	ids := make([]int, len(b))
+	for i := range b {
+		ids[i] = b[i].ID
+	}
+	return bc.AddServiceIDs(ids...)
+}
+
 // AddManageIDs adds the "manages" edge to the Manager entity by IDs.
 func (bc *BusinessCreate) AddManageIDs(ids ...string) *BusinessCreate {
 	bc.mutation.AddManageIDs(ids...)
@@ -279,6 +323,10 @@ func (bc *BusinessCreate) defaults() {
 		v := business.DefaultCategory
 		bc.mutation.SetCategory(v)
 	}
+	if _, ok := bc.mutation.Active(); !ok {
+		v := business.DefaultActive
+		bc.mutation.SetActive(v)
+	}
 	if _, ok := bc.mutation.Disabled(); !ok {
 		v := business.DefaultDisabled
 		bc.mutation.SetDisabled(v)
@@ -323,6 +371,14 @@ func (bc *BusinessCreate) check() error {
 		if err := business.EmailValidator(v); err != nil {
 			return &ValidationError{Name: "email", err: fmt.Errorf(`ent: validator failed for field "Business.email": %w`, err)}
 		}
+	}
+	if v, ok := bc.mutation.Website(); ok {
+		if err := business.WebsiteValidator(v); err != nil {
+			return &ValidationError{Name: "website", err: fmt.Errorf(`ent: validator failed for field "Business.website": %w`, err)}
+		}
+	}
+	if _, ok := bc.mutation.Active(); !ok {
+		return &ValidationError{Name: "active", err: errors.New(`ent: missing required field "Business.active"`)}
 	}
 	if _, ok := bc.mutation.Disabled(); !ok {
 		return &ValidationError{Name: "disabled", err: errors.New(`ent: missing required field "Business.disabled"`)}
@@ -388,6 +444,10 @@ func (bc *BusinessCreate) createSpec() (*Business, *sqlgraph.CreateSpec) {
 		_spec.SetField(business.FieldName, field.TypeString, value)
 		_node.Name = value
 	}
+	if value, ok := bc.mutation.About(); ok {
+		_spec.SetField(business.FieldAbout, field.TypeString, value)
+		_node.About = value
+	}
 	if value, ok := bc.mutation.Logo(); ok {
 		_spec.SetField(business.FieldLogo, field.TypeString, value)
 		_node.Logo = value
@@ -399,6 +459,10 @@ func (bc *BusinessCreate) createSpec() (*Business, *sqlgraph.CreateSpec) {
 	if value, ok := bc.mutation.Website(); ok {
 		_spec.SetField(business.FieldWebsite, field.TypeString, value)
 		_node.Website = value
+	}
+	if value, ok := bc.mutation.Active(); ok {
+		_spec.SetField(business.FieldActive, field.TypeBool, value)
+		_node.Active = value
 	}
 	if value, ok := bc.mutation.Disabled(); ok {
 		_spec.SetField(business.FieldDisabled, field.TypeBool, value)
@@ -429,6 +493,22 @@ func (bc *BusinessCreate) createSpec() (*Business, *sqlgraph.CreateSpec) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(social.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := bc.mutation.ServicesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   business.ServicesTable,
+			Columns: []string{business.ServicesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(businessservices.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {

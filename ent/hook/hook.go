@@ -21,6 +21,30 @@ func (f BusinessFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, er
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.BusinessMutation", m)
 }
 
+// The BusinessFeatureFunc type is an adapter to allow the use of ordinary
+// function as BusinessFeature mutator.
+type BusinessFeatureFunc func(context.Context, *ent.BusinessFeatureMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f BusinessFeatureFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.BusinessFeatureMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.BusinessFeatureMutation", m)
+}
+
+// The BusinessServicesFunc type is an adapter to allow the use of ordinary
+// function as BusinessServices mutator.
+type BusinessServicesFunc func(context.Context, *ent.BusinessServicesMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f BusinessServicesFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.BusinessServicesMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.BusinessServicesMutation", m)
+}
+
 // The ManagerFunc type is an adapter to allow the use of ordinary
 // function as Manager mutator.
 type ManagerFunc func(context.Context, *ent.ManagerMutation) (ent.Value, error)
@@ -45,6 +69,18 @@ func (f PermissionFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, 
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.PermissionMutation", m)
 }
 
+// The ProviderFunc type is an adapter to allow the use of ordinary
+// function as Provider mutator.
+type ProviderFunc func(context.Context, *ent.ProviderMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f ProviderFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.ProviderMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.ProviderMutation", m)
+}
+
 // The RoleFunc type is an adapter to allow the use of ordinary
 // function as Role mutator.
 type RoleFunc func(context.Context, *ent.RoleMutation) (ent.Value, error)
@@ -55,6 +91,18 @@ func (f RoleFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error)
 		return f(ctx, mv)
 	}
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.RoleMutation", m)
+}
+
+// The ServiceFunc type is an adapter to allow the use of ordinary
+// function as Service mutator.
+type ServiceFunc func(context.Context, *ent.ServiceMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f ServiceFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.ServiceMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.ServiceMutation", m)
 }
 
 // The SocialFunc type is an adapter to allow the use of ordinary

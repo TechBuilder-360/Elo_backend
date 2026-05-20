@@ -130,9 +130,14 @@ func Disabled(v bool) predicate.User {
 	return predicate.User(sql.FieldEQ(FieldDisabled, v))
 }
 
-// Tier applies equality check predicate on the "tier" field. It's identical to TierEQ.
-func Tier(v int8) predicate.User {
-	return predicate.User(sql.FieldEQ(FieldTier, v))
+// DisableReason applies equality check predicate on the "disable_reason" field. It's identical to DisableReasonEQ.
+func DisableReason(v bool) predicate.User {
+	return predicate.User(sql.FieldEQ(FieldDisableReason, v))
+}
+
+// Verified applies equality check predicate on the "verified" field. It's identical to VerifiedEQ.
+func Verified(v bool) predicate.User {
+	return predicate.User(sql.FieldEQ(FieldVerified, v))
 }
 
 // CreatedAtEQ applies the EQ predicate on the "created_at" field.
@@ -830,44 +835,34 @@ func DisabledNEQ(v bool) predicate.User {
 	return predicate.User(sql.FieldNEQ(FieldDisabled, v))
 }
 
-// TierEQ applies the EQ predicate on the "tier" field.
-func TierEQ(v int8) predicate.User {
-	return predicate.User(sql.FieldEQ(FieldTier, v))
+// DisableReasonEQ applies the EQ predicate on the "disable_reason" field.
+func DisableReasonEQ(v bool) predicate.User {
+	return predicate.User(sql.FieldEQ(FieldDisableReason, v))
 }
 
-// TierNEQ applies the NEQ predicate on the "tier" field.
-func TierNEQ(v int8) predicate.User {
-	return predicate.User(sql.FieldNEQ(FieldTier, v))
+// DisableReasonNEQ applies the NEQ predicate on the "disable_reason" field.
+func DisableReasonNEQ(v bool) predicate.User {
+	return predicate.User(sql.FieldNEQ(FieldDisableReason, v))
 }
 
-// TierIn applies the In predicate on the "tier" field.
-func TierIn(vs ...int8) predicate.User {
-	return predicate.User(sql.FieldIn(FieldTier, vs...))
+// DisableReasonIsNil applies the IsNil predicate on the "disable_reason" field.
+func DisableReasonIsNil() predicate.User {
+	return predicate.User(sql.FieldIsNull(FieldDisableReason))
 }
 
-// TierNotIn applies the NotIn predicate on the "tier" field.
-func TierNotIn(vs ...int8) predicate.User {
-	return predicate.User(sql.FieldNotIn(FieldTier, vs...))
+// DisableReasonNotNil applies the NotNil predicate on the "disable_reason" field.
+func DisableReasonNotNil() predicate.User {
+	return predicate.User(sql.FieldNotNull(FieldDisableReason))
 }
 
-// TierGT applies the GT predicate on the "tier" field.
-func TierGT(v int8) predicate.User {
-	return predicate.User(sql.FieldGT(FieldTier, v))
+// VerifiedEQ applies the EQ predicate on the "verified" field.
+func VerifiedEQ(v bool) predicate.User {
+	return predicate.User(sql.FieldEQ(FieldVerified, v))
 }
 
-// TierGTE applies the GTE predicate on the "tier" field.
-func TierGTE(v int8) predicate.User {
-	return predicate.User(sql.FieldGTE(FieldTier, v))
-}
-
-// TierLT applies the LT predicate on the "tier" field.
-func TierLT(v int8) predicate.User {
-	return predicate.User(sql.FieldLT(FieldTier, v))
-}
-
-// TierLTE applies the LTE predicate on the "tier" field.
-func TierLTE(v int8) predicate.User {
-	return predicate.User(sql.FieldLTE(FieldTier, v))
+// VerifiedNEQ applies the NEQ predicate on the "verified" field.
+func VerifiedNEQ(v bool) predicate.User {
+	return predicate.User(sql.FieldNEQ(FieldVerified, v))
 }
 
 // HasManages applies the HasEdge predicate on the "manages" edge.
