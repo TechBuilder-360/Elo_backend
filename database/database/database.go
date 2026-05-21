@@ -19,10 +19,6 @@ type config struct {
 	DbPort uint   `env:"DB_PORT"`
 }
 
-// type Client struct {
-// 	DBClient *ent.Client
-// }
-
 var dbInstance *ent.Client
 
 func initializeDB() {

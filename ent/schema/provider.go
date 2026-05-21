@@ -3,11 +3,18 @@ package schema
 import (
 	"entgo.io/ent"
 	"entgo.io/ent/schema/field"
+	"entgo.io/ent/schema/index"
 )
 
 // Provider holds the schema definition for the Provider entity.
 type Provider struct {
 	ent.Schema
+}
+
+func (Provider) Mixin() []ent.Mixin {
+	return []ent.Mixin{
+		BaseMixin{},
+	}
 }
 
 // Fields of the Provider.
@@ -26,4 +33,11 @@ func (Provider) Fields() []ent.Field {
 // Edges of the Provider.
 func (Provider) Edges() []ent.Edge {
 	return nil
+}
+
+// Indexes of the Provider.
+func (Provider) Indexes() []ent.Index {
+	return []ent.Index{
+		index.Fields("slug").Unique(),
+	}
 }

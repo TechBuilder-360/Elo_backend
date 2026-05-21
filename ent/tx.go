@@ -14,6 +14,8 @@ type Tx struct {
 	config
 	// Business is the client for interacting with the Business builders.
 	Business *BusinessClient
+	// BusinessDocument is the client for interacting with the BusinessDocument builders.
+	BusinessDocument *BusinessDocumentClient
 	// BusinessFeature is the client for interacting with the BusinessFeature builders.
 	BusinessFeature *BusinessFeatureClient
 	// BusinessServices is the client for interacting with the BusinessServices builders.
@@ -32,6 +34,8 @@ type Tx struct {
 	Social *SocialClient
 	// User is the client for interacting with the User builders.
 	User *UserClient
+	// UserDocument is the client for interacting with the UserDocument builders.
+	UserDocument *UserDocumentClient
 
 	// lazily loaded.
 	client     *Client
@@ -164,6 +168,7 @@ func (tx *Tx) Client() *Client {
 
 func (tx *Tx) init() {
 	tx.Business = NewBusinessClient(tx.config)
+	tx.BusinessDocument = NewBusinessDocumentClient(tx.config)
 	tx.BusinessFeature = NewBusinessFeatureClient(tx.config)
 	tx.BusinessServices = NewBusinessServicesClient(tx.config)
 	tx.Manager = NewManagerClient(tx.config)
@@ -173,6 +178,7 @@ func (tx *Tx) init() {
 	tx.Service = NewServiceClient(tx.config)
 	tx.Social = NewSocialClient(tx.config)
 	tx.User = NewUserClient(tx.config)
+	tx.UserDocument = NewUserDocumentClient(tx.config)
 }
 
 // txDriver wraps the given dialect.Tx with a nop dialect.Driver implementation.

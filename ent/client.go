@@ -16,6 +16,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"github.com/Toflex/directory_v2/ent/business"
+	"github.com/Toflex/directory_v2/ent/businessdocument"
 	"github.com/Toflex/directory_v2/ent/businessfeature"
 	"github.com/Toflex/directory_v2/ent/businessservices"
 	"github.com/Toflex/directory_v2/ent/manager"
@@ -25,6 +26,7 @@ import (
 	"github.com/Toflex/directory_v2/ent/service"
 	"github.com/Toflex/directory_v2/ent/social"
 	"github.com/Toflex/directory_v2/ent/user"
+	"github.com/Toflex/directory_v2/ent/userdocument"
 )
 
 // Client is the client that holds all ent builders.
@@ -34,6 +36,8 @@ type Client struct {
 	Schema *migrate.Schema
 	// Business is the client for interacting with the Business builders.
 	Business *BusinessClient
+	// BusinessDocument is the client for interacting with the BusinessDocument builders.
+	BusinessDocument *BusinessDocumentClient
 	// BusinessFeature is the client for interacting with the BusinessFeature builders.
 	BusinessFeature *BusinessFeatureClient
 	// BusinessServices is the client for interacting with the BusinessServices builders.
@@ -52,6 +56,8 @@ type Client struct {
 	Social *SocialClient
 	// User is the client for interacting with the User builders.
 	User *UserClient
+	// UserDocument is the client for interacting with the UserDocument builders.
+	UserDocument *UserDocumentClient
 }
 
 // NewClient creates a new client configured with the given options.
@@ -64,6 +70,7 @@ func NewClient(opts ...Option) *Client {
 func (c *Client) init() {
 	c.Schema = migrate.NewSchema(c.driver)
 	c.Business = NewBusinessClient(c.config)
+	c.BusinessDocument = NewBusinessDocumentClient(c.config)
 	c.BusinessFeature = NewBusinessFeatureClient(c.config)
 	c.BusinessServices = NewBusinessServicesClient(c.config)
 	c.Manager = NewManagerClient(c.config)
@@ -73,6 +80,7 @@ func (c *Client) init() {
 	c.Service = NewServiceClient(c.config)
 	c.Social = NewSocialClient(c.config)
 	c.User = NewUserClient(c.config)
+	c.UserDocument = NewUserDocumentClient(c.config)
 }
 
 type (
@@ -166,6 +174,7 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		ctx:              ctx,
 		config:           cfg,
 		Business:         NewBusinessClient(cfg),
+		BusinessDocument: NewBusinessDocumentClient(cfg),
 		BusinessFeature:  NewBusinessFeatureClient(cfg),
 		BusinessServices: NewBusinessServicesClient(cfg),
 		Manager:          NewManagerClient(cfg),
@@ -175,6 +184,7 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		Service:          NewServiceClient(cfg),
 		Social:           NewSocialClient(cfg),
 		User:             NewUserClient(cfg),
+		UserDocument:     NewUserDocumentClient(cfg),
 	}, nil
 }
 
@@ -195,6 +205,7 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		ctx:              ctx,
 		config:           cfg,
 		Business:         NewBusinessClient(cfg),
+		BusinessDocument: NewBusinessDocumentClient(cfg),
 		BusinessFeature:  NewBusinessFeatureClient(cfg),
 		BusinessServices: NewBusinessServicesClient(cfg),
 		Manager:          NewManagerClient(cfg),
@@ -204,6 +215,7 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		Service:          NewServiceClient(cfg),
 		Social:           NewSocialClient(cfg),
 		User:             NewUserClient(cfg),
+		UserDocument:     NewUserDocumentClient(cfg),
 	}, nil
 }
 
@@ -233,8 +245,9 @@ func (c *Client) Close() error {
 // In order to add hooks to a specific client, call: `client.Node.Use(...)`.
 func (c *Client) Use(hooks ...Hook) {
 	for _, n := range []interface{ Use(...Hook) }{
-		c.Business, c.BusinessFeature, c.BusinessServices, c.Manager, c.Permission,
-		c.Provider, c.Role, c.Service, c.Social, c.User,
+		c.Business, c.BusinessDocument, c.BusinessFeature, c.BusinessServices,
+		c.Manager, c.Permission, c.Provider, c.Role, c.Service, c.Social, c.User,
+		c.UserDocument,
 	} {
 		n.Use(hooks...)
 	}
@@ -244,8 +257,9 @@ func (c *Client) Use(hooks ...Hook) {
 // In order to add interceptors to a specific client, call: `client.Node.Intercept(...)`.
 func (c *Client) Intercept(interceptors ...Interceptor) {
 	for _, n := range []interface{ Intercept(...Interceptor) }{
-		c.Business, c.BusinessFeature, c.BusinessServices, c.Manager, c.Permission,
-		c.Provider, c.Role, c.Service, c.Social, c.User,
+		c.Business, c.BusinessDocument, c.BusinessFeature, c.BusinessServices,
+		c.Manager, c.Permission, c.Provider, c.Role, c.Service, c.Social, c.User,
+		c.UserDocument,
 	} {
 		n.Intercept(interceptors...)
 	}
@@ -256,6 +270,8 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 	switch m := m.(type) {
 	case *BusinessMutation:
 		return c.Business.mutate(ctx, m)
+	case *BusinessDocumentMutation:
+		return c.BusinessDocument.mutate(ctx, m)
 	case *BusinessFeatureMutation:
 		return c.BusinessFeature.mutate(ctx, m)
 	case *BusinessServicesMutation:
@@ -274,6 +290,8 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.Social.mutate(ctx, m)
 	case *UserMutation:
 		return c.User.mutate(ctx, m)
+	case *UserDocumentMutation:
+		return c.UserDocument.mutate(ctx, m)
 	default:
 		return nil, fmt.Errorf("ent: unknown mutation type %T", m)
 	}
@@ -435,6 +453,38 @@ func (c *BusinessClient) QueryManages(b *Business) *ManagerQuery {
 	return query
 }
 
+// QueryBusinessDocuments queries the business_documents edge of a Business.
+func (c *BusinessClient) QueryBusinessDocuments(b *Business) *BusinessDocumentQuery {
+	query := (&BusinessDocumentClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := b.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(business.Table, business.FieldID, id),
+			sqlgraph.To(businessdocument.Table, businessdocument.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, business.BusinessDocumentsTable, business.BusinessDocumentsColumn),
+		)
+		fromV = sqlgraph.Neighbors(b.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryUserDocuments queries the user_documents edge of a Business.
+func (c *BusinessClient) QueryUserDocuments(b *Business) *UserDocumentQuery {
+	query := (&UserDocumentClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := b.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(business.Table, business.FieldID, id),
+			sqlgraph.To(userdocument.Table, userdocument.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, business.UserDocumentsTable, business.UserDocumentsColumn),
+		)
+		fromV = sqlgraph.Neighbors(b.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // Hooks returns the client hooks.
 func (c *BusinessClient) Hooks() []Hook {
 	return c.hooks.Business
@@ -457,6 +507,155 @@ func (c *BusinessClient) mutate(ctx context.Context, m *BusinessMutation) (Value
 		return (&BusinessDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
 	default:
 		return nil, fmt.Errorf("ent: unknown Business mutation op: %q", m.Op())
+	}
+}
+
+// BusinessDocumentClient is a client for the BusinessDocument schema.
+type BusinessDocumentClient struct {
+	config
+}
+
+// NewBusinessDocumentClient returns a client for the BusinessDocument from the given config.
+func NewBusinessDocumentClient(c config) *BusinessDocumentClient {
+	return &BusinessDocumentClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `businessdocument.Hooks(f(g(h())))`.
+func (c *BusinessDocumentClient) Use(hooks ...Hook) {
+	c.hooks.BusinessDocument = append(c.hooks.BusinessDocument, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `businessdocument.Intercept(f(g(h())))`.
+func (c *BusinessDocumentClient) Intercept(interceptors ...Interceptor) {
+	c.inters.BusinessDocument = append(c.inters.BusinessDocument, interceptors...)
+}
+
+// Create returns a builder for creating a BusinessDocument entity.
+func (c *BusinessDocumentClient) Create() *BusinessDocumentCreate {
+	mutation := newBusinessDocumentMutation(c.config, OpCreate)
+	return &BusinessDocumentCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of BusinessDocument entities.
+func (c *BusinessDocumentClient) CreateBulk(builders ...*BusinessDocumentCreate) *BusinessDocumentCreateBulk {
+	return &BusinessDocumentCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *BusinessDocumentClient) MapCreateBulk(slice any, setFunc func(*BusinessDocumentCreate, int)) *BusinessDocumentCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &BusinessDocumentCreateBulk{err: fmt.Errorf("calling to BusinessDocumentClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*BusinessDocumentCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &BusinessDocumentCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for BusinessDocument.
+func (c *BusinessDocumentClient) Update() *BusinessDocumentUpdate {
+	mutation := newBusinessDocumentMutation(c.config, OpUpdate)
+	return &BusinessDocumentUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *BusinessDocumentClient) UpdateOne(bd *BusinessDocument) *BusinessDocumentUpdateOne {
+	mutation := newBusinessDocumentMutation(c.config, OpUpdateOne, withBusinessDocument(bd))
+	return &BusinessDocumentUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *BusinessDocumentClient) UpdateOneID(id int) *BusinessDocumentUpdateOne {
+	mutation := newBusinessDocumentMutation(c.config, OpUpdateOne, withBusinessDocumentID(id))
+	return &BusinessDocumentUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for BusinessDocument.
+func (c *BusinessDocumentClient) Delete() *BusinessDocumentDelete {
+	mutation := newBusinessDocumentMutation(c.config, OpDelete)
+	return &BusinessDocumentDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *BusinessDocumentClient) DeleteOne(bd *BusinessDocument) *BusinessDocumentDeleteOne {
+	return c.DeleteOneID(bd.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *BusinessDocumentClient) DeleteOneID(id int) *BusinessDocumentDeleteOne {
+	builder := c.Delete().Where(businessdocument.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &BusinessDocumentDeleteOne{builder}
+}
+
+// Query returns a query builder for BusinessDocument.
+func (c *BusinessDocumentClient) Query() *BusinessDocumentQuery {
+	return &BusinessDocumentQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeBusinessDocument},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a BusinessDocument entity by its id.
+func (c *BusinessDocumentClient) Get(ctx context.Context, id int) (*BusinessDocument, error) {
+	return c.Query().Where(businessdocument.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *BusinessDocumentClient) GetX(ctx context.Context, id int) *BusinessDocument {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryBusinessDocument queries the business_document edge of a BusinessDocument.
+func (c *BusinessDocumentClient) QueryBusinessDocument(bd *BusinessDocument) *BusinessQuery {
+	query := (&BusinessClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := bd.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(businessdocument.Table, businessdocument.FieldID, id),
+			sqlgraph.To(business.Table, business.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, businessdocument.BusinessDocumentTable, businessdocument.BusinessDocumentColumn),
+		)
+		fromV = sqlgraph.Neighbors(bd.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *BusinessDocumentClient) Hooks() []Hook {
+	return c.hooks.BusinessDocument
+}
+
+// Interceptors returns the client interceptors.
+func (c *BusinessDocumentClient) Interceptors() []Interceptor {
+	return c.inters.BusinessDocument
+}
+
+func (c *BusinessDocumentClient) mutate(ctx context.Context, m *BusinessDocumentMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&BusinessDocumentCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&BusinessDocumentUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&BusinessDocumentUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&BusinessDocumentDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown BusinessDocument mutation op: %q", m.Op())
 	}
 }
 
@@ -1117,7 +1316,7 @@ func (c *ProviderClient) UpdateOne(pr *Provider) *ProviderUpdateOne {
 }
 
 // UpdateOneID returns an update builder for the given id.
-func (c *ProviderClient) UpdateOneID(id int) *ProviderUpdateOne {
+func (c *ProviderClient) UpdateOneID(id string) *ProviderUpdateOne {
 	mutation := newProviderMutation(c.config, OpUpdateOne, withProviderID(id))
 	return &ProviderUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
@@ -1134,7 +1333,7 @@ func (c *ProviderClient) DeleteOne(pr *Provider) *ProviderDeleteOne {
 }
 
 // DeleteOneID returns a builder for deleting the given entity by its id.
-func (c *ProviderClient) DeleteOneID(id int) *ProviderDeleteOne {
+func (c *ProviderClient) DeleteOneID(id string) *ProviderDeleteOne {
 	builder := c.Delete().Where(provider.ID(id))
 	builder.mutation.id = &id
 	builder.mutation.op = OpDeleteOne
@@ -1151,12 +1350,12 @@ func (c *ProviderClient) Query() *ProviderQuery {
 }
 
 // Get returns a Provider entity by its id.
-func (c *ProviderClient) Get(ctx context.Context, id int) (*Provider, error) {
+func (c *ProviderClient) Get(ctx context.Context, id string) (*Provider, error) {
 	return c.Query().Where(provider.ID(id)).Only(ctx)
 }
 
 // GetX is like Get, but panics if an error occurs.
-func (c *ProviderClient) GetX(ctx context.Context, id int) *Provider {
+func (c *ProviderClient) GetX(ctx context.Context, id string) *Provider {
 	obj, err := c.Get(ctx, id)
 	if err != nil {
 		panic(err)
@@ -1744,6 +1943,22 @@ func (c *UserClient) QueryManages(u *User) *ManagerQuery {
 	return query
 }
 
+// QueryUserDocuments queries the user_documents edge of a User.
+func (c *UserClient) QueryUserDocuments(u *User) *UserDocumentQuery {
+	query := (&UserDocumentClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := u.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, id),
+			sqlgraph.To(userdocument.Table, userdocument.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, user.UserDocumentsTable, user.UserDocumentsColumn),
+		)
+		fromV = sqlgraph.Neighbors(u.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // Hooks returns the client hooks.
 func (c *UserClient) Hooks() []Hook {
 	return c.hooks.User
@@ -1769,14 +1984,164 @@ func (c *UserClient) mutate(ctx context.Context, m *UserMutation) (Value, error)
 	}
 }
 
+// UserDocumentClient is a client for the UserDocument schema.
+type UserDocumentClient struct {
+	config
+}
+
+// NewUserDocumentClient returns a client for the UserDocument from the given config.
+func NewUserDocumentClient(c config) *UserDocumentClient {
+	return &UserDocumentClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `userdocument.Hooks(f(g(h())))`.
+func (c *UserDocumentClient) Use(hooks ...Hook) {
+	c.hooks.UserDocument = append(c.hooks.UserDocument, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `userdocument.Intercept(f(g(h())))`.
+func (c *UserDocumentClient) Intercept(interceptors ...Interceptor) {
+	c.inters.UserDocument = append(c.inters.UserDocument, interceptors...)
+}
+
+// Create returns a builder for creating a UserDocument entity.
+func (c *UserDocumentClient) Create() *UserDocumentCreate {
+	mutation := newUserDocumentMutation(c.config, OpCreate)
+	return &UserDocumentCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of UserDocument entities.
+func (c *UserDocumentClient) CreateBulk(builders ...*UserDocumentCreate) *UserDocumentCreateBulk {
+	return &UserDocumentCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *UserDocumentClient) MapCreateBulk(slice any, setFunc func(*UserDocumentCreate, int)) *UserDocumentCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &UserDocumentCreateBulk{err: fmt.Errorf("calling to UserDocumentClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*UserDocumentCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &UserDocumentCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for UserDocument.
+func (c *UserDocumentClient) Update() *UserDocumentUpdate {
+	mutation := newUserDocumentMutation(c.config, OpUpdate)
+	return &UserDocumentUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *UserDocumentClient) UpdateOne(ud *UserDocument) *UserDocumentUpdateOne {
+	mutation := newUserDocumentMutation(c.config, OpUpdateOne, withUserDocument(ud))
+	return &UserDocumentUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *UserDocumentClient) UpdateOneID(id int) *UserDocumentUpdateOne {
+	mutation := newUserDocumentMutation(c.config, OpUpdateOne, withUserDocumentID(id))
+	return &UserDocumentUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for UserDocument.
+func (c *UserDocumentClient) Delete() *UserDocumentDelete {
+	mutation := newUserDocumentMutation(c.config, OpDelete)
+	return &UserDocumentDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *UserDocumentClient) DeleteOne(ud *UserDocument) *UserDocumentDeleteOne {
+	return c.DeleteOneID(ud.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *UserDocumentClient) DeleteOneID(id int) *UserDocumentDeleteOne {
+	builder := c.Delete().Where(userdocument.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &UserDocumentDeleteOne{builder}
+}
+
+// Query returns a query builder for UserDocument.
+func (c *UserDocumentClient) Query() *UserDocumentQuery {
+	return &UserDocumentQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeUserDocument},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a UserDocument entity by its id.
+func (c *UserDocumentClient) Get(ctx context.Context, id int) (*UserDocument, error) {
+	return c.Query().Where(userdocument.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *UserDocumentClient) GetX(ctx context.Context, id int) *UserDocument {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryUserDocument queries the user_document edge of a UserDocument.
+func (c *UserDocumentClient) QueryUserDocument(ud *UserDocument) *BusinessQuery {
+	query := (&BusinessClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := ud.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(userdocument.Table, userdocument.FieldID, id),
+			sqlgraph.To(business.Table, business.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, userdocument.UserDocumentTable, userdocument.UserDocumentColumn),
+		)
+		fromV = sqlgraph.Neighbors(ud.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *UserDocumentClient) Hooks() []Hook {
+	return c.hooks.UserDocument
+}
+
+// Interceptors returns the client interceptors.
+func (c *UserDocumentClient) Interceptors() []Interceptor {
+	return c.inters.UserDocument
+}
+
+func (c *UserDocumentClient) mutate(ctx context.Context, m *UserDocumentMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&UserDocumentCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&UserDocumentUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&UserDocumentUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&UserDocumentDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown UserDocument mutation op: %q", m.Op())
+	}
+}
+
 // hooks and interceptors per client, for fast access.
 type (
 	hooks struct {
-		Business, BusinessFeature, BusinessServices, Manager, Permission, Provider,
-		Role, Service, Social, User []ent.Hook
+		Business, BusinessDocument, BusinessFeature, BusinessServices, Manager,
+		Permission, Provider, Role, Service, Social, User, UserDocument []ent.Hook
 	}
 	inters struct {
-		Business, BusinessFeature, BusinessServices, Manager, Permission, Provider,
-		Role, Service, Social, User []ent.Interceptor
+		Business, BusinessDocument, BusinessFeature, BusinessServices, Manager,
+		Permission, Provider, Role, Service, Social, User,
+		UserDocument []ent.Interceptor
 	}
 )

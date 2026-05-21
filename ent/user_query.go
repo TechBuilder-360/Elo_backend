@@ -15,16 +15,18 @@ import (
 	"github.com/Toflex/directory_v2/ent/manager"
 	"github.com/Toflex/directory_v2/ent/predicate"
 	"github.com/Toflex/directory_v2/ent/user"
+	"github.com/Toflex/directory_v2/ent/userdocument"
 )
 
 // UserQuery is the builder for querying User entities.
 type UserQuery struct {
 	config
-	ctx         *QueryContext
-	order       []user.OrderOption
-	inters      []Interceptor
-	predicates  []predicate.User
-	withManages *ManagerQuery
+	ctx               *QueryContext
+	order             []user.OrderOption
+	inters            []Interceptor
+	predicates        []predicate.User
+	withManages       *ManagerQuery
+	withUserDocuments *UserDocumentQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -76,6 +78,28 @@ func (uq *UserQuery) QueryManages() *ManagerQuery {
 			sqlgraph.From(user.Table, user.FieldID, selector),
 			sqlgraph.To(manager.Table, manager.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, user.ManagesTable, user.ManagesColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(uq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryUserDocuments chains the current query on the "user_documents" edge.
+func (uq *UserQuery) QueryUserDocuments() *UserDocumentQuery {
+	query := (&UserDocumentClient{config: uq.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := uq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := uq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, selector),
+			sqlgraph.To(userdocument.Table, userdocument.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, user.UserDocumentsTable, user.UserDocumentsColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(uq.driver.Dialect(), step)
 		return fromU, nil
@@ -270,12 +294,13 @@ func (uq *UserQuery) Clone() *UserQuery {
 		return nil
 	}
 	return &UserQuery{
-		config:      uq.config,
-		ctx:         uq.ctx.Clone(),
-		order:       append([]user.OrderOption{}, uq.order...),
-		inters:      append([]Interceptor{}, uq.inters...),
-		predicates:  append([]predicate.User{}, uq.predicates...),
-		withManages: uq.withManages.Clone(),
+		config:            uq.config,
+		ctx:               uq.ctx.Clone(),
+		order:             append([]user.OrderOption{}, uq.order...),
+		inters:            append([]Interceptor{}, uq.inters...),
+		predicates:        append([]predicate.User{}, uq.predicates...),
+		withManages:       uq.withManages.Clone(),
+		withUserDocuments: uq.withUserDocuments.Clone(),
 		// clone intermediate query.
 		sql:  uq.sql.Clone(),
 		path: uq.path,
@@ -290,6 +315,17 @@ func (uq *UserQuery) WithManages(opts ...func(*ManagerQuery)) *UserQuery {
 		opt(query)
 	}
 	uq.withManages = query
+	return uq
+}
+
+// WithUserDocuments tells the query-builder to eager-load the nodes that are connected to
+// the "user_documents" edge. The optional arguments are used to configure the query builder of the edge.
+func (uq *UserQuery) WithUserDocuments(opts ...func(*UserDocumentQuery)) *UserQuery {
+	query := (&UserDocumentClient{config: uq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	uq.withUserDocuments = query
 	return uq
 }
 
@@ -371,8 +407,9 @@ func (uq *UserQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*User, e
 	var (
 		nodes       = []*User{}
 		_spec       = uq.querySpec()
-		loadedTypes = [1]bool{
+		loadedTypes = [2]bool{
 			uq.withManages != nil,
+			uq.withUserDocuments != nil,
 		}
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
@@ -397,6 +434,13 @@ func (uq *UserQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*User, e
 		if err := uq.loadManages(ctx, query, nodes,
 			func(n *User) { n.Edges.Manages = []*Manager{} },
 			func(n *User, e *Manager) { n.Edges.Manages = append(n.Edges.Manages, e) }); err != nil {
+			return nil, err
+		}
+	}
+	if query := uq.withUserDocuments; query != nil {
+		if err := uq.loadUserDocuments(ctx, query, nodes,
+			func(n *User) { n.Edges.UserDocuments = []*UserDocument{} },
+			func(n *User, e *UserDocument) { n.Edges.UserDocuments = append(n.Edges.UserDocuments, e) }); err != nil {
 			return nil, err
 		}
 	}
@@ -428,6 +472,37 @@ func (uq *UserQuery) loadManages(ctx context.Context, query *ManagerQuery, nodes
 		node, ok := nodeids[fk]
 		if !ok {
 			return fmt.Errorf(`unexpected referenced foreign-key "user_id" returned %v for node %v`, fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (uq *UserQuery) loadUserDocuments(ctx context.Context, query *UserDocumentQuery, nodes []*User, init func(*User), assign func(*User, *UserDocument)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[string]*User)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	query.withFKs = true
+	query.Where(predicate.UserDocument(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(user.UserDocumentsColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.user_user_documents
+		if fk == nil {
+			return fmt.Errorf(`foreign-key "user_user_documents" is nil for node %v`, n.ID)
+		}
+		node, ok := nodeids[*fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "user_user_documents" returned %v for node %v`, *fk, n.ID)
 		}
 		assign(node, n)
 	}

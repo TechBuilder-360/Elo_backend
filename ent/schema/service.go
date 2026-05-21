@@ -3,6 +3,7 @@ package schema
 import (
 	"entgo.io/ent"
 	"entgo.io/ent/schema/field"
+	"entgo.io/ent/schema/index"
 )
 
 // Service holds the schema definition for the Service entity.
@@ -66,4 +67,11 @@ func (Service) Fields() []ent.Field {
 // Edges of the Service.
 func (Service) Edges() []ent.Edge {
 	return nil
+}
+
+// Indexes of the Service.
+func (Service) Indexes() []ent.Index {
+	return []ent.Index{
+		index.Fields("identifier").Unique(),
+	}
 }

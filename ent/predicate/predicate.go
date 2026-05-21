@@ -9,6 +9,9 @@ import (
 // Business is the predicate function for business builders.
 type Business func(*sql.Selector)
 
+// BusinessDocument is the predicate function for businessdocument builders.
+type BusinessDocument func(*sql.Selector)
+
 // BusinessFeature is the predicate function for businessfeature builders.
 type BusinessFeature func(*sql.Selector)
 
@@ -35,3 +38,6 @@ type Social func(*sql.Selector)
 
 // User is the predicate function for user builders.
 type User func(*sql.Selector)
+
+// UserDocument is the predicate function for userdocument builders.
+type UserDocument func(*sql.Selector)

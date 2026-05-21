@@ -8,6 +8,8 @@ import (
 	"fmt"
 	"time"
 
+	"entgo.io/ent/dialect"
+	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/Toflex/directory_v2/ent/schema"
@@ -19,6 +21,7 @@ type ServiceCreate struct {
 	config
 	mutation *ServiceMutation
 	hooks    []Hook
+	conflict []sql.ConflictOption
 }
 
 // SetCreatedAt sets the "created_at" field.
@@ -300,6 +303,7 @@ func (sc *ServiceCreate) createSpec() (*Service, *sqlgraph.CreateSpec) {
 		_node = &Service{config: sc.config}
 		_spec = sqlgraph.NewCreateSpec(service.Table, sqlgraph.NewFieldSpec(service.FieldID, field.TypeString))
 	)
+	_spec.OnConflict = sc.conflict
 	if id, ok := sc.mutation.ID(); ok {
 		_node.ID = id
 		_spec.ID.Value = id
@@ -351,11 +355,449 @@ func (sc *ServiceCreate) createSpec() (*Service, *sqlgraph.CreateSpec) {
 	return _node, _spec
 }
 
+// OnConflict allows configuring the `ON CONFLICT` / `ON DUPLICATE KEY` clause
+// of the `INSERT` statement. For example:
+//
+//	client.Service.Create().
+//		SetCreatedAt(v).
+//		OnConflict(
+//			// Update the row with the new values
+//			// the was proposed for insertion.
+//			sql.ResolveWithNewValues(),
+//		).
+//		// Override some of the fields with custom
+//		// update values.
+//		Update(func(u *ent.ServiceUpsert) {
+//			SetCreatedAt(v+v).
+//		}).
+//		Exec(ctx)
+func (sc *ServiceCreate) OnConflict(opts ...sql.ConflictOption) *ServiceUpsertOne {
+	sc.conflict = opts
+	return &ServiceUpsertOne{
+		create: sc,
+	}
+}
+
+// OnConflictColumns calls `OnConflict` and configures the columns
+// as conflict target. Using this option is equivalent to using:
+//
+//	client.Service.Create().
+//		OnConflict(sql.ConflictColumns(columns...)).
+//		Exec(ctx)
+func (sc *ServiceCreate) OnConflictColumns(columns ...string) *ServiceUpsertOne {
+	sc.conflict = append(sc.conflict, sql.ConflictColumns(columns...))
+	return &ServiceUpsertOne{
+		create: sc,
+	}
+}
+
+type (
+	// ServiceUpsertOne is the builder for "upsert"-ing
+	//  one Service node.
+	ServiceUpsertOne struct {
+		create *ServiceCreate
+	}
+
+	// ServiceUpsert is the "OnConflict" setter.
+	ServiceUpsert struct {
+		*sql.UpdateSet
+	}
+)
+
+// SetUpdatedAt sets the "updated_at" field.
+func (u *ServiceUpsert) SetUpdatedAt(v time.Time) *ServiceUpsert {
+	u.Set(service.FieldUpdatedAt, v)
+	return u
+}
+
+// UpdateUpdatedAt sets the "updated_at" field to the value that was provided on create.
+func (u *ServiceUpsert) UpdateUpdatedAt() *ServiceUpsert {
+	u.SetExcluded(service.FieldUpdatedAt)
+	return u
+}
+
+// SetDeletedAt sets the "deleted_at" field.
+func (u *ServiceUpsert) SetDeletedAt(v time.Time) *ServiceUpsert {
+	u.Set(service.FieldDeletedAt, v)
+	return u
+}
+
+// UpdateDeletedAt sets the "deleted_at" field to the value that was provided on create.
+func (u *ServiceUpsert) UpdateDeletedAt() *ServiceUpsert {
+	u.SetExcluded(service.FieldDeletedAt)
+	return u
+}
+
+// ClearDeletedAt clears the value of the "deleted_at" field.
+func (u *ServiceUpsert) ClearDeletedAt() *ServiceUpsert {
+	u.SetNull(service.FieldDeletedAt)
+	return u
+}
+
+// SetName sets the "name" field.
+func (u *ServiceUpsert) SetName(v string) *ServiceUpsert {
+	u.Set(service.FieldName, v)
+	return u
+}
+
+// UpdateName sets the "name" field to the value that was provided on create.
+func (u *ServiceUpsert) UpdateName() *ServiceUpsert {
+	u.SetExcluded(service.FieldName)
+	return u
+}
+
+// SetIdentifier sets the "identifier" field.
+func (u *ServiceUpsert) SetIdentifier(v string) *ServiceUpsert {
+	u.Set(service.FieldIdentifier, v)
+	return u
+}
+
+// UpdateIdentifier sets the "identifier" field to the value that was provided on create.
+func (u *ServiceUpsert) UpdateIdentifier() *ServiceUpsert {
+	u.SetExcluded(service.FieldIdentifier)
+	return u
+}
+
+// SetProvider sets the "provider" field.
+func (u *ServiceUpsert) SetProvider(v string) *ServiceUpsert {
+	u.Set(service.FieldProvider, v)
+	return u
+}
+
+// UpdateProvider sets the "provider" field to the value that was provided on create.
+func (u *ServiceUpsert) UpdateProvider() *ServiceUpsert {
+	u.SetExcluded(service.FieldProvider)
+	return u
+}
+
+// SetRequireSubscription sets the "require_subscription" field.
+func (u *ServiceUpsert) SetRequireSubscription(v bool) *ServiceUpsert {
+	u.Set(service.FieldRequireSubscription, v)
+	return u
+}
+
+// UpdateRequireSubscription sets the "require_subscription" field to the value that was provided on create.
+func (u *ServiceUpsert) UpdateRequireSubscription() *ServiceUpsert {
+	u.SetExcluded(service.FieldRequireSubscription)
+	return u
+}
+
+// SetActive sets the "active" field.
+func (u *ServiceUpsert) SetActive(v bool) *ServiceUpsert {
+	u.Set(service.FieldActive, v)
+	return u
+}
+
+// UpdateActive sets the "active" field to the value that was provided on create.
+func (u *ServiceUpsert) UpdateActive() *ServiceUpsert {
+	u.SetExcluded(service.FieldActive)
+	return u
+}
+
+// SetMin sets the "min" field.
+func (u *ServiceUpsert) SetMin(v int) *ServiceUpsert {
+	u.Set(service.FieldMin, v)
+	return u
+}
+
+// UpdateMin sets the "min" field to the value that was provided on create.
+func (u *ServiceUpsert) UpdateMin() *ServiceUpsert {
+	u.SetExcluded(service.FieldMin)
+	return u
+}
+
+// AddMin adds v to the "min" field.
+func (u *ServiceUpsert) AddMin(v int) *ServiceUpsert {
+	u.Add(service.FieldMin, v)
+	return u
+}
+
+// SetMax sets the "max" field.
+func (u *ServiceUpsert) SetMax(v int) *ServiceUpsert {
+	u.Set(service.FieldMax, v)
+	return u
+}
+
+// UpdateMax sets the "max" field to the value that was provided on create.
+func (u *ServiceUpsert) UpdateMax() *ServiceUpsert {
+	u.SetExcluded(service.FieldMax)
+	return u
+}
+
+// AddMax adds v to the "max" field.
+func (u *ServiceUpsert) AddMax(v int) *ServiceUpsert {
+	u.Add(service.FieldMax, v)
+	return u
+}
+
+// SetFee sets the "fee" field.
+func (u *ServiceUpsert) SetFee(v *schema.Fee) *ServiceUpsert {
+	u.Set(service.FieldFee, v)
+	return u
+}
+
+// UpdateFee sets the "fee" field to the value that was provided on create.
+func (u *ServiceUpsert) UpdateFee() *ServiceUpsert {
+	u.SetExcluded(service.FieldFee)
+	return u
+}
+
+// UpdateNewValues updates the mutable fields using the new values that were set on create except the ID field.
+// Using this option is equivalent to using:
+//
+//	client.Service.Create().
+//		OnConflict(
+//			sql.ResolveWithNewValues(),
+//			sql.ResolveWith(func(u *sql.UpdateSet) {
+//				u.SetIgnore(service.FieldID)
+//			}),
+//		).
+//		Exec(ctx)
+func (u *ServiceUpsertOne) UpdateNewValues() *ServiceUpsertOne {
+	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
+	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(s *sql.UpdateSet) {
+		if _, exists := u.create.mutation.ID(); exists {
+			s.SetIgnore(service.FieldID)
+		}
+		if _, exists := u.create.mutation.CreatedAt(); exists {
+			s.SetIgnore(service.FieldCreatedAt)
+		}
+	}))
+	return u
+}
+
+// Ignore sets each column to itself in case of conflict.
+// Using this option is equivalent to using:
+//
+//	client.Service.Create().
+//	    OnConflict(sql.ResolveWithIgnore()).
+//	    Exec(ctx)
+func (u *ServiceUpsertOne) Ignore() *ServiceUpsertOne {
+	u.create.conflict = append(u.create.conflict, sql.ResolveWithIgnore())
+	return u
+}
+
+// DoNothing configures the conflict_action to `DO NOTHING`.
+// Supported only by SQLite and PostgreSQL.
+func (u *ServiceUpsertOne) DoNothing() *ServiceUpsertOne {
+	u.create.conflict = append(u.create.conflict, sql.DoNothing())
+	return u
+}
+
+// Update allows overriding fields `UPDATE` values. See the ServiceCreate.OnConflict
+// documentation for more info.
+func (u *ServiceUpsertOne) Update(set func(*ServiceUpsert)) *ServiceUpsertOne {
+	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(update *sql.UpdateSet) {
+		set(&ServiceUpsert{UpdateSet: update})
+	}))
+	return u
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (u *ServiceUpsertOne) SetUpdatedAt(v time.Time) *ServiceUpsertOne {
+	return u.Update(func(s *ServiceUpsert) {
+		s.SetUpdatedAt(v)
+	})
+}
+
+// UpdateUpdatedAt sets the "updated_at" field to the value that was provided on create.
+func (u *ServiceUpsertOne) UpdateUpdatedAt() *ServiceUpsertOne {
+	return u.Update(func(s *ServiceUpsert) {
+		s.UpdateUpdatedAt()
+	})
+}
+
+// SetDeletedAt sets the "deleted_at" field.
+func (u *ServiceUpsertOne) SetDeletedAt(v time.Time) *ServiceUpsertOne {
+	return u.Update(func(s *ServiceUpsert) {
+		s.SetDeletedAt(v)
+	})
+}
+
+// UpdateDeletedAt sets the "deleted_at" field to the value that was provided on create.
+func (u *ServiceUpsertOne) UpdateDeletedAt() *ServiceUpsertOne {
+	return u.Update(func(s *ServiceUpsert) {
+		s.UpdateDeletedAt()
+	})
+}
+
+// ClearDeletedAt clears the value of the "deleted_at" field.
+func (u *ServiceUpsertOne) ClearDeletedAt() *ServiceUpsertOne {
+	return u.Update(func(s *ServiceUpsert) {
+		s.ClearDeletedAt()
+	})
+}
+
+// SetName sets the "name" field.
+func (u *ServiceUpsertOne) SetName(v string) *ServiceUpsertOne {
+	return u.Update(func(s *ServiceUpsert) {
+		s.SetName(v)
+	})
+}
+
+// UpdateName sets the "name" field to the value that was provided on create.
+func (u *ServiceUpsertOne) UpdateName() *ServiceUpsertOne {
+	return u.Update(func(s *ServiceUpsert) {
+		s.UpdateName()
+	})
+}
+
+// SetIdentifier sets the "identifier" field.
+func (u *ServiceUpsertOne) SetIdentifier(v string) *ServiceUpsertOne {
+	return u.Update(func(s *ServiceUpsert) {
+		s.SetIdentifier(v)
+	})
+}
+
+// UpdateIdentifier sets the "identifier" field to the value that was provided on create.
+func (u *ServiceUpsertOne) UpdateIdentifier() *ServiceUpsertOne {
+	return u.Update(func(s *ServiceUpsert) {
+		s.UpdateIdentifier()
+	})
+}
+
+// SetProvider sets the "provider" field.
+func (u *ServiceUpsertOne) SetProvider(v string) *ServiceUpsertOne {
+	return u.Update(func(s *ServiceUpsert) {
+		s.SetProvider(v)
+	})
+}
+
+// UpdateProvider sets the "provider" field to the value that was provided on create.
+func (u *ServiceUpsertOne) UpdateProvider() *ServiceUpsertOne {
+	return u.Update(func(s *ServiceUpsert) {
+		s.UpdateProvider()
+	})
+}
+
+// SetRequireSubscription sets the "require_subscription" field.
+func (u *ServiceUpsertOne) SetRequireSubscription(v bool) *ServiceUpsertOne {
+	return u.Update(func(s *ServiceUpsert) {
+		s.SetRequireSubscription(v)
+	})
+}
+
+// UpdateRequireSubscription sets the "require_subscription" field to the value that was provided on create.
+func (u *ServiceUpsertOne) UpdateRequireSubscription() *ServiceUpsertOne {
+	return u.Update(func(s *ServiceUpsert) {
+		s.UpdateRequireSubscription()
+	})
+}
+
+// SetActive sets the "active" field.
+func (u *ServiceUpsertOne) SetActive(v bool) *ServiceUpsertOne {
+	return u.Update(func(s *ServiceUpsert) {
+		s.SetActive(v)
+	})
+}
+
+// UpdateActive sets the "active" field to the value that was provided on create.
+func (u *ServiceUpsertOne) UpdateActive() *ServiceUpsertOne {
+	return u.Update(func(s *ServiceUpsert) {
+		s.UpdateActive()
+	})
+}
+
+// SetMin sets the "min" field.
+func (u *ServiceUpsertOne) SetMin(v int) *ServiceUpsertOne {
+	return u.Update(func(s *ServiceUpsert) {
+		s.SetMin(v)
+	})
+}
+
+// AddMin adds v to the "min" field.
+func (u *ServiceUpsertOne) AddMin(v int) *ServiceUpsertOne {
+	return u.Update(func(s *ServiceUpsert) {
+		s.AddMin(v)
+	})
+}
+
+// UpdateMin sets the "min" field to the value that was provided on create.
+func (u *ServiceUpsertOne) UpdateMin() *ServiceUpsertOne {
+	return u.Update(func(s *ServiceUpsert) {
+		s.UpdateMin()
+	})
+}
+
+// SetMax sets the "max" field.
+func (u *ServiceUpsertOne) SetMax(v int) *ServiceUpsertOne {
+	return u.Update(func(s *ServiceUpsert) {
+		s.SetMax(v)
+	})
+}
+
+// AddMax adds v to the "max" field.
+func (u *ServiceUpsertOne) AddMax(v int) *ServiceUpsertOne {
+	return u.Update(func(s *ServiceUpsert) {
+		s.AddMax(v)
+	})
+}
+
+// UpdateMax sets the "max" field to the value that was provided on create.
+func (u *ServiceUpsertOne) UpdateMax() *ServiceUpsertOne {
+	return u.Update(func(s *ServiceUpsert) {
+		s.UpdateMax()
+	})
+}
+
+// SetFee sets the "fee" field.
+func (u *ServiceUpsertOne) SetFee(v *schema.Fee) *ServiceUpsertOne {
+	return u.Update(func(s *ServiceUpsert) {
+		s.SetFee(v)
+	})
+}
+
+// UpdateFee sets the "fee" field to the value that was provided on create.
+func (u *ServiceUpsertOne) UpdateFee() *ServiceUpsertOne {
+	return u.Update(func(s *ServiceUpsert) {
+		s.UpdateFee()
+	})
+}
+
+// Exec executes the query.
+func (u *ServiceUpsertOne) Exec(ctx context.Context) error {
+	if len(u.create.conflict) == 0 {
+		return errors.New("ent: missing options for ServiceCreate.OnConflict")
+	}
+	return u.create.Exec(ctx)
+}
+
+// ExecX is like Exec, but panics if an error occurs.
+func (u *ServiceUpsertOne) ExecX(ctx context.Context) {
+	if err := u.create.Exec(ctx); err != nil {
+		panic(err)
+	}
+}
+
+// Exec executes the UPSERT query and returns the inserted/updated ID.
+func (u *ServiceUpsertOne) ID(ctx context.Context) (id string, err error) {
+	if u.create.driver.Dialect() == dialect.MySQL {
+		// In case of "ON CONFLICT", there is no way to get back non-numeric ID
+		// fields from the database since MySQL does not support the RETURNING clause.
+		return id, errors.New("ent: ServiceUpsertOne.ID is not supported by MySQL driver. Use ServiceUpsertOne.Exec instead")
+	}
+	node, err := u.create.Save(ctx)
+	if err != nil {
+		return id, err
+	}
+	return node.ID, nil
+}
+
+// IDX is like ID, but panics if an error occurs.
+func (u *ServiceUpsertOne) IDX(ctx context.Context) string {
+	id, err := u.ID(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return id
+}
+
 // ServiceCreateBulk is the builder for creating many Service entities in bulk.
 type ServiceCreateBulk struct {
 	config
 	err      error
 	builders []*ServiceCreate
+	conflict []sql.ConflictOption
 }
 
 // Save creates the Service entities in the database.
@@ -385,6 +827,7 @@ func (scb *ServiceCreateBulk) Save(ctx context.Context) ([]*Service, error) {
 					_, err = mutators[i+1].Mutate(root, scb.builders[i+1].mutation)
 				} else {
 					spec := &sqlgraph.BatchCreateSpec{Nodes: specs}
+					spec.OnConflict = scb.conflict
 					// Invoke the actual operation on the latest mutation in the chain.
 					if err = sqlgraph.BatchCreate(ctx, scb.driver, spec); err != nil {
 						if sqlgraph.IsConstraintError(err) {
@@ -431,6 +874,284 @@ func (scb *ServiceCreateBulk) Exec(ctx context.Context) error {
 // ExecX is like Exec, but panics if an error occurs.
 func (scb *ServiceCreateBulk) ExecX(ctx context.Context) {
 	if err := scb.Exec(ctx); err != nil {
+		panic(err)
+	}
+}
+
+// OnConflict allows configuring the `ON CONFLICT` / `ON DUPLICATE KEY` clause
+// of the `INSERT` statement. For example:
+//
+//	client.Service.CreateBulk(builders...).
+//		OnConflict(
+//			// Update the row with the new values
+//			// the was proposed for insertion.
+//			sql.ResolveWithNewValues(),
+//		).
+//		// Override some of the fields with custom
+//		// update values.
+//		Update(func(u *ent.ServiceUpsert) {
+//			SetCreatedAt(v+v).
+//		}).
+//		Exec(ctx)
+func (scb *ServiceCreateBulk) OnConflict(opts ...sql.ConflictOption) *ServiceUpsertBulk {
+	scb.conflict = opts
+	return &ServiceUpsertBulk{
+		create: scb,
+	}
+}
+
+// OnConflictColumns calls `OnConflict` and configures the columns
+// as conflict target. Using this option is equivalent to using:
+//
+//	client.Service.Create().
+//		OnConflict(sql.ConflictColumns(columns...)).
+//		Exec(ctx)
+func (scb *ServiceCreateBulk) OnConflictColumns(columns ...string) *ServiceUpsertBulk {
+	scb.conflict = append(scb.conflict, sql.ConflictColumns(columns...))
+	return &ServiceUpsertBulk{
+		create: scb,
+	}
+}
+
+// ServiceUpsertBulk is the builder for "upsert"-ing
+// a bulk of Service nodes.
+type ServiceUpsertBulk struct {
+	create *ServiceCreateBulk
+}
+
+// UpdateNewValues updates the mutable fields using the new values that
+// were set on create. Using this option is equivalent to using:
+//
+//	client.Service.Create().
+//		OnConflict(
+//			sql.ResolveWithNewValues(),
+//			sql.ResolveWith(func(u *sql.UpdateSet) {
+//				u.SetIgnore(service.FieldID)
+//			}),
+//		).
+//		Exec(ctx)
+func (u *ServiceUpsertBulk) UpdateNewValues() *ServiceUpsertBulk {
+	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
+	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(s *sql.UpdateSet) {
+		for _, b := range u.create.builders {
+			if _, exists := b.mutation.ID(); exists {
+				s.SetIgnore(service.FieldID)
+			}
+			if _, exists := b.mutation.CreatedAt(); exists {
+				s.SetIgnore(service.FieldCreatedAt)
+			}
+		}
+	}))
+	return u
+}
+
+// Ignore sets each column to itself in case of conflict.
+// Using this option is equivalent to using:
+//
+//	client.Service.Create().
+//		OnConflict(sql.ResolveWithIgnore()).
+//		Exec(ctx)
+func (u *ServiceUpsertBulk) Ignore() *ServiceUpsertBulk {
+	u.create.conflict = append(u.create.conflict, sql.ResolveWithIgnore())
+	return u
+}
+
+// DoNothing configures the conflict_action to `DO NOTHING`.
+// Supported only by SQLite and PostgreSQL.
+func (u *ServiceUpsertBulk) DoNothing() *ServiceUpsertBulk {
+	u.create.conflict = append(u.create.conflict, sql.DoNothing())
+	return u
+}
+
+// Update allows overriding fields `UPDATE` values. See the ServiceCreateBulk.OnConflict
+// documentation for more info.
+func (u *ServiceUpsertBulk) Update(set func(*ServiceUpsert)) *ServiceUpsertBulk {
+	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(update *sql.UpdateSet) {
+		set(&ServiceUpsert{UpdateSet: update})
+	}))
+	return u
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (u *ServiceUpsertBulk) SetUpdatedAt(v time.Time) *ServiceUpsertBulk {
+	return u.Update(func(s *ServiceUpsert) {
+		s.SetUpdatedAt(v)
+	})
+}
+
+// UpdateUpdatedAt sets the "updated_at" field to the value that was provided on create.
+func (u *ServiceUpsertBulk) UpdateUpdatedAt() *ServiceUpsertBulk {
+	return u.Update(func(s *ServiceUpsert) {
+		s.UpdateUpdatedAt()
+	})
+}
+
+// SetDeletedAt sets the "deleted_at" field.
+func (u *ServiceUpsertBulk) SetDeletedAt(v time.Time) *ServiceUpsertBulk {
+	return u.Update(func(s *ServiceUpsert) {
+		s.SetDeletedAt(v)
+	})
+}
+
+// UpdateDeletedAt sets the "deleted_at" field to the value that was provided on create.
+func (u *ServiceUpsertBulk) UpdateDeletedAt() *ServiceUpsertBulk {
+	return u.Update(func(s *ServiceUpsert) {
+		s.UpdateDeletedAt()
+	})
+}
+
+// ClearDeletedAt clears the value of the "deleted_at" field.
+func (u *ServiceUpsertBulk) ClearDeletedAt() *ServiceUpsertBulk {
+	return u.Update(func(s *ServiceUpsert) {
+		s.ClearDeletedAt()
+	})
+}
+
+// SetName sets the "name" field.
+func (u *ServiceUpsertBulk) SetName(v string) *ServiceUpsertBulk {
+	return u.Update(func(s *ServiceUpsert) {
+		s.SetName(v)
+	})
+}
+
+// UpdateName sets the "name" field to the value that was provided on create.
+func (u *ServiceUpsertBulk) UpdateName() *ServiceUpsertBulk {
+	return u.Update(func(s *ServiceUpsert) {
+		s.UpdateName()
+	})
+}
+
+// SetIdentifier sets the "identifier" field.
+func (u *ServiceUpsertBulk) SetIdentifier(v string) *ServiceUpsertBulk {
+	return u.Update(func(s *ServiceUpsert) {
+		s.SetIdentifier(v)
+	})
+}
+
+// UpdateIdentifier sets the "identifier" field to the value that was provided on create.
+func (u *ServiceUpsertBulk) UpdateIdentifier() *ServiceUpsertBulk {
+	return u.Update(func(s *ServiceUpsert) {
+		s.UpdateIdentifier()
+	})
+}
+
+// SetProvider sets the "provider" field.
+func (u *ServiceUpsertBulk) SetProvider(v string) *ServiceUpsertBulk {
+	return u.Update(func(s *ServiceUpsert) {
+		s.SetProvider(v)
+	})
+}
+
+// UpdateProvider sets the "provider" field to the value that was provided on create.
+func (u *ServiceUpsertBulk) UpdateProvider() *ServiceUpsertBulk {
+	return u.Update(func(s *ServiceUpsert) {
+		s.UpdateProvider()
+	})
+}
+
+// SetRequireSubscription sets the "require_subscription" field.
+func (u *ServiceUpsertBulk) SetRequireSubscription(v bool) *ServiceUpsertBulk {
+	return u.Update(func(s *ServiceUpsert) {
+		s.SetRequireSubscription(v)
+	})
+}
+
+// UpdateRequireSubscription sets the "require_subscription" field to the value that was provided on create.
+func (u *ServiceUpsertBulk) UpdateRequireSubscription() *ServiceUpsertBulk {
+	return u.Update(func(s *ServiceUpsert) {
+		s.UpdateRequireSubscription()
+	})
+}
+
+// SetActive sets the "active" field.
+func (u *ServiceUpsertBulk) SetActive(v bool) *ServiceUpsertBulk {
+	return u.Update(func(s *ServiceUpsert) {
+		s.SetActive(v)
+	})
+}
+
+// UpdateActive sets the "active" field to the value that was provided on create.
+func (u *ServiceUpsertBulk) UpdateActive() *ServiceUpsertBulk {
+	return u.Update(func(s *ServiceUpsert) {
+		s.UpdateActive()
+	})
+}
+
+// SetMin sets the "min" field.
+func (u *ServiceUpsertBulk) SetMin(v int) *ServiceUpsertBulk {
+	return u.Update(func(s *ServiceUpsert) {
+		s.SetMin(v)
+	})
+}
+
+// AddMin adds v to the "min" field.
+func (u *ServiceUpsertBulk) AddMin(v int) *ServiceUpsertBulk {
+	return u.Update(func(s *ServiceUpsert) {
+		s.AddMin(v)
+	})
+}
+
+// UpdateMin sets the "min" field to the value that was provided on create.
+func (u *ServiceUpsertBulk) UpdateMin() *ServiceUpsertBulk {
+	return u.Update(func(s *ServiceUpsert) {
+		s.UpdateMin()
+	})
+}
+
+// SetMax sets the "max" field.
+func (u *ServiceUpsertBulk) SetMax(v int) *ServiceUpsertBulk {
+	return u.Update(func(s *ServiceUpsert) {
+		s.SetMax(v)
+	})
+}
+
+// AddMax adds v to the "max" field.
+func (u *ServiceUpsertBulk) AddMax(v int) *ServiceUpsertBulk {
+	return u.Update(func(s *ServiceUpsert) {
+		s.AddMax(v)
+	})
+}
+
+// UpdateMax sets the "max" field to the value that was provided on create.
+func (u *ServiceUpsertBulk) UpdateMax() *ServiceUpsertBulk {
+	return u.Update(func(s *ServiceUpsert) {
+		s.UpdateMax()
+	})
+}
+
+// SetFee sets the "fee" field.
+func (u *ServiceUpsertBulk) SetFee(v *schema.Fee) *ServiceUpsertBulk {
+	return u.Update(func(s *ServiceUpsert) {
+		s.SetFee(v)
+	})
+}
+
+// UpdateFee sets the "fee" field to the value that was provided on create.
+func (u *ServiceUpsertBulk) UpdateFee() *ServiceUpsertBulk {
+	return u.Update(func(s *ServiceUpsert) {
+		s.UpdateFee()
+	})
+}
+
+// Exec executes the query.
+func (u *ServiceUpsertBulk) Exec(ctx context.Context) error {
+	if u.create.err != nil {
+		return u.create.err
+	}
+	for i, b := range u.create.builders {
+		if len(b.conflict) != 0 {
+			return fmt.Errorf("ent: OnConflict was set for builder %d. Set it on the ServiceCreateBulk instead", i)
+		}
+	}
+	if len(u.create.conflict) == 0 {
+		return errors.New("ent: missing options for ServiceCreateBulk.OnConflict")
+	}
+	return u.create.Exec(ctx)
+}
+
+// ExecX is like Exec, but panics if an error occurs.
+func (u *ServiceUpsertBulk) ExecX(ctx context.Context) {
+	if err := u.create.Exec(ctx); err != nil {
 		panic(err)
 	}
 }

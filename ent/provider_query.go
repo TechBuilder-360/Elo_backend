@@ -82,8 +82,8 @@ func (pq *ProviderQuery) FirstX(ctx context.Context) *Provider {
 
 // FirstID returns the first Provider ID from the query.
 // Returns a *NotFoundError when no Provider ID was found.
-func (pq *ProviderQuery) FirstID(ctx context.Context) (id int, err error) {
-	var ids []int
+func (pq *ProviderQuery) FirstID(ctx context.Context) (id string, err error) {
+	var ids []string
 	if ids, err = pq.Limit(1).IDs(setContextOp(ctx, pq.ctx, ent.OpQueryFirstID)); err != nil {
 		return
 	}
@@ -95,7 +95,7 @@ func (pq *ProviderQuery) FirstID(ctx context.Context) (id int, err error) {
 }
 
 // FirstIDX is like FirstID, but panics if an error occurs.
-func (pq *ProviderQuery) FirstIDX(ctx context.Context) int {
+func (pq *ProviderQuery) FirstIDX(ctx context.Context) string {
 	id, err := pq.FirstID(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
@@ -133,8 +133,8 @@ func (pq *ProviderQuery) OnlyX(ctx context.Context) *Provider {
 // OnlyID is like Only, but returns the only Provider ID in the query.
 // Returns a *NotSingularError when more than one Provider ID is found.
 // Returns a *NotFoundError when no entities are found.
-func (pq *ProviderQuery) OnlyID(ctx context.Context) (id int, err error) {
-	var ids []int
+func (pq *ProviderQuery) OnlyID(ctx context.Context) (id string, err error) {
+	var ids []string
 	if ids, err = pq.Limit(2).IDs(setContextOp(ctx, pq.ctx, ent.OpQueryOnlyID)); err != nil {
 		return
 	}
@@ -150,7 +150,7 @@ func (pq *ProviderQuery) OnlyID(ctx context.Context) (id int, err error) {
 }
 
 // OnlyIDX is like OnlyID, but panics if an error occurs.
-func (pq *ProviderQuery) OnlyIDX(ctx context.Context) int {
+func (pq *ProviderQuery) OnlyIDX(ctx context.Context) string {
 	id, err := pq.OnlyID(ctx)
 	if err != nil {
 		panic(err)
@@ -178,7 +178,7 @@ func (pq *ProviderQuery) AllX(ctx context.Context) []*Provider {
 }
 
 // IDs executes the query and returns a list of Provider IDs.
-func (pq *ProviderQuery) IDs(ctx context.Context) (ids []int, err error) {
+func (pq *ProviderQuery) IDs(ctx context.Context) (ids []string, err error) {
 	if pq.ctx.Unique == nil && pq.path != nil {
 		pq.Unique(true)
 	}
@@ -190,7 +190,7 @@ func (pq *ProviderQuery) IDs(ctx context.Context) (ids []int, err error) {
 }
 
 // IDsX is like IDs, but panics if an error occurs.
-func (pq *ProviderQuery) IDsX(ctx context.Context) []int {
+func (pq *ProviderQuery) IDsX(ctx context.Context) []string {
 	ids, err := pq.IDs(ctx)
 	if err != nil {
 		panic(err)
@@ -262,12 +262,12 @@ func (pq *ProviderQuery) Clone() *ProviderQuery {
 // Example:
 //
 //	var v []struct {
-//		Name string `json:"name,omitempty"`
+//		CreatedAt time.Time `json:"created_at,omitempty"`
 //		Count int `json:"count,omitempty"`
 //	}
 //
 //	client.Provider.Query().
-//		GroupBy(provider.FieldName).
+//		GroupBy(provider.FieldCreatedAt).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
 func (pq *ProviderQuery) GroupBy(field string, fields ...string) *ProviderGroupBy {
@@ -285,11 +285,11 @@ func (pq *ProviderQuery) GroupBy(field string, fields ...string) *ProviderGroupB
 // Example:
 //
 //	var v []struct {
-//		Name string `json:"name,omitempty"`
+//		CreatedAt time.Time `json:"created_at,omitempty"`
 //	}
 //
 //	client.Provider.Query().
-//		Select(provider.FieldName).
+//		Select(provider.FieldCreatedAt).
 //		Scan(ctx, &v)
 func (pq *ProviderQuery) Select(fields ...string) *ProviderSelect {
 	pq.ctx.Fields = append(pq.ctx.Fields, fields...)
@@ -365,7 +365,7 @@ func (pq *ProviderQuery) sqlCount(ctx context.Context) (int, error) {
 }
 
 func (pq *ProviderQuery) querySpec() *sqlgraph.QuerySpec {
-	_spec := sqlgraph.NewQuerySpec(provider.Table, provider.Columns, sqlgraph.NewFieldSpec(provider.FieldID, field.TypeInt))
+	_spec := sqlgraph.NewQuerySpec(provider.Table, provider.Columns, sqlgraph.NewFieldSpec(provider.FieldID, field.TypeString))
 	_spec.From = pq.sql
 	if unique := pq.ctx.Unique; unique != nil {
 		_spec.Unique = *unique

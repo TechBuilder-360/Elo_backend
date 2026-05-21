@@ -8,6 +8,8 @@ import (
 	"fmt"
 	"time"
 
+	"entgo.io/ent/dialect"
+	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/Toflex/directory_v2/ent/business"
@@ -19,6 +21,7 @@ type SocialCreate struct {
 	config
 	mutation *SocialMutation
 	hooks    []Hook
+	conflict []sql.ConflictOption
 }
 
 // SetCreatedAt sets the "created_at" field.
@@ -216,6 +219,7 @@ func (sc *SocialCreate) createSpec() (*Social, *sqlgraph.CreateSpec) {
 		_node = &Social{config: sc.config}
 		_spec = sqlgraph.NewCreateSpec(social.Table, sqlgraph.NewFieldSpec(social.FieldID, field.TypeString))
 	)
+	_spec.OnConflict = sc.conflict
 	if id, ok := sc.mutation.ID(); ok {
 		_node.ID = id
 		_spec.ID.Value = id
@@ -260,11 +264,293 @@ func (sc *SocialCreate) createSpec() (*Social, *sqlgraph.CreateSpec) {
 	return _node, _spec
 }
 
+// OnConflict allows configuring the `ON CONFLICT` / `ON DUPLICATE KEY` clause
+// of the `INSERT` statement. For example:
+//
+//	client.Social.Create().
+//		SetCreatedAt(v).
+//		OnConflict(
+//			// Update the row with the new values
+//			// the was proposed for insertion.
+//			sql.ResolveWithNewValues(),
+//		).
+//		// Override some of the fields with custom
+//		// update values.
+//		Update(func(u *ent.SocialUpsert) {
+//			SetCreatedAt(v+v).
+//		}).
+//		Exec(ctx)
+func (sc *SocialCreate) OnConflict(opts ...sql.ConflictOption) *SocialUpsertOne {
+	sc.conflict = opts
+	return &SocialUpsertOne{
+		create: sc,
+	}
+}
+
+// OnConflictColumns calls `OnConflict` and configures the columns
+// as conflict target. Using this option is equivalent to using:
+//
+//	client.Social.Create().
+//		OnConflict(sql.ConflictColumns(columns...)).
+//		Exec(ctx)
+func (sc *SocialCreate) OnConflictColumns(columns ...string) *SocialUpsertOne {
+	sc.conflict = append(sc.conflict, sql.ConflictColumns(columns...))
+	return &SocialUpsertOne{
+		create: sc,
+	}
+}
+
+type (
+	// SocialUpsertOne is the builder for "upsert"-ing
+	//  one Social node.
+	SocialUpsertOne struct {
+		create *SocialCreate
+	}
+
+	// SocialUpsert is the "OnConflict" setter.
+	SocialUpsert struct {
+		*sql.UpdateSet
+	}
+)
+
+// SetUpdatedAt sets the "updated_at" field.
+func (u *SocialUpsert) SetUpdatedAt(v time.Time) *SocialUpsert {
+	u.Set(social.FieldUpdatedAt, v)
+	return u
+}
+
+// UpdateUpdatedAt sets the "updated_at" field to the value that was provided on create.
+func (u *SocialUpsert) UpdateUpdatedAt() *SocialUpsert {
+	u.SetExcluded(social.FieldUpdatedAt)
+	return u
+}
+
+// SetDeletedAt sets the "deleted_at" field.
+func (u *SocialUpsert) SetDeletedAt(v time.Time) *SocialUpsert {
+	u.Set(social.FieldDeletedAt, v)
+	return u
+}
+
+// UpdateDeletedAt sets the "deleted_at" field to the value that was provided on create.
+func (u *SocialUpsert) UpdateDeletedAt() *SocialUpsert {
+	u.SetExcluded(social.FieldDeletedAt)
+	return u
+}
+
+// ClearDeletedAt clears the value of the "deleted_at" field.
+func (u *SocialUpsert) ClearDeletedAt() *SocialUpsert {
+	u.SetNull(social.FieldDeletedAt)
+	return u
+}
+
+// SetBusinessID sets the "business_id" field.
+func (u *SocialUpsert) SetBusinessID(v string) *SocialUpsert {
+	u.Set(social.FieldBusinessID, v)
+	return u
+}
+
+// UpdateBusinessID sets the "business_id" field to the value that was provided on create.
+func (u *SocialUpsert) UpdateBusinessID() *SocialUpsert {
+	u.SetExcluded(social.FieldBusinessID)
+	return u
+}
+
+// SetName sets the "name" field.
+func (u *SocialUpsert) SetName(v string) *SocialUpsert {
+	u.Set(social.FieldName, v)
+	return u
+}
+
+// UpdateName sets the "name" field to the value that was provided on create.
+func (u *SocialUpsert) UpdateName() *SocialUpsert {
+	u.SetExcluded(social.FieldName)
+	return u
+}
+
+// SetURL sets the "url" field.
+func (u *SocialUpsert) SetURL(v string) *SocialUpsert {
+	u.Set(social.FieldURL, v)
+	return u
+}
+
+// UpdateURL sets the "url" field to the value that was provided on create.
+func (u *SocialUpsert) UpdateURL() *SocialUpsert {
+	u.SetExcluded(social.FieldURL)
+	return u
+}
+
+// UpdateNewValues updates the mutable fields using the new values that were set on create except the ID field.
+// Using this option is equivalent to using:
+//
+//	client.Social.Create().
+//		OnConflict(
+//			sql.ResolveWithNewValues(),
+//			sql.ResolveWith(func(u *sql.UpdateSet) {
+//				u.SetIgnore(social.FieldID)
+//			}),
+//		).
+//		Exec(ctx)
+func (u *SocialUpsertOne) UpdateNewValues() *SocialUpsertOne {
+	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
+	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(s *sql.UpdateSet) {
+		if _, exists := u.create.mutation.ID(); exists {
+			s.SetIgnore(social.FieldID)
+		}
+		if _, exists := u.create.mutation.CreatedAt(); exists {
+			s.SetIgnore(social.FieldCreatedAt)
+		}
+	}))
+	return u
+}
+
+// Ignore sets each column to itself in case of conflict.
+// Using this option is equivalent to using:
+//
+//	client.Social.Create().
+//	    OnConflict(sql.ResolveWithIgnore()).
+//	    Exec(ctx)
+func (u *SocialUpsertOne) Ignore() *SocialUpsertOne {
+	u.create.conflict = append(u.create.conflict, sql.ResolveWithIgnore())
+	return u
+}
+
+// DoNothing configures the conflict_action to `DO NOTHING`.
+// Supported only by SQLite and PostgreSQL.
+func (u *SocialUpsertOne) DoNothing() *SocialUpsertOne {
+	u.create.conflict = append(u.create.conflict, sql.DoNothing())
+	return u
+}
+
+// Update allows overriding fields `UPDATE` values. See the SocialCreate.OnConflict
+// documentation for more info.
+func (u *SocialUpsertOne) Update(set func(*SocialUpsert)) *SocialUpsertOne {
+	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(update *sql.UpdateSet) {
+		set(&SocialUpsert{UpdateSet: update})
+	}))
+	return u
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (u *SocialUpsertOne) SetUpdatedAt(v time.Time) *SocialUpsertOne {
+	return u.Update(func(s *SocialUpsert) {
+		s.SetUpdatedAt(v)
+	})
+}
+
+// UpdateUpdatedAt sets the "updated_at" field to the value that was provided on create.
+func (u *SocialUpsertOne) UpdateUpdatedAt() *SocialUpsertOne {
+	return u.Update(func(s *SocialUpsert) {
+		s.UpdateUpdatedAt()
+	})
+}
+
+// SetDeletedAt sets the "deleted_at" field.
+func (u *SocialUpsertOne) SetDeletedAt(v time.Time) *SocialUpsertOne {
+	return u.Update(func(s *SocialUpsert) {
+		s.SetDeletedAt(v)
+	})
+}
+
+// UpdateDeletedAt sets the "deleted_at" field to the value that was provided on create.
+func (u *SocialUpsertOne) UpdateDeletedAt() *SocialUpsertOne {
+	return u.Update(func(s *SocialUpsert) {
+		s.UpdateDeletedAt()
+	})
+}
+
+// ClearDeletedAt clears the value of the "deleted_at" field.
+func (u *SocialUpsertOne) ClearDeletedAt() *SocialUpsertOne {
+	return u.Update(func(s *SocialUpsert) {
+		s.ClearDeletedAt()
+	})
+}
+
+// SetBusinessID sets the "business_id" field.
+func (u *SocialUpsertOne) SetBusinessID(v string) *SocialUpsertOne {
+	return u.Update(func(s *SocialUpsert) {
+		s.SetBusinessID(v)
+	})
+}
+
+// UpdateBusinessID sets the "business_id" field to the value that was provided on create.
+func (u *SocialUpsertOne) UpdateBusinessID() *SocialUpsertOne {
+	return u.Update(func(s *SocialUpsert) {
+		s.UpdateBusinessID()
+	})
+}
+
+// SetName sets the "name" field.
+func (u *SocialUpsertOne) SetName(v string) *SocialUpsertOne {
+	return u.Update(func(s *SocialUpsert) {
+		s.SetName(v)
+	})
+}
+
+// UpdateName sets the "name" field to the value that was provided on create.
+func (u *SocialUpsertOne) UpdateName() *SocialUpsertOne {
+	return u.Update(func(s *SocialUpsert) {
+		s.UpdateName()
+	})
+}
+
+// SetURL sets the "url" field.
+func (u *SocialUpsertOne) SetURL(v string) *SocialUpsertOne {
+	return u.Update(func(s *SocialUpsert) {
+		s.SetURL(v)
+	})
+}
+
+// UpdateURL sets the "url" field to the value that was provided on create.
+func (u *SocialUpsertOne) UpdateURL() *SocialUpsertOne {
+	return u.Update(func(s *SocialUpsert) {
+		s.UpdateURL()
+	})
+}
+
+// Exec executes the query.
+func (u *SocialUpsertOne) Exec(ctx context.Context) error {
+	if len(u.create.conflict) == 0 {
+		return errors.New("ent: missing options for SocialCreate.OnConflict")
+	}
+	return u.create.Exec(ctx)
+}
+
+// ExecX is like Exec, but panics if an error occurs.
+func (u *SocialUpsertOne) ExecX(ctx context.Context) {
+	if err := u.create.Exec(ctx); err != nil {
+		panic(err)
+	}
+}
+
+// Exec executes the UPSERT query and returns the inserted/updated ID.
+func (u *SocialUpsertOne) ID(ctx context.Context) (id string, err error) {
+	if u.create.driver.Dialect() == dialect.MySQL {
+		// In case of "ON CONFLICT", there is no way to get back non-numeric ID
+		// fields from the database since MySQL does not support the RETURNING clause.
+		return id, errors.New("ent: SocialUpsertOne.ID is not supported by MySQL driver. Use SocialUpsertOne.Exec instead")
+	}
+	node, err := u.create.Save(ctx)
+	if err != nil {
+		return id, err
+	}
+	return node.ID, nil
+}
+
+// IDX is like ID, but panics if an error occurs.
+func (u *SocialUpsertOne) IDX(ctx context.Context) string {
+	id, err := u.ID(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return id
+}
+
 // SocialCreateBulk is the builder for creating many Social entities in bulk.
 type SocialCreateBulk struct {
 	config
 	err      error
 	builders []*SocialCreate
+	conflict []sql.ConflictOption
 }
 
 // Save creates the Social entities in the database.
@@ -294,6 +580,7 @@ func (scb *SocialCreateBulk) Save(ctx context.Context) ([]*Social, error) {
 					_, err = mutators[i+1].Mutate(root, scb.builders[i+1].mutation)
 				} else {
 					spec := &sqlgraph.BatchCreateSpec{Nodes: specs}
+					spec.OnConflict = scb.conflict
 					// Invoke the actual operation on the latest mutation in the chain.
 					if err = sqlgraph.BatchCreate(ctx, scb.driver, spec); err != nil {
 						if sqlgraph.IsConstraintError(err) {
@@ -340,6 +627,200 @@ func (scb *SocialCreateBulk) Exec(ctx context.Context) error {
 // ExecX is like Exec, but panics if an error occurs.
 func (scb *SocialCreateBulk) ExecX(ctx context.Context) {
 	if err := scb.Exec(ctx); err != nil {
+		panic(err)
+	}
+}
+
+// OnConflict allows configuring the `ON CONFLICT` / `ON DUPLICATE KEY` clause
+// of the `INSERT` statement. For example:
+//
+//	client.Social.CreateBulk(builders...).
+//		OnConflict(
+//			// Update the row with the new values
+//			// the was proposed for insertion.
+//			sql.ResolveWithNewValues(),
+//		).
+//		// Override some of the fields with custom
+//		// update values.
+//		Update(func(u *ent.SocialUpsert) {
+//			SetCreatedAt(v+v).
+//		}).
+//		Exec(ctx)
+func (scb *SocialCreateBulk) OnConflict(opts ...sql.ConflictOption) *SocialUpsertBulk {
+	scb.conflict = opts
+	return &SocialUpsertBulk{
+		create: scb,
+	}
+}
+
+// OnConflictColumns calls `OnConflict` and configures the columns
+// as conflict target. Using this option is equivalent to using:
+//
+//	client.Social.Create().
+//		OnConflict(sql.ConflictColumns(columns...)).
+//		Exec(ctx)
+func (scb *SocialCreateBulk) OnConflictColumns(columns ...string) *SocialUpsertBulk {
+	scb.conflict = append(scb.conflict, sql.ConflictColumns(columns...))
+	return &SocialUpsertBulk{
+		create: scb,
+	}
+}
+
+// SocialUpsertBulk is the builder for "upsert"-ing
+// a bulk of Social nodes.
+type SocialUpsertBulk struct {
+	create *SocialCreateBulk
+}
+
+// UpdateNewValues updates the mutable fields using the new values that
+// were set on create. Using this option is equivalent to using:
+//
+//	client.Social.Create().
+//		OnConflict(
+//			sql.ResolveWithNewValues(),
+//			sql.ResolveWith(func(u *sql.UpdateSet) {
+//				u.SetIgnore(social.FieldID)
+//			}),
+//		).
+//		Exec(ctx)
+func (u *SocialUpsertBulk) UpdateNewValues() *SocialUpsertBulk {
+	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
+	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(s *sql.UpdateSet) {
+		for _, b := range u.create.builders {
+			if _, exists := b.mutation.ID(); exists {
+				s.SetIgnore(social.FieldID)
+			}
+			if _, exists := b.mutation.CreatedAt(); exists {
+				s.SetIgnore(social.FieldCreatedAt)
+			}
+		}
+	}))
+	return u
+}
+
+// Ignore sets each column to itself in case of conflict.
+// Using this option is equivalent to using:
+//
+//	client.Social.Create().
+//		OnConflict(sql.ResolveWithIgnore()).
+//		Exec(ctx)
+func (u *SocialUpsertBulk) Ignore() *SocialUpsertBulk {
+	u.create.conflict = append(u.create.conflict, sql.ResolveWithIgnore())
+	return u
+}
+
+// DoNothing configures the conflict_action to `DO NOTHING`.
+// Supported only by SQLite and PostgreSQL.
+func (u *SocialUpsertBulk) DoNothing() *SocialUpsertBulk {
+	u.create.conflict = append(u.create.conflict, sql.DoNothing())
+	return u
+}
+
+// Update allows overriding fields `UPDATE` values. See the SocialCreateBulk.OnConflict
+// documentation for more info.
+func (u *SocialUpsertBulk) Update(set func(*SocialUpsert)) *SocialUpsertBulk {
+	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(update *sql.UpdateSet) {
+		set(&SocialUpsert{UpdateSet: update})
+	}))
+	return u
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (u *SocialUpsertBulk) SetUpdatedAt(v time.Time) *SocialUpsertBulk {
+	return u.Update(func(s *SocialUpsert) {
+		s.SetUpdatedAt(v)
+	})
+}
+
+// UpdateUpdatedAt sets the "updated_at" field to the value that was provided on create.
+func (u *SocialUpsertBulk) UpdateUpdatedAt() *SocialUpsertBulk {
+	return u.Update(func(s *SocialUpsert) {
+		s.UpdateUpdatedAt()
+	})
+}
+
+// SetDeletedAt sets the "deleted_at" field.
+func (u *SocialUpsertBulk) SetDeletedAt(v time.Time) *SocialUpsertBulk {
+	return u.Update(func(s *SocialUpsert) {
+		s.SetDeletedAt(v)
+	})
+}
+
+// UpdateDeletedAt sets the "deleted_at" field to the value that was provided on create.
+func (u *SocialUpsertBulk) UpdateDeletedAt() *SocialUpsertBulk {
+	return u.Update(func(s *SocialUpsert) {
+		s.UpdateDeletedAt()
+	})
+}
+
+// ClearDeletedAt clears the value of the "deleted_at" field.
+func (u *SocialUpsertBulk) ClearDeletedAt() *SocialUpsertBulk {
+	return u.Update(func(s *SocialUpsert) {
+		s.ClearDeletedAt()
+	})
+}
+
+// SetBusinessID sets the "business_id" field.
+func (u *SocialUpsertBulk) SetBusinessID(v string) *SocialUpsertBulk {
+	return u.Update(func(s *SocialUpsert) {
+		s.SetBusinessID(v)
+	})
+}
+
+// UpdateBusinessID sets the "business_id" field to the value that was provided on create.
+func (u *SocialUpsertBulk) UpdateBusinessID() *SocialUpsertBulk {
+	return u.Update(func(s *SocialUpsert) {
+		s.UpdateBusinessID()
+	})
+}
+
+// SetName sets the "name" field.
+func (u *SocialUpsertBulk) SetName(v string) *SocialUpsertBulk {
+	return u.Update(func(s *SocialUpsert) {
+		s.SetName(v)
+	})
+}
+
+// UpdateName sets the "name" field to the value that was provided on create.
+func (u *SocialUpsertBulk) UpdateName() *SocialUpsertBulk {
+	return u.Update(func(s *SocialUpsert) {
+		s.UpdateName()
+	})
+}
+
+// SetURL sets the "url" field.
+func (u *SocialUpsertBulk) SetURL(v string) *SocialUpsertBulk {
+	return u.Update(func(s *SocialUpsert) {
+		s.SetURL(v)
+	})
+}
+
+// UpdateURL sets the "url" field to the value that was provided on create.
+func (u *SocialUpsertBulk) UpdateURL() *SocialUpsertBulk {
+	return u.Update(func(s *SocialUpsert) {
+		s.UpdateURL()
+	})
+}
+
+// Exec executes the query.
+func (u *SocialUpsertBulk) Exec(ctx context.Context) error {
+	if u.create.err != nil {
+		return u.create.err
+	}
+	for i, b := range u.create.builders {
+		if len(b.conflict) != 0 {
+			return fmt.Errorf("ent: OnConflict was set for builder %d. Set it on the SocialCreateBulk instead", i)
+		}
+	}
+	if len(u.create.conflict) == 0 {
+		return errors.New("ent: missing options for SocialCreateBulk.OnConflict")
+	}
+	return u.create.Exec(ctx)
+}
+
+// ExecX is like Exec, but panics if an error occurs.
+func (u *SocialUpsertBulk) ExecX(ctx context.Context) {
+	if err := u.create.Exec(ctx); err != nil {
 		panic(err)
 	}
 }

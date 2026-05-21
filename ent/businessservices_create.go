@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 
+	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/Toflex/directory_v2/ent/business"
@@ -18,6 +19,7 @@ type BusinessServicesCreate struct {
 	config
 	mutation *BusinessServicesMutation
 	hooks    []Hook
+	conflict []sql.ConflictOption
 }
 
 // SetBusinessID sets the "business_id" field.
@@ -131,6 +133,7 @@ func (bsc *BusinessServicesCreate) createSpec() (*BusinessServices, *sqlgraph.Cr
 		_node = &BusinessServices{config: bsc.config}
 		_spec = sqlgraph.NewCreateSpec(businessservices.Table, sqlgraph.NewFieldSpec(businessservices.FieldID, field.TypeInt))
 	)
+	_spec.OnConflict = bsc.conflict
 	if value, ok := bsc.mutation.Title(); ok {
 		_spec.SetField(businessservices.FieldTitle, field.TypeString, value)
 		_node.Title = value
@@ -159,11 +162,212 @@ func (bsc *BusinessServicesCreate) createSpec() (*BusinessServices, *sqlgraph.Cr
 	return _node, _spec
 }
 
+// OnConflict allows configuring the `ON CONFLICT` / `ON DUPLICATE KEY` clause
+// of the `INSERT` statement. For example:
+//
+//	client.BusinessServices.Create().
+//		SetBusinessID(v).
+//		OnConflict(
+//			// Update the row with the new values
+//			// the was proposed for insertion.
+//			sql.ResolveWithNewValues(),
+//		).
+//		// Override some of the fields with custom
+//		// update values.
+//		Update(func(u *ent.BusinessServicesUpsert) {
+//			SetBusinessID(v+v).
+//		}).
+//		Exec(ctx)
+func (bsc *BusinessServicesCreate) OnConflict(opts ...sql.ConflictOption) *BusinessServicesUpsertOne {
+	bsc.conflict = opts
+	return &BusinessServicesUpsertOne{
+		create: bsc,
+	}
+}
+
+// OnConflictColumns calls `OnConflict` and configures the columns
+// as conflict target. Using this option is equivalent to using:
+//
+//	client.BusinessServices.Create().
+//		OnConflict(sql.ConflictColumns(columns...)).
+//		Exec(ctx)
+func (bsc *BusinessServicesCreate) OnConflictColumns(columns ...string) *BusinessServicesUpsertOne {
+	bsc.conflict = append(bsc.conflict, sql.ConflictColumns(columns...))
+	return &BusinessServicesUpsertOne{
+		create: bsc,
+	}
+}
+
+type (
+	// BusinessServicesUpsertOne is the builder for "upsert"-ing
+	//  one BusinessServices node.
+	BusinessServicesUpsertOne struct {
+		create *BusinessServicesCreate
+	}
+
+	// BusinessServicesUpsert is the "OnConflict" setter.
+	BusinessServicesUpsert struct {
+		*sql.UpdateSet
+	}
+)
+
+// SetBusinessID sets the "business_id" field.
+func (u *BusinessServicesUpsert) SetBusinessID(v string) *BusinessServicesUpsert {
+	u.Set(businessservices.FieldBusinessID, v)
+	return u
+}
+
+// UpdateBusinessID sets the "business_id" field to the value that was provided on create.
+func (u *BusinessServicesUpsert) UpdateBusinessID() *BusinessServicesUpsert {
+	u.SetExcluded(businessservices.FieldBusinessID)
+	return u
+}
+
+// SetTitle sets the "title" field.
+func (u *BusinessServicesUpsert) SetTitle(v string) *BusinessServicesUpsert {
+	u.Set(businessservices.FieldTitle, v)
+	return u
+}
+
+// UpdateTitle sets the "title" field to the value that was provided on create.
+func (u *BusinessServicesUpsert) UpdateTitle() *BusinessServicesUpsert {
+	u.SetExcluded(businessservices.FieldTitle)
+	return u
+}
+
+// SetDescription sets the "description" field.
+func (u *BusinessServicesUpsert) SetDescription(v string) *BusinessServicesUpsert {
+	u.Set(businessservices.FieldDescription, v)
+	return u
+}
+
+// UpdateDescription sets the "description" field to the value that was provided on create.
+func (u *BusinessServicesUpsert) UpdateDescription() *BusinessServicesUpsert {
+	u.SetExcluded(businessservices.FieldDescription)
+	return u
+}
+
+// UpdateNewValues updates the mutable fields using the new values that were set on create.
+// Using this option is equivalent to using:
+//
+//	client.BusinessServices.Create().
+//		OnConflict(
+//			sql.ResolveWithNewValues(),
+//		).
+//		Exec(ctx)
+func (u *BusinessServicesUpsertOne) UpdateNewValues() *BusinessServicesUpsertOne {
+	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
+	return u
+}
+
+// Ignore sets each column to itself in case of conflict.
+// Using this option is equivalent to using:
+//
+//	client.BusinessServices.Create().
+//	    OnConflict(sql.ResolveWithIgnore()).
+//	    Exec(ctx)
+func (u *BusinessServicesUpsertOne) Ignore() *BusinessServicesUpsertOne {
+	u.create.conflict = append(u.create.conflict, sql.ResolveWithIgnore())
+	return u
+}
+
+// DoNothing configures the conflict_action to `DO NOTHING`.
+// Supported only by SQLite and PostgreSQL.
+func (u *BusinessServicesUpsertOne) DoNothing() *BusinessServicesUpsertOne {
+	u.create.conflict = append(u.create.conflict, sql.DoNothing())
+	return u
+}
+
+// Update allows overriding fields `UPDATE` values. See the BusinessServicesCreate.OnConflict
+// documentation for more info.
+func (u *BusinessServicesUpsertOne) Update(set func(*BusinessServicesUpsert)) *BusinessServicesUpsertOne {
+	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(update *sql.UpdateSet) {
+		set(&BusinessServicesUpsert{UpdateSet: update})
+	}))
+	return u
+}
+
+// SetBusinessID sets the "business_id" field.
+func (u *BusinessServicesUpsertOne) SetBusinessID(v string) *BusinessServicesUpsertOne {
+	return u.Update(func(s *BusinessServicesUpsert) {
+		s.SetBusinessID(v)
+	})
+}
+
+// UpdateBusinessID sets the "business_id" field to the value that was provided on create.
+func (u *BusinessServicesUpsertOne) UpdateBusinessID() *BusinessServicesUpsertOne {
+	return u.Update(func(s *BusinessServicesUpsert) {
+		s.UpdateBusinessID()
+	})
+}
+
+// SetTitle sets the "title" field.
+func (u *BusinessServicesUpsertOne) SetTitle(v string) *BusinessServicesUpsertOne {
+	return u.Update(func(s *BusinessServicesUpsert) {
+		s.SetTitle(v)
+	})
+}
+
+// UpdateTitle sets the "title" field to the value that was provided on create.
+func (u *BusinessServicesUpsertOne) UpdateTitle() *BusinessServicesUpsertOne {
+	return u.Update(func(s *BusinessServicesUpsert) {
+		s.UpdateTitle()
+	})
+}
+
+// SetDescription sets the "description" field.
+func (u *BusinessServicesUpsertOne) SetDescription(v string) *BusinessServicesUpsertOne {
+	return u.Update(func(s *BusinessServicesUpsert) {
+		s.SetDescription(v)
+	})
+}
+
+// UpdateDescription sets the "description" field to the value that was provided on create.
+func (u *BusinessServicesUpsertOne) UpdateDescription() *BusinessServicesUpsertOne {
+	return u.Update(func(s *BusinessServicesUpsert) {
+		s.UpdateDescription()
+	})
+}
+
+// Exec executes the query.
+func (u *BusinessServicesUpsertOne) Exec(ctx context.Context) error {
+	if len(u.create.conflict) == 0 {
+		return errors.New("ent: missing options for BusinessServicesCreate.OnConflict")
+	}
+	return u.create.Exec(ctx)
+}
+
+// ExecX is like Exec, but panics if an error occurs.
+func (u *BusinessServicesUpsertOne) ExecX(ctx context.Context) {
+	if err := u.create.Exec(ctx); err != nil {
+		panic(err)
+	}
+}
+
+// Exec executes the UPSERT query and returns the inserted/updated ID.
+func (u *BusinessServicesUpsertOne) ID(ctx context.Context) (id int, err error) {
+	node, err := u.create.Save(ctx)
+	if err != nil {
+		return id, err
+	}
+	return node.ID, nil
+}
+
+// IDX is like ID, but panics if an error occurs.
+func (u *BusinessServicesUpsertOne) IDX(ctx context.Context) int {
+	id, err := u.ID(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return id
+}
+
 // BusinessServicesCreateBulk is the builder for creating many BusinessServices entities in bulk.
 type BusinessServicesCreateBulk struct {
 	config
 	err      error
 	builders []*BusinessServicesCreate
+	conflict []sql.ConflictOption
 }
 
 // Save creates the BusinessServices entities in the database.
@@ -192,6 +396,7 @@ func (bscb *BusinessServicesCreateBulk) Save(ctx context.Context) ([]*BusinessSe
 					_, err = mutators[i+1].Mutate(root, bscb.builders[i+1].mutation)
 				} else {
 					spec := &sqlgraph.BatchCreateSpec{Nodes: specs}
+					spec.OnConflict = bscb.conflict
 					// Invoke the actual operation on the latest mutation in the chain.
 					if err = sqlgraph.BatchCreate(ctx, bscb.driver, spec); err != nil {
 						if sqlgraph.IsConstraintError(err) {
@@ -242,6 +447,152 @@ func (bscb *BusinessServicesCreateBulk) Exec(ctx context.Context) error {
 // ExecX is like Exec, but panics if an error occurs.
 func (bscb *BusinessServicesCreateBulk) ExecX(ctx context.Context) {
 	if err := bscb.Exec(ctx); err != nil {
+		panic(err)
+	}
+}
+
+// OnConflict allows configuring the `ON CONFLICT` / `ON DUPLICATE KEY` clause
+// of the `INSERT` statement. For example:
+//
+//	client.BusinessServices.CreateBulk(builders...).
+//		OnConflict(
+//			// Update the row with the new values
+//			// the was proposed for insertion.
+//			sql.ResolveWithNewValues(),
+//		).
+//		// Override some of the fields with custom
+//		// update values.
+//		Update(func(u *ent.BusinessServicesUpsert) {
+//			SetBusinessID(v+v).
+//		}).
+//		Exec(ctx)
+func (bscb *BusinessServicesCreateBulk) OnConflict(opts ...sql.ConflictOption) *BusinessServicesUpsertBulk {
+	bscb.conflict = opts
+	return &BusinessServicesUpsertBulk{
+		create: bscb,
+	}
+}
+
+// OnConflictColumns calls `OnConflict` and configures the columns
+// as conflict target. Using this option is equivalent to using:
+//
+//	client.BusinessServices.Create().
+//		OnConflict(sql.ConflictColumns(columns...)).
+//		Exec(ctx)
+func (bscb *BusinessServicesCreateBulk) OnConflictColumns(columns ...string) *BusinessServicesUpsertBulk {
+	bscb.conflict = append(bscb.conflict, sql.ConflictColumns(columns...))
+	return &BusinessServicesUpsertBulk{
+		create: bscb,
+	}
+}
+
+// BusinessServicesUpsertBulk is the builder for "upsert"-ing
+// a bulk of BusinessServices nodes.
+type BusinessServicesUpsertBulk struct {
+	create *BusinessServicesCreateBulk
+}
+
+// UpdateNewValues updates the mutable fields using the new values that
+// were set on create. Using this option is equivalent to using:
+//
+//	client.BusinessServices.Create().
+//		OnConflict(
+//			sql.ResolveWithNewValues(),
+//		).
+//		Exec(ctx)
+func (u *BusinessServicesUpsertBulk) UpdateNewValues() *BusinessServicesUpsertBulk {
+	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
+	return u
+}
+
+// Ignore sets each column to itself in case of conflict.
+// Using this option is equivalent to using:
+//
+//	client.BusinessServices.Create().
+//		OnConflict(sql.ResolveWithIgnore()).
+//		Exec(ctx)
+func (u *BusinessServicesUpsertBulk) Ignore() *BusinessServicesUpsertBulk {
+	u.create.conflict = append(u.create.conflict, sql.ResolveWithIgnore())
+	return u
+}
+
+// DoNothing configures the conflict_action to `DO NOTHING`.
+// Supported only by SQLite and PostgreSQL.
+func (u *BusinessServicesUpsertBulk) DoNothing() *BusinessServicesUpsertBulk {
+	u.create.conflict = append(u.create.conflict, sql.DoNothing())
+	return u
+}
+
+// Update allows overriding fields `UPDATE` values. See the BusinessServicesCreateBulk.OnConflict
+// documentation for more info.
+func (u *BusinessServicesUpsertBulk) Update(set func(*BusinessServicesUpsert)) *BusinessServicesUpsertBulk {
+	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(update *sql.UpdateSet) {
+		set(&BusinessServicesUpsert{UpdateSet: update})
+	}))
+	return u
+}
+
+// SetBusinessID sets the "business_id" field.
+func (u *BusinessServicesUpsertBulk) SetBusinessID(v string) *BusinessServicesUpsertBulk {
+	return u.Update(func(s *BusinessServicesUpsert) {
+		s.SetBusinessID(v)
+	})
+}
+
+// UpdateBusinessID sets the "business_id" field to the value that was provided on create.
+func (u *BusinessServicesUpsertBulk) UpdateBusinessID() *BusinessServicesUpsertBulk {
+	return u.Update(func(s *BusinessServicesUpsert) {
+		s.UpdateBusinessID()
+	})
+}
+
+// SetTitle sets the "title" field.
+func (u *BusinessServicesUpsertBulk) SetTitle(v string) *BusinessServicesUpsertBulk {
+	return u.Update(func(s *BusinessServicesUpsert) {
+		s.SetTitle(v)
+	})
+}
+
+// UpdateTitle sets the "title" field to the value that was provided on create.
+func (u *BusinessServicesUpsertBulk) UpdateTitle() *BusinessServicesUpsertBulk {
+	return u.Update(func(s *BusinessServicesUpsert) {
+		s.UpdateTitle()
+	})
+}
+
+// SetDescription sets the "description" field.
+func (u *BusinessServicesUpsertBulk) SetDescription(v string) *BusinessServicesUpsertBulk {
+	return u.Update(func(s *BusinessServicesUpsert) {
+		s.SetDescription(v)
+	})
+}
+
+// UpdateDescription sets the "description" field to the value that was provided on create.
+func (u *BusinessServicesUpsertBulk) UpdateDescription() *BusinessServicesUpsertBulk {
+	return u.Update(func(s *BusinessServicesUpsert) {
+		s.UpdateDescription()
+	})
+}
+
+// Exec executes the query.
+func (u *BusinessServicesUpsertBulk) Exec(ctx context.Context) error {
+	if u.create.err != nil {
+		return u.create.err
+	}
+	for i, b := range u.create.builders {
+		if len(b.conflict) != 0 {
+			return fmt.Errorf("ent: OnConflict was set for builder %d. Set it on the BusinessServicesCreateBulk instead", i)
+		}
+	}
+	if len(u.create.conflict) == 0 {
+		return errors.New("ent: missing options for BusinessServicesCreateBulk.OnConflict")
+	}
+	return u.create.Exec(ctx)
+}
+
+// ExecX is like Exec, but panics if an error occurs.
+func (u *BusinessServicesUpsertBulk) ExecX(ctx context.Context) {
+	if err := u.create.Exec(ctx); err != nil {
 		panic(err)
 	}
 }

@@ -21,6 +21,18 @@ func (f BusinessFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, er
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.BusinessMutation", m)
 }
 
+// The BusinessDocumentFunc type is an adapter to allow the use of ordinary
+// function as BusinessDocument mutator.
+type BusinessDocumentFunc func(context.Context, *ent.BusinessDocumentMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f BusinessDocumentFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.BusinessDocumentMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.BusinessDocumentMutation", m)
+}
+
 // The BusinessFeatureFunc type is an adapter to allow the use of ordinary
 // function as BusinessFeature mutator.
 type BusinessFeatureFunc func(context.Context, *ent.BusinessFeatureMutation) (ent.Value, error)
@@ -127,6 +139,18 @@ func (f UserFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error)
 		return f(ctx, mv)
 	}
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.UserMutation", m)
+}
+
+// The UserDocumentFunc type is an adapter to allow the use of ordinary
+// function as UserDocument mutator.
+type UserDocumentFunc func(context.Context, *ent.UserDocumentMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f UserDocumentFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.UserDocumentMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.UserDocumentMutation", m)
 }
 
 // Condition is a hook condition function.

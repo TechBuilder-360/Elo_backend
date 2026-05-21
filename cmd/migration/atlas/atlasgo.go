@@ -43,7 +43,8 @@ func AtlasMigration() {
 	// Run `atlas migrate apply` on DB
 	uri := fmt.Sprintf("postgresql://%s:%s@%s:%d/%s?sslmode=disable", conf.DbUser, conf.DbPass, conf.DbHost, conf.DbPort, conf.DbName)
 	res, err := client.MigrateApply(context.Background(), &atlasexec.MigrateApplyParams{
-		URL: uri,
+		URL:        uri,
+		AllowDirty: true,
 	})
 	if err != nil {
 		log.Fatalf("failed to apply migrations: %v", err)

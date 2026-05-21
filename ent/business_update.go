@@ -12,10 +12,12 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/Toflex/directory_v2/ent/business"
+	"github.com/Toflex/directory_v2/ent/businessdocument"
 	"github.com/Toflex/directory_v2/ent/businessservices"
 	"github.com/Toflex/directory_v2/ent/manager"
 	"github.com/Toflex/directory_v2/ent/predicate"
 	"github.com/Toflex/directory_v2/ent/social"
+	"github.com/Toflex/directory_v2/ent/userdocument"
 )
 
 // BusinessUpdate is the builder for updating Business entities.
@@ -300,6 +302,36 @@ func (bu *BusinessUpdate) AddManages(m ...*Manager) *BusinessUpdate {
 	return bu.AddManageIDs(ids...)
 }
 
+// AddBusinessDocumentIDs adds the "business_documents" edge to the BusinessDocument entity by IDs.
+func (bu *BusinessUpdate) AddBusinessDocumentIDs(ids ...int) *BusinessUpdate {
+	bu.mutation.AddBusinessDocumentIDs(ids...)
+	return bu
+}
+
+// AddBusinessDocuments adds the "business_documents" edges to the BusinessDocument entity.
+func (bu *BusinessUpdate) AddBusinessDocuments(b ...*BusinessDocument) *BusinessUpdate {
+	ids := make([]int, len(b))
+	for i := range b {
+		ids[i] = b[i].ID
+	}
+	return bu.AddBusinessDocumentIDs(ids...)
+}
+
+// AddUserDocumentIDs adds the "user_documents" edge to the UserDocument entity by IDs.
+func (bu *BusinessUpdate) AddUserDocumentIDs(ids ...int) *BusinessUpdate {
+	bu.mutation.AddUserDocumentIDs(ids...)
+	return bu
+}
+
+// AddUserDocuments adds the "user_documents" edges to the UserDocument entity.
+func (bu *BusinessUpdate) AddUserDocuments(u ...*UserDocument) *BusinessUpdate {
+	ids := make([]int, len(u))
+	for i := range u {
+		ids[i] = u[i].ID
+	}
+	return bu.AddUserDocumentIDs(ids...)
+}
+
 // Mutation returns the BusinessMutation object of the builder.
 func (bu *BusinessUpdate) Mutation() *BusinessMutation {
 	return bu.mutation
@@ -366,6 +398,48 @@ func (bu *BusinessUpdate) RemoveManages(m ...*Manager) *BusinessUpdate {
 		ids[i] = m[i].ID
 	}
 	return bu.RemoveManageIDs(ids...)
+}
+
+// ClearBusinessDocuments clears all "business_documents" edges to the BusinessDocument entity.
+func (bu *BusinessUpdate) ClearBusinessDocuments() *BusinessUpdate {
+	bu.mutation.ClearBusinessDocuments()
+	return bu
+}
+
+// RemoveBusinessDocumentIDs removes the "business_documents" edge to BusinessDocument entities by IDs.
+func (bu *BusinessUpdate) RemoveBusinessDocumentIDs(ids ...int) *BusinessUpdate {
+	bu.mutation.RemoveBusinessDocumentIDs(ids...)
+	return bu
+}
+
+// RemoveBusinessDocuments removes "business_documents" edges to BusinessDocument entities.
+func (bu *BusinessUpdate) RemoveBusinessDocuments(b ...*BusinessDocument) *BusinessUpdate {
+	ids := make([]int, len(b))
+	for i := range b {
+		ids[i] = b[i].ID
+	}
+	return bu.RemoveBusinessDocumentIDs(ids...)
+}
+
+// ClearUserDocuments clears all "user_documents" edges to the UserDocument entity.
+func (bu *BusinessUpdate) ClearUserDocuments() *BusinessUpdate {
+	bu.mutation.ClearUserDocuments()
+	return bu
+}
+
+// RemoveUserDocumentIDs removes the "user_documents" edge to UserDocument entities by IDs.
+func (bu *BusinessUpdate) RemoveUserDocumentIDs(ids ...int) *BusinessUpdate {
+	bu.mutation.RemoveUserDocumentIDs(ids...)
+	return bu
+}
+
+// RemoveUserDocuments removes "user_documents" edges to UserDocument entities.
+func (bu *BusinessUpdate) RemoveUserDocuments(u ...*UserDocument) *BusinessUpdate {
+	ids := make([]int, len(u))
+	for i := range u {
+		ids[i] = u[i].ID
+	}
+	return bu.RemoveUserDocumentIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -624,6 +698,96 @@ func (bu *BusinessUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(manager.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if bu.mutation.BusinessDocumentsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   business.BusinessDocumentsTable,
+			Columns: []string{business.BusinessDocumentsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(businessdocument.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := bu.mutation.RemovedBusinessDocumentsIDs(); len(nodes) > 0 && !bu.mutation.BusinessDocumentsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   business.BusinessDocumentsTable,
+			Columns: []string{business.BusinessDocumentsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(businessdocument.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := bu.mutation.BusinessDocumentsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   business.BusinessDocumentsTable,
+			Columns: []string{business.BusinessDocumentsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(businessdocument.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if bu.mutation.UserDocumentsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   business.UserDocumentsTable,
+			Columns: []string{business.UserDocumentsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(userdocument.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := bu.mutation.RemovedUserDocumentsIDs(); len(nodes) > 0 && !bu.mutation.UserDocumentsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   business.UserDocumentsTable,
+			Columns: []string{business.UserDocumentsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(userdocument.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := bu.mutation.UserDocumentsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   business.UserDocumentsTable,
+			Columns: []string{business.UserDocumentsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(userdocument.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -920,6 +1084,36 @@ func (buo *BusinessUpdateOne) AddManages(m ...*Manager) *BusinessUpdateOne {
 	return buo.AddManageIDs(ids...)
 }
 
+// AddBusinessDocumentIDs adds the "business_documents" edge to the BusinessDocument entity by IDs.
+func (buo *BusinessUpdateOne) AddBusinessDocumentIDs(ids ...int) *BusinessUpdateOne {
+	buo.mutation.AddBusinessDocumentIDs(ids...)
+	return buo
+}
+
+// AddBusinessDocuments adds the "business_documents" edges to the BusinessDocument entity.
+func (buo *BusinessUpdateOne) AddBusinessDocuments(b ...*BusinessDocument) *BusinessUpdateOne {
+	ids := make([]int, len(b))
+	for i := range b {
+		ids[i] = b[i].ID
+	}
+	return buo.AddBusinessDocumentIDs(ids...)
+}
+
+// AddUserDocumentIDs adds the "user_documents" edge to the UserDocument entity by IDs.
+func (buo *BusinessUpdateOne) AddUserDocumentIDs(ids ...int) *BusinessUpdateOne {
+	buo.mutation.AddUserDocumentIDs(ids...)
+	return buo
+}
+
+// AddUserDocuments adds the "user_documents" edges to the UserDocument entity.
+func (buo *BusinessUpdateOne) AddUserDocuments(u ...*UserDocument) *BusinessUpdateOne {
+	ids := make([]int, len(u))
+	for i := range u {
+		ids[i] = u[i].ID
+	}
+	return buo.AddUserDocumentIDs(ids...)
+}
+
 // Mutation returns the BusinessMutation object of the builder.
 func (buo *BusinessUpdateOne) Mutation() *BusinessMutation {
 	return buo.mutation
@@ -986,6 +1180,48 @@ func (buo *BusinessUpdateOne) RemoveManages(m ...*Manager) *BusinessUpdateOne {
 		ids[i] = m[i].ID
 	}
 	return buo.RemoveManageIDs(ids...)
+}
+
+// ClearBusinessDocuments clears all "business_documents" edges to the BusinessDocument entity.
+func (buo *BusinessUpdateOne) ClearBusinessDocuments() *BusinessUpdateOne {
+	buo.mutation.ClearBusinessDocuments()
+	return buo
+}
+
+// RemoveBusinessDocumentIDs removes the "business_documents" edge to BusinessDocument entities by IDs.
+func (buo *BusinessUpdateOne) RemoveBusinessDocumentIDs(ids ...int) *BusinessUpdateOne {
+	buo.mutation.RemoveBusinessDocumentIDs(ids...)
+	return buo
+}
+
+// RemoveBusinessDocuments removes "business_documents" edges to BusinessDocument entities.
+func (buo *BusinessUpdateOne) RemoveBusinessDocuments(b ...*BusinessDocument) *BusinessUpdateOne {
+	ids := make([]int, len(b))
+	for i := range b {
+		ids[i] = b[i].ID
+	}
+	return buo.RemoveBusinessDocumentIDs(ids...)
+}
+
+// ClearUserDocuments clears all "user_documents" edges to the UserDocument entity.
+func (buo *BusinessUpdateOne) ClearUserDocuments() *BusinessUpdateOne {
+	buo.mutation.ClearUserDocuments()
+	return buo
+}
+
+// RemoveUserDocumentIDs removes the "user_documents" edge to UserDocument entities by IDs.
+func (buo *BusinessUpdateOne) RemoveUserDocumentIDs(ids ...int) *BusinessUpdateOne {
+	buo.mutation.RemoveUserDocumentIDs(ids...)
+	return buo
+}
+
+// RemoveUserDocuments removes "user_documents" edges to UserDocument entities.
+func (buo *BusinessUpdateOne) RemoveUserDocuments(u ...*UserDocument) *BusinessUpdateOne {
+	ids := make([]int, len(u))
+	for i := range u {
+		ids[i] = u[i].ID
+	}
+	return buo.RemoveUserDocumentIDs(ids...)
 }
 
 // Where appends a list predicates to the BusinessUpdate builder.
@@ -1274,6 +1510,96 @@ func (buo *BusinessUpdateOne) sqlSave(ctx context.Context) (_node *Business, err
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(manager.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if buo.mutation.BusinessDocumentsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   business.BusinessDocumentsTable,
+			Columns: []string{business.BusinessDocumentsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(businessdocument.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := buo.mutation.RemovedBusinessDocumentsIDs(); len(nodes) > 0 && !buo.mutation.BusinessDocumentsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   business.BusinessDocumentsTable,
+			Columns: []string{business.BusinessDocumentsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(businessdocument.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := buo.mutation.BusinessDocumentsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   business.BusinessDocumentsTable,
+			Columns: []string{business.BusinessDocumentsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(businessdocument.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if buo.mutation.UserDocumentsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   business.UserDocumentsTable,
+			Columns: []string{business.UserDocumentsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(userdocument.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := buo.mutation.RemovedUserDocumentsIDs(); len(nodes) > 0 && !buo.mutation.UserDocumentsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   business.UserDocumentsTable,
+			Columns: []string{business.UserDocumentsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(userdocument.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := buo.mutation.UserDocumentsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   business.UserDocumentsTable,
+			Columns: []string{business.UserDocumentsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(userdocument.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
