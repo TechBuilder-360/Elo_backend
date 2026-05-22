@@ -33,6 +33,29 @@ var (
 		Columns:    BusinessesColumns,
 		PrimaryKey: []*schema.Column{BusinessesColumns[0]},
 	}
+	// BusinessDocumentsColumns holds the columns for the "business_documents" table.
+	BusinessDocumentsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "title", Type: field.TypeString},
+		{Name: "description", Type: field.TypeString},
+		{Name: "url", Type: field.TypeString},
+		{Name: "verified", Type: field.TypeBool, Default: false},
+		{Name: "business_business_documents", Type: field.TypeString},
+	}
+	// BusinessDocumentsTable holds the schema information for the "business_documents" table.
+	BusinessDocumentsTable = &schema.Table{
+		Name:       "business_documents",
+		Columns:    BusinessDocumentsColumns,
+		PrimaryKey: []*schema.Column{BusinessDocumentsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "business_documents_businesses_business_documents",
+				Columns:    []*schema.Column{BusinessDocumentsColumns[5]},
+				RefColumns: []*schema.Column{BusinessesColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+		},
+	}
 	// BusinessFeaturesColumns holds the columns for the "business_features" table.
 	BusinessFeaturesColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeString},
@@ -123,7 +146,10 @@ var (
 	}
 	// ProvidersColumns holds the columns for the "providers" table.
 	ProvidersColumns = []*schema.Column{
-		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "id", Type: field.TypeString},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "deleted_at", Type: field.TypeTime, Nullable: true},
 		{Name: "name", Type: field.TypeString, Unique: true},
 		{Name: "slug", Type: field.TypeString, Unique: true},
 		{Name: "active", Type: field.TypeBool},
@@ -133,6 +159,13 @@ var (
 		Name:       "providers",
 		Columns:    ProvidersColumns,
 		PrimaryKey: []*schema.Column{ProvidersColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "provider_slug",
+				Unique:  true,
+				Columns: []*schema.Column{ProvidersColumns[5]},
+			},
+		},
 	}
 	// RolesColumns holds the columns for the "roles" table.
 	RolesColumns = []*schema.Column{
@@ -169,6 +202,13 @@ var (
 		Name:       "services",
 		Columns:    ServicesColumns,
 		PrimaryKey: []*schema.Column{ServicesColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "service_identifier",
+				Unique:  true,
+				Columns: []*schema.Column{ServicesColumns[5]},
+			},
+		},
 	}
 	// SocialsColumns holds the columns for the "socials" table.
 	SocialsColumns = []*schema.Column{
@@ -202,6 +242,7 @@ var (
 		{Name: "deleted_at", Type: field.TypeTime, Nullable: true},
 		{Name: "first_name", Type: field.TypeString},
 		{Name: "last_name", Type: field.TypeString},
+		{Name: "password", Type: field.TypeString},
 		{Name: "middle_name", Type: field.TypeString, Nullable: true},
 		{Name: "display_name", Type: field.TypeString, Nullable: true},
 		{Name: "email_address", Type: field.TypeString, Unique: true},
@@ -218,6 +259,35 @@ var (
 		Name:       "users",
 		Columns:    UsersColumns,
 		PrimaryKey: []*schema.Column{UsersColumns[0]},
+	}
+	// UserDocumentsColumns holds the columns for the "user_documents" table.
+	UserDocumentsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "title", Type: field.TypeString},
+		{Name: "description", Type: field.TypeString},
+		{Name: "url", Type: field.TypeString},
+		{Name: "business_user_documents", Type: field.TypeString},
+		{Name: "user_user_documents", Type: field.TypeString, Nullable: true},
+	}
+	// UserDocumentsTable holds the schema information for the "user_documents" table.
+	UserDocumentsTable = &schema.Table{
+		Name:       "user_documents",
+		Columns:    UserDocumentsColumns,
+		PrimaryKey: []*schema.Column{UserDocumentsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "user_documents_businesses_user_documents",
+				Columns:    []*schema.Column{UserDocumentsColumns[4]},
+				RefColumns: []*schema.Column{BusinessesColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+			{
+				Symbol:     "user_documents_users_user_documents",
+				Columns:    []*schema.Column{UserDocumentsColumns[5]},
+				RefColumns: []*schema.Column{UsersColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+		},
 	}
 	// RolePermissionsColumns holds the columns for the "role_permissions" table.
 	RolePermissionsColumns = []*schema.Column{
@@ -247,6 +317,7 @@ var (
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
 		BusinessesTable,
+		BusinessDocumentsTable,
 		BusinessFeaturesTable,
 		BusinessServicesTable,
 		ManagersTable,
@@ -256,15 +327,19 @@ var (
 		ServicesTable,
 		SocialsTable,
 		UsersTable,
+		UserDocumentsTable,
 		RolePermissionsTable,
 	}
 )
 
 func init() {
+	BusinessDocumentsTable.ForeignKeys[0].RefTable = BusinessesTable
 	BusinessServicesTable.ForeignKeys[0].RefTable = BusinessesTable
 	ManagersTable.ForeignKeys[0].RefTable = BusinessesTable
 	ManagersTable.ForeignKeys[1].RefTable = UsersTable
 	SocialsTable.ForeignKeys[0].RefTable = BusinessesTable
+	UserDocumentsTable.ForeignKeys[0].RefTable = BusinessesTable
+	UserDocumentsTable.ForeignKeys[1].RefTable = UsersTable
 	RolePermissionsTable.ForeignKeys[0].RefTable = RolesTable
 	RolePermissionsTable.ForeignKeys[1].RefTable = PermissionsTable
 }

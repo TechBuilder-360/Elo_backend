@@ -14,6 +14,7 @@ import (
 	"github.com/Toflex/directory_v2/ent/manager"
 	"github.com/Toflex/directory_v2/ent/predicate"
 	"github.com/Toflex/directory_v2/ent/user"
+	"github.com/Toflex/directory_v2/ent/userdocument"
 )
 
 // UserUpdate is the builder for updating User entities.
@@ -79,6 +80,20 @@ func (uu *UserUpdate) SetLastName(s string) *UserUpdate {
 func (uu *UserUpdate) SetNillableLastName(s *string) *UserUpdate {
 	if s != nil {
 		uu.SetLastName(*s)
+	}
+	return uu
+}
+
+// SetPassword sets the "password" field.
+func (uu *UserUpdate) SetPassword(s string) *UserUpdate {
+	uu.mutation.SetPassword(s)
+	return uu
+}
+
+// SetNillablePassword sets the "password" field if the given value is not nil.
+func (uu *UserUpdate) SetNillablePassword(s *string) *UserUpdate {
+	if s != nil {
+		uu.SetPassword(*s)
 	}
 	return uu
 }
@@ -274,6 +289,21 @@ func (uu *UserUpdate) AddManages(m ...*Manager) *UserUpdate {
 	return uu.AddManageIDs(ids...)
 }
 
+// AddUserDocumentIDs adds the "user_documents" edge to the UserDocument entity by IDs.
+func (uu *UserUpdate) AddUserDocumentIDs(ids ...int) *UserUpdate {
+	uu.mutation.AddUserDocumentIDs(ids...)
+	return uu
+}
+
+// AddUserDocuments adds the "user_documents" edges to the UserDocument entity.
+func (uu *UserUpdate) AddUserDocuments(u ...*UserDocument) *UserUpdate {
+	ids := make([]int, len(u))
+	for i := range u {
+		ids[i] = u[i].ID
+	}
+	return uu.AddUserDocumentIDs(ids...)
+}
+
 // Mutation returns the UserMutation object of the builder.
 func (uu *UserUpdate) Mutation() *UserMutation {
 	return uu.mutation
@@ -298,6 +328,27 @@ func (uu *UserUpdate) RemoveManages(m ...*Manager) *UserUpdate {
 		ids[i] = m[i].ID
 	}
 	return uu.RemoveManageIDs(ids...)
+}
+
+// ClearUserDocuments clears all "user_documents" edges to the UserDocument entity.
+func (uu *UserUpdate) ClearUserDocuments() *UserUpdate {
+	uu.mutation.ClearUserDocuments()
+	return uu
+}
+
+// RemoveUserDocumentIDs removes the "user_documents" edge to UserDocument entities by IDs.
+func (uu *UserUpdate) RemoveUserDocumentIDs(ids ...int) *UserUpdate {
+	uu.mutation.RemoveUserDocumentIDs(ids...)
+	return uu
+}
+
+// RemoveUserDocuments removes "user_documents" edges to UserDocument entities.
+func (uu *UserUpdate) RemoveUserDocuments(u ...*UserDocument) *UserUpdate {
+	ids := make([]int, len(u))
+	for i := range u {
+		ids[i] = u[i].ID
+	}
+	return uu.RemoveUserDocumentIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -348,6 +399,11 @@ func (uu *UserUpdate) check() error {
 			return &ValidationError{Name: "last_name", err: fmt.Errorf(`ent: validator failed for field "User.last_name": %w`, err)}
 		}
 	}
+	if v, ok := uu.mutation.Password(); ok {
+		if err := user.PasswordValidator(v); err != nil {
+			return &ValidationError{Name: "password", err: fmt.Errorf(`ent: validator failed for field "User.password": %w`, err)}
+		}
+	}
 	if v, ok := uu.mutation.EmailAddress(); ok {
 		if err := user.EmailAddressValidator(v); err != nil {
 			return &ValidationError{Name: "email_address", err: fmt.Errorf(`ent: validator failed for field "User.email_address": %w`, err)}
@@ -387,6 +443,9 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if value, ok := uu.mutation.LastName(); ok {
 		_spec.SetField(user.FieldLastName, field.TypeString, value)
+	}
+	if value, ok := uu.mutation.Password(); ok {
+		_spec.SetField(user.FieldPassword, field.TypeString, value)
 	}
 	if value, ok := uu.mutation.MiddleName(); ok {
 		_spec.SetField(user.FieldMiddleName, field.TypeString, value)
@@ -481,6 +540,51 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	if uu.mutation.UserDocumentsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.UserDocumentsTable,
+			Columns: []string{user.UserDocumentsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(userdocument.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := uu.mutation.RemovedUserDocumentsIDs(); len(nodes) > 0 && !uu.mutation.UserDocumentsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.UserDocumentsTable,
+			Columns: []string{user.UserDocumentsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(userdocument.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := uu.mutation.UserDocumentsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.UserDocumentsTable,
+			Columns: []string{user.UserDocumentsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(userdocument.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
 	if n, err = sqlgraph.UpdateNodes(ctx, uu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{user.Label}
@@ -551,6 +655,20 @@ func (uuo *UserUpdateOne) SetLastName(s string) *UserUpdateOne {
 func (uuo *UserUpdateOne) SetNillableLastName(s *string) *UserUpdateOne {
 	if s != nil {
 		uuo.SetLastName(*s)
+	}
+	return uuo
+}
+
+// SetPassword sets the "password" field.
+func (uuo *UserUpdateOne) SetPassword(s string) *UserUpdateOne {
+	uuo.mutation.SetPassword(s)
+	return uuo
+}
+
+// SetNillablePassword sets the "password" field if the given value is not nil.
+func (uuo *UserUpdateOne) SetNillablePassword(s *string) *UserUpdateOne {
+	if s != nil {
+		uuo.SetPassword(*s)
 	}
 	return uuo
 }
@@ -746,6 +864,21 @@ func (uuo *UserUpdateOne) AddManages(m ...*Manager) *UserUpdateOne {
 	return uuo.AddManageIDs(ids...)
 }
 
+// AddUserDocumentIDs adds the "user_documents" edge to the UserDocument entity by IDs.
+func (uuo *UserUpdateOne) AddUserDocumentIDs(ids ...int) *UserUpdateOne {
+	uuo.mutation.AddUserDocumentIDs(ids...)
+	return uuo
+}
+
+// AddUserDocuments adds the "user_documents" edges to the UserDocument entity.
+func (uuo *UserUpdateOne) AddUserDocuments(u ...*UserDocument) *UserUpdateOne {
+	ids := make([]int, len(u))
+	for i := range u {
+		ids[i] = u[i].ID
+	}
+	return uuo.AddUserDocumentIDs(ids...)
+}
+
 // Mutation returns the UserMutation object of the builder.
 func (uuo *UserUpdateOne) Mutation() *UserMutation {
 	return uuo.mutation
@@ -770,6 +903,27 @@ func (uuo *UserUpdateOne) RemoveManages(m ...*Manager) *UserUpdateOne {
 		ids[i] = m[i].ID
 	}
 	return uuo.RemoveManageIDs(ids...)
+}
+
+// ClearUserDocuments clears all "user_documents" edges to the UserDocument entity.
+func (uuo *UserUpdateOne) ClearUserDocuments() *UserUpdateOne {
+	uuo.mutation.ClearUserDocuments()
+	return uuo
+}
+
+// RemoveUserDocumentIDs removes the "user_documents" edge to UserDocument entities by IDs.
+func (uuo *UserUpdateOne) RemoveUserDocumentIDs(ids ...int) *UserUpdateOne {
+	uuo.mutation.RemoveUserDocumentIDs(ids...)
+	return uuo
+}
+
+// RemoveUserDocuments removes "user_documents" edges to UserDocument entities.
+func (uuo *UserUpdateOne) RemoveUserDocuments(u ...*UserDocument) *UserUpdateOne {
+	ids := make([]int, len(u))
+	for i := range u {
+		ids[i] = u[i].ID
+	}
+	return uuo.RemoveUserDocumentIDs(ids...)
 }
 
 // Where appends a list predicates to the UserUpdate builder.
@@ -833,6 +987,11 @@ func (uuo *UserUpdateOne) check() error {
 			return &ValidationError{Name: "last_name", err: fmt.Errorf(`ent: validator failed for field "User.last_name": %w`, err)}
 		}
 	}
+	if v, ok := uuo.mutation.Password(); ok {
+		if err := user.PasswordValidator(v); err != nil {
+			return &ValidationError{Name: "password", err: fmt.Errorf(`ent: validator failed for field "User.password": %w`, err)}
+		}
+	}
 	if v, ok := uuo.mutation.EmailAddress(); ok {
 		if err := user.EmailAddressValidator(v); err != nil {
 			return &ValidationError{Name: "email_address", err: fmt.Errorf(`ent: validator failed for field "User.email_address": %w`, err)}
@@ -889,6 +1048,9 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 	}
 	if value, ok := uuo.mutation.LastName(); ok {
 		_spec.SetField(user.FieldLastName, field.TypeString, value)
+	}
+	if value, ok := uuo.mutation.Password(); ok {
+		_spec.SetField(user.FieldPassword, field.TypeString, value)
 	}
 	if value, ok := uuo.mutation.MiddleName(); ok {
 		_spec.SetField(user.FieldMiddleName, field.TypeString, value)
@@ -976,6 +1138,51 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(manager.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if uuo.mutation.UserDocumentsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.UserDocumentsTable,
+			Columns: []string{user.UserDocumentsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(userdocument.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := uuo.mutation.RemovedUserDocumentsIDs(); len(nodes) > 0 && !uuo.mutation.UserDocumentsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.UserDocumentsTable,
+			Columns: []string{user.UserDocumentsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(userdocument.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := uuo.mutation.UserDocumentsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.UserDocumentsTable,
+			Columns: []string{user.UserDocumentsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(userdocument.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {

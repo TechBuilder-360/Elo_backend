@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/Toflex/directory_v2/ent/business"
+	"github.com/Toflex/directory_v2/ent/businessdocument"
 	"github.com/Toflex/directory_v2/ent/businessfeature"
 	"github.com/Toflex/directory_v2/ent/businessservices"
 	"github.com/Toflex/directory_v2/ent/manager"
@@ -16,6 +17,7 @@ import (
 	"github.com/Toflex/directory_v2/ent/service"
 	"github.com/Toflex/directory_v2/ent/social"
 	"github.com/Toflex/directory_v2/ent/user"
+	"github.com/Toflex/directory_v2/ent/userdocument"
 )
 
 // The init function reads all schema descriptors with runtime code
@@ -87,6 +89,24 @@ func init() {
 	businessDescID := businessMixinFields0[0].Descriptor()
 	// business.DefaultID holds the default value on creation for the id field.
 	business.DefaultID = businessDescID.Default.(func() string)
+	businessdocumentFields := schema.BusinessDocument{}.Fields()
+	_ = businessdocumentFields
+	// businessdocumentDescTitle is the schema descriptor for title field.
+	businessdocumentDescTitle := businessdocumentFields[0].Descriptor()
+	// businessdocument.TitleValidator is a validator for the "title" field. It is called by the builders before save.
+	businessdocument.TitleValidator = businessdocumentDescTitle.Validators[0].(func(string) error)
+	// businessdocumentDescDescription is the schema descriptor for description field.
+	businessdocumentDescDescription := businessdocumentFields[1].Descriptor()
+	// businessdocument.DescriptionValidator is a validator for the "description" field. It is called by the builders before save.
+	businessdocument.DescriptionValidator = businessdocumentDescDescription.Validators[0].(func(string) error)
+	// businessdocumentDescURL is the schema descriptor for url field.
+	businessdocumentDescURL := businessdocumentFields[2].Descriptor()
+	// businessdocument.URLValidator is a validator for the "url" field. It is called by the builders before save.
+	businessdocument.URLValidator = businessdocumentDescURL.Validators[0].(func(string) error)
+	// businessdocumentDescVerified is the schema descriptor for verified field.
+	businessdocumentDescVerified := businessdocumentFields[3].Descriptor()
+	// businessdocument.DefaultVerified holds the default value on creation for the verified field.
+	businessdocument.DefaultVerified = businessdocumentDescVerified.Default.(bool)
 	businessfeatureMixin := schema.BusinessFeature{}.Mixin()
 	businessfeatureMixinFields0 := businessfeatureMixin[0].Fields()
 	_ = businessfeatureMixinFields0
@@ -190,8 +210,21 @@ func init() {
 	permissionDescID := permissionMixinFields0[0].Descriptor()
 	// permission.DefaultID holds the default value on creation for the id field.
 	permission.DefaultID = permissionDescID.Default.(func() string)
+	providerMixin := schema.Provider{}.Mixin()
+	providerMixinFields0 := providerMixin[0].Fields()
+	_ = providerMixinFields0
 	providerFields := schema.Provider{}.Fields()
 	_ = providerFields
+	// providerDescCreatedAt is the schema descriptor for created_at field.
+	providerDescCreatedAt := providerMixinFields0[1].Descriptor()
+	// provider.DefaultCreatedAt holds the default value on creation for the created_at field.
+	provider.DefaultCreatedAt = providerDescCreatedAt.Default.(func() time.Time)
+	// providerDescUpdatedAt is the schema descriptor for updated_at field.
+	providerDescUpdatedAt := providerMixinFields0[2].Descriptor()
+	// provider.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	provider.DefaultUpdatedAt = providerDescUpdatedAt.Default.(func() time.Time)
+	// provider.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	provider.UpdateDefaultUpdatedAt = providerDescUpdatedAt.UpdateDefault.(func() time.Time)
 	// providerDescName is the schema descriptor for name field.
 	providerDescName := providerFields[0].Descriptor()
 	// provider.NameValidator is a validator for the "name" field. It is called by the builders before save.
@@ -200,6 +233,10 @@ func init() {
 	providerDescSlug := providerFields[1].Descriptor()
 	// provider.SlugValidator is a validator for the "slug" field. It is called by the builders before save.
 	provider.SlugValidator = providerDescSlug.Validators[0].(func(string) error)
+	// providerDescID is the schema descriptor for id field.
+	providerDescID := providerMixinFields0[0].Descriptor()
+	// provider.DefaultID holds the default value on creation for the id field.
+	provider.DefaultID = providerDescID.Default.(func() string)
 	roleMixin := schema.Role{}.Mixin()
 	roleMixinFields0 := roleMixin[0].Fields()
 	_ = roleMixinFields0
@@ -324,8 +361,12 @@ func init() {
 	userDescLastName := userFields[1].Descriptor()
 	// user.LastNameValidator is a validator for the "last_name" field. It is called by the builders before save.
 	user.LastNameValidator = userDescLastName.Validators[0].(func(string) error)
+	// userDescPassword is the schema descriptor for password field.
+	userDescPassword := userFields[2].Descriptor()
+	// user.PasswordValidator is a validator for the "password" field. It is called by the builders before save.
+	user.PasswordValidator = userDescPassword.Validators[0].(func(string) error)
 	// userDescEmailAddress is the schema descriptor for email_address field.
-	userDescEmailAddress := userFields[4].Descriptor()
+	userDescEmailAddress := userFields[5].Descriptor()
 	// user.EmailAddressValidator is a validator for the "email_address" field. It is called by the builders before save.
 	user.EmailAddressValidator = func() func(string) error {
 		validators := userDescEmailAddress.Validators
@@ -343,23 +384,37 @@ func init() {
 		}
 	}()
 	// userDescEmailVerified is the schema descriptor for email_verified field.
-	userDescEmailVerified := userFields[5].Descriptor()
+	userDescEmailVerified := userFields[6].Descriptor()
 	// user.DefaultEmailVerified holds the default value on creation for the email_verified field.
 	user.DefaultEmailVerified = userDescEmailVerified.Default.(bool)
 	// userDescPhoneNumber is the schema descriptor for phone_number field.
-	userDescPhoneNumber := userFields[7].Descriptor()
+	userDescPhoneNumber := userFields[8].Descriptor()
 	// user.PhoneNumberValidator is a validator for the "phone_number" field. It is called by the builders before save.
 	user.PhoneNumberValidator = userDescPhoneNumber.Validators[0].(func(string) error)
 	// userDescDisabled is the schema descriptor for disabled field.
-	userDescDisabled := userFields[9].Descriptor()
+	userDescDisabled := userFields[10].Descriptor()
 	// user.DefaultDisabled holds the default value on creation for the disabled field.
 	user.DefaultDisabled = userDescDisabled.Default.(bool)
 	// userDescVerified is the schema descriptor for verified field.
-	userDescVerified := userFields[11].Descriptor()
+	userDescVerified := userFields[12].Descriptor()
 	// user.DefaultVerified holds the default value on creation for the verified field.
 	user.DefaultVerified = userDescVerified.Default.(bool)
 	// userDescID is the schema descriptor for id field.
 	userDescID := userMixinFields0[0].Descriptor()
 	// user.DefaultID holds the default value on creation for the id field.
 	user.DefaultID = userDescID.Default.(func() string)
+	userdocumentFields := schema.UserDocument{}.Fields()
+	_ = userdocumentFields
+	// userdocumentDescTitle is the schema descriptor for title field.
+	userdocumentDescTitle := userdocumentFields[0].Descriptor()
+	// userdocument.TitleValidator is a validator for the "title" field. It is called by the builders before save.
+	userdocument.TitleValidator = userdocumentDescTitle.Validators[0].(func(string) error)
+	// userdocumentDescDescription is the schema descriptor for description field.
+	userdocumentDescDescription := userdocumentFields[1].Descriptor()
+	// userdocument.DescriptionValidator is a validator for the "description" field. It is called by the builders before save.
+	userdocument.DescriptionValidator = userdocumentDescDescription.Validators[0].(func(string) error)
+	// userdocumentDescURL is the schema descriptor for url field.
+	userdocumentDescURL := userdocumentFields[2].Descriptor()
+	// userdocument.URLValidator is a validator for the "url" field. It is called by the builders before save.
+	userdocument.URLValidator = userdocumentDescURL.Validators[0].(func(string) error)
 }

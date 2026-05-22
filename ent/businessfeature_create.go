@@ -8,6 +8,8 @@ import (
 	"fmt"
 	"time"
 
+	"entgo.io/ent/dialect"
+	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/Toflex/directory_v2/ent/businessfeature"
@@ -19,6 +21,7 @@ type BusinessFeatureCreate struct {
 	config
 	mutation *BusinessFeatureMutation
 	hooks    []Hook
+	conflict []sql.ConflictOption
 }
 
 // SetCreatedAt sets the "created_at" field.
@@ -286,6 +289,7 @@ func (bfc *BusinessFeatureCreate) createSpec() (*BusinessFeature, *sqlgraph.Crea
 		_node = &BusinessFeature{config: bfc.config}
 		_spec = sqlgraph.NewCreateSpec(businessfeature.Table, sqlgraph.NewFieldSpec(businessfeature.FieldID, field.TypeString))
 	)
+	_spec.OnConflict = bfc.conflict
 	if id, ok := bfc.mutation.ID(); ok {
 		_node.ID = id
 		_spec.ID.Value = id
@@ -333,11 +337,423 @@ func (bfc *BusinessFeatureCreate) createSpec() (*BusinessFeature, *sqlgraph.Crea
 	return _node, _spec
 }
 
+// OnConflict allows configuring the `ON CONFLICT` / `ON DUPLICATE KEY` clause
+// of the `INSERT` statement. For example:
+//
+//	client.BusinessFeature.Create().
+//		SetCreatedAt(v).
+//		OnConflict(
+//			// Update the row with the new values
+//			// the was proposed for insertion.
+//			sql.ResolveWithNewValues(),
+//		).
+//		// Override some of the fields with custom
+//		// update values.
+//		Update(func(u *ent.BusinessFeatureUpsert) {
+//			SetCreatedAt(v+v).
+//		}).
+//		Exec(ctx)
+func (bfc *BusinessFeatureCreate) OnConflict(opts ...sql.ConflictOption) *BusinessFeatureUpsertOne {
+	bfc.conflict = opts
+	return &BusinessFeatureUpsertOne{
+		create: bfc,
+	}
+}
+
+// OnConflictColumns calls `OnConflict` and configures the columns
+// as conflict target. Using this option is equivalent to using:
+//
+//	client.BusinessFeature.Create().
+//		OnConflict(sql.ConflictColumns(columns...)).
+//		Exec(ctx)
+func (bfc *BusinessFeatureCreate) OnConflictColumns(columns ...string) *BusinessFeatureUpsertOne {
+	bfc.conflict = append(bfc.conflict, sql.ConflictColumns(columns...))
+	return &BusinessFeatureUpsertOne{
+		create: bfc,
+	}
+}
+
+type (
+	// BusinessFeatureUpsertOne is the builder for "upsert"-ing
+	//  one BusinessFeature node.
+	BusinessFeatureUpsertOne struct {
+		create *BusinessFeatureCreate
+	}
+
+	// BusinessFeatureUpsert is the "OnConflict" setter.
+	BusinessFeatureUpsert struct {
+		*sql.UpdateSet
+	}
+)
+
+// SetUpdatedAt sets the "updated_at" field.
+func (u *BusinessFeatureUpsert) SetUpdatedAt(v time.Time) *BusinessFeatureUpsert {
+	u.Set(businessfeature.FieldUpdatedAt, v)
+	return u
+}
+
+// UpdateUpdatedAt sets the "updated_at" field to the value that was provided on create.
+func (u *BusinessFeatureUpsert) UpdateUpdatedAt() *BusinessFeatureUpsert {
+	u.SetExcluded(businessfeature.FieldUpdatedAt)
+	return u
+}
+
+// SetDeletedAt sets the "deleted_at" field.
+func (u *BusinessFeatureUpsert) SetDeletedAt(v time.Time) *BusinessFeatureUpsert {
+	u.Set(businessfeature.FieldDeletedAt, v)
+	return u
+}
+
+// UpdateDeletedAt sets the "deleted_at" field to the value that was provided on create.
+func (u *BusinessFeatureUpsert) UpdateDeletedAt() *BusinessFeatureUpsert {
+	u.SetExcluded(businessfeature.FieldDeletedAt)
+	return u
+}
+
+// ClearDeletedAt clears the value of the "deleted_at" field.
+func (u *BusinessFeatureUpsert) ClearDeletedAt() *BusinessFeatureUpsert {
+	u.SetNull(businessfeature.FieldDeletedAt)
+	return u
+}
+
+// SetName sets the "name" field.
+func (u *BusinessFeatureUpsert) SetName(v string) *BusinessFeatureUpsert {
+	u.Set(businessfeature.FieldName, v)
+	return u
+}
+
+// UpdateName sets the "name" field to the value that was provided on create.
+func (u *BusinessFeatureUpsert) UpdateName() *BusinessFeatureUpsert {
+	u.SetExcluded(businessfeature.FieldName)
+	return u
+}
+
+// SetIdentifier sets the "identifier" field.
+func (u *BusinessFeatureUpsert) SetIdentifier(v string) *BusinessFeatureUpsert {
+	u.Set(businessfeature.FieldIdentifier, v)
+	return u
+}
+
+// UpdateIdentifier sets the "identifier" field to the value that was provided on create.
+func (u *BusinessFeatureUpsert) UpdateIdentifier() *BusinessFeatureUpsert {
+	u.SetExcluded(businessfeature.FieldIdentifier)
+	return u
+}
+
+// SetRequireSubscription sets the "require_subscription" field.
+func (u *BusinessFeatureUpsert) SetRequireSubscription(v bool) *BusinessFeatureUpsert {
+	u.Set(businessfeature.FieldRequireSubscription, v)
+	return u
+}
+
+// UpdateRequireSubscription sets the "require_subscription" field to the value that was provided on create.
+func (u *BusinessFeatureUpsert) UpdateRequireSubscription() *BusinessFeatureUpsert {
+	u.SetExcluded(businessfeature.FieldRequireSubscription)
+	return u
+}
+
+// SetActive sets the "active" field.
+func (u *BusinessFeatureUpsert) SetActive(v bool) *BusinessFeatureUpsert {
+	u.Set(businessfeature.FieldActive, v)
+	return u
+}
+
+// UpdateActive sets the "active" field to the value that was provided on create.
+func (u *BusinessFeatureUpsert) UpdateActive() *BusinessFeatureUpsert {
+	u.SetExcluded(businessfeature.FieldActive)
+	return u
+}
+
+// SetMin sets the "min" field.
+func (u *BusinessFeatureUpsert) SetMin(v int) *BusinessFeatureUpsert {
+	u.Set(businessfeature.FieldMin, v)
+	return u
+}
+
+// UpdateMin sets the "min" field to the value that was provided on create.
+func (u *BusinessFeatureUpsert) UpdateMin() *BusinessFeatureUpsert {
+	u.SetExcluded(businessfeature.FieldMin)
+	return u
+}
+
+// AddMin adds v to the "min" field.
+func (u *BusinessFeatureUpsert) AddMin(v int) *BusinessFeatureUpsert {
+	u.Add(businessfeature.FieldMin, v)
+	return u
+}
+
+// SetMax sets the "max" field.
+func (u *BusinessFeatureUpsert) SetMax(v int) *BusinessFeatureUpsert {
+	u.Set(businessfeature.FieldMax, v)
+	return u
+}
+
+// UpdateMax sets the "max" field to the value that was provided on create.
+func (u *BusinessFeatureUpsert) UpdateMax() *BusinessFeatureUpsert {
+	u.SetExcluded(businessfeature.FieldMax)
+	return u
+}
+
+// AddMax adds v to the "max" field.
+func (u *BusinessFeatureUpsert) AddMax(v int) *BusinessFeatureUpsert {
+	u.Add(businessfeature.FieldMax, v)
+	return u
+}
+
+// SetFee sets the "fee" field.
+func (u *BusinessFeatureUpsert) SetFee(v *schema.Fee) *BusinessFeatureUpsert {
+	u.Set(businessfeature.FieldFee, v)
+	return u
+}
+
+// UpdateFee sets the "fee" field to the value that was provided on create.
+func (u *BusinessFeatureUpsert) UpdateFee() *BusinessFeatureUpsert {
+	u.SetExcluded(businessfeature.FieldFee)
+	return u
+}
+
+// UpdateNewValues updates the mutable fields using the new values that were set on create except the ID field.
+// Using this option is equivalent to using:
+//
+//	client.BusinessFeature.Create().
+//		OnConflict(
+//			sql.ResolveWithNewValues(),
+//			sql.ResolveWith(func(u *sql.UpdateSet) {
+//				u.SetIgnore(businessfeature.FieldID)
+//			}),
+//		).
+//		Exec(ctx)
+func (u *BusinessFeatureUpsertOne) UpdateNewValues() *BusinessFeatureUpsertOne {
+	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
+	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(s *sql.UpdateSet) {
+		if _, exists := u.create.mutation.ID(); exists {
+			s.SetIgnore(businessfeature.FieldID)
+		}
+		if _, exists := u.create.mutation.CreatedAt(); exists {
+			s.SetIgnore(businessfeature.FieldCreatedAt)
+		}
+	}))
+	return u
+}
+
+// Ignore sets each column to itself in case of conflict.
+// Using this option is equivalent to using:
+//
+//	client.BusinessFeature.Create().
+//	    OnConflict(sql.ResolveWithIgnore()).
+//	    Exec(ctx)
+func (u *BusinessFeatureUpsertOne) Ignore() *BusinessFeatureUpsertOne {
+	u.create.conflict = append(u.create.conflict, sql.ResolveWithIgnore())
+	return u
+}
+
+// DoNothing configures the conflict_action to `DO NOTHING`.
+// Supported only by SQLite and PostgreSQL.
+func (u *BusinessFeatureUpsertOne) DoNothing() *BusinessFeatureUpsertOne {
+	u.create.conflict = append(u.create.conflict, sql.DoNothing())
+	return u
+}
+
+// Update allows overriding fields `UPDATE` values. See the BusinessFeatureCreate.OnConflict
+// documentation for more info.
+func (u *BusinessFeatureUpsertOne) Update(set func(*BusinessFeatureUpsert)) *BusinessFeatureUpsertOne {
+	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(update *sql.UpdateSet) {
+		set(&BusinessFeatureUpsert{UpdateSet: update})
+	}))
+	return u
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (u *BusinessFeatureUpsertOne) SetUpdatedAt(v time.Time) *BusinessFeatureUpsertOne {
+	return u.Update(func(s *BusinessFeatureUpsert) {
+		s.SetUpdatedAt(v)
+	})
+}
+
+// UpdateUpdatedAt sets the "updated_at" field to the value that was provided on create.
+func (u *BusinessFeatureUpsertOne) UpdateUpdatedAt() *BusinessFeatureUpsertOne {
+	return u.Update(func(s *BusinessFeatureUpsert) {
+		s.UpdateUpdatedAt()
+	})
+}
+
+// SetDeletedAt sets the "deleted_at" field.
+func (u *BusinessFeatureUpsertOne) SetDeletedAt(v time.Time) *BusinessFeatureUpsertOne {
+	return u.Update(func(s *BusinessFeatureUpsert) {
+		s.SetDeletedAt(v)
+	})
+}
+
+// UpdateDeletedAt sets the "deleted_at" field to the value that was provided on create.
+func (u *BusinessFeatureUpsertOne) UpdateDeletedAt() *BusinessFeatureUpsertOne {
+	return u.Update(func(s *BusinessFeatureUpsert) {
+		s.UpdateDeletedAt()
+	})
+}
+
+// ClearDeletedAt clears the value of the "deleted_at" field.
+func (u *BusinessFeatureUpsertOne) ClearDeletedAt() *BusinessFeatureUpsertOne {
+	return u.Update(func(s *BusinessFeatureUpsert) {
+		s.ClearDeletedAt()
+	})
+}
+
+// SetName sets the "name" field.
+func (u *BusinessFeatureUpsertOne) SetName(v string) *BusinessFeatureUpsertOne {
+	return u.Update(func(s *BusinessFeatureUpsert) {
+		s.SetName(v)
+	})
+}
+
+// UpdateName sets the "name" field to the value that was provided on create.
+func (u *BusinessFeatureUpsertOne) UpdateName() *BusinessFeatureUpsertOne {
+	return u.Update(func(s *BusinessFeatureUpsert) {
+		s.UpdateName()
+	})
+}
+
+// SetIdentifier sets the "identifier" field.
+func (u *BusinessFeatureUpsertOne) SetIdentifier(v string) *BusinessFeatureUpsertOne {
+	return u.Update(func(s *BusinessFeatureUpsert) {
+		s.SetIdentifier(v)
+	})
+}
+
+// UpdateIdentifier sets the "identifier" field to the value that was provided on create.
+func (u *BusinessFeatureUpsertOne) UpdateIdentifier() *BusinessFeatureUpsertOne {
+	return u.Update(func(s *BusinessFeatureUpsert) {
+		s.UpdateIdentifier()
+	})
+}
+
+// SetRequireSubscription sets the "require_subscription" field.
+func (u *BusinessFeatureUpsertOne) SetRequireSubscription(v bool) *BusinessFeatureUpsertOne {
+	return u.Update(func(s *BusinessFeatureUpsert) {
+		s.SetRequireSubscription(v)
+	})
+}
+
+// UpdateRequireSubscription sets the "require_subscription" field to the value that was provided on create.
+func (u *BusinessFeatureUpsertOne) UpdateRequireSubscription() *BusinessFeatureUpsertOne {
+	return u.Update(func(s *BusinessFeatureUpsert) {
+		s.UpdateRequireSubscription()
+	})
+}
+
+// SetActive sets the "active" field.
+func (u *BusinessFeatureUpsertOne) SetActive(v bool) *BusinessFeatureUpsertOne {
+	return u.Update(func(s *BusinessFeatureUpsert) {
+		s.SetActive(v)
+	})
+}
+
+// UpdateActive sets the "active" field to the value that was provided on create.
+func (u *BusinessFeatureUpsertOne) UpdateActive() *BusinessFeatureUpsertOne {
+	return u.Update(func(s *BusinessFeatureUpsert) {
+		s.UpdateActive()
+	})
+}
+
+// SetMin sets the "min" field.
+func (u *BusinessFeatureUpsertOne) SetMin(v int) *BusinessFeatureUpsertOne {
+	return u.Update(func(s *BusinessFeatureUpsert) {
+		s.SetMin(v)
+	})
+}
+
+// AddMin adds v to the "min" field.
+func (u *BusinessFeatureUpsertOne) AddMin(v int) *BusinessFeatureUpsertOne {
+	return u.Update(func(s *BusinessFeatureUpsert) {
+		s.AddMin(v)
+	})
+}
+
+// UpdateMin sets the "min" field to the value that was provided on create.
+func (u *BusinessFeatureUpsertOne) UpdateMin() *BusinessFeatureUpsertOne {
+	return u.Update(func(s *BusinessFeatureUpsert) {
+		s.UpdateMin()
+	})
+}
+
+// SetMax sets the "max" field.
+func (u *BusinessFeatureUpsertOne) SetMax(v int) *BusinessFeatureUpsertOne {
+	return u.Update(func(s *BusinessFeatureUpsert) {
+		s.SetMax(v)
+	})
+}
+
+// AddMax adds v to the "max" field.
+func (u *BusinessFeatureUpsertOne) AddMax(v int) *BusinessFeatureUpsertOne {
+	return u.Update(func(s *BusinessFeatureUpsert) {
+		s.AddMax(v)
+	})
+}
+
+// UpdateMax sets the "max" field to the value that was provided on create.
+func (u *BusinessFeatureUpsertOne) UpdateMax() *BusinessFeatureUpsertOne {
+	return u.Update(func(s *BusinessFeatureUpsert) {
+		s.UpdateMax()
+	})
+}
+
+// SetFee sets the "fee" field.
+func (u *BusinessFeatureUpsertOne) SetFee(v *schema.Fee) *BusinessFeatureUpsertOne {
+	return u.Update(func(s *BusinessFeatureUpsert) {
+		s.SetFee(v)
+	})
+}
+
+// UpdateFee sets the "fee" field to the value that was provided on create.
+func (u *BusinessFeatureUpsertOne) UpdateFee() *BusinessFeatureUpsertOne {
+	return u.Update(func(s *BusinessFeatureUpsert) {
+		s.UpdateFee()
+	})
+}
+
+// Exec executes the query.
+func (u *BusinessFeatureUpsertOne) Exec(ctx context.Context) error {
+	if len(u.create.conflict) == 0 {
+		return errors.New("ent: missing options for BusinessFeatureCreate.OnConflict")
+	}
+	return u.create.Exec(ctx)
+}
+
+// ExecX is like Exec, but panics if an error occurs.
+func (u *BusinessFeatureUpsertOne) ExecX(ctx context.Context) {
+	if err := u.create.Exec(ctx); err != nil {
+		panic(err)
+	}
+}
+
+// Exec executes the UPSERT query and returns the inserted/updated ID.
+func (u *BusinessFeatureUpsertOne) ID(ctx context.Context) (id string, err error) {
+	if u.create.driver.Dialect() == dialect.MySQL {
+		// In case of "ON CONFLICT", there is no way to get back non-numeric ID
+		// fields from the database since MySQL does not support the RETURNING clause.
+		return id, errors.New("ent: BusinessFeatureUpsertOne.ID is not supported by MySQL driver. Use BusinessFeatureUpsertOne.Exec instead")
+	}
+	node, err := u.create.Save(ctx)
+	if err != nil {
+		return id, err
+	}
+	return node.ID, nil
+}
+
+// IDX is like ID, but panics if an error occurs.
+func (u *BusinessFeatureUpsertOne) IDX(ctx context.Context) string {
+	id, err := u.ID(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return id
+}
+
 // BusinessFeatureCreateBulk is the builder for creating many BusinessFeature entities in bulk.
 type BusinessFeatureCreateBulk struct {
 	config
 	err      error
 	builders []*BusinessFeatureCreate
+	conflict []sql.ConflictOption
 }
 
 // Save creates the BusinessFeature entities in the database.
@@ -367,6 +783,7 @@ func (bfcb *BusinessFeatureCreateBulk) Save(ctx context.Context) ([]*BusinessFea
 					_, err = mutators[i+1].Mutate(root, bfcb.builders[i+1].mutation)
 				} else {
 					spec := &sqlgraph.BatchCreateSpec{Nodes: specs}
+					spec.OnConflict = bfcb.conflict
 					// Invoke the actual operation on the latest mutation in the chain.
 					if err = sqlgraph.BatchCreate(ctx, bfcb.driver, spec); err != nil {
 						if sqlgraph.IsConstraintError(err) {
@@ -413,6 +830,270 @@ func (bfcb *BusinessFeatureCreateBulk) Exec(ctx context.Context) error {
 // ExecX is like Exec, but panics if an error occurs.
 func (bfcb *BusinessFeatureCreateBulk) ExecX(ctx context.Context) {
 	if err := bfcb.Exec(ctx); err != nil {
+		panic(err)
+	}
+}
+
+// OnConflict allows configuring the `ON CONFLICT` / `ON DUPLICATE KEY` clause
+// of the `INSERT` statement. For example:
+//
+//	client.BusinessFeature.CreateBulk(builders...).
+//		OnConflict(
+//			// Update the row with the new values
+//			// the was proposed for insertion.
+//			sql.ResolveWithNewValues(),
+//		).
+//		// Override some of the fields with custom
+//		// update values.
+//		Update(func(u *ent.BusinessFeatureUpsert) {
+//			SetCreatedAt(v+v).
+//		}).
+//		Exec(ctx)
+func (bfcb *BusinessFeatureCreateBulk) OnConflict(opts ...sql.ConflictOption) *BusinessFeatureUpsertBulk {
+	bfcb.conflict = opts
+	return &BusinessFeatureUpsertBulk{
+		create: bfcb,
+	}
+}
+
+// OnConflictColumns calls `OnConflict` and configures the columns
+// as conflict target. Using this option is equivalent to using:
+//
+//	client.BusinessFeature.Create().
+//		OnConflict(sql.ConflictColumns(columns...)).
+//		Exec(ctx)
+func (bfcb *BusinessFeatureCreateBulk) OnConflictColumns(columns ...string) *BusinessFeatureUpsertBulk {
+	bfcb.conflict = append(bfcb.conflict, sql.ConflictColumns(columns...))
+	return &BusinessFeatureUpsertBulk{
+		create: bfcb,
+	}
+}
+
+// BusinessFeatureUpsertBulk is the builder for "upsert"-ing
+// a bulk of BusinessFeature nodes.
+type BusinessFeatureUpsertBulk struct {
+	create *BusinessFeatureCreateBulk
+}
+
+// UpdateNewValues updates the mutable fields using the new values that
+// were set on create. Using this option is equivalent to using:
+//
+//	client.BusinessFeature.Create().
+//		OnConflict(
+//			sql.ResolveWithNewValues(),
+//			sql.ResolveWith(func(u *sql.UpdateSet) {
+//				u.SetIgnore(businessfeature.FieldID)
+//			}),
+//		).
+//		Exec(ctx)
+func (u *BusinessFeatureUpsertBulk) UpdateNewValues() *BusinessFeatureUpsertBulk {
+	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
+	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(s *sql.UpdateSet) {
+		for _, b := range u.create.builders {
+			if _, exists := b.mutation.ID(); exists {
+				s.SetIgnore(businessfeature.FieldID)
+			}
+			if _, exists := b.mutation.CreatedAt(); exists {
+				s.SetIgnore(businessfeature.FieldCreatedAt)
+			}
+		}
+	}))
+	return u
+}
+
+// Ignore sets each column to itself in case of conflict.
+// Using this option is equivalent to using:
+//
+//	client.BusinessFeature.Create().
+//		OnConflict(sql.ResolveWithIgnore()).
+//		Exec(ctx)
+func (u *BusinessFeatureUpsertBulk) Ignore() *BusinessFeatureUpsertBulk {
+	u.create.conflict = append(u.create.conflict, sql.ResolveWithIgnore())
+	return u
+}
+
+// DoNothing configures the conflict_action to `DO NOTHING`.
+// Supported only by SQLite and PostgreSQL.
+func (u *BusinessFeatureUpsertBulk) DoNothing() *BusinessFeatureUpsertBulk {
+	u.create.conflict = append(u.create.conflict, sql.DoNothing())
+	return u
+}
+
+// Update allows overriding fields `UPDATE` values. See the BusinessFeatureCreateBulk.OnConflict
+// documentation for more info.
+func (u *BusinessFeatureUpsertBulk) Update(set func(*BusinessFeatureUpsert)) *BusinessFeatureUpsertBulk {
+	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(update *sql.UpdateSet) {
+		set(&BusinessFeatureUpsert{UpdateSet: update})
+	}))
+	return u
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (u *BusinessFeatureUpsertBulk) SetUpdatedAt(v time.Time) *BusinessFeatureUpsertBulk {
+	return u.Update(func(s *BusinessFeatureUpsert) {
+		s.SetUpdatedAt(v)
+	})
+}
+
+// UpdateUpdatedAt sets the "updated_at" field to the value that was provided on create.
+func (u *BusinessFeatureUpsertBulk) UpdateUpdatedAt() *BusinessFeatureUpsertBulk {
+	return u.Update(func(s *BusinessFeatureUpsert) {
+		s.UpdateUpdatedAt()
+	})
+}
+
+// SetDeletedAt sets the "deleted_at" field.
+func (u *BusinessFeatureUpsertBulk) SetDeletedAt(v time.Time) *BusinessFeatureUpsertBulk {
+	return u.Update(func(s *BusinessFeatureUpsert) {
+		s.SetDeletedAt(v)
+	})
+}
+
+// UpdateDeletedAt sets the "deleted_at" field to the value that was provided on create.
+func (u *BusinessFeatureUpsertBulk) UpdateDeletedAt() *BusinessFeatureUpsertBulk {
+	return u.Update(func(s *BusinessFeatureUpsert) {
+		s.UpdateDeletedAt()
+	})
+}
+
+// ClearDeletedAt clears the value of the "deleted_at" field.
+func (u *BusinessFeatureUpsertBulk) ClearDeletedAt() *BusinessFeatureUpsertBulk {
+	return u.Update(func(s *BusinessFeatureUpsert) {
+		s.ClearDeletedAt()
+	})
+}
+
+// SetName sets the "name" field.
+func (u *BusinessFeatureUpsertBulk) SetName(v string) *BusinessFeatureUpsertBulk {
+	return u.Update(func(s *BusinessFeatureUpsert) {
+		s.SetName(v)
+	})
+}
+
+// UpdateName sets the "name" field to the value that was provided on create.
+func (u *BusinessFeatureUpsertBulk) UpdateName() *BusinessFeatureUpsertBulk {
+	return u.Update(func(s *BusinessFeatureUpsert) {
+		s.UpdateName()
+	})
+}
+
+// SetIdentifier sets the "identifier" field.
+func (u *BusinessFeatureUpsertBulk) SetIdentifier(v string) *BusinessFeatureUpsertBulk {
+	return u.Update(func(s *BusinessFeatureUpsert) {
+		s.SetIdentifier(v)
+	})
+}
+
+// UpdateIdentifier sets the "identifier" field to the value that was provided on create.
+func (u *BusinessFeatureUpsertBulk) UpdateIdentifier() *BusinessFeatureUpsertBulk {
+	return u.Update(func(s *BusinessFeatureUpsert) {
+		s.UpdateIdentifier()
+	})
+}
+
+// SetRequireSubscription sets the "require_subscription" field.
+func (u *BusinessFeatureUpsertBulk) SetRequireSubscription(v bool) *BusinessFeatureUpsertBulk {
+	return u.Update(func(s *BusinessFeatureUpsert) {
+		s.SetRequireSubscription(v)
+	})
+}
+
+// UpdateRequireSubscription sets the "require_subscription" field to the value that was provided on create.
+func (u *BusinessFeatureUpsertBulk) UpdateRequireSubscription() *BusinessFeatureUpsertBulk {
+	return u.Update(func(s *BusinessFeatureUpsert) {
+		s.UpdateRequireSubscription()
+	})
+}
+
+// SetActive sets the "active" field.
+func (u *BusinessFeatureUpsertBulk) SetActive(v bool) *BusinessFeatureUpsertBulk {
+	return u.Update(func(s *BusinessFeatureUpsert) {
+		s.SetActive(v)
+	})
+}
+
+// UpdateActive sets the "active" field to the value that was provided on create.
+func (u *BusinessFeatureUpsertBulk) UpdateActive() *BusinessFeatureUpsertBulk {
+	return u.Update(func(s *BusinessFeatureUpsert) {
+		s.UpdateActive()
+	})
+}
+
+// SetMin sets the "min" field.
+func (u *BusinessFeatureUpsertBulk) SetMin(v int) *BusinessFeatureUpsertBulk {
+	return u.Update(func(s *BusinessFeatureUpsert) {
+		s.SetMin(v)
+	})
+}
+
+// AddMin adds v to the "min" field.
+func (u *BusinessFeatureUpsertBulk) AddMin(v int) *BusinessFeatureUpsertBulk {
+	return u.Update(func(s *BusinessFeatureUpsert) {
+		s.AddMin(v)
+	})
+}
+
+// UpdateMin sets the "min" field to the value that was provided on create.
+func (u *BusinessFeatureUpsertBulk) UpdateMin() *BusinessFeatureUpsertBulk {
+	return u.Update(func(s *BusinessFeatureUpsert) {
+		s.UpdateMin()
+	})
+}
+
+// SetMax sets the "max" field.
+func (u *BusinessFeatureUpsertBulk) SetMax(v int) *BusinessFeatureUpsertBulk {
+	return u.Update(func(s *BusinessFeatureUpsert) {
+		s.SetMax(v)
+	})
+}
+
+// AddMax adds v to the "max" field.
+func (u *BusinessFeatureUpsertBulk) AddMax(v int) *BusinessFeatureUpsertBulk {
+	return u.Update(func(s *BusinessFeatureUpsert) {
+		s.AddMax(v)
+	})
+}
+
+// UpdateMax sets the "max" field to the value that was provided on create.
+func (u *BusinessFeatureUpsertBulk) UpdateMax() *BusinessFeatureUpsertBulk {
+	return u.Update(func(s *BusinessFeatureUpsert) {
+		s.UpdateMax()
+	})
+}
+
+// SetFee sets the "fee" field.
+func (u *BusinessFeatureUpsertBulk) SetFee(v *schema.Fee) *BusinessFeatureUpsertBulk {
+	return u.Update(func(s *BusinessFeatureUpsert) {
+		s.SetFee(v)
+	})
+}
+
+// UpdateFee sets the "fee" field to the value that was provided on create.
+func (u *BusinessFeatureUpsertBulk) UpdateFee() *BusinessFeatureUpsertBulk {
+	return u.Update(func(s *BusinessFeatureUpsert) {
+		s.UpdateFee()
+	})
+}
+
+// Exec executes the query.
+func (u *BusinessFeatureUpsertBulk) Exec(ctx context.Context) error {
+	if u.create.err != nil {
+		return u.create.err
+	}
+	for i, b := range u.create.builders {
+		if len(b.conflict) != 0 {
+			return fmt.Errorf("ent: OnConflict was set for builder %d. Set it on the BusinessFeatureCreateBulk instead", i)
+		}
+	}
+	if len(u.create.conflict) == 0 {
+		return errors.New("ent: missing options for BusinessFeatureCreateBulk.OnConflict")
+	}
+	return u.create.Exec(ctx)
+}
+
+// ExecX is like Exec, but panics if an error occurs.
+func (u *BusinessFeatureUpsertBulk) ExecX(ctx context.Context) {
+	if err := u.create.Exec(ctx); err != nil {
 		panic(err)
 	}
 }

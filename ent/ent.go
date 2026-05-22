@@ -13,6 +13,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"github.com/Toflex/directory_v2/ent/business"
+	"github.com/Toflex/directory_v2/ent/businessdocument"
 	"github.com/Toflex/directory_v2/ent/businessfeature"
 	"github.com/Toflex/directory_v2/ent/businessservices"
 	"github.com/Toflex/directory_v2/ent/manager"
@@ -22,6 +23,7 @@ import (
 	"github.com/Toflex/directory_v2/ent/service"
 	"github.com/Toflex/directory_v2/ent/social"
 	"github.com/Toflex/directory_v2/ent/user"
+	"github.com/Toflex/directory_v2/ent/userdocument"
 )
 
 // ent aliases to avoid import conflicts in user's code.
@@ -83,6 +85,7 @@ func checkColumn(table, column string) error {
 	initCheck.Do(func() {
 		columnCheck = sql.NewColumnCheck(map[string]func(string) bool{
 			business.Table:         business.ValidColumn,
+			businessdocument.Table: businessdocument.ValidColumn,
 			businessfeature.Table:  businessfeature.ValidColumn,
 			businessservices.Table: businessservices.ValidColumn,
 			manager.Table:          manager.ValidColumn,
@@ -92,6 +95,7 @@ func checkColumn(table, column string) error {
 			service.Table:          service.ValidColumn,
 			social.Table:           social.ValidColumn,
 			user.Table:             user.ValidColumn,
+			userdocument.Table:     userdocument.ValidColumn,
 		})
 	})
 	return columnCheck(table, column)

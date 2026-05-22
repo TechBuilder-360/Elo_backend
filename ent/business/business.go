@@ -50,6 +50,10 @@ const (
 	EdgeServices = "services"
 	// EdgeManages holds the string denoting the manages edge name in mutations.
 	EdgeManages = "manages"
+	// EdgeBusinessDocuments holds the string denoting the business_documents edge name in mutations.
+	EdgeBusinessDocuments = "business_documents"
+	// EdgeUserDocuments holds the string denoting the user_documents edge name in mutations.
+	EdgeUserDocuments = "user_documents"
 	// Table holds the table name of the business in the database.
 	Table = "businesses"
 	// SocialsTable is the table that holds the socials relation/edge.
@@ -73,6 +77,20 @@ const (
 	ManagesInverseTable = "managers"
 	// ManagesColumn is the table column denoting the manages relation/edge.
 	ManagesColumn = "business_id"
+	// BusinessDocumentsTable is the table that holds the business_documents relation/edge.
+	BusinessDocumentsTable = "business_documents"
+	// BusinessDocumentsInverseTable is the table name for the BusinessDocument entity.
+	// It exists in this package in order to avoid circular dependency with the "businessdocument" package.
+	BusinessDocumentsInverseTable = "business_documents"
+	// BusinessDocumentsColumn is the table column denoting the business_documents relation/edge.
+	BusinessDocumentsColumn = "business_business_documents"
+	// UserDocumentsTable is the table that holds the user_documents relation/edge.
+	UserDocumentsTable = "user_documents"
+	// UserDocumentsInverseTable is the table name for the UserDocument entity.
+	// It exists in this package in order to avoid circular dependency with the "userdocument" package.
+	UserDocumentsInverseTable = "user_documents"
+	// UserDocumentsColumn is the table column denoting the user_documents relation/edge.
+	UserDocumentsColumn = "business_user_documents"
 )
 
 // Columns holds all SQL columns for business fields.
@@ -256,6 +274,34 @@ func ByManages(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 		sqlgraph.OrderByNeighborTerms(s, newManagesStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
+
+// ByBusinessDocumentsCount orders the results by business_documents count.
+func ByBusinessDocumentsCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newBusinessDocumentsStep(), opts...)
+	}
+}
+
+// ByBusinessDocuments orders the results by business_documents terms.
+func ByBusinessDocuments(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newBusinessDocumentsStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+
+// ByUserDocumentsCount orders the results by user_documents count.
+func ByUserDocumentsCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newUserDocumentsStep(), opts...)
+	}
+}
+
+// ByUserDocuments orders the results by user_documents terms.
+func ByUserDocuments(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newUserDocumentsStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
 func newSocialsStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
@@ -275,5 +321,19 @@ func newManagesStep() *sqlgraph.Step {
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(ManagesInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.O2M, false, ManagesTable, ManagesColumn),
+	)
+}
+func newBusinessDocumentsStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(BusinessDocumentsInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, BusinessDocumentsTable, BusinessDocumentsColumn),
+	)
+}
+func newUserDocumentsStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(UserDocumentsInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, UserDocumentsTable, UserDocumentsColumn),
 	)
 }

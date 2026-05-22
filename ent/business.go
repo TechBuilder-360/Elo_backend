@@ -61,9 +61,13 @@ type BusinessEdges struct {
 	Services []*BusinessServices `json:"services,omitempty"`
 	// Manages holds the value of the manages edge.
 	Manages []*Manager `json:"manages,omitempty"`
+	// BusinessDocuments holds the value of the business_documents edge.
+	BusinessDocuments []*BusinessDocument `json:"business_documents,omitempty"`
+	// UserDocuments holds the value of the user_documents edge.
+	UserDocuments []*UserDocument `json:"user_documents,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [3]bool
+	loadedTypes [5]bool
 }
 
 // SocialsOrErr returns the Socials value or an error if the edge
@@ -91,6 +95,24 @@ func (e BusinessEdges) ManagesOrErr() ([]*Manager, error) {
 		return e.Manages, nil
 	}
 	return nil, &NotLoadedError{edge: "manages"}
+}
+
+// BusinessDocumentsOrErr returns the BusinessDocuments value or an error if the edge
+// was not loaded in eager-loading.
+func (e BusinessEdges) BusinessDocumentsOrErr() ([]*BusinessDocument, error) {
+	if e.loadedTypes[3] {
+		return e.BusinessDocuments, nil
+	}
+	return nil, &NotLoadedError{edge: "business_documents"}
+}
+
+// UserDocumentsOrErr returns the UserDocuments value or an error if the edge
+// was not loaded in eager-loading.
+func (e BusinessEdges) UserDocumentsOrErr() ([]*UserDocument, error) {
+	if e.loadedTypes[4] {
+		return e.UserDocuments, nil
+	}
+	return nil, &NotLoadedError{edge: "user_documents"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -242,6 +264,16 @@ func (b *Business) QueryServices() *BusinessServicesQuery {
 // QueryManages queries the "manages" edge of the Business entity.
 func (b *Business) QueryManages() *ManagerQuery {
 	return NewBusinessClient(b.config).QueryManages(b)
+}
+
+// QueryBusinessDocuments queries the "business_documents" edge of the Business entity.
+func (b *Business) QueryBusinessDocuments() *BusinessDocumentQuery {
+	return NewBusinessClient(b.config).QueryBusinessDocuments(b)
+}
+
+// QueryUserDocuments queries the "user_documents" edge of the Business entity.
+func (b *Business) QueryUserDocuments() *UserDocumentQuery {
+	return NewBusinessClient(b.config).QueryUserDocuments(b)
 }
 
 // Update returns a builder for updating this Business.

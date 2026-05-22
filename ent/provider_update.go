@@ -6,6 +6,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"time"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -24,6 +25,32 @@ type ProviderUpdate struct {
 // Where appends a list predicates to the ProviderUpdate builder.
 func (pu *ProviderUpdate) Where(ps ...predicate.Provider) *ProviderUpdate {
 	pu.mutation.Where(ps...)
+	return pu
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (pu *ProviderUpdate) SetUpdatedAt(t time.Time) *ProviderUpdate {
+	pu.mutation.SetUpdatedAt(t)
+	return pu
+}
+
+// SetDeletedAt sets the "deleted_at" field.
+func (pu *ProviderUpdate) SetDeletedAt(t time.Time) *ProviderUpdate {
+	pu.mutation.SetDeletedAt(t)
+	return pu
+}
+
+// SetNillableDeletedAt sets the "deleted_at" field if the given value is not nil.
+func (pu *ProviderUpdate) SetNillableDeletedAt(t *time.Time) *ProviderUpdate {
+	if t != nil {
+		pu.SetDeletedAt(*t)
+	}
+	return pu
+}
+
+// ClearDeletedAt clears the value of the "deleted_at" field.
+func (pu *ProviderUpdate) ClearDeletedAt() *ProviderUpdate {
+	pu.mutation.ClearDeletedAt()
 	return pu
 }
 
@@ -76,6 +103,7 @@ func (pu *ProviderUpdate) Mutation() *ProviderMutation {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (pu *ProviderUpdate) Save(ctx context.Context) (int, error) {
+	pu.defaults()
 	return withHooks(ctx, pu.sqlSave, pu.mutation, pu.hooks)
 }
 
@@ -101,6 +129,14 @@ func (pu *ProviderUpdate) ExecX(ctx context.Context) {
 	}
 }
 
+// defaults sets the default values of the builder before save.
+func (pu *ProviderUpdate) defaults() {
+	if _, ok := pu.mutation.UpdatedAt(); !ok {
+		v := provider.UpdateDefaultUpdatedAt()
+		pu.mutation.SetUpdatedAt(v)
+	}
+}
+
 // check runs all checks and user-defined validators on the builder.
 func (pu *ProviderUpdate) check() error {
 	if v, ok := pu.mutation.Name(); ok {
@@ -120,13 +156,22 @@ func (pu *ProviderUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if err := pu.check(); err != nil {
 		return n, err
 	}
-	_spec := sqlgraph.NewUpdateSpec(provider.Table, provider.Columns, sqlgraph.NewFieldSpec(provider.FieldID, field.TypeInt))
+	_spec := sqlgraph.NewUpdateSpec(provider.Table, provider.Columns, sqlgraph.NewFieldSpec(provider.FieldID, field.TypeString))
 	if ps := pu.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
+	}
+	if value, ok := pu.mutation.UpdatedAt(); ok {
+		_spec.SetField(provider.FieldUpdatedAt, field.TypeTime, value)
+	}
+	if value, ok := pu.mutation.DeletedAt(); ok {
+		_spec.SetField(provider.FieldDeletedAt, field.TypeTime, value)
+	}
+	if pu.mutation.DeletedAtCleared() {
+		_spec.ClearField(provider.FieldDeletedAt, field.TypeTime)
 	}
 	if value, ok := pu.mutation.Name(); ok {
 		_spec.SetField(provider.FieldName, field.TypeString, value)
@@ -155,6 +200,32 @@ type ProviderUpdateOne struct {
 	fields   []string
 	hooks    []Hook
 	mutation *ProviderMutation
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (puo *ProviderUpdateOne) SetUpdatedAt(t time.Time) *ProviderUpdateOne {
+	puo.mutation.SetUpdatedAt(t)
+	return puo
+}
+
+// SetDeletedAt sets the "deleted_at" field.
+func (puo *ProviderUpdateOne) SetDeletedAt(t time.Time) *ProviderUpdateOne {
+	puo.mutation.SetDeletedAt(t)
+	return puo
+}
+
+// SetNillableDeletedAt sets the "deleted_at" field if the given value is not nil.
+func (puo *ProviderUpdateOne) SetNillableDeletedAt(t *time.Time) *ProviderUpdateOne {
+	if t != nil {
+		puo.SetDeletedAt(*t)
+	}
+	return puo
+}
+
+// ClearDeletedAt clears the value of the "deleted_at" field.
+func (puo *ProviderUpdateOne) ClearDeletedAt() *ProviderUpdateOne {
+	puo.mutation.ClearDeletedAt()
+	return puo
 }
 
 // SetName sets the "name" field.
@@ -219,6 +290,7 @@ func (puo *ProviderUpdateOne) Select(field string, fields ...string) *ProviderUp
 
 // Save executes the query and returns the updated Provider entity.
 func (puo *ProviderUpdateOne) Save(ctx context.Context) (*Provider, error) {
+	puo.defaults()
 	return withHooks(ctx, puo.sqlSave, puo.mutation, puo.hooks)
 }
 
@@ -244,6 +316,14 @@ func (puo *ProviderUpdateOne) ExecX(ctx context.Context) {
 	}
 }
 
+// defaults sets the default values of the builder before save.
+func (puo *ProviderUpdateOne) defaults() {
+	if _, ok := puo.mutation.UpdatedAt(); !ok {
+		v := provider.UpdateDefaultUpdatedAt()
+		puo.mutation.SetUpdatedAt(v)
+	}
+}
+
 // check runs all checks and user-defined validators on the builder.
 func (puo *ProviderUpdateOne) check() error {
 	if v, ok := puo.mutation.Name(); ok {
@@ -263,7 +343,7 @@ func (puo *ProviderUpdateOne) sqlSave(ctx context.Context) (_node *Provider, err
 	if err := puo.check(); err != nil {
 		return _node, err
 	}
-	_spec := sqlgraph.NewUpdateSpec(provider.Table, provider.Columns, sqlgraph.NewFieldSpec(provider.FieldID, field.TypeInt))
+	_spec := sqlgraph.NewUpdateSpec(provider.Table, provider.Columns, sqlgraph.NewFieldSpec(provider.FieldID, field.TypeString))
 	id, ok := puo.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "Provider.id" for update`)}
@@ -287,6 +367,15 @@ func (puo *ProviderUpdateOne) sqlSave(ctx context.Context) (_node *Provider, err
 				ps[i](selector)
 			}
 		}
+	}
+	if value, ok := puo.mutation.UpdatedAt(); ok {
+		_spec.SetField(provider.FieldUpdatedAt, field.TypeTime, value)
+	}
+	if value, ok := puo.mutation.DeletedAt(); ok {
+		_spec.SetField(provider.FieldDeletedAt, field.TypeTime, value)
+	}
+	if puo.mutation.DeletedAtCleared() {
+		_spec.ClearField(provider.FieldDeletedAt, field.TypeTime)
 	}
 	if value, ok := puo.mutation.Name(); ok {
 		_spec.SetField(provider.FieldName, field.TypeString, value)

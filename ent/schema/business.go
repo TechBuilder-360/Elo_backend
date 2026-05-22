@@ -47,5 +47,6 @@ func (Business) Edges() []ent.Edge {
 		edge.To("services", BusinessServices.Type),
 		edge.To("manages", Manager.Type),
 		edge.To("business_documents", BusinessDocument.Type),
+		edge.To("user_documents", UserDocument.Type),
 	}
 }

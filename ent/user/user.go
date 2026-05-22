@@ -24,6 +24,8 @@ const (
 	FieldFirstName = "first_name"
 	// FieldLastName holds the string denoting the last_name field in the database.
 	FieldLastName = "last_name"
+	// FieldPassword holds the string denoting the password field in the database.
+	FieldPassword = "password"
 	// FieldMiddleName holds the string denoting the middle_name field in the database.
 	FieldMiddleName = "middle_name"
 	// FieldDisplayName holds the string denoting the display_name field in the database.
@@ -46,6 +48,8 @@ const (
 	FieldVerified = "verified"
 	// EdgeManages holds the string denoting the manages edge name in mutations.
 	EdgeManages = "manages"
+	// EdgeUserDocuments holds the string denoting the user_documents edge name in mutations.
+	EdgeUserDocuments = "user_documents"
 	// Table holds the table name of the user in the database.
 	Table = "users"
 	// ManagesTable is the table that holds the manages relation/edge.
@@ -55,6 +59,13 @@ const (
 	ManagesInverseTable = "managers"
 	// ManagesColumn is the table column denoting the manages relation/edge.
 	ManagesColumn = "user_id"
+	// UserDocumentsTable is the table that holds the user_documents relation/edge.
+	UserDocumentsTable = "user_documents"
+	// UserDocumentsInverseTable is the table name for the UserDocument entity.
+	// It exists in this package in order to avoid circular dependency with the "userdocument" package.
+	UserDocumentsInverseTable = "user_documents"
+	// UserDocumentsColumn is the table column denoting the user_documents relation/edge.
+	UserDocumentsColumn = "user_user_documents"
 )
 
 // Columns holds all SQL columns for user fields.
@@ -65,6 +76,7 @@ var Columns = []string{
 	FieldDeletedAt,
 	FieldFirstName,
 	FieldLastName,
+	FieldPassword,
 	FieldMiddleName,
 	FieldDisplayName,
 	FieldEmailAddress,
@@ -98,6 +110,8 @@ var (
 	FirstNameValidator func(string) error
 	// LastNameValidator is a validator for the "last_name" field. It is called by the builders before save.
 	LastNameValidator func(string) error
+	// PasswordValidator is a validator for the "password" field. It is called by the builders before save.
+	PasswordValidator func(string) error
 	// EmailAddressValidator is a validator for the "email_address" field. It is called by the builders before save.
 	EmailAddressValidator func(string) error
 	// DefaultEmailVerified holds the default value on creation for the "email_verified" field.
@@ -143,6 +157,11 @@ func ByFirstName(opts ...sql.OrderTermOption) OrderOption {
 // ByLastName orders the results by the last_name field.
 func ByLastName(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldLastName, opts...).ToFunc()
+}
+
+// ByPassword orders the results by the password field.
+func ByPassword(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldPassword, opts...).ToFunc()
 }
 
 // ByMiddleName orders the results by the middle_name field.
@@ -208,10 +227,31 @@ func ByManages(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 		sqlgraph.OrderByNeighborTerms(s, newManagesStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
+
+// ByUserDocumentsCount orders the results by user_documents count.
+func ByUserDocumentsCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newUserDocumentsStep(), opts...)
+	}
+}
+
+// ByUserDocuments orders the results by user_documents terms.
+func ByUserDocuments(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newUserDocumentsStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
 func newManagesStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(ManagesInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.O2M, false, ManagesTable, ManagesColumn),
+	)
+}
+func newUserDocumentsStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(UserDocumentsInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, UserDocumentsTable, UserDocumentsColumn),
 	)
 }

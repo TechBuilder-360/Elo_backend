@@ -27,6 +27,8 @@ type User struct {
 	FirstName string `json:"first_name,omitempty"`
 	// LastName holds the value of the "last_name" field.
 	LastName string `json:"last_name,omitempty"`
+	// Password holds the value of the "password" field.
+	Password string `json:"password,omitempty"`
 	// MiddleName holds the value of the "middle_name" field.
 	MiddleName string `json:"middle_name,omitempty"`
 	// DisplayName holds the value of the "display_name" field.
@@ -57,9 +59,11 @@ type User struct {
 type UserEdges struct {
 	// Manages holds the value of the manages edge.
 	Manages []*Manager `json:"manages,omitempty"`
+	// UserDocuments holds the value of the user_documents edge.
+	UserDocuments []*UserDocument `json:"user_documents,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [1]bool
+	loadedTypes [2]bool
 }
 
 // ManagesOrErr returns the Manages value or an error if the edge
@@ -71,6 +75,15 @@ func (e UserEdges) ManagesOrErr() ([]*Manager, error) {
 	return nil, &NotLoadedError{edge: "manages"}
 }
 
+// UserDocumentsOrErr returns the UserDocuments value or an error if the edge
+// was not loaded in eager-loading.
+func (e UserEdges) UserDocumentsOrErr() ([]*UserDocument, error) {
+	if e.loadedTypes[1] {
+		return e.UserDocuments, nil
+	}
+	return nil, &NotLoadedError{edge: "user_documents"}
+}
+
 // scanValues returns the types for scanning values from sql.Rows.
 func (*User) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
@@ -78,7 +91,7 @@ func (*User) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case user.FieldEmailVerified, user.FieldDisabled, user.FieldDisableReason, user.FieldVerified:
 			values[i] = new(sql.NullBool)
-		case user.FieldID, user.FieldFirstName, user.FieldLastName, user.FieldMiddleName, user.FieldDisplayName, user.FieldEmailAddress, user.FieldPhoneNumber, user.FieldAvatar:
+		case user.FieldID, user.FieldFirstName, user.FieldLastName, user.FieldPassword, user.FieldMiddleName, user.FieldDisplayName, user.FieldEmailAddress, user.FieldPhoneNumber, user.FieldAvatar:
 			values[i] = new(sql.NullString)
 		case user.FieldCreatedAt, user.FieldUpdatedAt, user.FieldDeletedAt, user.FieldEmailVerifiedAt:
 			values[i] = new(sql.NullTime)
@@ -133,6 +146,12 @@ func (u *User) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field last_name", values[i])
 			} else if value.Valid {
 				u.LastName = value.String
+			}
+		case user.FieldPassword:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field password", values[i])
+			} else if value.Valid {
+				u.Password = value.String
 			}
 		case user.FieldMiddleName:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -213,6 +232,11 @@ func (u *User) QueryManages() *ManagerQuery {
 	return NewUserClient(u.config).QueryManages(u)
 }
 
+// QueryUserDocuments queries the "user_documents" edge of the User entity.
+func (u *User) QueryUserDocuments() *UserDocumentQuery {
+	return NewUserClient(u.config).QueryUserDocuments(u)
+}
+
 // Update returns a builder for updating this User.
 // Note that you need to call User.Unwrap() before calling this method if this User
 // was returned from a transaction, and the transaction was committed or rolled back.
@@ -252,6 +276,9 @@ func (u *User) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("last_name=")
 	builder.WriteString(u.LastName)
+	builder.WriteString(", ")
+	builder.WriteString("password=")
+	builder.WriteString(u.Password)
 	builder.WriteString(", ")
 	builder.WriteString("middle_name=")
 	builder.WriteString(u.MiddleName)

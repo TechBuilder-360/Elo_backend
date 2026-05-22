@@ -8,6 +8,8 @@ import (
 	"fmt"
 	"time"
 
+	"entgo.io/ent/dialect"
+	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/Toflex/directory_v2/ent/business"
@@ -20,6 +22,7 @@ type ManagerCreate struct {
 	config
 	mutation *ManagerMutation
 	hooks    []Hook
+	conflict []sql.ConflictOption
 }
 
 // SetCreatedAt sets the "created_at" field.
@@ -249,6 +252,7 @@ func (mc *ManagerCreate) createSpec() (*Manager, *sqlgraph.CreateSpec) {
 		_node = &Manager{config: mc.config}
 		_spec = sqlgraph.NewCreateSpec(manager.Table, sqlgraph.NewFieldSpec(manager.FieldID, field.TypeString))
 	)
+	_spec.OnConflict = mc.conflict
 	if id, ok := mc.mutation.ID(); ok {
 		_node.ID = id
 		_spec.ID.Value = id
@@ -314,11 +318,371 @@ func (mc *ManagerCreate) createSpec() (*Manager, *sqlgraph.CreateSpec) {
 	return _node, _spec
 }
 
+// OnConflict allows configuring the `ON CONFLICT` / `ON DUPLICATE KEY` clause
+// of the `INSERT` statement. For example:
+//
+//	client.Manager.Create().
+//		SetCreatedAt(v).
+//		OnConflict(
+//			// Update the row with the new values
+//			// the was proposed for insertion.
+//			sql.ResolveWithNewValues(),
+//		).
+//		// Override some of the fields with custom
+//		// update values.
+//		Update(func(u *ent.ManagerUpsert) {
+//			SetCreatedAt(v+v).
+//		}).
+//		Exec(ctx)
+func (mc *ManagerCreate) OnConflict(opts ...sql.ConflictOption) *ManagerUpsertOne {
+	mc.conflict = opts
+	return &ManagerUpsertOne{
+		create: mc,
+	}
+}
+
+// OnConflictColumns calls `OnConflict` and configures the columns
+// as conflict target. Using this option is equivalent to using:
+//
+//	client.Manager.Create().
+//		OnConflict(sql.ConflictColumns(columns...)).
+//		Exec(ctx)
+func (mc *ManagerCreate) OnConflictColumns(columns ...string) *ManagerUpsertOne {
+	mc.conflict = append(mc.conflict, sql.ConflictColumns(columns...))
+	return &ManagerUpsertOne{
+		create: mc,
+	}
+}
+
+type (
+	// ManagerUpsertOne is the builder for "upsert"-ing
+	//  one Manager node.
+	ManagerUpsertOne struct {
+		create *ManagerCreate
+	}
+
+	// ManagerUpsert is the "OnConflict" setter.
+	ManagerUpsert struct {
+		*sql.UpdateSet
+	}
+)
+
+// SetUpdatedAt sets the "updated_at" field.
+func (u *ManagerUpsert) SetUpdatedAt(v time.Time) *ManagerUpsert {
+	u.Set(manager.FieldUpdatedAt, v)
+	return u
+}
+
+// UpdateUpdatedAt sets the "updated_at" field to the value that was provided on create.
+func (u *ManagerUpsert) UpdateUpdatedAt() *ManagerUpsert {
+	u.SetExcluded(manager.FieldUpdatedAt)
+	return u
+}
+
+// SetDeletedAt sets the "deleted_at" field.
+func (u *ManagerUpsert) SetDeletedAt(v time.Time) *ManagerUpsert {
+	u.Set(manager.FieldDeletedAt, v)
+	return u
+}
+
+// UpdateDeletedAt sets the "deleted_at" field to the value that was provided on create.
+func (u *ManagerUpsert) UpdateDeletedAt() *ManagerUpsert {
+	u.SetExcluded(manager.FieldDeletedAt)
+	return u
+}
+
+// ClearDeletedAt clears the value of the "deleted_at" field.
+func (u *ManagerUpsert) ClearDeletedAt() *ManagerUpsert {
+	u.SetNull(manager.FieldDeletedAt)
+	return u
+}
+
+// SetUserID sets the "user_id" field.
+func (u *ManagerUpsert) SetUserID(v string) *ManagerUpsert {
+	u.Set(manager.FieldUserID, v)
+	return u
+}
+
+// UpdateUserID sets the "user_id" field to the value that was provided on create.
+func (u *ManagerUpsert) UpdateUserID() *ManagerUpsert {
+	u.SetExcluded(manager.FieldUserID)
+	return u
+}
+
+// SetBusinessID sets the "business_id" field.
+func (u *ManagerUpsert) SetBusinessID(v string) *ManagerUpsert {
+	u.Set(manager.FieldBusinessID, v)
+	return u
+}
+
+// UpdateBusinessID sets the "business_id" field to the value that was provided on create.
+func (u *ManagerUpsert) UpdateBusinessID() *ManagerUpsert {
+	u.SetExcluded(manager.FieldBusinessID)
+	return u
+}
+
+// SetDisabled sets the "disabled" field.
+func (u *ManagerUpsert) SetDisabled(v bool) *ManagerUpsert {
+	u.Set(manager.FieldDisabled, v)
+	return u
+}
+
+// UpdateDisabled sets the "disabled" field to the value that was provided on create.
+func (u *ManagerUpsert) UpdateDisabled() *ManagerUpsert {
+	u.SetExcluded(manager.FieldDisabled)
+	return u
+}
+
+// SetDisableReason sets the "disable_reason" field.
+func (u *ManagerUpsert) SetDisableReason(v string) *ManagerUpsert {
+	u.Set(manager.FieldDisableReason, v)
+	return u
+}
+
+// UpdateDisableReason sets the "disable_reason" field to the value that was provided on create.
+func (u *ManagerUpsert) UpdateDisableReason() *ManagerUpsert {
+	u.SetExcluded(manager.FieldDisableReason)
+	return u
+}
+
+// ClearDisableReason clears the value of the "disable_reason" field.
+func (u *ManagerUpsert) ClearDisableReason() *ManagerUpsert {
+	u.SetNull(manager.FieldDisableReason)
+	return u
+}
+
+// SetDisabledAt sets the "disabled_at" field.
+func (u *ManagerUpsert) SetDisabledAt(v time.Time) *ManagerUpsert {
+	u.Set(manager.FieldDisabledAt, v)
+	return u
+}
+
+// UpdateDisabledAt sets the "disabled_at" field to the value that was provided on create.
+func (u *ManagerUpsert) UpdateDisabledAt() *ManagerUpsert {
+	u.SetExcluded(manager.FieldDisabledAt)
+	return u
+}
+
+// ClearDisabledAt clears the value of the "disabled_at" field.
+func (u *ManagerUpsert) ClearDisabledAt() *ManagerUpsert {
+	u.SetNull(manager.FieldDisabledAt)
+	return u
+}
+
+// UpdateNewValues updates the mutable fields using the new values that were set on create except the ID field.
+// Using this option is equivalent to using:
+//
+//	client.Manager.Create().
+//		OnConflict(
+//			sql.ResolveWithNewValues(),
+//			sql.ResolveWith(func(u *sql.UpdateSet) {
+//				u.SetIgnore(manager.FieldID)
+//			}),
+//		).
+//		Exec(ctx)
+func (u *ManagerUpsertOne) UpdateNewValues() *ManagerUpsertOne {
+	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
+	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(s *sql.UpdateSet) {
+		if _, exists := u.create.mutation.ID(); exists {
+			s.SetIgnore(manager.FieldID)
+		}
+		if _, exists := u.create.mutation.CreatedAt(); exists {
+			s.SetIgnore(manager.FieldCreatedAt)
+		}
+	}))
+	return u
+}
+
+// Ignore sets each column to itself in case of conflict.
+// Using this option is equivalent to using:
+//
+//	client.Manager.Create().
+//	    OnConflict(sql.ResolveWithIgnore()).
+//	    Exec(ctx)
+func (u *ManagerUpsertOne) Ignore() *ManagerUpsertOne {
+	u.create.conflict = append(u.create.conflict, sql.ResolveWithIgnore())
+	return u
+}
+
+// DoNothing configures the conflict_action to `DO NOTHING`.
+// Supported only by SQLite and PostgreSQL.
+func (u *ManagerUpsertOne) DoNothing() *ManagerUpsertOne {
+	u.create.conflict = append(u.create.conflict, sql.DoNothing())
+	return u
+}
+
+// Update allows overriding fields `UPDATE` values. See the ManagerCreate.OnConflict
+// documentation for more info.
+func (u *ManagerUpsertOne) Update(set func(*ManagerUpsert)) *ManagerUpsertOne {
+	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(update *sql.UpdateSet) {
+		set(&ManagerUpsert{UpdateSet: update})
+	}))
+	return u
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (u *ManagerUpsertOne) SetUpdatedAt(v time.Time) *ManagerUpsertOne {
+	return u.Update(func(s *ManagerUpsert) {
+		s.SetUpdatedAt(v)
+	})
+}
+
+// UpdateUpdatedAt sets the "updated_at" field to the value that was provided on create.
+func (u *ManagerUpsertOne) UpdateUpdatedAt() *ManagerUpsertOne {
+	return u.Update(func(s *ManagerUpsert) {
+		s.UpdateUpdatedAt()
+	})
+}
+
+// SetDeletedAt sets the "deleted_at" field.
+func (u *ManagerUpsertOne) SetDeletedAt(v time.Time) *ManagerUpsertOne {
+	return u.Update(func(s *ManagerUpsert) {
+		s.SetDeletedAt(v)
+	})
+}
+
+// UpdateDeletedAt sets the "deleted_at" field to the value that was provided on create.
+func (u *ManagerUpsertOne) UpdateDeletedAt() *ManagerUpsertOne {
+	return u.Update(func(s *ManagerUpsert) {
+		s.UpdateDeletedAt()
+	})
+}
+
+// ClearDeletedAt clears the value of the "deleted_at" field.
+func (u *ManagerUpsertOne) ClearDeletedAt() *ManagerUpsertOne {
+	return u.Update(func(s *ManagerUpsert) {
+		s.ClearDeletedAt()
+	})
+}
+
+// SetUserID sets the "user_id" field.
+func (u *ManagerUpsertOne) SetUserID(v string) *ManagerUpsertOne {
+	return u.Update(func(s *ManagerUpsert) {
+		s.SetUserID(v)
+	})
+}
+
+// UpdateUserID sets the "user_id" field to the value that was provided on create.
+func (u *ManagerUpsertOne) UpdateUserID() *ManagerUpsertOne {
+	return u.Update(func(s *ManagerUpsert) {
+		s.UpdateUserID()
+	})
+}
+
+// SetBusinessID sets the "business_id" field.
+func (u *ManagerUpsertOne) SetBusinessID(v string) *ManagerUpsertOne {
+	return u.Update(func(s *ManagerUpsert) {
+		s.SetBusinessID(v)
+	})
+}
+
+// UpdateBusinessID sets the "business_id" field to the value that was provided on create.
+func (u *ManagerUpsertOne) UpdateBusinessID() *ManagerUpsertOne {
+	return u.Update(func(s *ManagerUpsert) {
+		s.UpdateBusinessID()
+	})
+}
+
+// SetDisabled sets the "disabled" field.
+func (u *ManagerUpsertOne) SetDisabled(v bool) *ManagerUpsertOne {
+	return u.Update(func(s *ManagerUpsert) {
+		s.SetDisabled(v)
+	})
+}
+
+// UpdateDisabled sets the "disabled" field to the value that was provided on create.
+func (u *ManagerUpsertOne) UpdateDisabled() *ManagerUpsertOne {
+	return u.Update(func(s *ManagerUpsert) {
+		s.UpdateDisabled()
+	})
+}
+
+// SetDisableReason sets the "disable_reason" field.
+func (u *ManagerUpsertOne) SetDisableReason(v string) *ManagerUpsertOne {
+	return u.Update(func(s *ManagerUpsert) {
+		s.SetDisableReason(v)
+	})
+}
+
+// UpdateDisableReason sets the "disable_reason" field to the value that was provided on create.
+func (u *ManagerUpsertOne) UpdateDisableReason() *ManagerUpsertOne {
+	return u.Update(func(s *ManagerUpsert) {
+		s.UpdateDisableReason()
+	})
+}
+
+// ClearDisableReason clears the value of the "disable_reason" field.
+func (u *ManagerUpsertOne) ClearDisableReason() *ManagerUpsertOne {
+	return u.Update(func(s *ManagerUpsert) {
+		s.ClearDisableReason()
+	})
+}
+
+// SetDisabledAt sets the "disabled_at" field.
+func (u *ManagerUpsertOne) SetDisabledAt(v time.Time) *ManagerUpsertOne {
+	return u.Update(func(s *ManagerUpsert) {
+		s.SetDisabledAt(v)
+	})
+}
+
+// UpdateDisabledAt sets the "disabled_at" field to the value that was provided on create.
+func (u *ManagerUpsertOne) UpdateDisabledAt() *ManagerUpsertOne {
+	return u.Update(func(s *ManagerUpsert) {
+		s.UpdateDisabledAt()
+	})
+}
+
+// ClearDisabledAt clears the value of the "disabled_at" field.
+func (u *ManagerUpsertOne) ClearDisabledAt() *ManagerUpsertOne {
+	return u.Update(func(s *ManagerUpsert) {
+		s.ClearDisabledAt()
+	})
+}
+
+// Exec executes the query.
+func (u *ManagerUpsertOne) Exec(ctx context.Context) error {
+	if len(u.create.conflict) == 0 {
+		return errors.New("ent: missing options for ManagerCreate.OnConflict")
+	}
+	return u.create.Exec(ctx)
+}
+
+// ExecX is like Exec, but panics if an error occurs.
+func (u *ManagerUpsertOne) ExecX(ctx context.Context) {
+	if err := u.create.Exec(ctx); err != nil {
+		panic(err)
+	}
+}
+
+// Exec executes the UPSERT query and returns the inserted/updated ID.
+func (u *ManagerUpsertOne) ID(ctx context.Context) (id string, err error) {
+	if u.create.driver.Dialect() == dialect.MySQL {
+		// In case of "ON CONFLICT", there is no way to get back non-numeric ID
+		// fields from the database since MySQL does not support the RETURNING clause.
+		return id, errors.New("ent: ManagerUpsertOne.ID is not supported by MySQL driver. Use ManagerUpsertOne.Exec instead")
+	}
+	node, err := u.create.Save(ctx)
+	if err != nil {
+		return id, err
+	}
+	return node.ID, nil
+}
+
+// IDX is like ID, but panics if an error occurs.
+func (u *ManagerUpsertOne) IDX(ctx context.Context) string {
+	id, err := u.ID(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return id
+}
+
 // ManagerCreateBulk is the builder for creating many Manager entities in bulk.
 type ManagerCreateBulk struct {
 	config
 	err      error
 	builders []*ManagerCreate
+	conflict []sql.ConflictOption
 }
 
 // Save creates the Manager entities in the database.
@@ -348,6 +712,7 @@ func (mcb *ManagerCreateBulk) Save(ctx context.Context) ([]*Manager, error) {
 					_, err = mutators[i+1].Mutate(root, mcb.builders[i+1].mutation)
 				} else {
 					spec := &sqlgraph.BatchCreateSpec{Nodes: specs}
+					spec.OnConflict = mcb.conflict
 					// Invoke the actual operation on the latest mutation in the chain.
 					if err = sqlgraph.BatchCreate(ctx, mcb.driver, spec); err != nil {
 						if sqlgraph.IsConstraintError(err) {
@@ -394,6 +759,242 @@ func (mcb *ManagerCreateBulk) Exec(ctx context.Context) error {
 // ExecX is like Exec, but panics if an error occurs.
 func (mcb *ManagerCreateBulk) ExecX(ctx context.Context) {
 	if err := mcb.Exec(ctx); err != nil {
+		panic(err)
+	}
+}
+
+// OnConflict allows configuring the `ON CONFLICT` / `ON DUPLICATE KEY` clause
+// of the `INSERT` statement. For example:
+//
+//	client.Manager.CreateBulk(builders...).
+//		OnConflict(
+//			// Update the row with the new values
+//			// the was proposed for insertion.
+//			sql.ResolveWithNewValues(),
+//		).
+//		// Override some of the fields with custom
+//		// update values.
+//		Update(func(u *ent.ManagerUpsert) {
+//			SetCreatedAt(v+v).
+//		}).
+//		Exec(ctx)
+func (mcb *ManagerCreateBulk) OnConflict(opts ...sql.ConflictOption) *ManagerUpsertBulk {
+	mcb.conflict = opts
+	return &ManagerUpsertBulk{
+		create: mcb,
+	}
+}
+
+// OnConflictColumns calls `OnConflict` and configures the columns
+// as conflict target. Using this option is equivalent to using:
+//
+//	client.Manager.Create().
+//		OnConflict(sql.ConflictColumns(columns...)).
+//		Exec(ctx)
+func (mcb *ManagerCreateBulk) OnConflictColumns(columns ...string) *ManagerUpsertBulk {
+	mcb.conflict = append(mcb.conflict, sql.ConflictColumns(columns...))
+	return &ManagerUpsertBulk{
+		create: mcb,
+	}
+}
+
+// ManagerUpsertBulk is the builder for "upsert"-ing
+// a bulk of Manager nodes.
+type ManagerUpsertBulk struct {
+	create *ManagerCreateBulk
+}
+
+// UpdateNewValues updates the mutable fields using the new values that
+// were set on create. Using this option is equivalent to using:
+//
+//	client.Manager.Create().
+//		OnConflict(
+//			sql.ResolveWithNewValues(),
+//			sql.ResolveWith(func(u *sql.UpdateSet) {
+//				u.SetIgnore(manager.FieldID)
+//			}),
+//		).
+//		Exec(ctx)
+func (u *ManagerUpsertBulk) UpdateNewValues() *ManagerUpsertBulk {
+	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
+	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(s *sql.UpdateSet) {
+		for _, b := range u.create.builders {
+			if _, exists := b.mutation.ID(); exists {
+				s.SetIgnore(manager.FieldID)
+			}
+			if _, exists := b.mutation.CreatedAt(); exists {
+				s.SetIgnore(manager.FieldCreatedAt)
+			}
+		}
+	}))
+	return u
+}
+
+// Ignore sets each column to itself in case of conflict.
+// Using this option is equivalent to using:
+//
+//	client.Manager.Create().
+//		OnConflict(sql.ResolveWithIgnore()).
+//		Exec(ctx)
+func (u *ManagerUpsertBulk) Ignore() *ManagerUpsertBulk {
+	u.create.conflict = append(u.create.conflict, sql.ResolveWithIgnore())
+	return u
+}
+
+// DoNothing configures the conflict_action to `DO NOTHING`.
+// Supported only by SQLite and PostgreSQL.
+func (u *ManagerUpsertBulk) DoNothing() *ManagerUpsertBulk {
+	u.create.conflict = append(u.create.conflict, sql.DoNothing())
+	return u
+}
+
+// Update allows overriding fields `UPDATE` values. See the ManagerCreateBulk.OnConflict
+// documentation for more info.
+func (u *ManagerUpsertBulk) Update(set func(*ManagerUpsert)) *ManagerUpsertBulk {
+	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(update *sql.UpdateSet) {
+		set(&ManagerUpsert{UpdateSet: update})
+	}))
+	return u
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (u *ManagerUpsertBulk) SetUpdatedAt(v time.Time) *ManagerUpsertBulk {
+	return u.Update(func(s *ManagerUpsert) {
+		s.SetUpdatedAt(v)
+	})
+}
+
+// UpdateUpdatedAt sets the "updated_at" field to the value that was provided on create.
+func (u *ManagerUpsertBulk) UpdateUpdatedAt() *ManagerUpsertBulk {
+	return u.Update(func(s *ManagerUpsert) {
+		s.UpdateUpdatedAt()
+	})
+}
+
+// SetDeletedAt sets the "deleted_at" field.
+func (u *ManagerUpsertBulk) SetDeletedAt(v time.Time) *ManagerUpsertBulk {
+	return u.Update(func(s *ManagerUpsert) {
+		s.SetDeletedAt(v)
+	})
+}
+
+// UpdateDeletedAt sets the "deleted_at" field to the value that was provided on create.
+func (u *ManagerUpsertBulk) UpdateDeletedAt() *ManagerUpsertBulk {
+	return u.Update(func(s *ManagerUpsert) {
+		s.UpdateDeletedAt()
+	})
+}
+
+// ClearDeletedAt clears the value of the "deleted_at" field.
+func (u *ManagerUpsertBulk) ClearDeletedAt() *ManagerUpsertBulk {
+	return u.Update(func(s *ManagerUpsert) {
+		s.ClearDeletedAt()
+	})
+}
+
+// SetUserID sets the "user_id" field.
+func (u *ManagerUpsertBulk) SetUserID(v string) *ManagerUpsertBulk {
+	return u.Update(func(s *ManagerUpsert) {
+		s.SetUserID(v)
+	})
+}
+
+// UpdateUserID sets the "user_id" field to the value that was provided on create.
+func (u *ManagerUpsertBulk) UpdateUserID() *ManagerUpsertBulk {
+	return u.Update(func(s *ManagerUpsert) {
+		s.UpdateUserID()
+	})
+}
+
+// SetBusinessID sets the "business_id" field.
+func (u *ManagerUpsertBulk) SetBusinessID(v string) *ManagerUpsertBulk {
+	return u.Update(func(s *ManagerUpsert) {
+		s.SetBusinessID(v)
+	})
+}
+
+// UpdateBusinessID sets the "business_id" field to the value that was provided on create.
+func (u *ManagerUpsertBulk) UpdateBusinessID() *ManagerUpsertBulk {
+	return u.Update(func(s *ManagerUpsert) {
+		s.UpdateBusinessID()
+	})
+}
+
+// SetDisabled sets the "disabled" field.
+func (u *ManagerUpsertBulk) SetDisabled(v bool) *ManagerUpsertBulk {
+	return u.Update(func(s *ManagerUpsert) {
+		s.SetDisabled(v)
+	})
+}
+
+// UpdateDisabled sets the "disabled" field to the value that was provided on create.
+func (u *ManagerUpsertBulk) UpdateDisabled() *ManagerUpsertBulk {
+	return u.Update(func(s *ManagerUpsert) {
+		s.UpdateDisabled()
+	})
+}
+
+// SetDisableReason sets the "disable_reason" field.
+func (u *ManagerUpsertBulk) SetDisableReason(v string) *ManagerUpsertBulk {
+	return u.Update(func(s *ManagerUpsert) {
+		s.SetDisableReason(v)
+	})
+}
+
+// UpdateDisableReason sets the "disable_reason" field to the value that was provided on create.
+func (u *ManagerUpsertBulk) UpdateDisableReason() *ManagerUpsertBulk {
+	return u.Update(func(s *ManagerUpsert) {
+		s.UpdateDisableReason()
+	})
+}
+
+// ClearDisableReason clears the value of the "disable_reason" field.
+func (u *ManagerUpsertBulk) ClearDisableReason() *ManagerUpsertBulk {
+	return u.Update(func(s *ManagerUpsert) {
+		s.ClearDisableReason()
+	})
+}
+
+// SetDisabledAt sets the "disabled_at" field.
+func (u *ManagerUpsertBulk) SetDisabledAt(v time.Time) *ManagerUpsertBulk {
+	return u.Update(func(s *ManagerUpsert) {
+		s.SetDisabledAt(v)
+	})
+}
+
+// UpdateDisabledAt sets the "disabled_at" field to the value that was provided on create.
+func (u *ManagerUpsertBulk) UpdateDisabledAt() *ManagerUpsertBulk {
+	return u.Update(func(s *ManagerUpsert) {
+		s.UpdateDisabledAt()
+	})
+}
+
+// ClearDisabledAt clears the value of the "disabled_at" field.
+func (u *ManagerUpsertBulk) ClearDisabledAt() *ManagerUpsertBulk {
+	return u.Update(func(s *ManagerUpsert) {
+		s.ClearDisabledAt()
+	})
+}
+
+// Exec executes the query.
+func (u *ManagerUpsertBulk) Exec(ctx context.Context) error {
+	if u.create.err != nil {
+		return u.create.err
+	}
+	for i, b := range u.create.builders {
+		if len(b.conflict) != 0 {
+			return fmt.Errorf("ent: OnConflict was set for builder %d. Set it on the ManagerCreateBulk instead", i)
+		}
+	}
+	if len(u.create.conflict) == 0 {
+		return errors.New("ent: missing options for ManagerCreateBulk.OnConflict")
+	}
+	return u.create.Exec(ctx)
+}
+
+// ExecX is like Exec, but panics if an error occurs.
+func (u *ManagerUpsertBulk) ExecX(ctx context.Context) {
+	if err := u.create.Exec(ctx); err != nil {
 		panic(err)
 	}
 }

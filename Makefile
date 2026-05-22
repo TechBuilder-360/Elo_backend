@@ -1,7 +1,7 @@
 # Run project requirements
 
 generate-ent-schema:
-	go generate ./ent
+	 go run -mod=mod entgo.io/ent/cmd/ent generate --feature sql/upsert ./ent/schema
 
 migrate-schema:
 	atlas migrate diff directory \

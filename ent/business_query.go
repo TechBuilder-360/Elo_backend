@@ -13,22 +13,26 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/Toflex/directory_v2/ent/business"
+	"github.com/Toflex/directory_v2/ent/businessdocument"
 	"github.com/Toflex/directory_v2/ent/businessservices"
 	"github.com/Toflex/directory_v2/ent/manager"
 	"github.com/Toflex/directory_v2/ent/predicate"
 	"github.com/Toflex/directory_v2/ent/social"
+	"github.com/Toflex/directory_v2/ent/userdocument"
 )
 
 // BusinessQuery is the builder for querying Business entities.
 type BusinessQuery struct {
 	config
-	ctx          *QueryContext
-	order        []business.OrderOption
-	inters       []Interceptor
-	predicates   []predicate.Business
-	withSocials  *SocialQuery
-	withServices *BusinessServicesQuery
-	withManages  *ManagerQuery
+	ctx                   *QueryContext
+	order                 []business.OrderOption
+	inters                []Interceptor
+	predicates            []predicate.Business
+	withSocials           *SocialQuery
+	withServices          *BusinessServicesQuery
+	withManages           *ManagerQuery
+	withBusinessDocuments *BusinessDocumentQuery
+	withUserDocuments     *UserDocumentQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -124,6 +128,50 @@ func (bq *BusinessQuery) QueryManages() *ManagerQuery {
 			sqlgraph.From(business.Table, business.FieldID, selector),
 			sqlgraph.To(manager.Table, manager.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, business.ManagesTable, business.ManagesColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(bq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryBusinessDocuments chains the current query on the "business_documents" edge.
+func (bq *BusinessQuery) QueryBusinessDocuments() *BusinessDocumentQuery {
+	query := (&BusinessDocumentClient{config: bq.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := bq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := bq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(business.Table, business.FieldID, selector),
+			sqlgraph.To(businessdocument.Table, businessdocument.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, business.BusinessDocumentsTable, business.BusinessDocumentsColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(bq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryUserDocuments chains the current query on the "user_documents" edge.
+func (bq *BusinessQuery) QueryUserDocuments() *UserDocumentQuery {
+	query := (&UserDocumentClient{config: bq.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := bq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := bq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(business.Table, business.FieldID, selector),
+			sqlgraph.To(userdocument.Table, userdocument.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, business.UserDocumentsTable, business.UserDocumentsColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(bq.driver.Dialect(), step)
 		return fromU, nil
@@ -318,14 +366,16 @@ func (bq *BusinessQuery) Clone() *BusinessQuery {
 		return nil
 	}
 	return &BusinessQuery{
-		config:       bq.config,
-		ctx:          bq.ctx.Clone(),
-		order:        append([]business.OrderOption{}, bq.order...),
-		inters:       append([]Interceptor{}, bq.inters...),
-		predicates:   append([]predicate.Business{}, bq.predicates...),
-		withSocials:  bq.withSocials.Clone(),
-		withServices: bq.withServices.Clone(),
-		withManages:  bq.withManages.Clone(),
+		config:                bq.config,
+		ctx:                   bq.ctx.Clone(),
+		order:                 append([]business.OrderOption{}, bq.order...),
+		inters:                append([]Interceptor{}, bq.inters...),
+		predicates:            append([]predicate.Business{}, bq.predicates...),
+		withSocials:           bq.withSocials.Clone(),
+		withServices:          bq.withServices.Clone(),
+		withManages:           bq.withManages.Clone(),
+		withBusinessDocuments: bq.withBusinessDocuments.Clone(),
+		withUserDocuments:     bq.withUserDocuments.Clone(),
 		// clone intermediate query.
 		sql:  bq.sql.Clone(),
 		path: bq.path,
@@ -362,6 +412,28 @@ func (bq *BusinessQuery) WithManages(opts ...func(*ManagerQuery)) *BusinessQuery
 		opt(query)
 	}
 	bq.withManages = query
+	return bq
+}
+
+// WithBusinessDocuments tells the query-builder to eager-load the nodes that are connected to
+// the "business_documents" edge. The optional arguments are used to configure the query builder of the edge.
+func (bq *BusinessQuery) WithBusinessDocuments(opts ...func(*BusinessDocumentQuery)) *BusinessQuery {
+	query := (&BusinessDocumentClient{config: bq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	bq.withBusinessDocuments = query
+	return bq
+}
+
+// WithUserDocuments tells the query-builder to eager-load the nodes that are connected to
+// the "user_documents" edge. The optional arguments are used to configure the query builder of the edge.
+func (bq *BusinessQuery) WithUserDocuments(opts ...func(*UserDocumentQuery)) *BusinessQuery {
+	query := (&UserDocumentClient{config: bq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	bq.withUserDocuments = query
 	return bq
 }
 
@@ -443,10 +515,12 @@ func (bq *BusinessQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Bus
 	var (
 		nodes       = []*Business{}
 		_spec       = bq.querySpec()
-		loadedTypes = [3]bool{
+		loadedTypes = [5]bool{
 			bq.withSocials != nil,
 			bq.withServices != nil,
 			bq.withManages != nil,
+			bq.withBusinessDocuments != nil,
+			bq.withUserDocuments != nil,
 		}
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
@@ -485,6 +559,22 @@ func (bq *BusinessQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Bus
 		if err := bq.loadManages(ctx, query, nodes,
 			func(n *Business) { n.Edges.Manages = []*Manager{} },
 			func(n *Business, e *Manager) { n.Edges.Manages = append(n.Edges.Manages, e) }); err != nil {
+			return nil, err
+		}
+	}
+	if query := bq.withBusinessDocuments; query != nil {
+		if err := bq.loadBusinessDocuments(ctx, query, nodes,
+			func(n *Business) { n.Edges.BusinessDocuments = []*BusinessDocument{} },
+			func(n *Business, e *BusinessDocument) {
+				n.Edges.BusinessDocuments = append(n.Edges.BusinessDocuments, e)
+			}); err != nil {
+			return nil, err
+		}
+	}
+	if query := bq.withUserDocuments; query != nil {
+		if err := bq.loadUserDocuments(ctx, query, nodes,
+			func(n *Business) { n.Edges.UserDocuments = []*UserDocument{} },
+			func(n *Business, e *UserDocument) { n.Edges.UserDocuments = append(n.Edges.UserDocuments, e) }); err != nil {
 			return nil, err
 		}
 	}
@@ -576,6 +666,68 @@ func (bq *BusinessQuery) loadManages(ctx context.Context, query *ManagerQuery, n
 		node, ok := nodeids[fk]
 		if !ok {
 			return fmt.Errorf(`unexpected referenced foreign-key "business_id" returned %v for node %v`, fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (bq *BusinessQuery) loadBusinessDocuments(ctx context.Context, query *BusinessDocumentQuery, nodes []*Business, init func(*Business), assign func(*Business, *BusinessDocument)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[string]*Business)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	query.withFKs = true
+	query.Where(predicate.BusinessDocument(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(business.BusinessDocumentsColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.business_business_documents
+		if fk == nil {
+			return fmt.Errorf(`foreign-key "business_business_documents" is nil for node %v`, n.ID)
+		}
+		node, ok := nodeids[*fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "business_business_documents" returned %v for node %v`, *fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (bq *BusinessQuery) loadUserDocuments(ctx context.Context, query *UserDocumentQuery, nodes []*Business, init func(*Business), assign func(*Business, *UserDocument)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[string]*Business)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	query.withFKs = true
+	query.Where(predicate.UserDocument(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(business.UserDocumentsColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.business_user_documents
+		if fk == nil {
+			return fmt.Errorf(`foreign-key "business_user_documents" is nil for node %v`, n.ID)
+		}
+		node, ok := nodeids[*fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "business_user_documents" returned %v for node %v`, *fk, n.ID)
 		}
 		assign(node, n)
 	}
