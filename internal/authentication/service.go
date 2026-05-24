@@ -2,13 +2,10 @@ package authentication
 
 import (
 	"context"
-
 	"github.com/Toflex/directory_v2/database/redis"
 	"github.com/Toflex/directory_v2/ent"
 	"github.com/Toflex/directory_v2/graph/model"
 	"github.com/Toflex/directory_v2/pkg/log"
-	"github.com/Toflex/directory_v2/pkg/provider"
-
 	"github.com/samber/do/v2"
 )
 
@@ -19,18 +16,15 @@ type IService interface {
 }
 
 type Service struct {
-	serviceLocator provider.IService
-	repo           IRepository
-	cache          *redis.Client
+	repo  IRepository
+	cache *redis.Client
 }
 
 func NewService(i do.Injector) IService {
 	db := do.MustInvoke[*ent.Client](i)
-	serviceLocator := do.MustInvoke[provider.IService](i)
 	return &Service{
-		serviceLocator: serviceLocator,
-		repo:           Newrepository(db),
-		cache:          do.MustInvoke[*redis.Client](i),
+		repo:  Newrepository(db),
+		cache: do.MustInvoke[*redis.Client](i),
 	}
 }
 

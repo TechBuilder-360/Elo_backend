@@ -11,6 +11,7 @@ import (
 	"github.com/Toflex/directory_v2/pkg/configuration"
 	"github.com/Toflex/directory_v2/pkg/errors"
 	"github.com/Toflex/directory_v2/pkg/log"
+	"github.com/Toflex/directory_v2/pkg/saferoutine"
 	"github.com/Toflex/directory_v2/pkg/util"
 	"github.com/redis/go-redis/v9"
 )
@@ -47,6 +48,10 @@ func (s *Service) Login(ctx context.Context, payload Login, log log.Entry) (*mod
 		}
 	}
 
+	saferoutine.Run(func() {
+		s.cache.Delete(ctx, payload.Identifier)
+	})
+
 	user, err := s.repo.GetUserByID(ctx, data.UserID)
 	if err != nil {
 		log.WithField("User ID", data.UserID).WithError(err).Error("login failed")
@@ -69,8 +74,14 @@ func (s *Service) RequestOTP(ctx context.Context, payload OTPRequest, log log.En
 	}
 
 	if user == nil {
-		log.Error("user with email '%s' not found", payload.Email)
+		log.WithField("email", payload.Email).Error("user not found")
 		return nil, errors.New(errors.ErrNotFound, "user not found!")
+	}
+
+	passwordMatch := util.DecryptPassword(payload.Password, user.Password)
+	if !passwordMatch {
+		log.WithField("email", payload.Email).Error("password incorrect")
+		return nil, errors.New(errors.ErrFailed, "Invalid credentials")
 	}
 
 	otp := "111111"

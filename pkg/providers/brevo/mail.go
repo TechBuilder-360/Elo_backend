@@ -46,15 +46,19 @@ func (b *brevo) Send(ctx context.Context, payload email.MailPayload) error {
 		HTMLContent: payload.HTMLContent,
 		To:          to,
 		Subject:     payload.Subject,
+		Sender: Sender{
+			Email: "tech.builder.circle@gmail.com",
+			Name:  "Elo",
+		},
 	}
 
 	resp, err := apm.HTTPClientRequest().
 		SetContext(ctx).
-		SetHeader("api-key", b.config.apiKey).
+		SetHeader("api-key", b.config.ApiKey).
 		SetHeader("Content-Type", "application/json").
 		SetBody(request).
 		SetError(errorResponse).
-		Post(b.config.baseURL + "/v3/smtp/email")
+		Post(b.config.BaseURL + "/v3/smtp/email")
 
 	if err != nil {
 		logger.WithError(err).Error("failed to send email via Brevo")

@@ -1,6 +1,7 @@
 package queue
 
 import (
+	"encoding/json"
 	"time"
 
 	"github.com/Toflex/directory_v2/pkg/configuration"
@@ -13,6 +14,16 @@ type Client struct {
 }
 
 var ClientQueue *Client
+
+type TaskPayload struct {
+	TaskID    string
+	QueueName string
+	Data      interface{}
+	Retention time.Duration
+	Retry     int
+	WaitTime  time.Duration
+	Timeout   time.Duration
+}
 
 type asynqConfig struct {
 	RedisURL      string `env:"REDIS_URL"`
@@ -44,10 +55,21 @@ func (c *Client) Enqueue(task *asynq.Task, opts ...asynq.Option) (*asynq.TaskInf
 	return c.client.Enqueue(task, opts...)
 }
 
-func Enqueue(taskType string, payload []byte, waitTime int) error {
-	task := asynq.NewTask(taskType, payload)
+func Enqueue(taskType string, payload TaskPayload) error {
+	data, err := json.Marshal(payload.Data)
+	if err != nil {
+		return err
+	}
 
-	_, err := ClientQueue.Enqueue(task, asynq.ProcessIn(time.Duration(waitTime)*time.Second))
+	task := asynq.NewTask(taskType, data)
+
+	_, err = ClientQueue.Enqueue(task,
+		asynq.Queue(payload.QueueName),
+		asynq.ProcessIn(payload.WaitTime),
+		asynq.MaxRetry(payload.Retry),
+		asynq.Retention(payload.Retention),
+		asynq.TaskID(payload.TaskID),
+		asynq.Timeout(payload.Timeout))
 	if err != nil {
 		return err
 	}

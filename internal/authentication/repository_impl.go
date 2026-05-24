@@ -2,6 +2,7 @@ package authentication
 
 import (
 	"context"
+	"strings"
 
 	"github.com/Toflex/directory_v2/ent"
 	"github.com/Toflex/directory_v2/ent/user"
@@ -32,7 +33,7 @@ func (r *repository) Create(ctx context.Context, payload Onboarding) (*string, e
 func (r *repository) GetUserByEmail(ctx context.Context, email string) (*User, error) {
 	u, err := r.db.User.
 		Query().
-		Where(user.EmailAddressEQ(email)).
+		Where(user.EmailAddressEQ(strings.ToLower(email))).
 		Only(ctx)
 
 	if err != nil {

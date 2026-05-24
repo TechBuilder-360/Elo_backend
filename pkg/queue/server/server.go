@@ -1,6 +1,8 @@
 package server
 
 import (
+	"time"
+
 	"github.com/Toflex/directory_v2/internal/email"
 	"github.com/Toflex/directory_v2/pkg/configuration"
 	"github.com/Toflex/directory_v2/pkg/constant"
@@ -10,6 +12,7 @@ import (
 
 type Server struct {
 	srv *asynq.Server
+	mux *asynq.ServeMux
 }
 
 type asynqConfig struct {
@@ -27,26 +30,35 @@ func NewServer(i do.Injector) (*Server, error) {
 		conf.Concurrency = 10
 	}
 
+	queues := make(map[string]int)
+	queues["email"] = 1
+
 	srv := asynq.NewServer(
 		asynq.RedisClientOpt{
-			Addr:     conf.RedisURL,
-			Password: conf.RedisPassword,
-			DB:       conf.RedisDB,
+			Addr:         conf.RedisURL,
+			Password:     conf.RedisPassword,
+			DB:           conf.RedisDB,
+			PoolSize:     20,
+			ReadTimeout:  15 * time.Second,
+			WriteTimeout: 15 * time.Second,
+			DialTimeout:  15 * time.Second,
 		},
 		asynq.Config{
 			Concurrency: conf.Concurrency,
+			Queues:      queues,
 		},
 	)
 
 	// mux maps a type to a handler
 	mux := asynq.NewServeMux()
 	mux.HandleFunc(constant.TaskTypeWelcomeEmail, email.HandleWelcomeEmailTask)
+	mux.HandleFunc(constant.TaskTypeOTPEmail, email.HandleOTPEmailTask)
 
-	return &Server{srv: srv}, nil
+	return &Server{srv: srv, mux: mux}, nil
 }
 
-func (s *Server) Run(mux *asynq.ServeMux) error {
-	return s.srv.Run(mux)
+func (s *Server) Run() error {
+	return s.srv.Run(s.mux)
 }
 
 func (s *Server) Shutdown() {

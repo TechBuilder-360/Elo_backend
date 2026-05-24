@@ -1,26 +1,35 @@
 package email
 
 import (
-	"encoding/json"
+	"time"
 
 	"github.com/Toflex/directory_v2/pkg/constant"
 	"github.com/Toflex/directory_v2/pkg/queue"
+	"github.com/Toflex/directory_v2/pkg/util"
 )
 
-func NewEmailWelcomeTask(request WelcomeEmailPayload) error {
-	payload, err := json.Marshal(request)
-	if err != nil {
-		return err
-	}
+const queueName = "email"
 
-	return queue.Enqueue(constant.TaskTypeWelcomeEmail, payload, 0)
+func NewEmailWelcomeTask(request WelcomeEmailPayload) error {
+	return queue.Enqueue(constant.TaskTypeWelcomeEmail, queue.TaskPayload{
+		TaskID:    util.GenerateUUID(),
+		QueueName: queueName,
+		Retention: time.Hour,
+		Retry:     3,
+		Timeout:   time.Second * 30,
+		WaitTime:  0,
+		Data:      request,
+	})
 }
 
 func NewOTPTask(request OTPMailRequest) error {
-	payload, err := json.Marshal(request)
-	if err != nil {
-		return err
-	}
-
-	return queue.Enqueue(constant.TaskTypeOTPEmail, payload, 0)
+	return queue.Enqueue(constant.TaskTypeOTPEmail, queue.TaskPayload{
+		TaskID:    util.GenerateUUID(),
+		QueueName: queueName,
+		Retention: time.Hour,
+		Retry:     3,
+		Timeout:   time.Second * 30,
+		WaitTime:  0,
+		Data:      request,
+	})
 }
