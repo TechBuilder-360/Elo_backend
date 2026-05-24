@@ -3,6 +3,9 @@ package router
 import (
 	"context"
 
+	stderrors "errors"
+
+	"github.com/99designs/gqlgen/graphql"
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/handler/extension"
 	"github.com/99designs/gqlgen/graphql/handler/lru"
@@ -14,18 +17,23 @@ import (
 	"github.com/Toflex/directory_v2/internal/authentication"
 	"github.com/Toflex/directory_v2/middlewares"
 	"github.com/Toflex/directory_v2/pkg/configuration"
+	apperrors "github.com/Toflex/directory_v2/pkg/errors"
 	"github.com/Toflex/directory_v2/pkg/log"
 	"github.com/gin-gonic/gin"
+	"github.com/hibiken/asynq"
+	"github.com/hibiken/asynqmon"
 	"github.com/samber/do/v2"
 	"github.com/vektah/gqlparser/v2/ast"
 	"github.com/vektah/gqlparser/v2/gqlerror"
 )
 
+type asynqMonitorConfig struct {
+	RedisURL      string `env:"REDIS_URL"`
+	RedisDB       int    `env:"REDIS_DB"`
+	RedisPassword string `env:"REDIS_PASSWORD"`
+}
+
 func InitializeRoutes(engine *gin.Engine) {
-
-	// TODO: move middlewares to middlewares init folder
-	engine.Use(middlewares.Logger())
-
 	resolverStruct := resolver.Resolver{
 		AuthenticationService: do.MustInvoke[authentication.IService](runtime.Injector),
 	}
@@ -45,14 +53,32 @@ func InitializeRoutes(engine *gin.Engine) {
 	})
 
 	gqlHandler.SetRecoverFunc(func(ctx context.Context, err interface{}) error {
-		// Notify bug tracker...
-		log.Error("An error occurred: %s", err)
-		return gqlerror.Errorf("Internal server error!")
+		log.Error("GraphQL panic recovered: %v", err)
+		return gqlerror.Errorf("internal server error")
+	})
+
+	gqlHandler.SetErrorPresenter(func(ctx context.Context, err error) *gqlerror.Error {
+		var gqlErr *gqlerror.Error
+		if stderrors.As(err, &gqlErr) {
+			return gqlErr
+		}
+
+		var safe *apperrors.SafeError
+		if stderrors.As(err, &safe) {
+			return &gqlerror.Error{
+				Message: safe.Message,
+				Extensions: map[string]any{
+					"code": string(safe.Code),
+				},
+			}
+		}
+		return graphql.DefaultErrorPresenter(ctx, err)
 	})
 
 	// GraphQL endpoint
-	engine.POST("/api", func(c *gin.Context) {
-		gqlHandler.ServeHTTP(c.Writer, c.Request)
+	engine.POST("/api", middlewares.Logger(), func(c *gin.Context) {
+		ctx := log.SetLoggerInContext(c.Request.Context())
+		gqlHandler.ServeHTTP(c.Writer, c.Request.WithContext(ctx))
 	})
 
 	basicAuth := gin.BasicAuth(gin.Accounts{
@@ -63,5 +89,20 @@ func InitializeRoutes(engine *gin.Engine) {
 	engine.GET("/api", basicAuth, func(c *gin.Context) {
 		playgroundHandler.ServeHTTP(c.Writer, c.Request)
 	})
+
+	monitorConf := &asynqMonitorConfig{}
+	configuration.Load(monitorConf)
+
+	monitorHandler := asynqmon.New(asynqmon.Options{
+		RootPath: "/monitoring",
+		RedisConnOpt: asynq.RedisClientOpt{
+			Addr:     monitorConf.RedisURL,
+			Password: monitorConf.RedisPassword,
+			DB:       monitorConf.RedisDB,
+		},
+	})
+
+	engine.Any(monitorHandler.RootPath(), basicAuth, gin.WrapH(monitorHandler))
+	engine.Any(monitorHandler.RootPath()+"/*path", basicAuth, gin.WrapH(monitorHandler))
 
 }

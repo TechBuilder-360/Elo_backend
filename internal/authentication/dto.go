@@ -47,14 +47,15 @@ func (r *Registration) Validate() error {
 		displayName = displayName[:10]
 	}
 
+	displayName = strings.ToLower(displayName)
+
 	// validate email field
-	email := r.EmailAddress
-	err := util.ValidateEmail(email)
+	err := util.ValidateEmail(r.EmailAddress)
 	if err != nil {
 		return errors.New(errors.ErrInvalidInput, err.Error())
 	}
 
-	email = strings.ToLower(email)
+	r.EmailAddress = strings.ToLower(r.EmailAddress)
 
 	// validate first name
 	firstname := strings.ReplaceAll(strings.ToLower(r.FirstName), " ", "")
@@ -95,9 +96,8 @@ func (r *Registration) Validate() error {
 	}
 
 	r.DisplayName = &displayName
-	r.EmailAddress = email
-	r.FirstName = firstname
-	r.LastName = lastname
+	r.FirstName = util.ToTitleCase(firstname)
+	r.LastName = util.ToTitleCase(lastname)
 	r.Password = util.EncryptPassword(r.Password)
 
 	return nil

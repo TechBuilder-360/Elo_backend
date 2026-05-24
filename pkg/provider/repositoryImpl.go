@@ -27,17 +27,22 @@ func (r *repository) FindByIdentifier(ctx context.Context, identifier string) (*
 	return serv, nil
 }
 
-func (r *repository) GetProvider(ctx context.Context, name string) (*ActiveProvider, error) {
-	activeProvider := new(ActiveProvider)
-	err := r.db.Provider.
+func (r *repository) GetProvider(ctx context.Context, identifier string) (*ActiveProvider, error) {
+	activeProvider, err := r.db.Provider.
 		Query().
-		Where(provider.NameEqualFold(name)).
-		Select(provider.FieldName, provider.FieldSlug, provider.FieldActive).
-		Scan(ctx, &activeProvider)
+		Where(provider.Or(
+			provider.NameEqualFold(identifier),
+			provider.SlugEqualFold(identifier),
+		)).
+		First(ctx)
 
 	if err != nil {
 		return nil, err
 	}
 
-	return activeProvider, nil
+	return &ActiveProvider{
+		Name:   activeProvider.Name,
+		Slug:   activeProvider.Slug,
+		Active: activeProvider.Active,
+	}, nil
 }

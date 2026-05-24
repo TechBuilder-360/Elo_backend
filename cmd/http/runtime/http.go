@@ -8,6 +8,8 @@ import (
 func server(i do.Injector) (*gin.Engine, error) {
 	engine := gin.Default()
 
+	gin.SetMode(gin.ReleaseMode)
+
 	// gin
 	engine.Use(gin.Recovery())
 	engine.Use(gin.Logger())

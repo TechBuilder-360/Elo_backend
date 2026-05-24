@@ -17,7 +17,7 @@ func (e *SafeError) Error() string {
 
 // Unwrap provides compatibility for errors.Unwrap
 func (e *SafeError) Unwrap() error {
-	return e
+	return e.Err
 }
 
 // New creates a new SafeError with a code and message

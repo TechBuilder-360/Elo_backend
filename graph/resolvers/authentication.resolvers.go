@@ -25,19 +25,19 @@ func (r *mutationResolver) Registration(ctx context.Context, input model.Registr
 		EmailAddress: input.EmailAddress,
 		DisplayName:  input.DisplayName,
 		PhoneNumber:  input.PhoneNumber,
+		Password:     input.Password,
 	}
 
 	// validate input
 	err := payload.Validate()
 	if err != nil {
-		return nil, err
+		return nil, toGQLError(err)
 	}
 
 	userId, err := r.AuthenticationService.RegisterUser(ctx, payload, logger)
 	if err != nil {
 		logger.Error("Registration failed %+v", err)
-		graphql.AddError(ctx, err)
-		return nil, err
+		return nil, toGQLError(err)
 	}
 
 	return &model.RegistrationResponse{
@@ -54,8 +54,7 @@ func (r *mutationResolver) Login(ctx context.Context, input model.Login) (*model
 	}, logger)
 	if err != nil {
 		logger.Error("Login failed %+v", err)
-		graphql.AddError(ctx, err)
-		return nil, err
+		return nil, toGQLError(err)
 	}
 
 	return response, nil
@@ -69,7 +68,7 @@ func (r *mutationResolver) RequestOtp(ctx context.Context, input *model.RequestO
 	if err != nil {
 		logger.Error("OTP Request failed %+v", err)
 		graphql.AddError(ctx, err)
-		return nil, err
+		return nil, toGQLError(err)
 	}
 
 	return &model.OTPResponse{Identifier: util.AddressToString(identifier)}, nil

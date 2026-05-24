@@ -18,6 +18,7 @@ require (
 
 require (
 	github.com/goccy/go-yaml v1.19.2 // indirect
+	github.com/gorilla/mux v1.8.0 // indirect
 	github.com/robfig/cron/v3 v3.0.1 // indirect
 	github.com/spf13/cast v1.10.0 // indirect
 	github.com/urfave/cli/v3 v3.6.2 // indirect
@@ -58,6 +59,7 @@ require (
 	github.com/goccy/go-json v0.10.2 // indirect
 	github.com/google/go-cmp v0.7.0 // indirect
 	github.com/hashicorp/hcl/v2 v2.18.1 // indirect
+	github.com/hibiken/asynqmon v0.7.2
 	github.com/json-iterator/go v1.1.12 // indirect
 	github.com/klauspost/cpuid/v2 v2.2.7 // indirect
 	github.com/leodido/go-urn v1.4.0 // indirect

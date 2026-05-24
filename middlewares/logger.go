@@ -31,7 +31,7 @@ func (w bodyLogWriter) Write(b []byte) (int, error) {
 
 func Logger() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		log.SetLoggerInContext(c.Request.Context())
+		c.Request = c.Request.WithContext(log.SetLoggerInContext(c.Request.Context()))
 
 		blw := &bodyLogWriter{
 			body:           bytes.NewBufferString(""),

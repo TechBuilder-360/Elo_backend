@@ -5,8 +5,9 @@ package errors
 type ErrorCode string
 
 const (
-	ErrNotFound     ErrorCode = "NOT FOUND"
-	ErrInvalidInput ErrorCode = "INVALID INPUT"
-	ErrInternal     ErrorCode = "INTERNAL ERROR"
-	ErrFailed       ErrorCode = "REQUEST FAILED"
+	ErrNotFound      ErrorCode = "NOT FOUND"
+	ErrInvalidInput  ErrorCode = "INVALID INPUT"
+	ErrInternal      ErrorCode = "INTERNAL ERROR"
+	ErrFailed        ErrorCode = "REQUEST FAILED"
+	ErrInputRequired ErrorCode = "INPUT REQUIRED"
 )

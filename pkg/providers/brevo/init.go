@@ -14,8 +14,8 @@ type brevo struct {
 }
 
 type config struct {
-	baseURL string `env:"BREVO_BASE_URL" required:"true"`
-	apiKey  string `env:"BREVO_API_KEY" required:"true"`
+	BaseURL string `env:"BREVO_BASE_URL" required:"true"`
+	ApiKey  string `env:"BREVO_API_KEY" required:"true"`
 }
 
 func (*brevo) Slug() string {
