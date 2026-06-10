@@ -2,6 +2,8 @@ package router
 
 import (
 	"context"
+	"fmt"
+	"net/http"
 
 	stderrors "errors"
 
@@ -34,6 +36,13 @@ type asynqMonitorConfig struct {
 }
 
 func InitializeRoutes(engine *gin.Engine) {
+
+	engine.GET("/health", middlewares.Logger(), func(c *gin.Context) {
+		c.AbortWithStatusJSON(http.StatusOK, gin.H{
+			"message": "Server is up 🚀",
+		})
+	})
+
 	resolverStruct := resolver.Resolver{
 		AuthenticationService: do.MustInvoke[authentication.IService](runtime.Injector),
 	}
