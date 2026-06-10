@@ -24,7 +24,6 @@ type SocialQuery struct {
 	inters     []Interceptor
 	predicates []predicate.Social
 	withSocial *BusinessQuery
-	withFKs    bool
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -107,8 +106,8 @@ func (sq *SocialQuery) FirstX(ctx context.Context) *Social {
 
 // FirstID returns the first Social ID from the query.
 // Returns a *NotFoundError when no Social ID was found.
-func (sq *SocialQuery) FirstID(ctx context.Context) (id int, err error) {
-	var ids []int
+func (sq *SocialQuery) FirstID(ctx context.Context) (id string, err error) {
+	var ids []string
 	if ids, err = sq.Limit(1).IDs(setContextOp(ctx, sq.ctx, ent.OpQueryFirstID)); err != nil {
 		return
 	}
@@ -120,7 +119,7 @@ func (sq *SocialQuery) FirstID(ctx context.Context) (id int, err error) {
 }
 
 // FirstIDX is like FirstID, but panics if an error occurs.
-func (sq *SocialQuery) FirstIDX(ctx context.Context) int {
+func (sq *SocialQuery) FirstIDX(ctx context.Context) string {
 	id, err := sq.FirstID(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
@@ -158,8 +157,8 @@ func (sq *SocialQuery) OnlyX(ctx context.Context) *Social {
 // OnlyID is like Only, but returns the only Social ID in the query.
 // Returns a *NotSingularError when more than one Social ID is found.
 // Returns a *NotFoundError when no entities are found.
-func (sq *SocialQuery) OnlyID(ctx context.Context) (id int, err error) {
-	var ids []int
+func (sq *SocialQuery) OnlyID(ctx context.Context) (id string, err error) {
+	var ids []string
 	if ids, err = sq.Limit(2).IDs(setContextOp(ctx, sq.ctx, ent.OpQueryOnlyID)); err != nil {
 		return
 	}
@@ -175,7 +174,7 @@ func (sq *SocialQuery) OnlyID(ctx context.Context) (id int, err error) {
 }
 
 // OnlyIDX is like OnlyID, but panics if an error occurs.
-func (sq *SocialQuery) OnlyIDX(ctx context.Context) int {
+func (sq *SocialQuery) OnlyIDX(ctx context.Context) string {
 	id, err := sq.OnlyID(ctx)
 	if err != nil {
 		panic(err)
@@ -203,7 +202,7 @@ func (sq *SocialQuery) AllX(ctx context.Context) []*Social {
 }
 
 // IDs executes the query and returns a list of Social IDs.
-func (sq *SocialQuery) IDs(ctx context.Context) (ids []int, err error) {
+func (sq *SocialQuery) IDs(ctx context.Context) (ids []string, err error) {
 	if sq.ctx.Unique == nil && sq.path != nil {
 		sq.Unique(true)
 	}
@@ -215,7 +214,7 @@ func (sq *SocialQuery) IDs(ctx context.Context) (ids []int, err error) {
 }
 
 // IDsX is like IDs, but panics if an error occurs.
-func (sq *SocialQuery) IDsX(ctx context.Context) []int {
+func (sq *SocialQuery) IDsX(ctx context.Context) []string {
 	ids, err := sq.IDs(ctx)
 	if err != nil {
 		panic(err)
@@ -370,18 +369,11 @@ func (sq *SocialQuery) prepareQuery(ctx context.Context) error {
 func (sq *SocialQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Social, error) {
 	var (
 		nodes       = []*Social{}
-		withFKs     = sq.withFKs
 		_spec       = sq.querySpec()
 		loadedTypes = [1]bool{
 			sq.withSocial != nil,
 		}
 	)
-	if sq.withSocial != nil {
-		withFKs = true
-	}
-	if withFKs {
-		_spec.Node.Columns = append(_spec.Node.Columns, social.ForeignKeys...)
-	}
 	_spec.ScanValues = func(columns []string) ([]any, error) {
 		return (*Social).scanValues(nil, columns)
 	}
@@ -410,13 +402,10 @@ func (sq *SocialQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Socia
 }
 
 func (sq *SocialQuery) loadSocial(ctx context.Context, query *BusinessQuery, nodes []*Social, init func(*Social), assign func(*Social, *Business)) error {
-	ids := make([]int, 0, len(nodes))
-	nodeids := make(map[int][]*Social)
+	ids := make([]string, 0, len(nodes))
+	nodeids := make(map[string][]*Social)
 	for i := range nodes {
-		if nodes[i].business_business_social == nil {
-			continue
-		}
-		fk := *nodes[i].business_business_social
+		fk := nodes[i].BusinessID
 		if _, ok := nodeids[fk]; !ok {
 			ids = append(ids, fk)
 		}
@@ -433,7 +422,7 @@ func (sq *SocialQuery) loadSocial(ctx context.Context, query *BusinessQuery, nod
 	for _, n := range neighbors {
 		nodes, ok := nodeids[n.ID]
 		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "business_business_social" returned %v`, n.ID)
+			return fmt.Errorf(`unexpected foreign-key "business_id" returned %v`, n.ID)
 		}
 		for i := range nodes {
 			assign(nodes[i], n)
@@ -452,7 +441,7 @@ func (sq *SocialQuery) sqlCount(ctx context.Context) (int, error) {
 }
 
 func (sq *SocialQuery) querySpec() *sqlgraph.QuerySpec {
-	_spec := sqlgraph.NewQuerySpec(social.Table, social.Columns, sqlgraph.NewFieldSpec(social.FieldID, field.TypeInt))
+	_spec := sqlgraph.NewQuerySpec(social.Table, social.Columns, sqlgraph.NewFieldSpec(social.FieldID, field.TypeString))
 	_spec.From = sq.sql
 	if unique := sq.ctx.Unique; unique != nil {
 		_spec.Unique = *unique
@@ -466,6 +455,9 @@ func (sq *SocialQuery) querySpec() *sqlgraph.QuerySpec {
 			if fields[i] != social.FieldID {
 				_spec.Node.Columns = append(_spec.Node.Columns, fields[i])
 			}
+		}
+		if sq.withSocial != nil {
+			_spec.Node.AddColumnOnce(social.FieldBusinessID)
 		}
 	}
 	if ps := sq.predicates; len(ps) > 0 {

@@ -14,56 +14,103 @@ const (
 	Label = "user"
 	// FieldID holds the string denoting the id field in the database.
 	FieldID = "id"
+	// FieldCreatedAt holds the string denoting the created_at field in the database.
+	FieldCreatedAt = "created_at"
+	// FieldUpdatedAt holds the string denoting the updated_at field in the database.
+	FieldUpdatedAt = "updated_at"
+	// FieldDeletedAt holds the string denoting the deleted_at field in the database.
+	FieldDeletedAt = "deleted_at"
 	// FieldFirstName holds the string denoting the first_name field in the database.
 	FieldFirstName = "first_name"
 	// FieldLastName holds the string denoting the last_name field in the database.
 	FieldLastName = "last_name"
+	// FieldPassword holds the string denoting the password field in the database.
+	FieldPassword = "password"
 	// FieldMiddleName holds the string denoting the middle_name field in the database.
 	FieldMiddleName = "middle_name"
 	// FieldDisplayName holds the string denoting the display_name field in the database.
 	FieldDisplayName = "display_name"
 	// FieldEmailAddress holds the string denoting the email_address field in the database.
 	FieldEmailAddress = "email_address"
+	// FieldEmailVerified holds the string denoting the email_verified field in the database.
+	FieldEmailVerified = "email_verified"
+	// FieldEmailVerifiedAt holds the string denoting the email_verified_at field in the database.
+	FieldEmailVerifiedAt = "email_verified_at"
 	// FieldPhoneNumber holds the string denoting the phone_number field in the database.
 	FieldPhoneNumber = "phone_number"
 	// FieldAvatar holds the string denoting the avatar field in the database.
 	FieldAvatar = "avatar"
 	// FieldDisabled holds the string denoting the disabled field in the database.
 	FieldDisabled = "disabled"
-	// FieldIdentificationNumber holds the string denoting the identification_number field in the database.
-	FieldIdentificationNumber = "identification_number"
-	// FieldTier holds the string denoting the tier field in the database.
-	FieldTier = "tier"
-	// FieldCreatedAt holds the string denoting the created_at field in the database.
-	FieldCreatedAt = "created_at"
-	// EdgeUserManager holds the string denoting the user_manager edge name in mutations.
-	EdgeUserManager = "user_manager"
+	// FieldDisableReason holds the string denoting the disable_reason field in the database.
+	FieldDisableReason = "disable_reason"
+	// FieldVerified holds the string denoting the verified field in the database.
+	FieldVerified = "verified"
+	// EdgeManages holds the string denoting the manages edge name in mutations.
+	EdgeManages = "manages"
+	// EdgeUserDocuments holds the string denoting the user_documents edge name in mutations.
+	EdgeUserDocuments = "user_documents"
+	// EdgeVerifications holds the string denoting the verifications edge name in mutations.
+	EdgeVerifications = "verifications"
+	// EdgeRequestVerifications holds the string denoting the request_verifications edge name in mutations.
+	EdgeRequestVerifications = "request_verifications"
 	// Table holds the table name of the user in the database.
 	Table = "users"
-	// UserManagerTable is the table that holds the user_manager relation/edge.
-	UserManagerTable = "managers"
-	// UserManagerInverseTable is the table name for the Manager entity.
+	// ManagesTable is the table that holds the manages relation/edge.
+	ManagesTable = "managers"
+	// ManagesInverseTable is the table name for the Manager entity.
 	// It exists in this package in order to avoid circular dependency with the "manager" package.
-	UserManagerInverseTable = "managers"
-	// UserManagerColumn is the table column denoting the user_manager relation/edge.
-	UserManagerColumn = "user_user_manager"
+	ManagesInverseTable = "managers"
+	// ManagesColumn is the table column denoting the manages relation/edge.
+	ManagesColumn = "user_id"
+	// UserDocumentsTable is the table that holds the user_documents relation/edge.
+	UserDocumentsTable = "user_documents"
+	// UserDocumentsInverseTable is the table name for the UserDocument entity.
+	// It exists in this package in order to avoid circular dependency with the "userdocument" package.
+	UserDocumentsInverseTable = "user_documents"
+	// UserDocumentsColumn is the table column denoting the user_documents relation/edge.
+	UserDocumentsColumn = "user_user_documents"
+	// VerificationsTable is the table that holds the verifications relation/edge. The primary key declared below.
+	VerificationsTable = "verification_user"
+	// VerificationsInverseTable is the table name for the Verification entity.
+	// It exists in this package in order to avoid circular dependency with the "verification" package.
+	VerificationsInverseTable = "verifications"
+	// RequestVerificationsTable is the table that holds the request_verifications relation/edge. The primary key declared below.
+	RequestVerificationsTable = "request_verification_user"
+	// RequestVerificationsInverseTable is the table name for the RequestVerification entity.
+	// It exists in this package in order to avoid circular dependency with the "requestverification" package.
+	RequestVerificationsInverseTable = "request_verifications"
 )
 
 // Columns holds all SQL columns for user fields.
 var Columns = []string{
 	FieldID,
+	FieldCreatedAt,
+	FieldUpdatedAt,
+	FieldDeletedAt,
 	FieldFirstName,
 	FieldLastName,
+	FieldPassword,
 	FieldMiddleName,
 	FieldDisplayName,
 	FieldEmailAddress,
+	FieldEmailVerified,
+	FieldEmailVerifiedAt,
 	FieldPhoneNumber,
 	FieldAvatar,
 	FieldDisabled,
-	FieldIdentificationNumber,
-	FieldTier,
-	FieldCreatedAt,
+	FieldDisableReason,
+	FieldVerified,
 }
+
+var (
+	// VerificationsPrimaryKey and VerificationsColumn2 are the table columns denoting the
+	// primary key for the verifications relation (M2M).
+	VerificationsPrimaryKey = []string{"verification_id", "user_id"}
+	// RequestVerificationsPrimaryKey and RequestVerificationsColumn2 are the table columns denoting the
+	// primary key for the request_verifications relation (M2M).
+	RequestVerificationsPrimaryKey = []string{"request_verification_id", "user_id"}
+)
 
 // ValidColumn reports if the column name is valid (part of the table columns).
 func ValidColumn(column string) bool {
@@ -76,20 +123,30 @@ func ValidColumn(column string) bool {
 }
 
 var (
+	// DefaultCreatedAt holds the default value on creation for the "created_at" field.
+	DefaultCreatedAt func() time.Time
+	// DefaultUpdatedAt holds the default value on creation for the "updated_at" field.
+	DefaultUpdatedAt func() time.Time
+	// UpdateDefaultUpdatedAt holds the default value on update for the "updated_at" field.
+	UpdateDefaultUpdatedAt func() time.Time
 	// FirstNameValidator is a validator for the "first_name" field. It is called by the builders before save.
 	FirstNameValidator func(string) error
 	// LastNameValidator is a validator for the "last_name" field. It is called by the builders before save.
 	LastNameValidator func(string) error
+	// PasswordValidator is a validator for the "password" field. It is called by the builders before save.
+	PasswordValidator func(string) error
 	// EmailAddressValidator is a validator for the "email_address" field. It is called by the builders before save.
 	EmailAddressValidator func(string) error
+	// DefaultEmailVerified holds the default value on creation for the "email_verified" field.
+	DefaultEmailVerified bool
 	// PhoneNumberValidator is a validator for the "phone_number" field. It is called by the builders before save.
 	PhoneNumberValidator func(string) error
 	// DefaultDisabled holds the default value on creation for the "disabled" field.
 	DefaultDisabled bool
-	// DefaultTier holds the default value on creation for the "tier" field.
-	DefaultTier int8
-	// DefaultCreatedAt holds the default value on creation for the "created_at" field.
-	DefaultCreatedAt func() time.Time
+	// DefaultVerified holds the default value on creation for the "verified" field.
+	DefaultVerified bool
+	// DefaultID holds the default value on creation for the "id" field.
+	DefaultID func() string
 )
 
 // OrderOption defines the ordering options for the User queries.
@@ -100,6 +157,21 @@ func ByID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldID, opts...).ToFunc()
 }
 
+// ByCreatedAt orders the results by the created_at field.
+func ByCreatedAt(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldCreatedAt, opts...).ToFunc()
+}
+
+// ByUpdatedAt orders the results by the updated_at field.
+func ByUpdatedAt(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldUpdatedAt, opts...).ToFunc()
+}
+
+// ByDeletedAt orders the results by the deleted_at field.
+func ByDeletedAt(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldDeletedAt, opts...).ToFunc()
+}
+
 // ByFirstName orders the results by the first_name field.
 func ByFirstName(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldFirstName, opts...).ToFunc()
@@ -108,6 +180,11 @@ func ByFirstName(opts ...sql.OrderTermOption) OrderOption {
 // ByLastName orders the results by the last_name field.
 func ByLastName(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldLastName, opts...).ToFunc()
+}
+
+// ByPassword orders the results by the password field.
+func ByPassword(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldPassword, opts...).ToFunc()
 }
 
 // ByMiddleName orders the results by the middle_name field.
@@ -125,6 +202,16 @@ func ByEmailAddress(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldEmailAddress, opts...).ToFunc()
 }
 
+// ByEmailVerified orders the results by the email_verified field.
+func ByEmailVerified(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldEmailVerified, opts...).ToFunc()
+}
+
+// ByEmailVerifiedAt orders the results by the email_verified_at field.
+func ByEmailVerifiedAt(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldEmailVerifiedAt, opts...).ToFunc()
+}
+
 // ByPhoneNumber orders the results by the phone_number field.
 func ByPhoneNumber(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldPhoneNumber, opts...).ToFunc()
@@ -140,38 +227,96 @@ func ByDisabled(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldDisabled, opts...).ToFunc()
 }
 
-// ByIdentificationNumber orders the results by the identification_number field.
-func ByIdentificationNumber(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldIdentificationNumber, opts...).ToFunc()
+// ByDisableReason orders the results by the disable_reason field.
+func ByDisableReason(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldDisableReason, opts...).ToFunc()
 }
 
-// ByTier orders the results by the tier field.
-func ByTier(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldTier, opts...).ToFunc()
+// ByVerified orders the results by the verified field.
+func ByVerified(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldVerified, opts...).ToFunc()
 }
 
-// ByCreatedAt orders the results by the created_at field.
-func ByCreatedAt(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldCreatedAt, opts...).ToFunc()
-}
-
-// ByUserManagerCount orders the results by user_manager count.
-func ByUserManagerCount(opts ...sql.OrderTermOption) OrderOption {
+// ByManagesCount orders the results by manages count.
+func ByManagesCount(opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborsCount(s, newUserManagerStep(), opts...)
+		sqlgraph.OrderByNeighborsCount(s, newManagesStep(), opts...)
 	}
 }
 
-// ByUserManager orders the results by user_manager terms.
-func ByUserManager(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+// ByManages orders the results by manages terms.
+func ByManages(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newUserManagerStep(), append([]sql.OrderTerm{term}, terms...)...)
+		sqlgraph.OrderByNeighborTerms(s, newManagesStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
-func newUserManagerStep() *sqlgraph.Step {
+
+// ByUserDocumentsCount orders the results by user_documents count.
+func ByUserDocumentsCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newUserDocumentsStep(), opts...)
+	}
+}
+
+// ByUserDocuments orders the results by user_documents terms.
+func ByUserDocuments(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newUserDocumentsStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+
+// ByVerificationsCount orders the results by verifications count.
+func ByVerificationsCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newVerificationsStep(), opts...)
+	}
+}
+
+// ByVerifications orders the results by verifications terms.
+func ByVerifications(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newVerificationsStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+
+// ByRequestVerificationsCount orders the results by request_verifications count.
+func ByRequestVerificationsCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newRequestVerificationsStep(), opts...)
+	}
+}
+
+// ByRequestVerifications orders the results by request_verifications terms.
+func ByRequestVerifications(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newRequestVerificationsStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+func newManagesStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
-		sqlgraph.To(UserManagerInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.O2M, false, UserManagerTable, UserManagerColumn),
+		sqlgraph.To(ManagesInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, ManagesTable, ManagesColumn),
+	)
+}
+func newUserDocumentsStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(UserDocumentsInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, UserDocumentsTable, UserDocumentsColumn),
+	)
+}
+func newVerificationsStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(VerificationsInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.M2M, true, VerificationsTable, VerificationsPrimaryKey...),
+	)
+}
+func newRequestVerificationsStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(RequestVerificationsInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.M2M, true, RequestVerificationsTable, RequestVerificationsPrimaryKey...),
 	)
 }

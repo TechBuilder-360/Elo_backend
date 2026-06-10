@@ -1,8 +1,7 @@
 package configuration
 
 import (
-	"log"
-	"os"
+	"strings"
 
 	"go.deanishe.net/env"
 )
@@ -15,6 +14,11 @@ const (
 	sandbox     ENVIRONMENT = "SANDBOX"
 )
 
+var baseURL = map[string]string{
+	string(production):  "https://api.elo.com",
+	string(development): "https://dev.api.elo.com",
+}
+
 var Instance *baseConfig
 
 type baseConfig struct {
@@ -23,13 +27,14 @@ type baseConfig struct {
 	BASEURL       string      `env:"BASE_URL"`
 	Port          string      `env:"PORT"`
 	Environment   ENVIRONMENT `env:"ENVIRONMENT"`
-	Secret        string      `env:"SECRET"`
+	JWTSecret     string      `env:"JWT_SECRET"`
 	TOKENLIFESPAN uint        `env:"TOKEN_LIFE_SPAN"`
+	BasicUsername string      `env:"BASIC_USERNAME"`
+	BasicPassword string      `env:"BASIC_PASSWORD"`
 }
 
 func LoadBaseConfiguration() {
 	c := &baseConfig{}
-	log.Printf("Port: %s", os.Getenv("PWD"))
 	if err := env.Bind(c); err != nil {
 		panic(err.Error())
 	}
@@ -43,4 +48,28 @@ func Load(conf interface{}) interface{} {
 	}
 
 	return conf
+}
+
+func GetEnv() ENVIRONMENT {
+	return ENVIRONMENT(strings.ToLower(string(Instance.Environment)))
+}
+
+func IsProduction() bool {
+	return Instance.Environment == production
+}
+
+func IsSandbox() bool {
+	return Instance.Environment == sandbox
+}
+
+func IsDevelopment() bool {
+	return Instance.Environment == development
+}
+
+func GetBaseURL() string {
+	url, ok := baseURL[strings.ToUpper(string(GetEnv()))]
+	if !ok {
+		return ""
+	}
+	return url
 }

@@ -1,14 +1,24 @@
 # Run project requirements
 
-generate_ent_schema:
-	go generate ./ent
+generate-ent-schema:
+	 go run -mod=mod entgo.io/ent/cmd/ent generate --feature sql/upsert ./ent/schema
 
-migrate_schema:
-	atlas migrate diff migration_name \
+migrate-schema:
+	atlas migrate diff directory \
       --dir "file://ent/migrate/migrations" \
       --to "ent://ent/schema" \
-      --dev-url "docker://postgres/15/test?search_path=public"
+      --dev-url "docker://postgres/latest/test?search_path=public"
 
-migration_compute_hash:
+migration-compute_hash:
 	atlas migrate hash \
 	 	--dir "file://ent/migrate/migrations"
+
+migrate:
+	go run cmd/migration/migration.go
+
+start-server:
+	go run cmd/http/server.go 
+
+
+gqlgen:
+	go run github.com/99designs/gqlgen generate

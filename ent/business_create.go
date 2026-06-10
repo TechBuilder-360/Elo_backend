@@ -8,11 +8,17 @@ import (
 	"fmt"
 	"time"
 
+	"entgo.io/ent/dialect"
+	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/Toflex/directory_v2/ent/business"
+	"github.com/Toflex/directory_v2/ent/businessdocument"
+	"github.com/Toflex/directory_v2/ent/businessservices"
 	"github.com/Toflex/directory_v2/ent/manager"
+	"github.com/Toflex/directory_v2/ent/requestverification"
 	"github.com/Toflex/directory_v2/ent/social"
+	"github.com/Toflex/directory_v2/ent/verification"
 )
 
 // BusinessCreate is the builder for creating a Business entity.
@@ -20,6 +26,49 @@ type BusinessCreate struct {
 	config
 	mutation *BusinessMutation
 	hooks    []Hook
+	conflict []sql.ConflictOption
+}
+
+// SetCreatedAt sets the "created_at" field.
+func (bc *BusinessCreate) SetCreatedAt(t time.Time) *BusinessCreate {
+	bc.mutation.SetCreatedAt(t)
+	return bc
+}
+
+// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
+func (bc *BusinessCreate) SetNillableCreatedAt(t *time.Time) *BusinessCreate {
+	if t != nil {
+		bc.SetCreatedAt(*t)
+	}
+	return bc
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (bc *BusinessCreate) SetUpdatedAt(t time.Time) *BusinessCreate {
+	bc.mutation.SetUpdatedAt(t)
+	return bc
+}
+
+// SetNillableUpdatedAt sets the "updated_at" field if the given value is not nil.
+func (bc *BusinessCreate) SetNillableUpdatedAt(t *time.Time) *BusinessCreate {
+	if t != nil {
+		bc.SetUpdatedAt(*t)
+	}
+	return bc
+}
+
+// SetDeletedAt sets the "deleted_at" field.
+func (bc *BusinessCreate) SetDeletedAt(t time.Time) *BusinessCreate {
+	bc.mutation.SetDeletedAt(t)
+	return bc
+}
+
+// SetNillableDeletedAt sets the "deleted_at" field if the given value is not nil.
+func (bc *BusinessCreate) SetNillableDeletedAt(t *time.Time) *BusinessCreate {
+	if t != nil {
+		bc.SetDeletedAt(*t)
+	}
+	return bc
 }
 
 // SetCategory sets the "category" field.
@@ -42,9 +91,31 @@ func (bc *BusinessCreate) SetName(s string) *BusinessCreate {
 	return bc
 }
 
-// SetLogoURL sets the "logo_url" field.
-func (bc *BusinessCreate) SetLogoURL(s string) *BusinessCreate {
-	bc.mutation.SetLogoURL(s)
+// SetAbout sets the "about" field.
+func (bc *BusinessCreate) SetAbout(s string) *BusinessCreate {
+	bc.mutation.SetAbout(s)
+	return bc
+}
+
+// SetNillableAbout sets the "about" field if the given value is not nil.
+func (bc *BusinessCreate) SetNillableAbout(s *string) *BusinessCreate {
+	if s != nil {
+		bc.SetAbout(*s)
+	}
+	return bc
+}
+
+// SetLogo sets the "logo" field.
+func (bc *BusinessCreate) SetLogo(s string) *BusinessCreate {
+	bc.mutation.SetLogo(s)
+	return bc
+}
+
+// SetNillableLogo sets the "logo" field if the given value is not nil.
+func (bc *BusinessCreate) SetNillableLogo(s *string) *BusinessCreate {
+	if s != nil {
+		bc.SetLogo(*s)
+	}
 	return bc
 }
 
@@ -57,6 +128,28 @@ func (bc *BusinessCreate) SetEmail(s string) *BusinessCreate {
 // SetWebsite sets the "website" field.
 func (bc *BusinessCreate) SetWebsite(s string) *BusinessCreate {
 	bc.mutation.SetWebsite(s)
+	return bc
+}
+
+// SetNillableWebsite sets the "website" field if the given value is not nil.
+func (bc *BusinessCreate) SetNillableWebsite(s *string) *BusinessCreate {
+	if s != nil {
+		bc.SetWebsite(*s)
+	}
+	return bc
+}
+
+// SetActive sets the "active" field.
+func (bc *BusinessCreate) SetActive(b bool) *BusinessCreate {
+	bc.mutation.SetActive(b)
+	return bc
+}
+
+// SetNillableActive sets the "active" field if the given value is not nil.
+func (bc *BusinessCreate) SetNillableActive(b *bool) *BusinessCreate {
+	if b != nil {
+		bc.SetActive(*b)
+	}
 	return bc
 }
 
@@ -94,6 +187,14 @@ func (bc *BusinessCreate) SetDisableReason(s string) *BusinessCreate {
 	return bc
 }
 
+// SetNillableDisableReason sets the "disable_reason" field if the given value is not nil.
+func (bc *BusinessCreate) SetNillableDisableReason(s *string) *BusinessCreate {
+	if s != nil {
+		bc.SetDisableReason(*s)
+	}
+	return bc
+}
+
 // SetVerified sets the "verified" field.
 func (bc *BusinessCreate) SetVerified(b bool) *BusinessCreate {
 	bc.mutation.SetVerified(b)
@@ -114,48 +215,116 @@ func (bc *BusinessCreate) SetVerifiedAt(t time.Time) *BusinessCreate {
 	return bc
 }
 
-// SetCreatedAt sets the "created_at" field.
-func (bc *BusinessCreate) SetCreatedAt(t time.Time) *BusinessCreate {
-	bc.mutation.SetCreatedAt(t)
-	return bc
-}
-
-// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
-func (bc *BusinessCreate) SetNillableCreatedAt(t *time.Time) *BusinessCreate {
+// SetNillableVerifiedAt sets the "verified_at" field if the given value is not nil.
+func (bc *BusinessCreate) SetNillableVerifiedAt(t *time.Time) *BusinessCreate {
 	if t != nil {
-		bc.SetCreatedAt(*t)
+		bc.SetVerifiedAt(*t)
 	}
 	return bc
 }
 
-// AddBusinessSocialIDs adds the "business_social" edge to the Social entity by IDs.
-func (bc *BusinessCreate) AddBusinessSocialIDs(ids ...int) *BusinessCreate {
-	bc.mutation.AddBusinessSocialIDs(ids...)
+// SetID sets the "id" field.
+func (bc *BusinessCreate) SetID(s string) *BusinessCreate {
+	bc.mutation.SetID(s)
 	return bc
 }
 
-// AddBusinessSocial adds the "business_social" edges to the Social entity.
-func (bc *BusinessCreate) AddBusinessSocial(s ...*Social) *BusinessCreate {
-	ids := make([]int, len(s))
+// SetNillableID sets the "id" field if the given value is not nil.
+func (bc *BusinessCreate) SetNillableID(s *string) *BusinessCreate {
+	if s != nil {
+		bc.SetID(*s)
+	}
+	return bc
+}
+
+// AddSocialIDs adds the "socials" edge to the Social entity by IDs.
+func (bc *BusinessCreate) AddSocialIDs(ids ...string) *BusinessCreate {
+	bc.mutation.AddSocialIDs(ids...)
+	return bc
+}
+
+// AddSocials adds the "socials" edges to the Social entity.
+func (bc *BusinessCreate) AddSocials(s ...*Social) *BusinessCreate {
+	ids := make([]string, len(s))
 	for i := range s {
 		ids[i] = s[i].ID
 	}
-	return bc.AddBusinessSocialIDs(ids...)
+	return bc.AddSocialIDs(ids...)
 }
 
-// AddBusinessManagerIDs adds the "business_manager" edge to the Manager entity by IDs.
-func (bc *BusinessCreate) AddBusinessManagerIDs(ids ...int) *BusinessCreate {
-	bc.mutation.AddBusinessManagerIDs(ids...)
+// AddServiceIDs adds the "services" edge to the BusinessServices entity by IDs.
+func (bc *BusinessCreate) AddServiceIDs(ids ...int) *BusinessCreate {
+	bc.mutation.AddServiceIDs(ids...)
 	return bc
 }
 
-// AddBusinessManager adds the "business_manager" edges to the Manager entity.
-func (bc *BusinessCreate) AddBusinessManager(m ...*Manager) *BusinessCreate {
-	ids := make([]int, len(m))
+// AddServices adds the "services" edges to the BusinessServices entity.
+func (bc *BusinessCreate) AddServices(b ...*BusinessServices) *BusinessCreate {
+	ids := make([]int, len(b))
+	for i := range b {
+		ids[i] = b[i].ID
+	}
+	return bc.AddServiceIDs(ids...)
+}
+
+// AddManageIDs adds the "manages" edge to the Manager entity by IDs.
+func (bc *BusinessCreate) AddManageIDs(ids ...string) *BusinessCreate {
+	bc.mutation.AddManageIDs(ids...)
+	return bc
+}
+
+// AddManages adds the "manages" edges to the Manager entity.
+func (bc *BusinessCreate) AddManages(m ...*Manager) *BusinessCreate {
+	ids := make([]string, len(m))
 	for i := range m {
 		ids[i] = m[i].ID
 	}
-	return bc.AddBusinessManagerIDs(ids...)
+	return bc.AddManageIDs(ids...)
+}
+
+// AddVerificationIDs adds the "verifications" edge to the Verification entity by IDs.
+func (bc *BusinessCreate) AddVerificationIDs(ids ...string) *BusinessCreate {
+	bc.mutation.AddVerificationIDs(ids...)
+	return bc
+}
+
+// AddVerifications adds the "verifications" edges to the Verification entity.
+func (bc *BusinessCreate) AddVerifications(v ...*Verification) *BusinessCreate {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return bc.AddVerificationIDs(ids...)
+}
+
+// AddRequestVerificationIDs adds the "request_verifications" edge to the RequestVerification entity by IDs.
+func (bc *BusinessCreate) AddRequestVerificationIDs(ids ...string) *BusinessCreate {
+	bc.mutation.AddRequestVerificationIDs(ids...)
+	return bc
+}
+
+// AddRequestVerifications adds the "request_verifications" edges to the RequestVerification entity.
+func (bc *BusinessCreate) AddRequestVerifications(r ...*RequestVerification) *BusinessCreate {
+	ids := make([]string, len(r))
+	for i := range r {
+		ids[i] = r[i].ID
+	}
+	return bc.AddRequestVerificationIDs(ids...)
+}
+
+// AddBusinessDocumentIDs adds the "business_documents" edge to the BusinessDocument entity by IDs.
+func (bc *BusinessCreate) AddBusinessDocumentIDs(ids ...int) *BusinessCreate {
+	bc.mutation.AddBusinessDocumentIDs(ids...)
+	return bc
+}
+
+// AddBusinessDocuments adds the "business_documents" edges to the BusinessDocument entity.
+func (bc *BusinessCreate) AddBusinessDocuments(b ...*BusinessDocument) *BusinessCreate {
+	ids := make([]int, len(b))
+	for i := range b {
+		ids[i] = b[i].ID
+	}
+	return bc.AddBusinessDocumentIDs(ids...)
 }
 
 // Mutation returns the BusinessMutation object of the builder.
@@ -193,9 +362,21 @@ func (bc *BusinessCreate) ExecX(ctx context.Context) {
 
 // defaults sets the default values of the builder before save.
 func (bc *BusinessCreate) defaults() {
+	if _, ok := bc.mutation.CreatedAt(); !ok {
+		v := business.DefaultCreatedAt()
+		bc.mutation.SetCreatedAt(v)
+	}
+	if _, ok := bc.mutation.UpdatedAt(); !ok {
+		v := business.DefaultUpdatedAt()
+		bc.mutation.SetUpdatedAt(v)
+	}
 	if _, ok := bc.mutation.Category(); !ok {
 		v := business.DefaultCategory
 		bc.mutation.SetCategory(v)
+	}
+	if _, ok := bc.mutation.Active(); !ok {
+		v := business.DefaultActive
+		bc.mutation.SetActive(v)
 	}
 	if _, ok := bc.mutation.Disabled(); !ok {
 		v := business.DefaultDisabled
@@ -209,14 +390,20 @@ func (bc *BusinessCreate) defaults() {
 		v := business.DefaultVerified
 		bc.mutation.SetVerified(v)
 	}
-	if _, ok := bc.mutation.CreatedAt(); !ok {
-		v := business.DefaultCreatedAt()
-		bc.mutation.SetCreatedAt(v)
+	if _, ok := bc.mutation.ID(); !ok {
+		v := business.DefaultID()
+		bc.mutation.SetID(v)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
 func (bc *BusinessCreate) check() error {
+	if _, ok := bc.mutation.CreatedAt(); !ok {
+		return &ValidationError{Name: "created_at", err: errors.New(`ent: missing required field "Business.created_at"`)}
+	}
+	if _, ok := bc.mutation.UpdatedAt(); !ok {
+		return &ValidationError{Name: "updated_at", err: errors.New(`ent: missing required field "Business.updated_at"`)}
+	}
 	if _, ok := bc.mutation.Category(); !ok {
 		return &ValidationError{Name: "category", err: errors.New(`ent: missing required field "Business.category"`)}
 	}
@@ -228,9 +415,6 @@ func (bc *BusinessCreate) check() error {
 			return &ValidationError{Name: "name", err: fmt.Errorf(`ent: validator failed for field "Business.name": %w`, err)}
 		}
 	}
-	if _, ok := bc.mutation.LogoURL(); !ok {
-		return &ValidationError{Name: "logo_url", err: errors.New(`ent: missing required field "Business.logo_url"`)}
-	}
 	if _, ok := bc.mutation.Email(); !ok {
 		return &ValidationError{Name: "email", err: errors.New(`ent: missing required field "Business.email"`)}
 	}
@@ -239,8 +423,13 @@ func (bc *BusinessCreate) check() error {
 			return &ValidationError{Name: "email", err: fmt.Errorf(`ent: validator failed for field "Business.email": %w`, err)}
 		}
 	}
-	if _, ok := bc.mutation.Website(); !ok {
-		return &ValidationError{Name: "website", err: errors.New(`ent: missing required field "Business.website"`)}
+	if v, ok := bc.mutation.Website(); ok {
+		if err := business.WebsiteValidator(v); err != nil {
+			return &ValidationError{Name: "website", err: fmt.Errorf(`ent: validator failed for field "Business.website": %w`, err)}
+		}
+	}
+	if _, ok := bc.mutation.Active(); !ok {
+		return &ValidationError{Name: "active", err: errors.New(`ent: missing required field "Business.active"`)}
 	}
 	if _, ok := bc.mutation.Disabled(); !ok {
 		return &ValidationError{Name: "disabled", err: errors.New(`ent: missing required field "Business.disabled"`)}
@@ -248,17 +437,8 @@ func (bc *BusinessCreate) check() error {
 	if _, ok := bc.mutation.DisabledAt(); !ok {
 		return &ValidationError{Name: "disabled_at", err: errors.New(`ent: missing required field "Business.disabled_at"`)}
 	}
-	if _, ok := bc.mutation.DisableReason(); !ok {
-		return &ValidationError{Name: "disable_reason", err: errors.New(`ent: missing required field "Business.disable_reason"`)}
-	}
 	if _, ok := bc.mutation.Verified(); !ok {
 		return &ValidationError{Name: "verified", err: errors.New(`ent: missing required field "Business.verified"`)}
-	}
-	if _, ok := bc.mutation.VerifiedAt(); !ok {
-		return &ValidationError{Name: "verified_at", err: errors.New(`ent: missing required field "Business.verified_at"`)}
-	}
-	if _, ok := bc.mutation.CreatedAt(); !ok {
-		return &ValidationError{Name: "created_at", err: errors.New(`ent: missing required field "Business.created_at"`)}
 	}
 	return nil
 }
@@ -274,8 +454,13 @@ func (bc *BusinessCreate) sqlSave(ctx context.Context) (*Business, error) {
 		}
 		return nil, err
 	}
-	id := _spec.ID.Value.(int64)
-	_node.ID = int(id)
+	if _spec.ID.Value != nil {
+		if id, ok := _spec.ID.Value.(string); ok {
+			_node.ID = id
+		} else {
+			return nil, fmt.Errorf("unexpected Business.ID type: %T", _spec.ID.Value)
+		}
+	}
 	bc.mutation.id = &_node.ID
 	bc.mutation.done = true
 	return _node, nil
@@ -284,8 +469,25 @@ func (bc *BusinessCreate) sqlSave(ctx context.Context) (*Business, error) {
 func (bc *BusinessCreate) createSpec() (*Business, *sqlgraph.CreateSpec) {
 	var (
 		_node = &Business{config: bc.config}
-		_spec = sqlgraph.NewCreateSpec(business.Table, sqlgraph.NewFieldSpec(business.FieldID, field.TypeInt))
+		_spec = sqlgraph.NewCreateSpec(business.Table, sqlgraph.NewFieldSpec(business.FieldID, field.TypeString))
 	)
+	_spec.OnConflict = bc.conflict
+	if id, ok := bc.mutation.ID(); ok {
+		_node.ID = id
+		_spec.ID.Value = id
+	}
+	if value, ok := bc.mutation.CreatedAt(); ok {
+		_spec.SetField(business.FieldCreatedAt, field.TypeTime, value)
+		_node.CreatedAt = value
+	}
+	if value, ok := bc.mutation.UpdatedAt(); ok {
+		_spec.SetField(business.FieldUpdatedAt, field.TypeTime, value)
+		_node.UpdatedAt = value
+	}
+	if value, ok := bc.mutation.DeletedAt(); ok {
+		_spec.SetField(business.FieldDeletedAt, field.TypeTime, value)
+		_node.DeletedAt = &value
+	}
 	if value, ok := bc.mutation.Category(); ok {
 		_spec.SetField(business.FieldCategory, field.TypeString, value)
 		_node.Category = value
@@ -294,9 +496,13 @@ func (bc *BusinessCreate) createSpec() (*Business, *sqlgraph.CreateSpec) {
 		_spec.SetField(business.FieldName, field.TypeString, value)
 		_node.Name = value
 	}
-	if value, ok := bc.mutation.LogoURL(); ok {
-		_spec.SetField(business.FieldLogoURL, field.TypeString, value)
-		_node.LogoURL = &value
+	if value, ok := bc.mutation.About(); ok {
+		_spec.SetField(business.FieldAbout, field.TypeString, value)
+		_node.About = value
+	}
+	if value, ok := bc.mutation.Logo(); ok {
+		_spec.SetField(business.FieldLogo, field.TypeString, value)
+		_node.Logo = value
 	}
 	if value, ok := bc.mutation.Email(); ok {
 		_spec.SetField(business.FieldEmail, field.TypeString, value)
@@ -304,7 +510,11 @@ func (bc *BusinessCreate) createSpec() (*Business, *sqlgraph.CreateSpec) {
 	}
 	if value, ok := bc.mutation.Website(); ok {
 		_spec.SetField(business.FieldWebsite, field.TypeString, value)
-		_node.Website = &value
+		_node.Website = value
+	}
+	if value, ok := bc.mutation.Active(); ok {
+		_spec.SetField(business.FieldActive, field.TypeBool, value)
+		_node.Active = value
 	}
 	if value, ok := bc.mutation.Disabled(); ok {
 		_spec.SetField(business.FieldDisabled, field.TypeBool, value)
@@ -316,7 +526,7 @@ func (bc *BusinessCreate) createSpec() (*Business, *sqlgraph.CreateSpec) {
 	}
 	if value, ok := bc.mutation.DisableReason(); ok {
 		_spec.SetField(business.FieldDisableReason, field.TypeString, value)
-		_node.DisableReason = &value
+		_node.DisableReason = value
 	}
 	if value, ok := bc.mutation.Verified(); ok {
 		_spec.SetField(business.FieldVerified, field.TypeBool, value)
@@ -324,21 +534,17 @@ func (bc *BusinessCreate) createSpec() (*Business, *sqlgraph.CreateSpec) {
 	}
 	if value, ok := bc.mutation.VerifiedAt(); ok {
 		_spec.SetField(business.FieldVerifiedAt, field.TypeTime, value)
-		_node.VerifiedAt = &value
+		_node.VerifiedAt = value
 	}
-	if value, ok := bc.mutation.CreatedAt(); ok {
-		_spec.SetField(business.FieldCreatedAt, field.TypeTime, value)
-		_node.CreatedAt = value
-	}
-	if nodes := bc.mutation.BusinessSocialIDs(); len(nodes) > 0 {
+	if nodes := bc.mutation.SocialsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   business.BusinessSocialTable,
-			Columns: []string{business.BusinessSocialColumn},
+			Table:   business.SocialsTable,
+			Columns: []string{business.SocialsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(social.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(social.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {
@@ -346,15 +552,79 @@ func (bc *BusinessCreate) createSpec() (*Business, *sqlgraph.CreateSpec) {
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := bc.mutation.BusinessManagerIDs(); len(nodes) > 0 {
+	if nodes := bc.mutation.ServicesIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   business.BusinessManagerTable,
-			Columns: []string{business.BusinessManagerColumn},
+			Table:   business.ServicesTable,
+			Columns: []string{business.ServicesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(manager.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(businessservices.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := bc.mutation.ManagesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   business.ManagesTable,
+			Columns: []string{business.ManagesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(manager.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := bc.mutation.VerificationsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   business.VerificationsTable,
+			Columns: business.VerificationsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(verification.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := bc.mutation.RequestVerificationsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   business.RequestVerificationsTable,
+			Columns: business.RequestVerificationsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(requestverification.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := bc.mutation.BusinessDocumentsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   business.BusinessDocumentsTable,
+			Columns: []string{business.BusinessDocumentsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(businessdocument.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -365,11 +635,592 @@ func (bc *BusinessCreate) createSpec() (*Business, *sqlgraph.CreateSpec) {
 	return _node, _spec
 }
 
+// OnConflict allows configuring the `ON CONFLICT` / `ON DUPLICATE KEY` clause
+// of the `INSERT` statement. For example:
+//
+//	client.Business.Create().
+//		SetCreatedAt(v).
+//		OnConflict(
+//			// Update the row with the new values
+//			// the was proposed for insertion.
+//			sql.ResolveWithNewValues(),
+//		).
+//		// Override some of the fields with custom
+//		// update values.
+//		Update(func(u *ent.BusinessUpsert) {
+//			SetCreatedAt(v+v).
+//		}).
+//		Exec(ctx)
+func (bc *BusinessCreate) OnConflict(opts ...sql.ConflictOption) *BusinessUpsertOne {
+	bc.conflict = opts
+	return &BusinessUpsertOne{
+		create: bc,
+	}
+}
+
+// OnConflictColumns calls `OnConflict` and configures the columns
+// as conflict target. Using this option is equivalent to using:
+//
+//	client.Business.Create().
+//		OnConflict(sql.ConflictColumns(columns...)).
+//		Exec(ctx)
+func (bc *BusinessCreate) OnConflictColumns(columns ...string) *BusinessUpsertOne {
+	bc.conflict = append(bc.conflict, sql.ConflictColumns(columns...))
+	return &BusinessUpsertOne{
+		create: bc,
+	}
+}
+
+type (
+	// BusinessUpsertOne is the builder for "upsert"-ing
+	//  one Business node.
+	BusinessUpsertOne struct {
+		create *BusinessCreate
+	}
+
+	// BusinessUpsert is the "OnConflict" setter.
+	BusinessUpsert struct {
+		*sql.UpdateSet
+	}
+)
+
+// SetUpdatedAt sets the "updated_at" field.
+func (u *BusinessUpsert) SetUpdatedAt(v time.Time) *BusinessUpsert {
+	u.Set(business.FieldUpdatedAt, v)
+	return u
+}
+
+// UpdateUpdatedAt sets the "updated_at" field to the value that was provided on create.
+func (u *BusinessUpsert) UpdateUpdatedAt() *BusinessUpsert {
+	u.SetExcluded(business.FieldUpdatedAt)
+	return u
+}
+
+// SetDeletedAt sets the "deleted_at" field.
+func (u *BusinessUpsert) SetDeletedAt(v time.Time) *BusinessUpsert {
+	u.Set(business.FieldDeletedAt, v)
+	return u
+}
+
+// UpdateDeletedAt sets the "deleted_at" field to the value that was provided on create.
+func (u *BusinessUpsert) UpdateDeletedAt() *BusinessUpsert {
+	u.SetExcluded(business.FieldDeletedAt)
+	return u
+}
+
+// ClearDeletedAt clears the value of the "deleted_at" field.
+func (u *BusinessUpsert) ClearDeletedAt() *BusinessUpsert {
+	u.SetNull(business.FieldDeletedAt)
+	return u
+}
+
+// SetCategory sets the "category" field.
+func (u *BusinessUpsert) SetCategory(v string) *BusinessUpsert {
+	u.Set(business.FieldCategory, v)
+	return u
+}
+
+// UpdateCategory sets the "category" field to the value that was provided on create.
+func (u *BusinessUpsert) UpdateCategory() *BusinessUpsert {
+	u.SetExcluded(business.FieldCategory)
+	return u
+}
+
+// SetName sets the "name" field.
+func (u *BusinessUpsert) SetName(v string) *BusinessUpsert {
+	u.Set(business.FieldName, v)
+	return u
+}
+
+// UpdateName sets the "name" field to the value that was provided on create.
+func (u *BusinessUpsert) UpdateName() *BusinessUpsert {
+	u.SetExcluded(business.FieldName)
+	return u
+}
+
+// SetAbout sets the "about" field.
+func (u *BusinessUpsert) SetAbout(v string) *BusinessUpsert {
+	u.Set(business.FieldAbout, v)
+	return u
+}
+
+// UpdateAbout sets the "about" field to the value that was provided on create.
+func (u *BusinessUpsert) UpdateAbout() *BusinessUpsert {
+	u.SetExcluded(business.FieldAbout)
+	return u
+}
+
+// ClearAbout clears the value of the "about" field.
+func (u *BusinessUpsert) ClearAbout() *BusinessUpsert {
+	u.SetNull(business.FieldAbout)
+	return u
+}
+
+// SetLogo sets the "logo" field.
+func (u *BusinessUpsert) SetLogo(v string) *BusinessUpsert {
+	u.Set(business.FieldLogo, v)
+	return u
+}
+
+// UpdateLogo sets the "logo" field to the value that was provided on create.
+func (u *BusinessUpsert) UpdateLogo() *BusinessUpsert {
+	u.SetExcluded(business.FieldLogo)
+	return u
+}
+
+// ClearLogo clears the value of the "logo" field.
+func (u *BusinessUpsert) ClearLogo() *BusinessUpsert {
+	u.SetNull(business.FieldLogo)
+	return u
+}
+
+// SetEmail sets the "email" field.
+func (u *BusinessUpsert) SetEmail(v string) *BusinessUpsert {
+	u.Set(business.FieldEmail, v)
+	return u
+}
+
+// UpdateEmail sets the "email" field to the value that was provided on create.
+func (u *BusinessUpsert) UpdateEmail() *BusinessUpsert {
+	u.SetExcluded(business.FieldEmail)
+	return u
+}
+
+// SetWebsite sets the "website" field.
+func (u *BusinessUpsert) SetWebsite(v string) *BusinessUpsert {
+	u.Set(business.FieldWebsite, v)
+	return u
+}
+
+// UpdateWebsite sets the "website" field to the value that was provided on create.
+func (u *BusinessUpsert) UpdateWebsite() *BusinessUpsert {
+	u.SetExcluded(business.FieldWebsite)
+	return u
+}
+
+// ClearWebsite clears the value of the "website" field.
+func (u *BusinessUpsert) ClearWebsite() *BusinessUpsert {
+	u.SetNull(business.FieldWebsite)
+	return u
+}
+
+// SetActive sets the "active" field.
+func (u *BusinessUpsert) SetActive(v bool) *BusinessUpsert {
+	u.Set(business.FieldActive, v)
+	return u
+}
+
+// UpdateActive sets the "active" field to the value that was provided on create.
+func (u *BusinessUpsert) UpdateActive() *BusinessUpsert {
+	u.SetExcluded(business.FieldActive)
+	return u
+}
+
+// SetDisabled sets the "disabled" field.
+func (u *BusinessUpsert) SetDisabled(v bool) *BusinessUpsert {
+	u.Set(business.FieldDisabled, v)
+	return u
+}
+
+// UpdateDisabled sets the "disabled" field to the value that was provided on create.
+func (u *BusinessUpsert) UpdateDisabled() *BusinessUpsert {
+	u.SetExcluded(business.FieldDisabled)
+	return u
+}
+
+// SetDisabledAt sets the "disabled_at" field.
+func (u *BusinessUpsert) SetDisabledAt(v time.Time) *BusinessUpsert {
+	u.Set(business.FieldDisabledAt, v)
+	return u
+}
+
+// UpdateDisabledAt sets the "disabled_at" field to the value that was provided on create.
+func (u *BusinessUpsert) UpdateDisabledAt() *BusinessUpsert {
+	u.SetExcluded(business.FieldDisabledAt)
+	return u
+}
+
+// SetDisableReason sets the "disable_reason" field.
+func (u *BusinessUpsert) SetDisableReason(v string) *BusinessUpsert {
+	u.Set(business.FieldDisableReason, v)
+	return u
+}
+
+// UpdateDisableReason sets the "disable_reason" field to the value that was provided on create.
+func (u *BusinessUpsert) UpdateDisableReason() *BusinessUpsert {
+	u.SetExcluded(business.FieldDisableReason)
+	return u
+}
+
+// ClearDisableReason clears the value of the "disable_reason" field.
+func (u *BusinessUpsert) ClearDisableReason() *BusinessUpsert {
+	u.SetNull(business.FieldDisableReason)
+	return u
+}
+
+// SetVerified sets the "verified" field.
+func (u *BusinessUpsert) SetVerified(v bool) *BusinessUpsert {
+	u.Set(business.FieldVerified, v)
+	return u
+}
+
+// UpdateVerified sets the "verified" field to the value that was provided on create.
+func (u *BusinessUpsert) UpdateVerified() *BusinessUpsert {
+	u.SetExcluded(business.FieldVerified)
+	return u
+}
+
+// SetVerifiedAt sets the "verified_at" field.
+func (u *BusinessUpsert) SetVerifiedAt(v time.Time) *BusinessUpsert {
+	u.Set(business.FieldVerifiedAt, v)
+	return u
+}
+
+// UpdateVerifiedAt sets the "verified_at" field to the value that was provided on create.
+func (u *BusinessUpsert) UpdateVerifiedAt() *BusinessUpsert {
+	u.SetExcluded(business.FieldVerifiedAt)
+	return u
+}
+
+// ClearVerifiedAt clears the value of the "verified_at" field.
+func (u *BusinessUpsert) ClearVerifiedAt() *BusinessUpsert {
+	u.SetNull(business.FieldVerifiedAt)
+	return u
+}
+
+// UpdateNewValues updates the mutable fields using the new values that were set on create except the ID field.
+// Using this option is equivalent to using:
+//
+//	client.Business.Create().
+//		OnConflict(
+//			sql.ResolveWithNewValues(),
+//			sql.ResolveWith(func(u *sql.UpdateSet) {
+//				u.SetIgnore(business.FieldID)
+//			}),
+//		).
+//		Exec(ctx)
+func (u *BusinessUpsertOne) UpdateNewValues() *BusinessUpsertOne {
+	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
+	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(s *sql.UpdateSet) {
+		if _, exists := u.create.mutation.ID(); exists {
+			s.SetIgnore(business.FieldID)
+		}
+		if _, exists := u.create.mutation.CreatedAt(); exists {
+			s.SetIgnore(business.FieldCreatedAt)
+		}
+	}))
+	return u
+}
+
+// Ignore sets each column to itself in case of conflict.
+// Using this option is equivalent to using:
+//
+//	client.Business.Create().
+//	    OnConflict(sql.ResolveWithIgnore()).
+//	    Exec(ctx)
+func (u *BusinessUpsertOne) Ignore() *BusinessUpsertOne {
+	u.create.conflict = append(u.create.conflict, sql.ResolveWithIgnore())
+	return u
+}
+
+// DoNothing configures the conflict_action to `DO NOTHING`.
+// Supported only by SQLite and PostgreSQL.
+func (u *BusinessUpsertOne) DoNothing() *BusinessUpsertOne {
+	u.create.conflict = append(u.create.conflict, sql.DoNothing())
+	return u
+}
+
+// Update allows overriding fields `UPDATE` values. See the BusinessCreate.OnConflict
+// documentation for more info.
+func (u *BusinessUpsertOne) Update(set func(*BusinessUpsert)) *BusinessUpsertOne {
+	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(update *sql.UpdateSet) {
+		set(&BusinessUpsert{UpdateSet: update})
+	}))
+	return u
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (u *BusinessUpsertOne) SetUpdatedAt(v time.Time) *BusinessUpsertOne {
+	return u.Update(func(s *BusinessUpsert) {
+		s.SetUpdatedAt(v)
+	})
+}
+
+// UpdateUpdatedAt sets the "updated_at" field to the value that was provided on create.
+func (u *BusinessUpsertOne) UpdateUpdatedAt() *BusinessUpsertOne {
+	return u.Update(func(s *BusinessUpsert) {
+		s.UpdateUpdatedAt()
+	})
+}
+
+// SetDeletedAt sets the "deleted_at" field.
+func (u *BusinessUpsertOne) SetDeletedAt(v time.Time) *BusinessUpsertOne {
+	return u.Update(func(s *BusinessUpsert) {
+		s.SetDeletedAt(v)
+	})
+}
+
+// UpdateDeletedAt sets the "deleted_at" field to the value that was provided on create.
+func (u *BusinessUpsertOne) UpdateDeletedAt() *BusinessUpsertOne {
+	return u.Update(func(s *BusinessUpsert) {
+		s.UpdateDeletedAt()
+	})
+}
+
+// ClearDeletedAt clears the value of the "deleted_at" field.
+func (u *BusinessUpsertOne) ClearDeletedAt() *BusinessUpsertOne {
+	return u.Update(func(s *BusinessUpsert) {
+		s.ClearDeletedAt()
+	})
+}
+
+// SetCategory sets the "category" field.
+func (u *BusinessUpsertOne) SetCategory(v string) *BusinessUpsertOne {
+	return u.Update(func(s *BusinessUpsert) {
+		s.SetCategory(v)
+	})
+}
+
+// UpdateCategory sets the "category" field to the value that was provided on create.
+func (u *BusinessUpsertOne) UpdateCategory() *BusinessUpsertOne {
+	return u.Update(func(s *BusinessUpsert) {
+		s.UpdateCategory()
+	})
+}
+
+// SetName sets the "name" field.
+func (u *BusinessUpsertOne) SetName(v string) *BusinessUpsertOne {
+	return u.Update(func(s *BusinessUpsert) {
+		s.SetName(v)
+	})
+}
+
+// UpdateName sets the "name" field to the value that was provided on create.
+func (u *BusinessUpsertOne) UpdateName() *BusinessUpsertOne {
+	return u.Update(func(s *BusinessUpsert) {
+		s.UpdateName()
+	})
+}
+
+// SetAbout sets the "about" field.
+func (u *BusinessUpsertOne) SetAbout(v string) *BusinessUpsertOne {
+	return u.Update(func(s *BusinessUpsert) {
+		s.SetAbout(v)
+	})
+}
+
+// UpdateAbout sets the "about" field to the value that was provided on create.
+func (u *BusinessUpsertOne) UpdateAbout() *BusinessUpsertOne {
+	return u.Update(func(s *BusinessUpsert) {
+		s.UpdateAbout()
+	})
+}
+
+// ClearAbout clears the value of the "about" field.
+func (u *BusinessUpsertOne) ClearAbout() *BusinessUpsertOne {
+	return u.Update(func(s *BusinessUpsert) {
+		s.ClearAbout()
+	})
+}
+
+// SetLogo sets the "logo" field.
+func (u *BusinessUpsertOne) SetLogo(v string) *BusinessUpsertOne {
+	return u.Update(func(s *BusinessUpsert) {
+		s.SetLogo(v)
+	})
+}
+
+// UpdateLogo sets the "logo" field to the value that was provided on create.
+func (u *BusinessUpsertOne) UpdateLogo() *BusinessUpsertOne {
+	return u.Update(func(s *BusinessUpsert) {
+		s.UpdateLogo()
+	})
+}
+
+// ClearLogo clears the value of the "logo" field.
+func (u *BusinessUpsertOne) ClearLogo() *BusinessUpsertOne {
+	return u.Update(func(s *BusinessUpsert) {
+		s.ClearLogo()
+	})
+}
+
+// SetEmail sets the "email" field.
+func (u *BusinessUpsertOne) SetEmail(v string) *BusinessUpsertOne {
+	return u.Update(func(s *BusinessUpsert) {
+		s.SetEmail(v)
+	})
+}
+
+// UpdateEmail sets the "email" field to the value that was provided on create.
+func (u *BusinessUpsertOne) UpdateEmail() *BusinessUpsertOne {
+	return u.Update(func(s *BusinessUpsert) {
+		s.UpdateEmail()
+	})
+}
+
+// SetWebsite sets the "website" field.
+func (u *BusinessUpsertOne) SetWebsite(v string) *BusinessUpsertOne {
+	return u.Update(func(s *BusinessUpsert) {
+		s.SetWebsite(v)
+	})
+}
+
+// UpdateWebsite sets the "website" field to the value that was provided on create.
+func (u *BusinessUpsertOne) UpdateWebsite() *BusinessUpsertOne {
+	return u.Update(func(s *BusinessUpsert) {
+		s.UpdateWebsite()
+	})
+}
+
+// ClearWebsite clears the value of the "website" field.
+func (u *BusinessUpsertOne) ClearWebsite() *BusinessUpsertOne {
+	return u.Update(func(s *BusinessUpsert) {
+		s.ClearWebsite()
+	})
+}
+
+// SetActive sets the "active" field.
+func (u *BusinessUpsertOne) SetActive(v bool) *BusinessUpsertOne {
+	return u.Update(func(s *BusinessUpsert) {
+		s.SetActive(v)
+	})
+}
+
+// UpdateActive sets the "active" field to the value that was provided on create.
+func (u *BusinessUpsertOne) UpdateActive() *BusinessUpsertOne {
+	return u.Update(func(s *BusinessUpsert) {
+		s.UpdateActive()
+	})
+}
+
+// SetDisabled sets the "disabled" field.
+func (u *BusinessUpsertOne) SetDisabled(v bool) *BusinessUpsertOne {
+	return u.Update(func(s *BusinessUpsert) {
+		s.SetDisabled(v)
+	})
+}
+
+// UpdateDisabled sets the "disabled" field to the value that was provided on create.
+func (u *BusinessUpsertOne) UpdateDisabled() *BusinessUpsertOne {
+	return u.Update(func(s *BusinessUpsert) {
+		s.UpdateDisabled()
+	})
+}
+
+// SetDisabledAt sets the "disabled_at" field.
+func (u *BusinessUpsertOne) SetDisabledAt(v time.Time) *BusinessUpsertOne {
+	return u.Update(func(s *BusinessUpsert) {
+		s.SetDisabledAt(v)
+	})
+}
+
+// UpdateDisabledAt sets the "disabled_at" field to the value that was provided on create.
+func (u *BusinessUpsertOne) UpdateDisabledAt() *BusinessUpsertOne {
+	return u.Update(func(s *BusinessUpsert) {
+		s.UpdateDisabledAt()
+	})
+}
+
+// SetDisableReason sets the "disable_reason" field.
+func (u *BusinessUpsertOne) SetDisableReason(v string) *BusinessUpsertOne {
+	return u.Update(func(s *BusinessUpsert) {
+		s.SetDisableReason(v)
+	})
+}
+
+// UpdateDisableReason sets the "disable_reason" field to the value that was provided on create.
+func (u *BusinessUpsertOne) UpdateDisableReason() *BusinessUpsertOne {
+	return u.Update(func(s *BusinessUpsert) {
+		s.UpdateDisableReason()
+	})
+}
+
+// ClearDisableReason clears the value of the "disable_reason" field.
+func (u *BusinessUpsertOne) ClearDisableReason() *BusinessUpsertOne {
+	return u.Update(func(s *BusinessUpsert) {
+		s.ClearDisableReason()
+	})
+}
+
+// SetVerified sets the "verified" field.
+func (u *BusinessUpsertOne) SetVerified(v bool) *BusinessUpsertOne {
+	return u.Update(func(s *BusinessUpsert) {
+		s.SetVerified(v)
+	})
+}
+
+// UpdateVerified sets the "verified" field to the value that was provided on create.
+func (u *BusinessUpsertOne) UpdateVerified() *BusinessUpsertOne {
+	return u.Update(func(s *BusinessUpsert) {
+		s.UpdateVerified()
+	})
+}
+
+// SetVerifiedAt sets the "verified_at" field.
+func (u *BusinessUpsertOne) SetVerifiedAt(v time.Time) *BusinessUpsertOne {
+	return u.Update(func(s *BusinessUpsert) {
+		s.SetVerifiedAt(v)
+	})
+}
+
+// UpdateVerifiedAt sets the "verified_at" field to the value that was provided on create.
+func (u *BusinessUpsertOne) UpdateVerifiedAt() *BusinessUpsertOne {
+	return u.Update(func(s *BusinessUpsert) {
+		s.UpdateVerifiedAt()
+	})
+}
+
+// ClearVerifiedAt clears the value of the "verified_at" field.
+func (u *BusinessUpsertOne) ClearVerifiedAt() *BusinessUpsertOne {
+	return u.Update(func(s *BusinessUpsert) {
+		s.ClearVerifiedAt()
+	})
+}
+
+// Exec executes the query.
+func (u *BusinessUpsertOne) Exec(ctx context.Context) error {
+	if len(u.create.conflict) == 0 {
+		return errors.New("ent: missing options for BusinessCreate.OnConflict")
+	}
+	return u.create.Exec(ctx)
+}
+
+// ExecX is like Exec, but panics if an error occurs.
+func (u *BusinessUpsertOne) ExecX(ctx context.Context) {
+	if err := u.create.Exec(ctx); err != nil {
+		panic(err)
+	}
+}
+
+// Exec executes the UPSERT query and returns the inserted/updated ID.
+func (u *BusinessUpsertOne) ID(ctx context.Context) (id string, err error) {
+	if u.create.driver.Dialect() == dialect.MySQL {
+		// In case of "ON CONFLICT", there is no way to get back non-numeric ID
+		// fields from the database since MySQL does not support the RETURNING clause.
+		return id, errors.New("ent: BusinessUpsertOne.ID is not supported by MySQL driver. Use BusinessUpsertOne.Exec instead")
+	}
+	node, err := u.create.Save(ctx)
+	if err != nil {
+		return id, err
+	}
+	return node.ID, nil
+}
+
+// IDX is like ID, but panics if an error occurs.
+func (u *BusinessUpsertOne) IDX(ctx context.Context) string {
+	id, err := u.ID(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return id
+}
+
 // BusinessCreateBulk is the builder for creating many Business entities in bulk.
 type BusinessCreateBulk struct {
 	config
 	err      error
 	builders []*BusinessCreate
+	conflict []sql.ConflictOption
 }
 
 // Save creates the Business entities in the database.
@@ -399,6 +1250,7 @@ func (bcb *BusinessCreateBulk) Save(ctx context.Context) ([]*Business, error) {
 					_, err = mutators[i+1].Mutate(root, bcb.builders[i+1].mutation)
 				} else {
 					spec := &sqlgraph.BatchCreateSpec{Nodes: specs}
+					spec.OnConflict = bcb.conflict
 					// Invoke the actual operation on the latest mutation in the chain.
 					if err = sqlgraph.BatchCreate(ctx, bcb.driver, spec); err != nil {
 						if sqlgraph.IsConstraintError(err) {
@@ -410,10 +1262,6 @@ func (bcb *BusinessCreateBulk) Save(ctx context.Context) ([]*Business, error) {
 					return nil, err
 				}
 				mutation.id = &nodes[i].ID
-				if specs[i].ID.Value != nil {
-					id := specs[i].ID.Value.(int64)
-					nodes[i].ID = int(id)
-				}
 				mutation.done = true
 				return nodes[i], nil
 			})
@@ -449,6 +1297,361 @@ func (bcb *BusinessCreateBulk) Exec(ctx context.Context) error {
 // ExecX is like Exec, but panics if an error occurs.
 func (bcb *BusinessCreateBulk) ExecX(ctx context.Context) {
 	if err := bcb.Exec(ctx); err != nil {
+		panic(err)
+	}
+}
+
+// OnConflict allows configuring the `ON CONFLICT` / `ON DUPLICATE KEY` clause
+// of the `INSERT` statement. For example:
+//
+//	client.Business.CreateBulk(builders...).
+//		OnConflict(
+//			// Update the row with the new values
+//			// the was proposed for insertion.
+//			sql.ResolveWithNewValues(),
+//		).
+//		// Override some of the fields with custom
+//		// update values.
+//		Update(func(u *ent.BusinessUpsert) {
+//			SetCreatedAt(v+v).
+//		}).
+//		Exec(ctx)
+func (bcb *BusinessCreateBulk) OnConflict(opts ...sql.ConflictOption) *BusinessUpsertBulk {
+	bcb.conflict = opts
+	return &BusinessUpsertBulk{
+		create: bcb,
+	}
+}
+
+// OnConflictColumns calls `OnConflict` and configures the columns
+// as conflict target. Using this option is equivalent to using:
+//
+//	client.Business.Create().
+//		OnConflict(sql.ConflictColumns(columns...)).
+//		Exec(ctx)
+func (bcb *BusinessCreateBulk) OnConflictColumns(columns ...string) *BusinessUpsertBulk {
+	bcb.conflict = append(bcb.conflict, sql.ConflictColumns(columns...))
+	return &BusinessUpsertBulk{
+		create: bcb,
+	}
+}
+
+// BusinessUpsertBulk is the builder for "upsert"-ing
+// a bulk of Business nodes.
+type BusinessUpsertBulk struct {
+	create *BusinessCreateBulk
+}
+
+// UpdateNewValues updates the mutable fields using the new values that
+// were set on create. Using this option is equivalent to using:
+//
+//	client.Business.Create().
+//		OnConflict(
+//			sql.ResolveWithNewValues(),
+//			sql.ResolveWith(func(u *sql.UpdateSet) {
+//				u.SetIgnore(business.FieldID)
+//			}),
+//		).
+//		Exec(ctx)
+func (u *BusinessUpsertBulk) UpdateNewValues() *BusinessUpsertBulk {
+	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
+	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(s *sql.UpdateSet) {
+		for _, b := range u.create.builders {
+			if _, exists := b.mutation.ID(); exists {
+				s.SetIgnore(business.FieldID)
+			}
+			if _, exists := b.mutation.CreatedAt(); exists {
+				s.SetIgnore(business.FieldCreatedAt)
+			}
+		}
+	}))
+	return u
+}
+
+// Ignore sets each column to itself in case of conflict.
+// Using this option is equivalent to using:
+//
+//	client.Business.Create().
+//		OnConflict(sql.ResolveWithIgnore()).
+//		Exec(ctx)
+func (u *BusinessUpsertBulk) Ignore() *BusinessUpsertBulk {
+	u.create.conflict = append(u.create.conflict, sql.ResolveWithIgnore())
+	return u
+}
+
+// DoNothing configures the conflict_action to `DO NOTHING`.
+// Supported only by SQLite and PostgreSQL.
+func (u *BusinessUpsertBulk) DoNothing() *BusinessUpsertBulk {
+	u.create.conflict = append(u.create.conflict, sql.DoNothing())
+	return u
+}
+
+// Update allows overriding fields `UPDATE` values. See the BusinessCreateBulk.OnConflict
+// documentation for more info.
+func (u *BusinessUpsertBulk) Update(set func(*BusinessUpsert)) *BusinessUpsertBulk {
+	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(update *sql.UpdateSet) {
+		set(&BusinessUpsert{UpdateSet: update})
+	}))
+	return u
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (u *BusinessUpsertBulk) SetUpdatedAt(v time.Time) *BusinessUpsertBulk {
+	return u.Update(func(s *BusinessUpsert) {
+		s.SetUpdatedAt(v)
+	})
+}
+
+// UpdateUpdatedAt sets the "updated_at" field to the value that was provided on create.
+func (u *BusinessUpsertBulk) UpdateUpdatedAt() *BusinessUpsertBulk {
+	return u.Update(func(s *BusinessUpsert) {
+		s.UpdateUpdatedAt()
+	})
+}
+
+// SetDeletedAt sets the "deleted_at" field.
+func (u *BusinessUpsertBulk) SetDeletedAt(v time.Time) *BusinessUpsertBulk {
+	return u.Update(func(s *BusinessUpsert) {
+		s.SetDeletedAt(v)
+	})
+}
+
+// UpdateDeletedAt sets the "deleted_at" field to the value that was provided on create.
+func (u *BusinessUpsertBulk) UpdateDeletedAt() *BusinessUpsertBulk {
+	return u.Update(func(s *BusinessUpsert) {
+		s.UpdateDeletedAt()
+	})
+}
+
+// ClearDeletedAt clears the value of the "deleted_at" field.
+func (u *BusinessUpsertBulk) ClearDeletedAt() *BusinessUpsertBulk {
+	return u.Update(func(s *BusinessUpsert) {
+		s.ClearDeletedAt()
+	})
+}
+
+// SetCategory sets the "category" field.
+func (u *BusinessUpsertBulk) SetCategory(v string) *BusinessUpsertBulk {
+	return u.Update(func(s *BusinessUpsert) {
+		s.SetCategory(v)
+	})
+}
+
+// UpdateCategory sets the "category" field to the value that was provided on create.
+func (u *BusinessUpsertBulk) UpdateCategory() *BusinessUpsertBulk {
+	return u.Update(func(s *BusinessUpsert) {
+		s.UpdateCategory()
+	})
+}
+
+// SetName sets the "name" field.
+func (u *BusinessUpsertBulk) SetName(v string) *BusinessUpsertBulk {
+	return u.Update(func(s *BusinessUpsert) {
+		s.SetName(v)
+	})
+}
+
+// UpdateName sets the "name" field to the value that was provided on create.
+func (u *BusinessUpsertBulk) UpdateName() *BusinessUpsertBulk {
+	return u.Update(func(s *BusinessUpsert) {
+		s.UpdateName()
+	})
+}
+
+// SetAbout sets the "about" field.
+func (u *BusinessUpsertBulk) SetAbout(v string) *BusinessUpsertBulk {
+	return u.Update(func(s *BusinessUpsert) {
+		s.SetAbout(v)
+	})
+}
+
+// UpdateAbout sets the "about" field to the value that was provided on create.
+func (u *BusinessUpsertBulk) UpdateAbout() *BusinessUpsertBulk {
+	return u.Update(func(s *BusinessUpsert) {
+		s.UpdateAbout()
+	})
+}
+
+// ClearAbout clears the value of the "about" field.
+func (u *BusinessUpsertBulk) ClearAbout() *BusinessUpsertBulk {
+	return u.Update(func(s *BusinessUpsert) {
+		s.ClearAbout()
+	})
+}
+
+// SetLogo sets the "logo" field.
+func (u *BusinessUpsertBulk) SetLogo(v string) *BusinessUpsertBulk {
+	return u.Update(func(s *BusinessUpsert) {
+		s.SetLogo(v)
+	})
+}
+
+// UpdateLogo sets the "logo" field to the value that was provided on create.
+func (u *BusinessUpsertBulk) UpdateLogo() *BusinessUpsertBulk {
+	return u.Update(func(s *BusinessUpsert) {
+		s.UpdateLogo()
+	})
+}
+
+// ClearLogo clears the value of the "logo" field.
+func (u *BusinessUpsertBulk) ClearLogo() *BusinessUpsertBulk {
+	return u.Update(func(s *BusinessUpsert) {
+		s.ClearLogo()
+	})
+}
+
+// SetEmail sets the "email" field.
+func (u *BusinessUpsertBulk) SetEmail(v string) *BusinessUpsertBulk {
+	return u.Update(func(s *BusinessUpsert) {
+		s.SetEmail(v)
+	})
+}
+
+// UpdateEmail sets the "email" field to the value that was provided on create.
+func (u *BusinessUpsertBulk) UpdateEmail() *BusinessUpsertBulk {
+	return u.Update(func(s *BusinessUpsert) {
+		s.UpdateEmail()
+	})
+}
+
+// SetWebsite sets the "website" field.
+func (u *BusinessUpsertBulk) SetWebsite(v string) *BusinessUpsertBulk {
+	return u.Update(func(s *BusinessUpsert) {
+		s.SetWebsite(v)
+	})
+}
+
+// UpdateWebsite sets the "website" field to the value that was provided on create.
+func (u *BusinessUpsertBulk) UpdateWebsite() *BusinessUpsertBulk {
+	return u.Update(func(s *BusinessUpsert) {
+		s.UpdateWebsite()
+	})
+}
+
+// ClearWebsite clears the value of the "website" field.
+func (u *BusinessUpsertBulk) ClearWebsite() *BusinessUpsertBulk {
+	return u.Update(func(s *BusinessUpsert) {
+		s.ClearWebsite()
+	})
+}
+
+// SetActive sets the "active" field.
+func (u *BusinessUpsertBulk) SetActive(v bool) *BusinessUpsertBulk {
+	return u.Update(func(s *BusinessUpsert) {
+		s.SetActive(v)
+	})
+}
+
+// UpdateActive sets the "active" field to the value that was provided on create.
+func (u *BusinessUpsertBulk) UpdateActive() *BusinessUpsertBulk {
+	return u.Update(func(s *BusinessUpsert) {
+		s.UpdateActive()
+	})
+}
+
+// SetDisabled sets the "disabled" field.
+func (u *BusinessUpsertBulk) SetDisabled(v bool) *BusinessUpsertBulk {
+	return u.Update(func(s *BusinessUpsert) {
+		s.SetDisabled(v)
+	})
+}
+
+// UpdateDisabled sets the "disabled" field to the value that was provided on create.
+func (u *BusinessUpsertBulk) UpdateDisabled() *BusinessUpsertBulk {
+	return u.Update(func(s *BusinessUpsert) {
+		s.UpdateDisabled()
+	})
+}
+
+// SetDisabledAt sets the "disabled_at" field.
+func (u *BusinessUpsertBulk) SetDisabledAt(v time.Time) *BusinessUpsertBulk {
+	return u.Update(func(s *BusinessUpsert) {
+		s.SetDisabledAt(v)
+	})
+}
+
+// UpdateDisabledAt sets the "disabled_at" field to the value that was provided on create.
+func (u *BusinessUpsertBulk) UpdateDisabledAt() *BusinessUpsertBulk {
+	return u.Update(func(s *BusinessUpsert) {
+		s.UpdateDisabledAt()
+	})
+}
+
+// SetDisableReason sets the "disable_reason" field.
+func (u *BusinessUpsertBulk) SetDisableReason(v string) *BusinessUpsertBulk {
+	return u.Update(func(s *BusinessUpsert) {
+		s.SetDisableReason(v)
+	})
+}
+
+// UpdateDisableReason sets the "disable_reason" field to the value that was provided on create.
+func (u *BusinessUpsertBulk) UpdateDisableReason() *BusinessUpsertBulk {
+	return u.Update(func(s *BusinessUpsert) {
+		s.UpdateDisableReason()
+	})
+}
+
+// ClearDisableReason clears the value of the "disable_reason" field.
+func (u *BusinessUpsertBulk) ClearDisableReason() *BusinessUpsertBulk {
+	return u.Update(func(s *BusinessUpsert) {
+		s.ClearDisableReason()
+	})
+}
+
+// SetVerified sets the "verified" field.
+func (u *BusinessUpsertBulk) SetVerified(v bool) *BusinessUpsertBulk {
+	return u.Update(func(s *BusinessUpsert) {
+		s.SetVerified(v)
+	})
+}
+
+// UpdateVerified sets the "verified" field to the value that was provided on create.
+func (u *BusinessUpsertBulk) UpdateVerified() *BusinessUpsertBulk {
+	return u.Update(func(s *BusinessUpsert) {
+		s.UpdateVerified()
+	})
+}
+
+// SetVerifiedAt sets the "verified_at" field.
+func (u *BusinessUpsertBulk) SetVerifiedAt(v time.Time) *BusinessUpsertBulk {
+	return u.Update(func(s *BusinessUpsert) {
+		s.SetVerifiedAt(v)
+	})
+}
+
+// UpdateVerifiedAt sets the "verified_at" field to the value that was provided on create.
+func (u *BusinessUpsertBulk) UpdateVerifiedAt() *BusinessUpsertBulk {
+	return u.Update(func(s *BusinessUpsert) {
+		s.UpdateVerifiedAt()
+	})
+}
+
+// ClearVerifiedAt clears the value of the "verified_at" field.
+func (u *BusinessUpsertBulk) ClearVerifiedAt() *BusinessUpsertBulk {
+	return u.Update(func(s *BusinessUpsert) {
+		s.ClearVerifiedAt()
+	})
+}
+
+// Exec executes the query.
+func (u *BusinessUpsertBulk) Exec(ctx context.Context) error {
+	if u.create.err != nil {
+		return u.create.err
+	}
+	for i, b := range u.create.builders {
+		if len(b.conflict) != 0 {
+			return fmt.Errorf("ent: OnConflict was set for builder %d. Set it on the BusinessCreateBulk instead", i)
+		}
+	}
+	if len(u.create.conflict) == 0 {
+		return errors.New("ent: missing options for BusinessCreateBulk.OnConflict")
+	}
+	return u.create.Exec(ctx)
+}
+
+// ExecX is like Exec, but panics if an error occurs.
+func (u *BusinessUpsertBulk) ExecX(ctx context.Context) {
+	if err := u.create.Exec(ctx); err != nil {
 		panic(err)
 	}
 }

@@ -6,6 +6,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"time"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -25,6 +26,46 @@ type SocialUpdate struct {
 // Where appends a list predicates to the SocialUpdate builder.
 func (su *SocialUpdate) Where(ps ...predicate.Social) *SocialUpdate {
 	su.mutation.Where(ps...)
+	return su
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (su *SocialUpdate) SetUpdatedAt(t time.Time) *SocialUpdate {
+	su.mutation.SetUpdatedAt(t)
+	return su
+}
+
+// SetDeletedAt sets the "deleted_at" field.
+func (su *SocialUpdate) SetDeletedAt(t time.Time) *SocialUpdate {
+	su.mutation.SetDeletedAt(t)
+	return su
+}
+
+// SetNillableDeletedAt sets the "deleted_at" field if the given value is not nil.
+func (su *SocialUpdate) SetNillableDeletedAt(t *time.Time) *SocialUpdate {
+	if t != nil {
+		su.SetDeletedAt(*t)
+	}
+	return su
+}
+
+// ClearDeletedAt clears the value of the "deleted_at" field.
+func (su *SocialUpdate) ClearDeletedAt() *SocialUpdate {
+	su.mutation.ClearDeletedAt()
+	return su
+}
+
+// SetBusinessID sets the "business_id" field.
+func (su *SocialUpdate) SetBusinessID(s string) *SocialUpdate {
+	su.mutation.SetBusinessID(s)
+	return su
+}
+
+// SetNillableBusinessID sets the "business_id" field if the given value is not nil.
+func (su *SocialUpdate) SetNillableBusinessID(s *string) *SocialUpdate {
+	if s != nil {
+		su.SetBusinessID(*s)
+	}
 	return su
 }
 
@@ -57,7 +98,7 @@ func (su *SocialUpdate) SetNillableURL(s *string) *SocialUpdate {
 }
 
 // SetSocialID sets the "social" edge to the Business entity by ID.
-func (su *SocialUpdate) SetSocialID(id int) *SocialUpdate {
+func (su *SocialUpdate) SetSocialID(id string) *SocialUpdate {
 	su.mutation.SetSocialID(id)
 	return su
 }
@@ -80,6 +121,7 @@ func (su *SocialUpdate) ClearSocial() *SocialUpdate {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (su *SocialUpdate) Save(ctx context.Context) (int, error) {
+	su.defaults()
 	return withHooks(ctx, su.sqlSave, su.mutation, su.hooks)
 }
 
@@ -105,6 +147,14 @@ func (su *SocialUpdate) ExecX(ctx context.Context) {
 	}
 }
 
+// defaults sets the default values of the builder before save.
+func (su *SocialUpdate) defaults() {
+	if _, ok := su.mutation.UpdatedAt(); !ok {
+		v := social.UpdateDefaultUpdatedAt()
+		su.mutation.SetUpdatedAt(v)
+	}
+}
+
 // check runs all checks and user-defined validators on the builder.
 func (su *SocialUpdate) check() error {
 	if v, ok := su.mutation.Name(); ok {
@@ -127,13 +177,22 @@ func (su *SocialUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if err := su.check(); err != nil {
 		return n, err
 	}
-	_spec := sqlgraph.NewUpdateSpec(social.Table, social.Columns, sqlgraph.NewFieldSpec(social.FieldID, field.TypeInt))
+	_spec := sqlgraph.NewUpdateSpec(social.Table, social.Columns, sqlgraph.NewFieldSpec(social.FieldID, field.TypeString))
 	if ps := su.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
+	}
+	if value, ok := su.mutation.UpdatedAt(); ok {
+		_spec.SetField(social.FieldUpdatedAt, field.TypeTime, value)
+	}
+	if value, ok := su.mutation.DeletedAt(); ok {
+		_spec.SetField(social.FieldDeletedAt, field.TypeTime, value)
+	}
+	if su.mutation.DeletedAtCleared() {
+		_spec.ClearField(social.FieldDeletedAt, field.TypeTime)
 	}
 	if value, ok := su.mutation.Name(); ok {
 		_spec.SetField(social.FieldName, field.TypeString, value)
@@ -149,7 +208,7 @@ func (su *SocialUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{social.SocialColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(business.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(business.FieldID, field.TypeString),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -162,7 +221,7 @@ func (su *SocialUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{social.SocialColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(business.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(business.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {
@@ -188,6 +247,46 @@ type SocialUpdateOne struct {
 	fields   []string
 	hooks    []Hook
 	mutation *SocialMutation
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (suo *SocialUpdateOne) SetUpdatedAt(t time.Time) *SocialUpdateOne {
+	suo.mutation.SetUpdatedAt(t)
+	return suo
+}
+
+// SetDeletedAt sets the "deleted_at" field.
+func (suo *SocialUpdateOne) SetDeletedAt(t time.Time) *SocialUpdateOne {
+	suo.mutation.SetDeletedAt(t)
+	return suo
+}
+
+// SetNillableDeletedAt sets the "deleted_at" field if the given value is not nil.
+func (suo *SocialUpdateOne) SetNillableDeletedAt(t *time.Time) *SocialUpdateOne {
+	if t != nil {
+		suo.SetDeletedAt(*t)
+	}
+	return suo
+}
+
+// ClearDeletedAt clears the value of the "deleted_at" field.
+func (suo *SocialUpdateOne) ClearDeletedAt() *SocialUpdateOne {
+	suo.mutation.ClearDeletedAt()
+	return suo
+}
+
+// SetBusinessID sets the "business_id" field.
+func (suo *SocialUpdateOne) SetBusinessID(s string) *SocialUpdateOne {
+	suo.mutation.SetBusinessID(s)
+	return suo
+}
+
+// SetNillableBusinessID sets the "business_id" field if the given value is not nil.
+func (suo *SocialUpdateOne) SetNillableBusinessID(s *string) *SocialUpdateOne {
+	if s != nil {
+		suo.SetBusinessID(*s)
+	}
+	return suo
 }
 
 // SetName sets the "name" field.
@@ -219,7 +318,7 @@ func (suo *SocialUpdateOne) SetNillableURL(s *string) *SocialUpdateOne {
 }
 
 // SetSocialID sets the "social" edge to the Business entity by ID.
-func (suo *SocialUpdateOne) SetSocialID(id int) *SocialUpdateOne {
+func (suo *SocialUpdateOne) SetSocialID(id string) *SocialUpdateOne {
 	suo.mutation.SetSocialID(id)
 	return suo
 }
@@ -255,6 +354,7 @@ func (suo *SocialUpdateOne) Select(field string, fields ...string) *SocialUpdate
 
 // Save executes the query and returns the updated Social entity.
 func (suo *SocialUpdateOne) Save(ctx context.Context) (*Social, error) {
+	suo.defaults()
 	return withHooks(ctx, suo.sqlSave, suo.mutation, suo.hooks)
 }
 
@@ -280,6 +380,14 @@ func (suo *SocialUpdateOne) ExecX(ctx context.Context) {
 	}
 }
 
+// defaults sets the default values of the builder before save.
+func (suo *SocialUpdateOne) defaults() {
+	if _, ok := suo.mutation.UpdatedAt(); !ok {
+		v := social.UpdateDefaultUpdatedAt()
+		suo.mutation.SetUpdatedAt(v)
+	}
+}
+
 // check runs all checks and user-defined validators on the builder.
 func (suo *SocialUpdateOne) check() error {
 	if v, ok := suo.mutation.Name(); ok {
@@ -302,7 +410,7 @@ func (suo *SocialUpdateOne) sqlSave(ctx context.Context) (_node *Social, err err
 	if err := suo.check(); err != nil {
 		return _node, err
 	}
-	_spec := sqlgraph.NewUpdateSpec(social.Table, social.Columns, sqlgraph.NewFieldSpec(social.FieldID, field.TypeInt))
+	_spec := sqlgraph.NewUpdateSpec(social.Table, social.Columns, sqlgraph.NewFieldSpec(social.FieldID, field.TypeString))
 	id, ok := suo.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "Social.id" for update`)}
@@ -327,6 +435,15 @@ func (suo *SocialUpdateOne) sqlSave(ctx context.Context) (_node *Social, err err
 			}
 		}
 	}
+	if value, ok := suo.mutation.UpdatedAt(); ok {
+		_spec.SetField(social.FieldUpdatedAt, field.TypeTime, value)
+	}
+	if value, ok := suo.mutation.DeletedAt(); ok {
+		_spec.SetField(social.FieldDeletedAt, field.TypeTime, value)
+	}
+	if suo.mutation.DeletedAtCleared() {
+		_spec.ClearField(social.FieldDeletedAt, field.TypeTime)
+	}
 	if value, ok := suo.mutation.Name(); ok {
 		_spec.SetField(social.FieldName, field.TypeString, value)
 	}
@@ -341,7 +458,7 @@ func (suo *SocialUpdateOne) sqlSave(ctx context.Context) (_node *Social, err err
 			Columns: []string{social.SocialColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(business.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(business.FieldID, field.TypeString),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -354,7 +471,7 @@ func (suo *SocialUpdateOne) sqlSave(ctx context.Context) (_node *Social, err err
 			Columns: []string{social.SocialColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(business.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(business.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {

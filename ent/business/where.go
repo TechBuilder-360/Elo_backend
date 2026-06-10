@@ -11,48 +11,73 @@ import (
 )
 
 // ID filters vertices based on their ID field.
-func ID(id int) predicate.Business {
+func ID(id string) predicate.Business {
 	return predicate.Business(sql.FieldEQ(FieldID, id))
 }
 
 // IDEQ applies the EQ predicate on the ID field.
-func IDEQ(id int) predicate.Business {
+func IDEQ(id string) predicate.Business {
 	return predicate.Business(sql.FieldEQ(FieldID, id))
 }
 
 // IDNEQ applies the NEQ predicate on the ID field.
-func IDNEQ(id int) predicate.Business {
+func IDNEQ(id string) predicate.Business {
 	return predicate.Business(sql.FieldNEQ(FieldID, id))
 }
 
 // IDIn applies the In predicate on the ID field.
-func IDIn(ids ...int) predicate.Business {
+func IDIn(ids ...string) predicate.Business {
 	return predicate.Business(sql.FieldIn(FieldID, ids...))
 }
 
 // IDNotIn applies the NotIn predicate on the ID field.
-func IDNotIn(ids ...int) predicate.Business {
+func IDNotIn(ids ...string) predicate.Business {
 	return predicate.Business(sql.FieldNotIn(FieldID, ids...))
 }
 
 // IDGT applies the GT predicate on the ID field.
-func IDGT(id int) predicate.Business {
+func IDGT(id string) predicate.Business {
 	return predicate.Business(sql.FieldGT(FieldID, id))
 }
 
 // IDGTE applies the GTE predicate on the ID field.
-func IDGTE(id int) predicate.Business {
+func IDGTE(id string) predicate.Business {
 	return predicate.Business(sql.FieldGTE(FieldID, id))
 }
 
 // IDLT applies the LT predicate on the ID field.
-func IDLT(id int) predicate.Business {
+func IDLT(id string) predicate.Business {
 	return predicate.Business(sql.FieldLT(FieldID, id))
 }
 
 // IDLTE applies the LTE predicate on the ID field.
-func IDLTE(id int) predicate.Business {
+func IDLTE(id string) predicate.Business {
 	return predicate.Business(sql.FieldLTE(FieldID, id))
+}
+
+// IDEqualFold applies the EqualFold predicate on the ID field.
+func IDEqualFold(id string) predicate.Business {
+	return predicate.Business(sql.FieldEqualFold(FieldID, id))
+}
+
+// IDContainsFold applies the ContainsFold predicate on the ID field.
+func IDContainsFold(id string) predicate.Business {
+	return predicate.Business(sql.FieldContainsFold(FieldID, id))
+}
+
+// CreatedAt applies equality check predicate on the "created_at" field. It's identical to CreatedAtEQ.
+func CreatedAt(v time.Time) predicate.Business {
+	return predicate.Business(sql.FieldEQ(FieldCreatedAt, v))
+}
+
+// UpdatedAt applies equality check predicate on the "updated_at" field. It's identical to UpdatedAtEQ.
+func UpdatedAt(v time.Time) predicate.Business {
+	return predicate.Business(sql.FieldEQ(FieldUpdatedAt, v))
+}
+
+// DeletedAt applies equality check predicate on the "deleted_at" field. It's identical to DeletedAtEQ.
+func DeletedAt(v time.Time) predicate.Business {
+	return predicate.Business(sql.FieldEQ(FieldDeletedAt, v))
 }
 
 // Category applies equality check predicate on the "category" field. It's identical to CategoryEQ.
@@ -65,9 +90,14 @@ func Name(v string) predicate.Business {
 	return predicate.Business(sql.FieldEQ(FieldName, v))
 }
 
-// LogoURL applies equality check predicate on the "logo_url" field. It's identical to LogoURLEQ.
-func LogoURL(v string) predicate.Business {
-	return predicate.Business(sql.FieldEQ(FieldLogoURL, v))
+// About applies equality check predicate on the "about" field. It's identical to AboutEQ.
+func About(v string) predicate.Business {
+	return predicate.Business(sql.FieldEQ(FieldAbout, v))
+}
+
+// Logo applies equality check predicate on the "logo" field. It's identical to LogoEQ.
+func Logo(v string) predicate.Business {
+	return predicate.Business(sql.FieldEQ(FieldLogo, v))
 }
 
 // Email applies equality check predicate on the "email" field. It's identical to EmailEQ.
@@ -78,6 +108,11 @@ func Email(v string) predicate.Business {
 // Website applies equality check predicate on the "website" field. It's identical to WebsiteEQ.
 func Website(v string) predicate.Business {
 	return predicate.Business(sql.FieldEQ(FieldWebsite, v))
+}
+
+// Active applies equality check predicate on the "active" field. It's identical to ActiveEQ.
+func Active(v bool) predicate.Business {
+	return predicate.Business(sql.FieldEQ(FieldActive, v))
 }
 
 // Disabled applies equality check predicate on the "disabled" field. It's identical to DisabledEQ.
@@ -105,9 +140,134 @@ func VerifiedAt(v time.Time) predicate.Business {
 	return predicate.Business(sql.FieldEQ(FieldVerifiedAt, v))
 }
 
-// CreatedAt applies equality check predicate on the "created_at" field. It's identical to CreatedAtEQ.
-func CreatedAt(v time.Time) predicate.Business {
+// CreatedAtEQ applies the EQ predicate on the "created_at" field.
+func CreatedAtEQ(v time.Time) predicate.Business {
 	return predicate.Business(sql.FieldEQ(FieldCreatedAt, v))
+}
+
+// CreatedAtNEQ applies the NEQ predicate on the "created_at" field.
+func CreatedAtNEQ(v time.Time) predicate.Business {
+	return predicate.Business(sql.FieldNEQ(FieldCreatedAt, v))
+}
+
+// CreatedAtIn applies the In predicate on the "created_at" field.
+func CreatedAtIn(vs ...time.Time) predicate.Business {
+	return predicate.Business(sql.FieldIn(FieldCreatedAt, vs...))
+}
+
+// CreatedAtNotIn applies the NotIn predicate on the "created_at" field.
+func CreatedAtNotIn(vs ...time.Time) predicate.Business {
+	return predicate.Business(sql.FieldNotIn(FieldCreatedAt, vs...))
+}
+
+// CreatedAtGT applies the GT predicate on the "created_at" field.
+func CreatedAtGT(v time.Time) predicate.Business {
+	return predicate.Business(sql.FieldGT(FieldCreatedAt, v))
+}
+
+// CreatedAtGTE applies the GTE predicate on the "created_at" field.
+func CreatedAtGTE(v time.Time) predicate.Business {
+	return predicate.Business(sql.FieldGTE(FieldCreatedAt, v))
+}
+
+// CreatedAtLT applies the LT predicate on the "created_at" field.
+func CreatedAtLT(v time.Time) predicate.Business {
+	return predicate.Business(sql.FieldLT(FieldCreatedAt, v))
+}
+
+// CreatedAtLTE applies the LTE predicate on the "created_at" field.
+func CreatedAtLTE(v time.Time) predicate.Business {
+	return predicate.Business(sql.FieldLTE(FieldCreatedAt, v))
+}
+
+// UpdatedAtEQ applies the EQ predicate on the "updated_at" field.
+func UpdatedAtEQ(v time.Time) predicate.Business {
+	return predicate.Business(sql.FieldEQ(FieldUpdatedAt, v))
+}
+
+// UpdatedAtNEQ applies the NEQ predicate on the "updated_at" field.
+func UpdatedAtNEQ(v time.Time) predicate.Business {
+	return predicate.Business(sql.FieldNEQ(FieldUpdatedAt, v))
+}
+
+// UpdatedAtIn applies the In predicate on the "updated_at" field.
+func UpdatedAtIn(vs ...time.Time) predicate.Business {
+	return predicate.Business(sql.FieldIn(FieldUpdatedAt, vs...))
+}
+
+// UpdatedAtNotIn applies the NotIn predicate on the "updated_at" field.
+func UpdatedAtNotIn(vs ...time.Time) predicate.Business {
+	return predicate.Business(sql.FieldNotIn(FieldUpdatedAt, vs...))
+}
+
+// UpdatedAtGT applies the GT predicate on the "updated_at" field.
+func UpdatedAtGT(v time.Time) predicate.Business {
+	return predicate.Business(sql.FieldGT(FieldUpdatedAt, v))
+}
+
+// UpdatedAtGTE applies the GTE predicate on the "updated_at" field.
+func UpdatedAtGTE(v time.Time) predicate.Business {
+	return predicate.Business(sql.FieldGTE(FieldUpdatedAt, v))
+}
+
+// UpdatedAtLT applies the LT predicate on the "updated_at" field.
+func UpdatedAtLT(v time.Time) predicate.Business {
+	return predicate.Business(sql.FieldLT(FieldUpdatedAt, v))
+}
+
+// UpdatedAtLTE applies the LTE predicate on the "updated_at" field.
+func UpdatedAtLTE(v time.Time) predicate.Business {
+	return predicate.Business(sql.FieldLTE(FieldUpdatedAt, v))
+}
+
+// DeletedAtEQ applies the EQ predicate on the "deleted_at" field.
+func DeletedAtEQ(v time.Time) predicate.Business {
+	return predicate.Business(sql.FieldEQ(FieldDeletedAt, v))
+}
+
+// DeletedAtNEQ applies the NEQ predicate on the "deleted_at" field.
+func DeletedAtNEQ(v time.Time) predicate.Business {
+	return predicate.Business(sql.FieldNEQ(FieldDeletedAt, v))
+}
+
+// DeletedAtIn applies the In predicate on the "deleted_at" field.
+func DeletedAtIn(vs ...time.Time) predicate.Business {
+	return predicate.Business(sql.FieldIn(FieldDeletedAt, vs...))
+}
+
+// DeletedAtNotIn applies the NotIn predicate on the "deleted_at" field.
+func DeletedAtNotIn(vs ...time.Time) predicate.Business {
+	return predicate.Business(sql.FieldNotIn(FieldDeletedAt, vs...))
+}
+
+// DeletedAtGT applies the GT predicate on the "deleted_at" field.
+func DeletedAtGT(v time.Time) predicate.Business {
+	return predicate.Business(sql.FieldGT(FieldDeletedAt, v))
+}
+
+// DeletedAtGTE applies the GTE predicate on the "deleted_at" field.
+func DeletedAtGTE(v time.Time) predicate.Business {
+	return predicate.Business(sql.FieldGTE(FieldDeletedAt, v))
+}
+
+// DeletedAtLT applies the LT predicate on the "deleted_at" field.
+func DeletedAtLT(v time.Time) predicate.Business {
+	return predicate.Business(sql.FieldLT(FieldDeletedAt, v))
+}
+
+// DeletedAtLTE applies the LTE predicate on the "deleted_at" field.
+func DeletedAtLTE(v time.Time) predicate.Business {
+	return predicate.Business(sql.FieldLTE(FieldDeletedAt, v))
+}
+
+// DeletedAtIsNil applies the IsNil predicate on the "deleted_at" field.
+func DeletedAtIsNil() predicate.Business {
+	return predicate.Business(sql.FieldIsNull(FieldDeletedAt))
+}
+
+// DeletedAtNotNil applies the NotNil predicate on the "deleted_at" field.
+func DeletedAtNotNil() predicate.Business {
+	return predicate.Business(sql.FieldNotNull(FieldDeletedAt))
 }
 
 // CategoryEQ applies the EQ predicate on the "category" field.
@@ -240,69 +400,154 @@ func NameContainsFold(v string) predicate.Business {
 	return predicate.Business(sql.FieldContainsFold(FieldName, v))
 }
 
-// LogoURLEQ applies the EQ predicate on the "logo_url" field.
-func LogoURLEQ(v string) predicate.Business {
-	return predicate.Business(sql.FieldEQ(FieldLogoURL, v))
+// AboutEQ applies the EQ predicate on the "about" field.
+func AboutEQ(v string) predicate.Business {
+	return predicate.Business(sql.FieldEQ(FieldAbout, v))
 }
 
-// LogoURLNEQ applies the NEQ predicate on the "logo_url" field.
-func LogoURLNEQ(v string) predicate.Business {
-	return predicate.Business(sql.FieldNEQ(FieldLogoURL, v))
+// AboutNEQ applies the NEQ predicate on the "about" field.
+func AboutNEQ(v string) predicate.Business {
+	return predicate.Business(sql.FieldNEQ(FieldAbout, v))
 }
 
-// LogoURLIn applies the In predicate on the "logo_url" field.
-func LogoURLIn(vs ...string) predicate.Business {
-	return predicate.Business(sql.FieldIn(FieldLogoURL, vs...))
+// AboutIn applies the In predicate on the "about" field.
+func AboutIn(vs ...string) predicate.Business {
+	return predicate.Business(sql.FieldIn(FieldAbout, vs...))
 }
 
-// LogoURLNotIn applies the NotIn predicate on the "logo_url" field.
-func LogoURLNotIn(vs ...string) predicate.Business {
-	return predicate.Business(sql.FieldNotIn(FieldLogoURL, vs...))
+// AboutNotIn applies the NotIn predicate on the "about" field.
+func AboutNotIn(vs ...string) predicate.Business {
+	return predicate.Business(sql.FieldNotIn(FieldAbout, vs...))
 }
 
-// LogoURLGT applies the GT predicate on the "logo_url" field.
-func LogoURLGT(v string) predicate.Business {
-	return predicate.Business(sql.FieldGT(FieldLogoURL, v))
+// AboutGT applies the GT predicate on the "about" field.
+func AboutGT(v string) predicate.Business {
+	return predicate.Business(sql.FieldGT(FieldAbout, v))
 }
 
-// LogoURLGTE applies the GTE predicate on the "logo_url" field.
-func LogoURLGTE(v string) predicate.Business {
-	return predicate.Business(sql.FieldGTE(FieldLogoURL, v))
+// AboutGTE applies the GTE predicate on the "about" field.
+func AboutGTE(v string) predicate.Business {
+	return predicate.Business(sql.FieldGTE(FieldAbout, v))
 }
 
-// LogoURLLT applies the LT predicate on the "logo_url" field.
-func LogoURLLT(v string) predicate.Business {
-	return predicate.Business(sql.FieldLT(FieldLogoURL, v))
+// AboutLT applies the LT predicate on the "about" field.
+func AboutLT(v string) predicate.Business {
+	return predicate.Business(sql.FieldLT(FieldAbout, v))
 }
 
-// LogoURLLTE applies the LTE predicate on the "logo_url" field.
-func LogoURLLTE(v string) predicate.Business {
-	return predicate.Business(sql.FieldLTE(FieldLogoURL, v))
+// AboutLTE applies the LTE predicate on the "about" field.
+func AboutLTE(v string) predicate.Business {
+	return predicate.Business(sql.FieldLTE(FieldAbout, v))
 }
 
-// LogoURLContains applies the Contains predicate on the "logo_url" field.
-func LogoURLContains(v string) predicate.Business {
-	return predicate.Business(sql.FieldContains(FieldLogoURL, v))
+// AboutContains applies the Contains predicate on the "about" field.
+func AboutContains(v string) predicate.Business {
+	return predicate.Business(sql.FieldContains(FieldAbout, v))
 }
 
-// LogoURLHasPrefix applies the HasPrefix predicate on the "logo_url" field.
-func LogoURLHasPrefix(v string) predicate.Business {
-	return predicate.Business(sql.FieldHasPrefix(FieldLogoURL, v))
+// AboutHasPrefix applies the HasPrefix predicate on the "about" field.
+func AboutHasPrefix(v string) predicate.Business {
+	return predicate.Business(sql.FieldHasPrefix(FieldAbout, v))
 }
 
-// LogoURLHasSuffix applies the HasSuffix predicate on the "logo_url" field.
-func LogoURLHasSuffix(v string) predicate.Business {
-	return predicate.Business(sql.FieldHasSuffix(FieldLogoURL, v))
+// AboutHasSuffix applies the HasSuffix predicate on the "about" field.
+func AboutHasSuffix(v string) predicate.Business {
+	return predicate.Business(sql.FieldHasSuffix(FieldAbout, v))
 }
 
-// LogoURLEqualFold applies the EqualFold predicate on the "logo_url" field.
-func LogoURLEqualFold(v string) predicate.Business {
-	return predicate.Business(sql.FieldEqualFold(FieldLogoURL, v))
+// AboutIsNil applies the IsNil predicate on the "about" field.
+func AboutIsNil() predicate.Business {
+	return predicate.Business(sql.FieldIsNull(FieldAbout))
 }
 
-// LogoURLContainsFold applies the ContainsFold predicate on the "logo_url" field.
-func LogoURLContainsFold(v string) predicate.Business {
-	return predicate.Business(sql.FieldContainsFold(FieldLogoURL, v))
+// AboutNotNil applies the NotNil predicate on the "about" field.
+func AboutNotNil() predicate.Business {
+	return predicate.Business(sql.FieldNotNull(FieldAbout))
+}
+
+// AboutEqualFold applies the EqualFold predicate on the "about" field.
+func AboutEqualFold(v string) predicate.Business {
+	return predicate.Business(sql.FieldEqualFold(FieldAbout, v))
+}
+
+// AboutContainsFold applies the ContainsFold predicate on the "about" field.
+func AboutContainsFold(v string) predicate.Business {
+	return predicate.Business(sql.FieldContainsFold(FieldAbout, v))
+}
+
+// LogoEQ applies the EQ predicate on the "logo" field.
+func LogoEQ(v string) predicate.Business {
+	return predicate.Business(sql.FieldEQ(FieldLogo, v))
+}
+
+// LogoNEQ applies the NEQ predicate on the "logo" field.
+func LogoNEQ(v string) predicate.Business {
+	return predicate.Business(sql.FieldNEQ(FieldLogo, v))
+}
+
+// LogoIn applies the In predicate on the "logo" field.
+func LogoIn(vs ...string) predicate.Business {
+	return predicate.Business(sql.FieldIn(FieldLogo, vs...))
+}
+
+// LogoNotIn applies the NotIn predicate on the "logo" field.
+func LogoNotIn(vs ...string) predicate.Business {
+	return predicate.Business(sql.FieldNotIn(FieldLogo, vs...))
+}
+
+// LogoGT applies the GT predicate on the "logo" field.
+func LogoGT(v string) predicate.Business {
+	return predicate.Business(sql.FieldGT(FieldLogo, v))
+}
+
+// LogoGTE applies the GTE predicate on the "logo" field.
+func LogoGTE(v string) predicate.Business {
+	return predicate.Business(sql.FieldGTE(FieldLogo, v))
+}
+
+// LogoLT applies the LT predicate on the "logo" field.
+func LogoLT(v string) predicate.Business {
+	return predicate.Business(sql.FieldLT(FieldLogo, v))
+}
+
+// LogoLTE applies the LTE predicate on the "logo" field.
+func LogoLTE(v string) predicate.Business {
+	return predicate.Business(sql.FieldLTE(FieldLogo, v))
+}
+
+// LogoContains applies the Contains predicate on the "logo" field.
+func LogoContains(v string) predicate.Business {
+	return predicate.Business(sql.FieldContains(FieldLogo, v))
+}
+
+// LogoHasPrefix applies the HasPrefix predicate on the "logo" field.
+func LogoHasPrefix(v string) predicate.Business {
+	return predicate.Business(sql.FieldHasPrefix(FieldLogo, v))
+}
+
+// LogoHasSuffix applies the HasSuffix predicate on the "logo" field.
+func LogoHasSuffix(v string) predicate.Business {
+	return predicate.Business(sql.FieldHasSuffix(FieldLogo, v))
+}
+
+// LogoIsNil applies the IsNil predicate on the "logo" field.
+func LogoIsNil() predicate.Business {
+	return predicate.Business(sql.FieldIsNull(FieldLogo))
+}
+
+// LogoNotNil applies the NotNil predicate on the "logo" field.
+func LogoNotNil() predicate.Business {
+	return predicate.Business(sql.FieldNotNull(FieldLogo))
+}
+
+// LogoEqualFold applies the EqualFold predicate on the "logo" field.
+func LogoEqualFold(v string) predicate.Business {
+	return predicate.Business(sql.FieldEqualFold(FieldLogo, v))
+}
+
+// LogoContainsFold applies the ContainsFold predicate on the "logo" field.
+func LogoContainsFold(v string) predicate.Business {
+	return predicate.Business(sql.FieldContainsFold(FieldLogo, v))
 }
 
 // EmailEQ applies the EQ predicate on the "email" field.
@@ -425,6 +670,16 @@ func WebsiteHasSuffix(v string) predicate.Business {
 	return predicate.Business(sql.FieldHasSuffix(FieldWebsite, v))
 }
 
+// WebsiteIsNil applies the IsNil predicate on the "website" field.
+func WebsiteIsNil() predicate.Business {
+	return predicate.Business(sql.FieldIsNull(FieldWebsite))
+}
+
+// WebsiteNotNil applies the NotNil predicate on the "website" field.
+func WebsiteNotNil() predicate.Business {
+	return predicate.Business(sql.FieldNotNull(FieldWebsite))
+}
+
 // WebsiteEqualFold applies the EqualFold predicate on the "website" field.
 func WebsiteEqualFold(v string) predicate.Business {
 	return predicate.Business(sql.FieldEqualFold(FieldWebsite, v))
@@ -433,6 +688,16 @@ func WebsiteEqualFold(v string) predicate.Business {
 // WebsiteContainsFold applies the ContainsFold predicate on the "website" field.
 func WebsiteContainsFold(v string) predicate.Business {
 	return predicate.Business(sql.FieldContainsFold(FieldWebsite, v))
+}
+
+// ActiveEQ applies the EQ predicate on the "active" field.
+func ActiveEQ(v bool) predicate.Business {
+	return predicate.Business(sql.FieldEQ(FieldActive, v))
+}
+
+// ActiveNEQ applies the NEQ predicate on the "active" field.
+func ActiveNEQ(v bool) predicate.Business {
+	return predicate.Business(sql.FieldNEQ(FieldActive, v))
 }
 
 // DisabledEQ applies the EQ predicate on the "disabled" field.
@@ -540,6 +805,16 @@ func DisableReasonHasSuffix(v string) predicate.Business {
 	return predicate.Business(sql.FieldHasSuffix(FieldDisableReason, v))
 }
 
+// DisableReasonIsNil applies the IsNil predicate on the "disable_reason" field.
+func DisableReasonIsNil() predicate.Business {
+	return predicate.Business(sql.FieldIsNull(FieldDisableReason))
+}
+
+// DisableReasonNotNil applies the NotNil predicate on the "disable_reason" field.
+func DisableReasonNotNil() predicate.Business {
+	return predicate.Business(sql.FieldNotNull(FieldDisableReason))
+}
+
 // DisableReasonEqualFold applies the EqualFold predicate on the "disable_reason" field.
 func DisableReasonEqualFold(v string) predicate.Business {
 	return predicate.Business(sql.FieldEqualFold(FieldDisableReason, v))
@@ -600,61 +875,31 @@ func VerifiedAtLTE(v time.Time) predicate.Business {
 	return predicate.Business(sql.FieldLTE(FieldVerifiedAt, v))
 }
 
-// CreatedAtEQ applies the EQ predicate on the "created_at" field.
-func CreatedAtEQ(v time.Time) predicate.Business {
-	return predicate.Business(sql.FieldEQ(FieldCreatedAt, v))
+// VerifiedAtIsNil applies the IsNil predicate on the "verified_at" field.
+func VerifiedAtIsNil() predicate.Business {
+	return predicate.Business(sql.FieldIsNull(FieldVerifiedAt))
 }
 
-// CreatedAtNEQ applies the NEQ predicate on the "created_at" field.
-func CreatedAtNEQ(v time.Time) predicate.Business {
-	return predicate.Business(sql.FieldNEQ(FieldCreatedAt, v))
+// VerifiedAtNotNil applies the NotNil predicate on the "verified_at" field.
+func VerifiedAtNotNil() predicate.Business {
+	return predicate.Business(sql.FieldNotNull(FieldVerifiedAt))
 }
 
-// CreatedAtIn applies the In predicate on the "created_at" field.
-func CreatedAtIn(vs ...time.Time) predicate.Business {
-	return predicate.Business(sql.FieldIn(FieldCreatedAt, vs...))
-}
-
-// CreatedAtNotIn applies the NotIn predicate on the "created_at" field.
-func CreatedAtNotIn(vs ...time.Time) predicate.Business {
-	return predicate.Business(sql.FieldNotIn(FieldCreatedAt, vs...))
-}
-
-// CreatedAtGT applies the GT predicate on the "created_at" field.
-func CreatedAtGT(v time.Time) predicate.Business {
-	return predicate.Business(sql.FieldGT(FieldCreatedAt, v))
-}
-
-// CreatedAtGTE applies the GTE predicate on the "created_at" field.
-func CreatedAtGTE(v time.Time) predicate.Business {
-	return predicate.Business(sql.FieldGTE(FieldCreatedAt, v))
-}
-
-// CreatedAtLT applies the LT predicate on the "created_at" field.
-func CreatedAtLT(v time.Time) predicate.Business {
-	return predicate.Business(sql.FieldLT(FieldCreatedAt, v))
-}
-
-// CreatedAtLTE applies the LTE predicate on the "created_at" field.
-func CreatedAtLTE(v time.Time) predicate.Business {
-	return predicate.Business(sql.FieldLTE(FieldCreatedAt, v))
-}
-
-// HasBusinessSocial applies the HasEdge predicate on the "business_social" edge.
-func HasBusinessSocial() predicate.Business {
+// HasSocials applies the HasEdge predicate on the "socials" edge.
+func HasSocials() predicate.Business {
 	return predicate.Business(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, BusinessSocialTable, BusinessSocialColumn),
+			sqlgraph.Edge(sqlgraph.O2M, false, SocialsTable, SocialsColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})
 }
 
-// HasBusinessSocialWith applies the HasEdge predicate on the "business_social" edge with a given conditions (other predicates).
-func HasBusinessSocialWith(preds ...predicate.Social) predicate.Business {
+// HasSocialsWith applies the HasEdge predicate on the "socials" edge with a given conditions (other predicates).
+func HasSocialsWith(preds ...predicate.Social) predicate.Business {
 	return predicate.Business(func(s *sql.Selector) {
-		step := newBusinessSocialStep()
+		step := newSocialsStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)
@@ -663,21 +908,113 @@ func HasBusinessSocialWith(preds ...predicate.Social) predicate.Business {
 	})
 }
 
-// HasBusinessManager applies the HasEdge predicate on the "business_manager" edge.
-func HasBusinessManager() predicate.Business {
+// HasServices applies the HasEdge predicate on the "services" edge.
+func HasServices() predicate.Business {
 	return predicate.Business(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, BusinessManagerTable, BusinessManagerColumn),
+			sqlgraph.Edge(sqlgraph.O2M, false, ServicesTable, ServicesColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})
 }
 
-// HasBusinessManagerWith applies the HasEdge predicate on the "business_manager" edge with a given conditions (other predicates).
-func HasBusinessManagerWith(preds ...predicate.Manager) predicate.Business {
+// HasServicesWith applies the HasEdge predicate on the "services" edge with a given conditions (other predicates).
+func HasServicesWith(preds ...predicate.BusinessServices) predicate.Business {
 	return predicate.Business(func(s *sql.Selector) {
-		step := newBusinessManagerStep()
+		step := newServicesStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasManages applies the HasEdge predicate on the "manages" edge.
+func HasManages() predicate.Business {
+	return predicate.Business(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, ManagesTable, ManagesColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasManagesWith applies the HasEdge predicate on the "manages" edge with a given conditions (other predicates).
+func HasManagesWith(preds ...predicate.Manager) predicate.Business {
+	return predicate.Business(func(s *sql.Selector) {
+		step := newManagesStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasVerifications applies the HasEdge predicate on the "verifications" edge.
+func HasVerifications() predicate.Business {
+	return predicate.Business(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, true, VerificationsTable, VerificationsPrimaryKey...),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasVerificationsWith applies the HasEdge predicate on the "verifications" edge with a given conditions (other predicates).
+func HasVerificationsWith(preds ...predicate.Verification) predicate.Business {
+	return predicate.Business(func(s *sql.Selector) {
+		step := newVerificationsStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasRequestVerifications applies the HasEdge predicate on the "request_verifications" edge.
+func HasRequestVerifications() predicate.Business {
+	return predicate.Business(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, true, RequestVerificationsTable, RequestVerificationsPrimaryKey...),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasRequestVerificationsWith applies the HasEdge predicate on the "request_verifications" edge with a given conditions (other predicates).
+func HasRequestVerificationsWith(preds ...predicate.RequestVerification) predicate.Business {
+	return predicate.Business(func(s *sql.Selector) {
+		step := newRequestVerificationsStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasBusinessDocuments applies the HasEdge predicate on the "business_documents" edge.
+func HasBusinessDocuments() predicate.Business {
+	return predicate.Business(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, BusinessDocumentsTable, BusinessDocumentsColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasBusinessDocumentsWith applies the HasEdge predicate on the "business_documents" edge with a given conditions (other predicates).
+func HasBusinessDocumentsWith(preds ...predicate.BusinessDocument) predicate.Business {
+	return predicate.Business(func(s *sql.Selector) {
+		step := newBusinessDocumentsStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)

@@ -1,8 +1,6 @@
 package schema
 
 import (
-	"time"
-
 	"entgo.io/ent"
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
@@ -13,30 +11,37 @@ type Manager struct {
 	ent.Schema
 }
 
+func (Manager) Mixin() []ent.Mixin {
+	return []ent.Mixin{
+		BaseMixin{},
+	}
+}
+
 // Fields of the Manager.
 func (Manager) Fields() []ent.Field {
 	return []ent.Field{
-		field.Time("created_at").
-			Default(time.Now).
-			Immutable(),
-		field.String("position").NotEmpty(),
-		field.Bool("diasbled").Default(false),
-		field.String("disable_reason").Nillable(),
-		field.Time("disabled_at").Nillable(),
+		field.String("user_id"),
+		field.String("business_id"),
+		field.Bool("disabled").Default(false),
+		field.String("disable_reason").Optional(),
+		field.Time("disabled_at").Optional(),
 	}
 }
 
 // Edges of the Manager.
 func (Manager) Edges() []ent.Edge {
+
 	return []ent.Edge{
-		edge.From("admins", Business.Type).
-			Ref("manager").
-			Unique().
-			Required(),
-		edge.From("managers", User.Type).
-			Ref("manager").
-			Unique().
-			Required(),
+		edge.From("business", Business.Type).
+			Ref("manages").
+			Field("business_id").
+			Required().
+			Unique(),
+		edge.From("user", User.Type).
+			Ref("manages").
+			Field("user_id").
+			Required().
+			Unique(),
 	}
 }
 

@@ -44,6 +44,10 @@ func WithField(key string, value interface{}) Entry {
 	return Std.WithField(key, value)
 }
 
+func WithError(value interface{}) Entry {
+	return Std.WithField("error", value)
+}
+
 func WithFields(fields map[string]interface{}) Entry {
 	return Std.WithFields(fields)
 }

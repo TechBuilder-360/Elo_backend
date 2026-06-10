@@ -20,13 +20,12 @@ import (
 // ManagerQuery is the builder for querying Manager entities.
 type ManagerQuery struct {
 	config
-	ctx              *QueryContext
-	order            []manager.OrderOption
-	inters           []Interceptor
-	predicates       []predicate.Manager
-	withBusinessUser *BusinessQuery
-	withUserManager  *UserQuery
-	withFKs          bool
+	ctx          *QueryContext
+	order        []manager.OrderOption
+	inters       []Interceptor
+	predicates   []predicate.Manager
+	withBusiness *BusinessQuery
+	withUser     *UserQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -63,8 +62,8 @@ func (mq *ManagerQuery) Order(o ...manager.OrderOption) *ManagerQuery {
 	return mq
 }
 
-// QueryBusinessUser chains the current query on the "business_user" edge.
-func (mq *ManagerQuery) QueryBusinessUser() *BusinessQuery {
+// QueryBusiness chains the current query on the "business" edge.
+func (mq *ManagerQuery) QueryBusiness() *BusinessQuery {
 	query := (&BusinessClient{config: mq.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := mq.prepareQuery(ctx); err != nil {
@@ -77,7 +76,7 @@ func (mq *ManagerQuery) QueryBusinessUser() *BusinessQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(manager.Table, manager.FieldID, selector),
 			sqlgraph.To(business.Table, business.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, manager.BusinessUserTable, manager.BusinessUserColumn),
+			sqlgraph.Edge(sqlgraph.M2O, true, manager.BusinessTable, manager.BusinessColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(mq.driver.Dialect(), step)
 		return fromU, nil
@@ -85,8 +84,8 @@ func (mq *ManagerQuery) QueryBusinessUser() *BusinessQuery {
 	return query
 }
 
-// QueryUserManager chains the current query on the "user_manager" edge.
-func (mq *ManagerQuery) QueryUserManager() *UserQuery {
+// QueryUser chains the current query on the "user" edge.
+func (mq *ManagerQuery) QueryUser() *UserQuery {
 	query := (&UserClient{config: mq.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := mq.prepareQuery(ctx); err != nil {
@@ -99,7 +98,7 @@ func (mq *ManagerQuery) QueryUserManager() *UserQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(manager.Table, manager.FieldID, selector),
 			sqlgraph.To(user.Table, user.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, manager.UserManagerTable, manager.UserManagerColumn),
+			sqlgraph.Edge(sqlgraph.M2O, true, manager.UserTable, manager.UserColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(mq.driver.Dialect(), step)
 		return fromU, nil
@@ -131,8 +130,8 @@ func (mq *ManagerQuery) FirstX(ctx context.Context) *Manager {
 
 // FirstID returns the first Manager ID from the query.
 // Returns a *NotFoundError when no Manager ID was found.
-func (mq *ManagerQuery) FirstID(ctx context.Context) (id int, err error) {
-	var ids []int
+func (mq *ManagerQuery) FirstID(ctx context.Context) (id string, err error) {
+	var ids []string
 	if ids, err = mq.Limit(1).IDs(setContextOp(ctx, mq.ctx, ent.OpQueryFirstID)); err != nil {
 		return
 	}
@@ -144,7 +143,7 @@ func (mq *ManagerQuery) FirstID(ctx context.Context) (id int, err error) {
 }
 
 // FirstIDX is like FirstID, but panics if an error occurs.
-func (mq *ManagerQuery) FirstIDX(ctx context.Context) int {
+func (mq *ManagerQuery) FirstIDX(ctx context.Context) string {
 	id, err := mq.FirstID(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
@@ -182,8 +181,8 @@ func (mq *ManagerQuery) OnlyX(ctx context.Context) *Manager {
 // OnlyID is like Only, but returns the only Manager ID in the query.
 // Returns a *NotSingularError when more than one Manager ID is found.
 // Returns a *NotFoundError when no entities are found.
-func (mq *ManagerQuery) OnlyID(ctx context.Context) (id int, err error) {
-	var ids []int
+func (mq *ManagerQuery) OnlyID(ctx context.Context) (id string, err error) {
+	var ids []string
 	if ids, err = mq.Limit(2).IDs(setContextOp(ctx, mq.ctx, ent.OpQueryOnlyID)); err != nil {
 		return
 	}
@@ -199,7 +198,7 @@ func (mq *ManagerQuery) OnlyID(ctx context.Context) (id int, err error) {
 }
 
 // OnlyIDX is like OnlyID, but panics if an error occurs.
-func (mq *ManagerQuery) OnlyIDX(ctx context.Context) int {
+func (mq *ManagerQuery) OnlyIDX(ctx context.Context) string {
 	id, err := mq.OnlyID(ctx)
 	if err != nil {
 		panic(err)
@@ -227,7 +226,7 @@ func (mq *ManagerQuery) AllX(ctx context.Context) []*Manager {
 }
 
 // IDs executes the query and returns a list of Manager IDs.
-func (mq *ManagerQuery) IDs(ctx context.Context) (ids []int, err error) {
+func (mq *ManagerQuery) IDs(ctx context.Context) (ids []string, err error) {
 	if mq.ctx.Unique == nil && mq.path != nil {
 		mq.Unique(true)
 	}
@@ -239,7 +238,7 @@ func (mq *ManagerQuery) IDs(ctx context.Context) (ids []int, err error) {
 }
 
 // IDsX is like IDs, but panics if an error occurs.
-func (mq *ManagerQuery) IDsX(ctx context.Context) []int {
+func (mq *ManagerQuery) IDsX(ctx context.Context) []string {
 	ids, err := mq.IDs(ctx)
 	if err != nil {
 		panic(err)
@@ -294,38 +293,38 @@ func (mq *ManagerQuery) Clone() *ManagerQuery {
 		return nil
 	}
 	return &ManagerQuery{
-		config:           mq.config,
-		ctx:              mq.ctx.Clone(),
-		order:            append([]manager.OrderOption{}, mq.order...),
-		inters:           append([]Interceptor{}, mq.inters...),
-		predicates:       append([]predicate.Manager{}, mq.predicates...),
-		withBusinessUser: mq.withBusinessUser.Clone(),
-		withUserManager:  mq.withUserManager.Clone(),
+		config:       mq.config,
+		ctx:          mq.ctx.Clone(),
+		order:        append([]manager.OrderOption{}, mq.order...),
+		inters:       append([]Interceptor{}, mq.inters...),
+		predicates:   append([]predicate.Manager{}, mq.predicates...),
+		withBusiness: mq.withBusiness.Clone(),
+		withUser:     mq.withUser.Clone(),
 		// clone intermediate query.
 		sql:  mq.sql.Clone(),
 		path: mq.path,
 	}
 }
 
-// WithBusinessUser tells the query-builder to eager-load the nodes that are connected to
-// the "business_user" edge. The optional arguments are used to configure the query builder of the edge.
-func (mq *ManagerQuery) WithBusinessUser(opts ...func(*BusinessQuery)) *ManagerQuery {
+// WithBusiness tells the query-builder to eager-load the nodes that are connected to
+// the "business" edge. The optional arguments are used to configure the query builder of the edge.
+func (mq *ManagerQuery) WithBusiness(opts ...func(*BusinessQuery)) *ManagerQuery {
 	query := (&BusinessClient{config: mq.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
-	mq.withBusinessUser = query
+	mq.withBusiness = query
 	return mq
 }
 
-// WithUserManager tells the query-builder to eager-load the nodes that are connected to
-// the "user_manager" edge. The optional arguments are used to configure the query builder of the edge.
-func (mq *ManagerQuery) WithUserManager(opts ...func(*UserQuery)) *ManagerQuery {
+// WithUser tells the query-builder to eager-load the nodes that are connected to
+// the "user" edge. The optional arguments are used to configure the query builder of the edge.
+func (mq *ManagerQuery) WithUser(opts ...func(*UserQuery)) *ManagerQuery {
 	query := (&UserClient{config: mq.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
-	mq.withUserManager = query
+	mq.withUser = query
 	return mq
 }
 
@@ -406,19 +405,12 @@ func (mq *ManagerQuery) prepareQuery(ctx context.Context) error {
 func (mq *ManagerQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Manager, error) {
 	var (
 		nodes       = []*Manager{}
-		withFKs     = mq.withFKs
 		_spec       = mq.querySpec()
 		loadedTypes = [2]bool{
-			mq.withBusinessUser != nil,
-			mq.withUserManager != nil,
+			mq.withBusiness != nil,
+			mq.withUser != nil,
 		}
 	)
-	if mq.withBusinessUser != nil || mq.withUserManager != nil {
-		withFKs = true
-	}
-	if withFKs {
-		_spec.Node.Columns = append(_spec.Node.Columns, manager.ForeignKeys...)
-	}
 	_spec.ScanValues = func(columns []string) ([]any, error) {
 		return (*Manager).scanValues(nil, columns)
 	}
@@ -437,29 +429,26 @@ func (mq *ManagerQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Mana
 	if len(nodes) == 0 {
 		return nodes, nil
 	}
-	if query := mq.withBusinessUser; query != nil {
-		if err := mq.loadBusinessUser(ctx, query, nodes, nil,
-			func(n *Manager, e *Business) { n.Edges.BusinessUser = e }); err != nil {
+	if query := mq.withBusiness; query != nil {
+		if err := mq.loadBusiness(ctx, query, nodes, nil,
+			func(n *Manager, e *Business) { n.Edges.Business = e }); err != nil {
 			return nil, err
 		}
 	}
-	if query := mq.withUserManager; query != nil {
-		if err := mq.loadUserManager(ctx, query, nodes, nil,
-			func(n *Manager, e *User) { n.Edges.UserManager = e }); err != nil {
+	if query := mq.withUser; query != nil {
+		if err := mq.loadUser(ctx, query, nodes, nil,
+			func(n *Manager, e *User) { n.Edges.User = e }); err != nil {
 			return nil, err
 		}
 	}
 	return nodes, nil
 }
 
-func (mq *ManagerQuery) loadBusinessUser(ctx context.Context, query *BusinessQuery, nodes []*Manager, init func(*Manager), assign func(*Manager, *Business)) error {
-	ids := make([]int, 0, len(nodes))
-	nodeids := make(map[int][]*Manager)
+func (mq *ManagerQuery) loadBusiness(ctx context.Context, query *BusinessQuery, nodes []*Manager, init func(*Manager), assign func(*Manager, *Business)) error {
+	ids := make([]string, 0, len(nodes))
+	nodeids := make(map[string][]*Manager)
 	for i := range nodes {
-		if nodes[i].business_business_manager == nil {
-			continue
-		}
-		fk := *nodes[i].business_business_manager
+		fk := nodes[i].BusinessID
 		if _, ok := nodeids[fk]; !ok {
 			ids = append(ids, fk)
 		}
@@ -476,7 +465,7 @@ func (mq *ManagerQuery) loadBusinessUser(ctx context.Context, query *BusinessQue
 	for _, n := range neighbors {
 		nodes, ok := nodeids[n.ID]
 		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "business_business_manager" returned %v`, n.ID)
+			return fmt.Errorf(`unexpected foreign-key "business_id" returned %v`, n.ID)
 		}
 		for i := range nodes {
 			assign(nodes[i], n)
@@ -484,14 +473,11 @@ func (mq *ManagerQuery) loadBusinessUser(ctx context.Context, query *BusinessQue
 	}
 	return nil
 }
-func (mq *ManagerQuery) loadUserManager(ctx context.Context, query *UserQuery, nodes []*Manager, init func(*Manager), assign func(*Manager, *User)) error {
-	ids := make([]int, 0, len(nodes))
-	nodeids := make(map[int][]*Manager)
+func (mq *ManagerQuery) loadUser(ctx context.Context, query *UserQuery, nodes []*Manager, init func(*Manager), assign func(*Manager, *User)) error {
+	ids := make([]string, 0, len(nodes))
+	nodeids := make(map[string][]*Manager)
 	for i := range nodes {
-		if nodes[i].user_user_manager == nil {
-			continue
-		}
-		fk := *nodes[i].user_user_manager
+		fk := nodes[i].UserID
 		if _, ok := nodeids[fk]; !ok {
 			ids = append(ids, fk)
 		}
@@ -508,7 +494,7 @@ func (mq *ManagerQuery) loadUserManager(ctx context.Context, query *UserQuery, n
 	for _, n := range neighbors {
 		nodes, ok := nodeids[n.ID]
 		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "user_user_manager" returned %v`, n.ID)
+			return fmt.Errorf(`unexpected foreign-key "user_id" returned %v`, n.ID)
 		}
 		for i := range nodes {
 			assign(nodes[i], n)
@@ -527,7 +513,7 @@ func (mq *ManagerQuery) sqlCount(ctx context.Context) (int, error) {
 }
 
 func (mq *ManagerQuery) querySpec() *sqlgraph.QuerySpec {
-	_spec := sqlgraph.NewQuerySpec(manager.Table, manager.Columns, sqlgraph.NewFieldSpec(manager.FieldID, field.TypeInt))
+	_spec := sqlgraph.NewQuerySpec(manager.Table, manager.Columns, sqlgraph.NewFieldSpec(manager.FieldID, field.TypeString))
 	_spec.From = mq.sql
 	if unique := mq.ctx.Unique; unique != nil {
 		_spec.Unique = *unique
@@ -541,6 +527,12 @@ func (mq *ManagerQuery) querySpec() *sqlgraph.QuerySpec {
 			if fields[i] != manager.FieldID {
 				_spec.Node.Columns = append(_spec.Node.Columns, fields[i])
 			}
+		}
+		if mq.withBusiness != nil {
+			_spec.Node.AddColumnOnce(manager.FieldBusinessID)
+		}
+		if mq.withUser != nil {
+			_spec.Node.AddColumnOnce(manager.FieldUserID)
 		}
 	}
 	if ps := mq.predicates; len(ps) > 0 {

@@ -14,16 +14,26 @@ const (
 	Label = "business"
 	// FieldID holds the string denoting the id field in the database.
 	FieldID = "id"
+	// FieldCreatedAt holds the string denoting the created_at field in the database.
+	FieldCreatedAt = "created_at"
+	// FieldUpdatedAt holds the string denoting the updated_at field in the database.
+	FieldUpdatedAt = "updated_at"
+	// FieldDeletedAt holds the string denoting the deleted_at field in the database.
+	FieldDeletedAt = "deleted_at"
 	// FieldCategory holds the string denoting the category field in the database.
 	FieldCategory = "category"
 	// FieldName holds the string denoting the name field in the database.
 	FieldName = "name"
-	// FieldLogoURL holds the string denoting the logo_url field in the database.
-	FieldLogoURL = "logo_url"
+	// FieldAbout holds the string denoting the about field in the database.
+	FieldAbout = "about"
+	// FieldLogo holds the string denoting the logo field in the database.
+	FieldLogo = "logo"
 	// FieldEmail holds the string denoting the email field in the database.
 	FieldEmail = "email"
 	// FieldWebsite holds the string denoting the website field in the database.
 	FieldWebsite = "website"
+	// FieldActive holds the string denoting the active field in the database.
+	FieldActive = "active"
 	// FieldDisabled holds the string denoting the disabled field in the database.
 	FieldDisabled = "disabled"
 	// FieldDisabledAt holds the string denoting the disabled_at field in the database.
@@ -34,45 +44,88 @@ const (
 	FieldVerified = "verified"
 	// FieldVerifiedAt holds the string denoting the verified_at field in the database.
 	FieldVerifiedAt = "verified_at"
-	// FieldCreatedAt holds the string denoting the created_at field in the database.
-	FieldCreatedAt = "created_at"
-	// EdgeBusinessSocial holds the string denoting the business_social edge name in mutations.
-	EdgeBusinessSocial = "business_social"
-	// EdgeBusinessManager holds the string denoting the business_manager edge name in mutations.
-	EdgeBusinessManager = "business_manager"
+	// EdgeSocials holds the string denoting the socials edge name in mutations.
+	EdgeSocials = "socials"
+	// EdgeServices holds the string denoting the services edge name in mutations.
+	EdgeServices = "services"
+	// EdgeManages holds the string denoting the manages edge name in mutations.
+	EdgeManages = "manages"
+	// EdgeVerifications holds the string denoting the verifications edge name in mutations.
+	EdgeVerifications = "verifications"
+	// EdgeRequestVerifications holds the string denoting the request_verifications edge name in mutations.
+	EdgeRequestVerifications = "request_verifications"
+	// EdgeBusinessDocuments holds the string denoting the business_documents edge name in mutations.
+	EdgeBusinessDocuments = "business_documents"
 	// Table holds the table name of the business in the database.
 	Table = "businesses"
-	// BusinessSocialTable is the table that holds the business_social relation/edge.
-	BusinessSocialTable = "socials"
-	// BusinessSocialInverseTable is the table name for the Social entity.
+	// SocialsTable is the table that holds the socials relation/edge.
+	SocialsTable = "socials"
+	// SocialsInverseTable is the table name for the Social entity.
 	// It exists in this package in order to avoid circular dependency with the "social" package.
-	BusinessSocialInverseTable = "socials"
-	// BusinessSocialColumn is the table column denoting the business_social relation/edge.
-	BusinessSocialColumn = "business_business_social"
-	// BusinessManagerTable is the table that holds the business_manager relation/edge.
-	BusinessManagerTable = "managers"
-	// BusinessManagerInverseTable is the table name for the Manager entity.
+	SocialsInverseTable = "socials"
+	// SocialsColumn is the table column denoting the socials relation/edge.
+	SocialsColumn = "business_id"
+	// ServicesTable is the table that holds the services relation/edge.
+	ServicesTable = "business_services"
+	// ServicesInverseTable is the table name for the BusinessServices entity.
+	// It exists in this package in order to avoid circular dependency with the "businessservices" package.
+	ServicesInverseTable = "business_services"
+	// ServicesColumn is the table column denoting the services relation/edge.
+	ServicesColumn = "business_id"
+	// ManagesTable is the table that holds the manages relation/edge.
+	ManagesTable = "managers"
+	// ManagesInverseTable is the table name for the Manager entity.
 	// It exists in this package in order to avoid circular dependency with the "manager" package.
-	BusinessManagerInverseTable = "managers"
-	// BusinessManagerColumn is the table column denoting the business_manager relation/edge.
-	BusinessManagerColumn = "business_business_manager"
+	ManagesInverseTable = "managers"
+	// ManagesColumn is the table column denoting the manages relation/edge.
+	ManagesColumn = "business_id"
+	// VerificationsTable is the table that holds the verifications relation/edge. The primary key declared below.
+	VerificationsTable = "verification_business"
+	// VerificationsInverseTable is the table name for the Verification entity.
+	// It exists in this package in order to avoid circular dependency with the "verification" package.
+	VerificationsInverseTable = "verifications"
+	// RequestVerificationsTable is the table that holds the request_verifications relation/edge. The primary key declared below.
+	RequestVerificationsTable = "request_verification_business"
+	// RequestVerificationsInverseTable is the table name for the RequestVerification entity.
+	// It exists in this package in order to avoid circular dependency with the "requestverification" package.
+	RequestVerificationsInverseTable = "request_verifications"
+	// BusinessDocumentsTable is the table that holds the business_documents relation/edge.
+	BusinessDocumentsTable = "business_documents"
+	// BusinessDocumentsInverseTable is the table name for the BusinessDocument entity.
+	// It exists in this package in order to avoid circular dependency with the "businessdocument" package.
+	BusinessDocumentsInverseTable = "business_documents"
+	// BusinessDocumentsColumn is the table column denoting the business_documents relation/edge.
+	BusinessDocumentsColumn = "business_business_documents"
 )
 
 // Columns holds all SQL columns for business fields.
 var Columns = []string{
 	FieldID,
+	FieldCreatedAt,
+	FieldUpdatedAt,
+	FieldDeletedAt,
 	FieldCategory,
 	FieldName,
-	FieldLogoURL,
+	FieldAbout,
+	FieldLogo,
 	FieldEmail,
 	FieldWebsite,
+	FieldActive,
 	FieldDisabled,
 	FieldDisabledAt,
 	FieldDisableReason,
 	FieldVerified,
 	FieldVerifiedAt,
-	FieldCreatedAt,
 }
+
+var (
+	// VerificationsPrimaryKey and VerificationsColumn2 are the table columns denoting the
+	// primary key for the verifications relation (M2M).
+	VerificationsPrimaryKey = []string{"verification_id", "business_id"}
+	// RequestVerificationsPrimaryKey and RequestVerificationsColumn2 are the table columns denoting the
+	// primary key for the request_verifications relation (M2M).
+	RequestVerificationsPrimaryKey = []string{"request_verification_id", "business_id"}
+)
 
 // ValidColumn reports if the column name is valid (part of the table columns).
 func ValidColumn(column string) bool {
@@ -85,20 +138,30 @@ func ValidColumn(column string) bool {
 }
 
 var (
+	// DefaultCreatedAt holds the default value on creation for the "created_at" field.
+	DefaultCreatedAt func() time.Time
+	// DefaultUpdatedAt holds the default value on creation for the "updated_at" field.
+	DefaultUpdatedAt func() time.Time
+	// UpdateDefaultUpdatedAt holds the default value on update for the "updated_at" field.
+	UpdateDefaultUpdatedAt func() time.Time
 	// DefaultCategory holds the default value on creation for the "category" field.
 	DefaultCategory string
 	// NameValidator is a validator for the "name" field. It is called by the builders before save.
 	NameValidator func(string) error
 	// EmailValidator is a validator for the "email" field. It is called by the builders before save.
 	EmailValidator func(string) error
+	// WebsiteValidator is a validator for the "website" field. It is called by the builders before save.
+	WebsiteValidator func(string) error
+	// DefaultActive holds the default value on creation for the "active" field.
+	DefaultActive bool
 	// DefaultDisabled holds the default value on creation for the "disabled" field.
 	DefaultDisabled bool
 	// DefaultDisabledAt holds the default value on creation for the "disabled_at" field.
 	DefaultDisabledAt func() time.Time
 	// DefaultVerified holds the default value on creation for the "verified" field.
 	DefaultVerified bool
-	// DefaultCreatedAt holds the default value on creation for the "created_at" field.
-	DefaultCreatedAt func() time.Time
+	// DefaultID holds the default value on creation for the "id" field.
+	DefaultID func() string
 )
 
 // OrderOption defines the ordering options for the Business queries.
@@ -107,6 +170,21 @@ type OrderOption func(*sql.Selector)
 // ByID orders the results by the id field.
 func ByID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldID, opts...).ToFunc()
+}
+
+// ByCreatedAt orders the results by the created_at field.
+func ByCreatedAt(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldCreatedAt, opts...).ToFunc()
+}
+
+// ByUpdatedAt orders the results by the updated_at field.
+func ByUpdatedAt(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldUpdatedAt, opts...).ToFunc()
+}
+
+// ByDeletedAt orders the results by the deleted_at field.
+func ByDeletedAt(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldDeletedAt, opts...).ToFunc()
 }
 
 // ByCategory orders the results by the category field.
@@ -119,9 +197,14 @@ func ByName(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldName, opts...).ToFunc()
 }
 
-// ByLogoURL orders the results by the logo_url field.
-func ByLogoURL(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldLogoURL, opts...).ToFunc()
+// ByAbout orders the results by the about field.
+func ByAbout(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldAbout, opts...).ToFunc()
+}
+
+// ByLogo orders the results by the logo field.
+func ByLogo(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldLogo, opts...).ToFunc()
 }
 
 // ByEmail orders the results by the email field.
@@ -132,6 +215,11 @@ func ByEmail(opts ...sql.OrderTermOption) OrderOption {
 // ByWebsite orders the results by the website field.
 func ByWebsite(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldWebsite, opts...).ToFunc()
+}
+
+// ByActive orders the results by the active field.
+func ByActive(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldActive, opts...).ToFunc()
 }
 
 // ByDisabled orders the results by the disabled field.
@@ -159,49 +247,128 @@ func ByVerifiedAt(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldVerifiedAt, opts...).ToFunc()
 }
 
-// ByCreatedAt orders the results by the created_at field.
-func ByCreatedAt(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldCreatedAt, opts...).ToFunc()
-}
-
-// ByBusinessSocialCount orders the results by business_social count.
-func ByBusinessSocialCount(opts ...sql.OrderTermOption) OrderOption {
+// BySocialsCount orders the results by socials count.
+func BySocialsCount(opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborsCount(s, newBusinessSocialStep(), opts...)
+		sqlgraph.OrderByNeighborsCount(s, newSocialsStep(), opts...)
 	}
 }
 
-// ByBusinessSocial orders the results by business_social terms.
-func ByBusinessSocial(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+// BySocials orders the results by socials terms.
+func BySocials(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newBusinessSocialStep(), append([]sql.OrderTerm{term}, terms...)...)
+		sqlgraph.OrderByNeighborTerms(s, newSocialsStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
 
-// ByBusinessManagerCount orders the results by business_manager count.
-func ByBusinessManagerCount(opts ...sql.OrderTermOption) OrderOption {
+// ByServicesCount orders the results by services count.
+func ByServicesCount(opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborsCount(s, newBusinessManagerStep(), opts...)
+		sqlgraph.OrderByNeighborsCount(s, newServicesStep(), opts...)
 	}
 }
 
-// ByBusinessManager orders the results by business_manager terms.
-func ByBusinessManager(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+// ByServices orders the results by services terms.
+func ByServices(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newBusinessManagerStep(), append([]sql.OrderTerm{term}, terms...)...)
+		sqlgraph.OrderByNeighborTerms(s, newServicesStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
-func newBusinessSocialStep() *sqlgraph.Step {
+
+// ByManagesCount orders the results by manages count.
+func ByManagesCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newManagesStep(), opts...)
+	}
+}
+
+// ByManages orders the results by manages terms.
+func ByManages(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newManagesStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+
+// ByVerificationsCount orders the results by verifications count.
+func ByVerificationsCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newVerificationsStep(), opts...)
+	}
+}
+
+// ByVerifications orders the results by verifications terms.
+func ByVerifications(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newVerificationsStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+
+// ByRequestVerificationsCount orders the results by request_verifications count.
+func ByRequestVerificationsCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newRequestVerificationsStep(), opts...)
+	}
+}
+
+// ByRequestVerifications orders the results by request_verifications terms.
+func ByRequestVerifications(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newRequestVerificationsStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+
+// ByBusinessDocumentsCount orders the results by business_documents count.
+func ByBusinessDocumentsCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newBusinessDocumentsStep(), opts...)
+	}
+}
+
+// ByBusinessDocuments orders the results by business_documents terms.
+func ByBusinessDocuments(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newBusinessDocumentsStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+func newSocialsStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
-		sqlgraph.To(BusinessSocialInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.O2M, false, BusinessSocialTable, BusinessSocialColumn),
+		sqlgraph.To(SocialsInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, SocialsTable, SocialsColumn),
 	)
 }
-func newBusinessManagerStep() *sqlgraph.Step {
+func newServicesStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
-		sqlgraph.To(BusinessManagerInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.O2M, false, BusinessManagerTable, BusinessManagerColumn),
+		sqlgraph.To(ServicesInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, ServicesTable, ServicesColumn),
+	)
+}
+func newManagesStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(ManagesInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, ManagesTable, ManagesColumn),
+	)
+}
+func newVerificationsStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(VerificationsInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.M2M, true, VerificationsTable, VerificationsPrimaryKey...),
+	)
+}
+func newRequestVerificationsStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(RequestVerificationsInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.M2M, true, RequestVerificationsTable, RequestVerificationsPrimaryKey...),
+	)
+}
+func newBusinessDocumentsStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(BusinessDocumentsInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, BusinessDocumentsTable, BusinessDocumentsColumn),
 	)
 }

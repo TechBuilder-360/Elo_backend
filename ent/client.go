@@ -16,9 +16,19 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"github.com/Toflex/directory_v2/ent/business"
+	"github.com/Toflex/directory_v2/ent/businessdocument"
+	"github.com/Toflex/directory_v2/ent/businessfeature"
+	"github.com/Toflex/directory_v2/ent/businessservices"
 	"github.com/Toflex/directory_v2/ent/manager"
+	"github.com/Toflex/directory_v2/ent/permission"
+	"github.com/Toflex/directory_v2/ent/provider"
+	"github.com/Toflex/directory_v2/ent/requestverification"
+	"github.com/Toflex/directory_v2/ent/role"
+	"github.com/Toflex/directory_v2/ent/service"
 	"github.com/Toflex/directory_v2/ent/social"
 	"github.com/Toflex/directory_v2/ent/user"
+	"github.com/Toflex/directory_v2/ent/userdocument"
+	"github.com/Toflex/directory_v2/ent/verification"
 )
 
 // Client is the client that holds all ent builders.
@@ -28,12 +38,32 @@ type Client struct {
 	Schema *migrate.Schema
 	// Business is the client for interacting with the Business builders.
 	Business *BusinessClient
+	// BusinessDocument is the client for interacting with the BusinessDocument builders.
+	BusinessDocument *BusinessDocumentClient
+	// BusinessFeature is the client for interacting with the BusinessFeature builders.
+	BusinessFeature *BusinessFeatureClient
+	// BusinessServices is the client for interacting with the BusinessServices builders.
+	BusinessServices *BusinessServicesClient
 	// Manager is the client for interacting with the Manager builders.
 	Manager *ManagerClient
+	// Permission is the client for interacting with the Permission builders.
+	Permission *PermissionClient
+	// Provider is the client for interacting with the Provider builders.
+	Provider *ProviderClient
+	// RequestVerification is the client for interacting with the RequestVerification builders.
+	RequestVerification *RequestVerificationClient
+	// Role is the client for interacting with the Role builders.
+	Role *RoleClient
+	// Service is the client for interacting with the Service builders.
+	Service *ServiceClient
 	// Social is the client for interacting with the Social builders.
 	Social *SocialClient
 	// User is the client for interacting with the User builders.
 	User *UserClient
+	// UserDocument is the client for interacting with the UserDocument builders.
+	UserDocument *UserDocumentClient
+	// Verification is the client for interacting with the Verification builders.
+	Verification *VerificationClient
 }
 
 // NewClient creates a new client configured with the given options.
@@ -46,9 +76,19 @@ func NewClient(opts ...Option) *Client {
 func (c *Client) init() {
 	c.Schema = migrate.NewSchema(c.driver)
 	c.Business = NewBusinessClient(c.config)
+	c.BusinessDocument = NewBusinessDocumentClient(c.config)
+	c.BusinessFeature = NewBusinessFeatureClient(c.config)
+	c.BusinessServices = NewBusinessServicesClient(c.config)
 	c.Manager = NewManagerClient(c.config)
+	c.Permission = NewPermissionClient(c.config)
+	c.Provider = NewProviderClient(c.config)
+	c.RequestVerification = NewRequestVerificationClient(c.config)
+	c.Role = NewRoleClient(c.config)
+	c.Service = NewServiceClient(c.config)
 	c.Social = NewSocialClient(c.config)
 	c.User = NewUserClient(c.config)
+	c.UserDocument = NewUserDocumentClient(c.config)
+	c.Verification = NewVerificationClient(c.config)
 }
 
 type (
@@ -139,12 +179,22 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 	cfg := c.config
 	cfg.driver = tx
 	return &Tx{
-		ctx:      ctx,
-		config:   cfg,
-		Business: NewBusinessClient(cfg),
-		Manager:  NewManagerClient(cfg),
-		Social:   NewSocialClient(cfg),
-		User:     NewUserClient(cfg),
+		ctx:                 ctx,
+		config:              cfg,
+		Business:            NewBusinessClient(cfg),
+		BusinessDocument:    NewBusinessDocumentClient(cfg),
+		BusinessFeature:     NewBusinessFeatureClient(cfg),
+		BusinessServices:    NewBusinessServicesClient(cfg),
+		Manager:             NewManagerClient(cfg),
+		Permission:          NewPermissionClient(cfg),
+		Provider:            NewProviderClient(cfg),
+		RequestVerification: NewRequestVerificationClient(cfg),
+		Role:                NewRoleClient(cfg),
+		Service:             NewServiceClient(cfg),
+		Social:              NewSocialClient(cfg),
+		User:                NewUserClient(cfg),
+		UserDocument:        NewUserDocumentClient(cfg),
+		Verification:        NewVerificationClient(cfg),
 	}, nil
 }
 
@@ -162,12 +212,22 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 	cfg := c.config
 	cfg.driver = &txDriver{tx: tx, drv: c.driver}
 	return &Tx{
-		ctx:      ctx,
-		config:   cfg,
-		Business: NewBusinessClient(cfg),
-		Manager:  NewManagerClient(cfg),
-		Social:   NewSocialClient(cfg),
-		User:     NewUserClient(cfg),
+		ctx:                 ctx,
+		config:              cfg,
+		Business:            NewBusinessClient(cfg),
+		BusinessDocument:    NewBusinessDocumentClient(cfg),
+		BusinessFeature:     NewBusinessFeatureClient(cfg),
+		BusinessServices:    NewBusinessServicesClient(cfg),
+		Manager:             NewManagerClient(cfg),
+		Permission:          NewPermissionClient(cfg),
+		Provider:            NewProviderClient(cfg),
+		RequestVerification: NewRequestVerificationClient(cfg),
+		Role:                NewRoleClient(cfg),
+		Service:             NewServiceClient(cfg),
+		Social:              NewSocialClient(cfg),
+		User:                NewUserClient(cfg),
+		UserDocument:        NewUserDocumentClient(cfg),
+		Verification:        NewVerificationClient(cfg),
 	}, nil
 }
 
@@ -196,19 +256,25 @@ func (c *Client) Close() error {
 // Use adds the mutation hooks to all the entity clients.
 // In order to add hooks to a specific client, call: `client.Node.Use(...)`.
 func (c *Client) Use(hooks ...Hook) {
-	c.Business.Use(hooks...)
-	c.Manager.Use(hooks...)
-	c.Social.Use(hooks...)
-	c.User.Use(hooks...)
+	for _, n := range []interface{ Use(...Hook) }{
+		c.Business, c.BusinessDocument, c.BusinessFeature, c.BusinessServices,
+		c.Manager, c.Permission, c.Provider, c.RequestVerification, c.Role, c.Service,
+		c.Social, c.User, c.UserDocument, c.Verification,
+	} {
+		n.Use(hooks...)
+	}
 }
 
 // Intercept adds the query interceptors to all the entity clients.
 // In order to add interceptors to a specific client, call: `client.Node.Intercept(...)`.
 func (c *Client) Intercept(interceptors ...Interceptor) {
-	c.Business.Intercept(interceptors...)
-	c.Manager.Intercept(interceptors...)
-	c.Social.Intercept(interceptors...)
-	c.User.Intercept(interceptors...)
+	for _, n := range []interface{ Intercept(...Interceptor) }{
+		c.Business, c.BusinessDocument, c.BusinessFeature, c.BusinessServices,
+		c.Manager, c.Permission, c.Provider, c.RequestVerification, c.Role, c.Service,
+		c.Social, c.User, c.UserDocument, c.Verification,
+	} {
+		n.Intercept(interceptors...)
+	}
 }
 
 // Mutate implements the ent.Mutator interface.
@@ -216,12 +282,32 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 	switch m := m.(type) {
 	case *BusinessMutation:
 		return c.Business.mutate(ctx, m)
+	case *BusinessDocumentMutation:
+		return c.BusinessDocument.mutate(ctx, m)
+	case *BusinessFeatureMutation:
+		return c.BusinessFeature.mutate(ctx, m)
+	case *BusinessServicesMutation:
+		return c.BusinessServices.mutate(ctx, m)
 	case *ManagerMutation:
 		return c.Manager.mutate(ctx, m)
+	case *PermissionMutation:
+		return c.Permission.mutate(ctx, m)
+	case *ProviderMutation:
+		return c.Provider.mutate(ctx, m)
+	case *RequestVerificationMutation:
+		return c.RequestVerification.mutate(ctx, m)
+	case *RoleMutation:
+		return c.Role.mutate(ctx, m)
+	case *ServiceMutation:
+		return c.Service.mutate(ctx, m)
 	case *SocialMutation:
 		return c.Social.mutate(ctx, m)
 	case *UserMutation:
 		return c.User.mutate(ctx, m)
+	case *UserDocumentMutation:
+		return c.UserDocument.mutate(ctx, m)
+	case *VerificationMutation:
+		return c.Verification.mutate(ctx, m)
 	default:
 		return nil, fmt.Errorf("ent: unknown mutation type %T", m)
 	}
@@ -288,7 +374,7 @@ func (c *BusinessClient) UpdateOne(b *Business) *BusinessUpdateOne {
 }
 
 // UpdateOneID returns an update builder for the given id.
-func (c *BusinessClient) UpdateOneID(id int) *BusinessUpdateOne {
+func (c *BusinessClient) UpdateOneID(id string) *BusinessUpdateOne {
 	mutation := newBusinessMutation(c.config, OpUpdateOne, withBusinessID(id))
 	return &BusinessUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
@@ -305,7 +391,7 @@ func (c *BusinessClient) DeleteOne(b *Business) *BusinessDeleteOne {
 }
 
 // DeleteOneID returns a builder for deleting the given entity by its id.
-func (c *BusinessClient) DeleteOneID(id int) *BusinessDeleteOne {
+func (c *BusinessClient) DeleteOneID(id string) *BusinessDeleteOne {
 	builder := c.Delete().Where(business.ID(id))
 	builder.mutation.id = &id
 	builder.mutation.op = OpDeleteOne
@@ -322,12 +408,12 @@ func (c *BusinessClient) Query() *BusinessQuery {
 }
 
 // Get returns a Business entity by its id.
-func (c *BusinessClient) Get(ctx context.Context, id int) (*Business, error) {
+func (c *BusinessClient) Get(ctx context.Context, id string) (*Business, error) {
 	return c.Query().Where(business.ID(id)).Only(ctx)
 }
 
 // GetX is like Get, but panics if an error occurs.
-func (c *BusinessClient) GetX(ctx context.Context, id int) *Business {
+func (c *BusinessClient) GetX(ctx context.Context, id string) *Business {
 	obj, err := c.Get(ctx, id)
 	if err != nil {
 		panic(err)
@@ -335,15 +421,15 @@ func (c *BusinessClient) GetX(ctx context.Context, id int) *Business {
 	return obj
 }
 
-// QueryBusinessSocial queries the business_social edge of a Business.
-func (c *BusinessClient) QueryBusinessSocial(b *Business) *SocialQuery {
+// QuerySocials queries the socials edge of a Business.
+func (c *BusinessClient) QuerySocials(b *Business) *SocialQuery {
 	query := (&SocialClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := b.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(business.Table, business.FieldID, id),
 			sqlgraph.To(social.Table, social.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, business.BusinessSocialTable, business.BusinessSocialColumn),
+			sqlgraph.Edge(sqlgraph.O2M, false, business.SocialsTable, business.SocialsColumn),
 		)
 		fromV = sqlgraph.Neighbors(b.driver.Dialect(), step)
 		return fromV, nil
@@ -351,15 +437,79 @@ func (c *BusinessClient) QueryBusinessSocial(b *Business) *SocialQuery {
 	return query
 }
 
-// QueryBusinessManager queries the business_manager edge of a Business.
-func (c *BusinessClient) QueryBusinessManager(b *Business) *ManagerQuery {
+// QueryServices queries the services edge of a Business.
+func (c *BusinessClient) QueryServices(b *Business) *BusinessServicesQuery {
+	query := (&BusinessServicesClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := b.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(business.Table, business.FieldID, id),
+			sqlgraph.To(businessservices.Table, businessservices.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, business.ServicesTable, business.ServicesColumn),
+		)
+		fromV = sqlgraph.Neighbors(b.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryManages queries the manages edge of a Business.
+func (c *BusinessClient) QueryManages(b *Business) *ManagerQuery {
 	query := (&ManagerClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := b.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(business.Table, business.FieldID, id),
 			sqlgraph.To(manager.Table, manager.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, business.BusinessManagerTable, business.BusinessManagerColumn),
+			sqlgraph.Edge(sqlgraph.O2M, false, business.ManagesTable, business.ManagesColumn),
+		)
+		fromV = sqlgraph.Neighbors(b.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryVerifications queries the verifications edge of a Business.
+func (c *BusinessClient) QueryVerifications(b *Business) *VerificationQuery {
+	query := (&VerificationClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := b.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(business.Table, business.FieldID, id),
+			sqlgraph.To(verification.Table, verification.FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, true, business.VerificationsTable, business.VerificationsPrimaryKey...),
+		)
+		fromV = sqlgraph.Neighbors(b.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryRequestVerifications queries the request_verifications edge of a Business.
+func (c *BusinessClient) QueryRequestVerifications(b *Business) *RequestVerificationQuery {
+	query := (&RequestVerificationClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := b.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(business.Table, business.FieldID, id),
+			sqlgraph.To(requestverification.Table, requestverification.FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, true, business.RequestVerificationsTable, business.RequestVerificationsPrimaryKey...),
+		)
+		fromV = sqlgraph.Neighbors(b.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryBusinessDocuments queries the business_documents edge of a Business.
+func (c *BusinessClient) QueryBusinessDocuments(b *Business) *BusinessDocumentQuery {
+	query := (&BusinessDocumentClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := b.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(business.Table, business.FieldID, id),
+			sqlgraph.To(businessdocument.Table, businessdocument.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, business.BusinessDocumentsTable, business.BusinessDocumentsColumn),
 		)
 		fromV = sqlgraph.Neighbors(b.driver.Dialect(), step)
 		return fromV, nil
@@ -389,6 +539,437 @@ func (c *BusinessClient) mutate(ctx context.Context, m *BusinessMutation) (Value
 		return (&BusinessDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
 	default:
 		return nil, fmt.Errorf("ent: unknown Business mutation op: %q", m.Op())
+	}
+}
+
+// BusinessDocumentClient is a client for the BusinessDocument schema.
+type BusinessDocumentClient struct {
+	config
+}
+
+// NewBusinessDocumentClient returns a client for the BusinessDocument from the given config.
+func NewBusinessDocumentClient(c config) *BusinessDocumentClient {
+	return &BusinessDocumentClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `businessdocument.Hooks(f(g(h())))`.
+func (c *BusinessDocumentClient) Use(hooks ...Hook) {
+	c.hooks.BusinessDocument = append(c.hooks.BusinessDocument, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `businessdocument.Intercept(f(g(h())))`.
+func (c *BusinessDocumentClient) Intercept(interceptors ...Interceptor) {
+	c.inters.BusinessDocument = append(c.inters.BusinessDocument, interceptors...)
+}
+
+// Create returns a builder for creating a BusinessDocument entity.
+func (c *BusinessDocumentClient) Create() *BusinessDocumentCreate {
+	mutation := newBusinessDocumentMutation(c.config, OpCreate)
+	return &BusinessDocumentCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of BusinessDocument entities.
+func (c *BusinessDocumentClient) CreateBulk(builders ...*BusinessDocumentCreate) *BusinessDocumentCreateBulk {
+	return &BusinessDocumentCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *BusinessDocumentClient) MapCreateBulk(slice any, setFunc func(*BusinessDocumentCreate, int)) *BusinessDocumentCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &BusinessDocumentCreateBulk{err: fmt.Errorf("calling to BusinessDocumentClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*BusinessDocumentCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &BusinessDocumentCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for BusinessDocument.
+func (c *BusinessDocumentClient) Update() *BusinessDocumentUpdate {
+	mutation := newBusinessDocumentMutation(c.config, OpUpdate)
+	return &BusinessDocumentUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *BusinessDocumentClient) UpdateOne(bd *BusinessDocument) *BusinessDocumentUpdateOne {
+	mutation := newBusinessDocumentMutation(c.config, OpUpdateOne, withBusinessDocument(bd))
+	return &BusinessDocumentUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *BusinessDocumentClient) UpdateOneID(id int) *BusinessDocumentUpdateOne {
+	mutation := newBusinessDocumentMutation(c.config, OpUpdateOne, withBusinessDocumentID(id))
+	return &BusinessDocumentUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for BusinessDocument.
+func (c *BusinessDocumentClient) Delete() *BusinessDocumentDelete {
+	mutation := newBusinessDocumentMutation(c.config, OpDelete)
+	return &BusinessDocumentDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *BusinessDocumentClient) DeleteOne(bd *BusinessDocument) *BusinessDocumentDeleteOne {
+	return c.DeleteOneID(bd.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *BusinessDocumentClient) DeleteOneID(id int) *BusinessDocumentDeleteOne {
+	builder := c.Delete().Where(businessdocument.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &BusinessDocumentDeleteOne{builder}
+}
+
+// Query returns a query builder for BusinessDocument.
+func (c *BusinessDocumentClient) Query() *BusinessDocumentQuery {
+	return &BusinessDocumentQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeBusinessDocument},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a BusinessDocument entity by its id.
+func (c *BusinessDocumentClient) Get(ctx context.Context, id int) (*BusinessDocument, error) {
+	return c.Query().Where(businessdocument.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *BusinessDocumentClient) GetX(ctx context.Context, id int) *BusinessDocument {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryBusinessDocument queries the business_document edge of a BusinessDocument.
+func (c *BusinessDocumentClient) QueryBusinessDocument(bd *BusinessDocument) *BusinessQuery {
+	query := (&BusinessClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := bd.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(businessdocument.Table, businessdocument.FieldID, id),
+			sqlgraph.To(business.Table, business.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, businessdocument.BusinessDocumentTable, businessdocument.BusinessDocumentColumn),
+		)
+		fromV = sqlgraph.Neighbors(bd.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *BusinessDocumentClient) Hooks() []Hook {
+	return c.hooks.BusinessDocument
+}
+
+// Interceptors returns the client interceptors.
+func (c *BusinessDocumentClient) Interceptors() []Interceptor {
+	return c.inters.BusinessDocument
+}
+
+func (c *BusinessDocumentClient) mutate(ctx context.Context, m *BusinessDocumentMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&BusinessDocumentCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&BusinessDocumentUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&BusinessDocumentUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&BusinessDocumentDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown BusinessDocument mutation op: %q", m.Op())
+	}
+}
+
+// BusinessFeatureClient is a client for the BusinessFeature schema.
+type BusinessFeatureClient struct {
+	config
+}
+
+// NewBusinessFeatureClient returns a client for the BusinessFeature from the given config.
+func NewBusinessFeatureClient(c config) *BusinessFeatureClient {
+	return &BusinessFeatureClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `businessfeature.Hooks(f(g(h())))`.
+func (c *BusinessFeatureClient) Use(hooks ...Hook) {
+	c.hooks.BusinessFeature = append(c.hooks.BusinessFeature, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `businessfeature.Intercept(f(g(h())))`.
+func (c *BusinessFeatureClient) Intercept(interceptors ...Interceptor) {
+	c.inters.BusinessFeature = append(c.inters.BusinessFeature, interceptors...)
+}
+
+// Create returns a builder for creating a BusinessFeature entity.
+func (c *BusinessFeatureClient) Create() *BusinessFeatureCreate {
+	mutation := newBusinessFeatureMutation(c.config, OpCreate)
+	return &BusinessFeatureCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of BusinessFeature entities.
+func (c *BusinessFeatureClient) CreateBulk(builders ...*BusinessFeatureCreate) *BusinessFeatureCreateBulk {
+	return &BusinessFeatureCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *BusinessFeatureClient) MapCreateBulk(slice any, setFunc func(*BusinessFeatureCreate, int)) *BusinessFeatureCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &BusinessFeatureCreateBulk{err: fmt.Errorf("calling to BusinessFeatureClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*BusinessFeatureCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &BusinessFeatureCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for BusinessFeature.
+func (c *BusinessFeatureClient) Update() *BusinessFeatureUpdate {
+	mutation := newBusinessFeatureMutation(c.config, OpUpdate)
+	return &BusinessFeatureUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *BusinessFeatureClient) UpdateOne(bf *BusinessFeature) *BusinessFeatureUpdateOne {
+	mutation := newBusinessFeatureMutation(c.config, OpUpdateOne, withBusinessFeature(bf))
+	return &BusinessFeatureUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *BusinessFeatureClient) UpdateOneID(id string) *BusinessFeatureUpdateOne {
+	mutation := newBusinessFeatureMutation(c.config, OpUpdateOne, withBusinessFeatureID(id))
+	return &BusinessFeatureUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for BusinessFeature.
+func (c *BusinessFeatureClient) Delete() *BusinessFeatureDelete {
+	mutation := newBusinessFeatureMutation(c.config, OpDelete)
+	return &BusinessFeatureDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *BusinessFeatureClient) DeleteOne(bf *BusinessFeature) *BusinessFeatureDeleteOne {
+	return c.DeleteOneID(bf.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *BusinessFeatureClient) DeleteOneID(id string) *BusinessFeatureDeleteOne {
+	builder := c.Delete().Where(businessfeature.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &BusinessFeatureDeleteOne{builder}
+}
+
+// Query returns a query builder for BusinessFeature.
+func (c *BusinessFeatureClient) Query() *BusinessFeatureQuery {
+	return &BusinessFeatureQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeBusinessFeature},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a BusinessFeature entity by its id.
+func (c *BusinessFeatureClient) Get(ctx context.Context, id string) (*BusinessFeature, error) {
+	return c.Query().Where(businessfeature.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *BusinessFeatureClient) GetX(ctx context.Context, id string) *BusinessFeature {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *BusinessFeatureClient) Hooks() []Hook {
+	return c.hooks.BusinessFeature
+}
+
+// Interceptors returns the client interceptors.
+func (c *BusinessFeatureClient) Interceptors() []Interceptor {
+	return c.inters.BusinessFeature
+}
+
+func (c *BusinessFeatureClient) mutate(ctx context.Context, m *BusinessFeatureMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&BusinessFeatureCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&BusinessFeatureUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&BusinessFeatureUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&BusinessFeatureDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown BusinessFeature mutation op: %q", m.Op())
+	}
+}
+
+// BusinessServicesClient is a client for the BusinessServices schema.
+type BusinessServicesClient struct {
+	config
+}
+
+// NewBusinessServicesClient returns a client for the BusinessServices from the given config.
+func NewBusinessServicesClient(c config) *BusinessServicesClient {
+	return &BusinessServicesClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `businessservices.Hooks(f(g(h())))`.
+func (c *BusinessServicesClient) Use(hooks ...Hook) {
+	c.hooks.BusinessServices = append(c.hooks.BusinessServices, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `businessservices.Intercept(f(g(h())))`.
+func (c *BusinessServicesClient) Intercept(interceptors ...Interceptor) {
+	c.inters.BusinessServices = append(c.inters.BusinessServices, interceptors...)
+}
+
+// Create returns a builder for creating a BusinessServices entity.
+func (c *BusinessServicesClient) Create() *BusinessServicesCreate {
+	mutation := newBusinessServicesMutation(c.config, OpCreate)
+	return &BusinessServicesCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of BusinessServices entities.
+func (c *BusinessServicesClient) CreateBulk(builders ...*BusinessServicesCreate) *BusinessServicesCreateBulk {
+	return &BusinessServicesCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *BusinessServicesClient) MapCreateBulk(slice any, setFunc func(*BusinessServicesCreate, int)) *BusinessServicesCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &BusinessServicesCreateBulk{err: fmt.Errorf("calling to BusinessServicesClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*BusinessServicesCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &BusinessServicesCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for BusinessServices.
+func (c *BusinessServicesClient) Update() *BusinessServicesUpdate {
+	mutation := newBusinessServicesMutation(c.config, OpUpdate)
+	return &BusinessServicesUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *BusinessServicesClient) UpdateOne(bs *BusinessServices) *BusinessServicesUpdateOne {
+	mutation := newBusinessServicesMutation(c.config, OpUpdateOne, withBusinessServices(bs))
+	return &BusinessServicesUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *BusinessServicesClient) UpdateOneID(id int) *BusinessServicesUpdateOne {
+	mutation := newBusinessServicesMutation(c.config, OpUpdateOne, withBusinessServicesID(id))
+	return &BusinessServicesUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for BusinessServices.
+func (c *BusinessServicesClient) Delete() *BusinessServicesDelete {
+	mutation := newBusinessServicesMutation(c.config, OpDelete)
+	return &BusinessServicesDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *BusinessServicesClient) DeleteOne(bs *BusinessServices) *BusinessServicesDeleteOne {
+	return c.DeleteOneID(bs.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *BusinessServicesClient) DeleteOneID(id int) *BusinessServicesDeleteOne {
+	builder := c.Delete().Where(businessservices.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &BusinessServicesDeleteOne{builder}
+}
+
+// Query returns a query builder for BusinessServices.
+func (c *BusinessServicesClient) Query() *BusinessServicesQuery {
+	return &BusinessServicesQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeBusinessServices},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a BusinessServices entity by its id.
+func (c *BusinessServicesClient) Get(ctx context.Context, id int) (*BusinessServices, error) {
+	return c.Query().Where(businessservices.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *BusinessServicesClient) GetX(ctx context.Context, id int) *BusinessServices {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryBusinessService queries the business_service edge of a BusinessServices.
+func (c *BusinessServicesClient) QueryBusinessService(bs *BusinessServices) *BusinessQuery {
+	query := (&BusinessClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := bs.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(businessservices.Table, businessservices.FieldID, id),
+			sqlgraph.To(business.Table, business.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, businessservices.BusinessServiceTable, businessservices.BusinessServiceColumn),
+		)
+		fromV = sqlgraph.Neighbors(bs.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *BusinessServicesClient) Hooks() []Hook {
+	return c.hooks.BusinessServices
+}
+
+// Interceptors returns the client interceptors.
+func (c *BusinessServicesClient) Interceptors() []Interceptor {
+	return c.inters.BusinessServices
+}
+
+func (c *BusinessServicesClient) mutate(ctx context.Context, m *BusinessServicesMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&BusinessServicesCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&BusinessServicesUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&BusinessServicesUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&BusinessServicesDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown BusinessServices mutation op: %q", m.Op())
 	}
 }
 
@@ -453,7 +1034,7 @@ func (c *ManagerClient) UpdateOne(m *Manager) *ManagerUpdateOne {
 }
 
 // UpdateOneID returns an update builder for the given id.
-func (c *ManagerClient) UpdateOneID(id int) *ManagerUpdateOne {
+func (c *ManagerClient) UpdateOneID(id string) *ManagerUpdateOne {
 	mutation := newManagerMutation(c.config, OpUpdateOne, withManagerID(id))
 	return &ManagerUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
@@ -470,7 +1051,7 @@ func (c *ManagerClient) DeleteOne(m *Manager) *ManagerDeleteOne {
 }
 
 // DeleteOneID returns a builder for deleting the given entity by its id.
-func (c *ManagerClient) DeleteOneID(id int) *ManagerDeleteOne {
+func (c *ManagerClient) DeleteOneID(id string) *ManagerDeleteOne {
 	builder := c.Delete().Where(manager.ID(id))
 	builder.mutation.id = &id
 	builder.mutation.op = OpDeleteOne
@@ -487,12 +1068,12 @@ func (c *ManagerClient) Query() *ManagerQuery {
 }
 
 // Get returns a Manager entity by its id.
-func (c *ManagerClient) Get(ctx context.Context, id int) (*Manager, error) {
+func (c *ManagerClient) Get(ctx context.Context, id string) (*Manager, error) {
 	return c.Query().Where(manager.ID(id)).Only(ctx)
 }
 
 // GetX is like Get, but panics if an error occurs.
-func (c *ManagerClient) GetX(ctx context.Context, id int) *Manager {
+func (c *ManagerClient) GetX(ctx context.Context, id string) *Manager {
 	obj, err := c.Get(ctx, id)
 	if err != nil {
 		panic(err)
@@ -500,15 +1081,15 @@ func (c *ManagerClient) GetX(ctx context.Context, id int) *Manager {
 	return obj
 }
 
-// QueryBusinessUser queries the business_user edge of a Manager.
-func (c *ManagerClient) QueryBusinessUser(m *Manager) *BusinessQuery {
+// QueryBusiness queries the business edge of a Manager.
+func (c *ManagerClient) QueryBusiness(m *Manager) *BusinessQuery {
 	query := (&BusinessClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(manager.Table, manager.FieldID, id),
 			sqlgraph.To(business.Table, business.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, manager.BusinessUserTable, manager.BusinessUserColumn),
+			sqlgraph.Edge(sqlgraph.M2O, true, manager.BusinessTable, manager.BusinessColumn),
 		)
 		fromV = sqlgraph.Neighbors(m.driver.Dialect(), step)
 		return fromV, nil
@@ -516,15 +1097,15 @@ func (c *ManagerClient) QueryBusinessUser(m *Manager) *BusinessQuery {
 	return query
 }
 
-// QueryUserManager queries the user_manager edge of a Manager.
-func (c *ManagerClient) QueryUserManager(m *Manager) *UserQuery {
+// QueryUser queries the user edge of a Manager.
+func (c *ManagerClient) QueryUser(m *Manager) *UserQuery {
 	query := (&UserClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(manager.Table, manager.FieldID, id),
 			sqlgraph.To(user.Table, user.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, manager.UserManagerTable, manager.UserManagerColumn),
+			sqlgraph.Edge(sqlgraph.M2O, true, manager.UserTable, manager.UserColumn),
 		)
 		fromV = sqlgraph.Neighbors(m.driver.Dialect(), step)
 		return fromV, nil
@@ -554,6 +1135,735 @@ func (c *ManagerClient) mutate(ctx context.Context, m *ManagerMutation) (Value, 
 		return (&ManagerDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
 	default:
 		return nil, fmt.Errorf("ent: unknown Manager mutation op: %q", m.Op())
+	}
+}
+
+// PermissionClient is a client for the Permission schema.
+type PermissionClient struct {
+	config
+}
+
+// NewPermissionClient returns a client for the Permission from the given config.
+func NewPermissionClient(c config) *PermissionClient {
+	return &PermissionClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `permission.Hooks(f(g(h())))`.
+func (c *PermissionClient) Use(hooks ...Hook) {
+	c.hooks.Permission = append(c.hooks.Permission, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `permission.Intercept(f(g(h())))`.
+func (c *PermissionClient) Intercept(interceptors ...Interceptor) {
+	c.inters.Permission = append(c.inters.Permission, interceptors...)
+}
+
+// Create returns a builder for creating a Permission entity.
+func (c *PermissionClient) Create() *PermissionCreate {
+	mutation := newPermissionMutation(c.config, OpCreate)
+	return &PermissionCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of Permission entities.
+func (c *PermissionClient) CreateBulk(builders ...*PermissionCreate) *PermissionCreateBulk {
+	return &PermissionCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *PermissionClient) MapCreateBulk(slice any, setFunc func(*PermissionCreate, int)) *PermissionCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &PermissionCreateBulk{err: fmt.Errorf("calling to PermissionClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*PermissionCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &PermissionCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for Permission.
+func (c *PermissionClient) Update() *PermissionUpdate {
+	mutation := newPermissionMutation(c.config, OpUpdate)
+	return &PermissionUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *PermissionClient) UpdateOne(pe *Permission) *PermissionUpdateOne {
+	mutation := newPermissionMutation(c.config, OpUpdateOne, withPermission(pe))
+	return &PermissionUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *PermissionClient) UpdateOneID(id string) *PermissionUpdateOne {
+	mutation := newPermissionMutation(c.config, OpUpdateOne, withPermissionID(id))
+	return &PermissionUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for Permission.
+func (c *PermissionClient) Delete() *PermissionDelete {
+	mutation := newPermissionMutation(c.config, OpDelete)
+	return &PermissionDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *PermissionClient) DeleteOne(pe *Permission) *PermissionDeleteOne {
+	return c.DeleteOneID(pe.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *PermissionClient) DeleteOneID(id string) *PermissionDeleteOne {
+	builder := c.Delete().Where(permission.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &PermissionDeleteOne{builder}
+}
+
+// Query returns a query builder for Permission.
+func (c *PermissionClient) Query() *PermissionQuery {
+	return &PermissionQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypePermission},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a Permission entity by its id.
+func (c *PermissionClient) Get(ctx context.Context, id string) (*Permission, error) {
+	return c.Query().Where(permission.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *PermissionClient) GetX(ctx context.Context, id string) *Permission {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryRoles queries the roles edge of a Permission.
+func (c *PermissionClient) QueryRoles(pe *Permission) *RoleQuery {
+	query := (&RoleClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := pe.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(permission.Table, permission.FieldID, id),
+			sqlgraph.To(role.Table, role.FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, true, permission.RolesTable, permission.RolesPrimaryKey...),
+		)
+		fromV = sqlgraph.Neighbors(pe.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *PermissionClient) Hooks() []Hook {
+	return c.hooks.Permission
+}
+
+// Interceptors returns the client interceptors.
+func (c *PermissionClient) Interceptors() []Interceptor {
+	return c.inters.Permission
+}
+
+func (c *PermissionClient) mutate(ctx context.Context, m *PermissionMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&PermissionCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&PermissionUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&PermissionUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&PermissionDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown Permission mutation op: %q", m.Op())
+	}
+}
+
+// ProviderClient is a client for the Provider schema.
+type ProviderClient struct {
+	config
+}
+
+// NewProviderClient returns a client for the Provider from the given config.
+func NewProviderClient(c config) *ProviderClient {
+	return &ProviderClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `provider.Hooks(f(g(h())))`.
+func (c *ProviderClient) Use(hooks ...Hook) {
+	c.hooks.Provider = append(c.hooks.Provider, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `provider.Intercept(f(g(h())))`.
+func (c *ProviderClient) Intercept(interceptors ...Interceptor) {
+	c.inters.Provider = append(c.inters.Provider, interceptors...)
+}
+
+// Create returns a builder for creating a Provider entity.
+func (c *ProviderClient) Create() *ProviderCreate {
+	mutation := newProviderMutation(c.config, OpCreate)
+	return &ProviderCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of Provider entities.
+func (c *ProviderClient) CreateBulk(builders ...*ProviderCreate) *ProviderCreateBulk {
+	return &ProviderCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *ProviderClient) MapCreateBulk(slice any, setFunc func(*ProviderCreate, int)) *ProviderCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &ProviderCreateBulk{err: fmt.Errorf("calling to ProviderClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*ProviderCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &ProviderCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for Provider.
+func (c *ProviderClient) Update() *ProviderUpdate {
+	mutation := newProviderMutation(c.config, OpUpdate)
+	return &ProviderUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *ProviderClient) UpdateOne(pr *Provider) *ProviderUpdateOne {
+	mutation := newProviderMutation(c.config, OpUpdateOne, withProvider(pr))
+	return &ProviderUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *ProviderClient) UpdateOneID(id string) *ProviderUpdateOne {
+	mutation := newProviderMutation(c.config, OpUpdateOne, withProviderID(id))
+	return &ProviderUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for Provider.
+func (c *ProviderClient) Delete() *ProviderDelete {
+	mutation := newProviderMutation(c.config, OpDelete)
+	return &ProviderDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *ProviderClient) DeleteOne(pr *Provider) *ProviderDeleteOne {
+	return c.DeleteOneID(pr.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *ProviderClient) DeleteOneID(id string) *ProviderDeleteOne {
+	builder := c.Delete().Where(provider.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &ProviderDeleteOne{builder}
+}
+
+// Query returns a query builder for Provider.
+func (c *ProviderClient) Query() *ProviderQuery {
+	return &ProviderQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeProvider},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a Provider entity by its id.
+func (c *ProviderClient) Get(ctx context.Context, id string) (*Provider, error) {
+	return c.Query().Where(provider.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *ProviderClient) GetX(ctx context.Context, id string) *Provider {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *ProviderClient) Hooks() []Hook {
+	return c.hooks.Provider
+}
+
+// Interceptors returns the client interceptors.
+func (c *ProviderClient) Interceptors() []Interceptor {
+	return c.inters.Provider
+}
+
+func (c *ProviderClient) mutate(ctx context.Context, m *ProviderMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&ProviderCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&ProviderUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&ProviderUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&ProviderDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown Provider mutation op: %q", m.Op())
+	}
+}
+
+// RequestVerificationClient is a client for the RequestVerification schema.
+type RequestVerificationClient struct {
+	config
+}
+
+// NewRequestVerificationClient returns a client for the RequestVerification from the given config.
+func NewRequestVerificationClient(c config) *RequestVerificationClient {
+	return &RequestVerificationClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `requestverification.Hooks(f(g(h())))`.
+func (c *RequestVerificationClient) Use(hooks ...Hook) {
+	c.hooks.RequestVerification = append(c.hooks.RequestVerification, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `requestverification.Intercept(f(g(h())))`.
+func (c *RequestVerificationClient) Intercept(interceptors ...Interceptor) {
+	c.inters.RequestVerification = append(c.inters.RequestVerification, interceptors...)
+}
+
+// Create returns a builder for creating a RequestVerification entity.
+func (c *RequestVerificationClient) Create() *RequestVerificationCreate {
+	mutation := newRequestVerificationMutation(c.config, OpCreate)
+	return &RequestVerificationCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of RequestVerification entities.
+func (c *RequestVerificationClient) CreateBulk(builders ...*RequestVerificationCreate) *RequestVerificationCreateBulk {
+	return &RequestVerificationCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *RequestVerificationClient) MapCreateBulk(slice any, setFunc func(*RequestVerificationCreate, int)) *RequestVerificationCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &RequestVerificationCreateBulk{err: fmt.Errorf("calling to RequestVerificationClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*RequestVerificationCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &RequestVerificationCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for RequestVerification.
+func (c *RequestVerificationClient) Update() *RequestVerificationUpdate {
+	mutation := newRequestVerificationMutation(c.config, OpUpdate)
+	return &RequestVerificationUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *RequestVerificationClient) UpdateOne(rv *RequestVerification) *RequestVerificationUpdateOne {
+	mutation := newRequestVerificationMutation(c.config, OpUpdateOne, withRequestVerification(rv))
+	return &RequestVerificationUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *RequestVerificationClient) UpdateOneID(id string) *RequestVerificationUpdateOne {
+	mutation := newRequestVerificationMutation(c.config, OpUpdateOne, withRequestVerificationID(id))
+	return &RequestVerificationUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for RequestVerification.
+func (c *RequestVerificationClient) Delete() *RequestVerificationDelete {
+	mutation := newRequestVerificationMutation(c.config, OpDelete)
+	return &RequestVerificationDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *RequestVerificationClient) DeleteOne(rv *RequestVerification) *RequestVerificationDeleteOne {
+	return c.DeleteOneID(rv.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *RequestVerificationClient) DeleteOneID(id string) *RequestVerificationDeleteOne {
+	builder := c.Delete().Where(requestverification.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &RequestVerificationDeleteOne{builder}
+}
+
+// Query returns a query builder for RequestVerification.
+func (c *RequestVerificationClient) Query() *RequestVerificationQuery {
+	return &RequestVerificationQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeRequestVerification},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a RequestVerification entity by its id.
+func (c *RequestVerificationClient) Get(ctx context.Context, id string) (*RequestVerification, error) {
+	return c.Query().Where(requestverification.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *RequestVerificationClient) GetX(ctx context.Context, id string) *RequestVerification {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryUser queries the user edge of a RequestVerification.
+func (c *RequestVerificationClient) QueryUser(rv *RequestVerification) *UserQuery {
+	query := (&UserClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := rv.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(requestverification.Table, requestverification.FieldID, id),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, false, requestverification.UserTable, requestverification.UserPrimaryKey...),
+		)
+		fromV = sqlgraph.Neighbors(rv.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryBusiness queries the business edge of a RequestVerification.
+func (c *RequestVerificationClient) QueryBusiness(rv *RequestVerification) *BusinessQuery {
+	query := (&BusinessClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := rv.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(requestverification.Table, requestverification.FieldID, id),
+			sqlgraph.To(business.Table, business.FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, false, requestverification.BusinessTable, requestverification.BusinessPrimaryKey...),
+		)
+		fromV = sqlgraph.Neighbors(rv.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *RequestVerificationClient) Hooks() []Hook {
+	return c.hooks.RequestVerification
+}
+
+// Interceptors returns the client interceptors.
+func (c *RequestVerificationClient) Interceptors() []Interceptor {
+	return c.inters.RequestVerification
+}
+
+func (c *RequestVerificationClient) mutate(ctx context.Context, m *RequestVerificationMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&RequestVerificationCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&RequestVerificationUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&RequestVerificationUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&RequestVerificationDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown RequestVerification mutation op: %q", m.Op())
+	}
+}
+
+// RoleClient is a client for the Role schema.
+type RoleClient struct {
+	config
+}
+
+// NewRoleClient returns a client for the Role from the given config.
+func NewRoleClient(c config) *RoleClient {
+	return &RoleClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `role.Hooks(f(g(h())))`.
+func (c *RoleClient) Use(hooks ...Hook) {
+	c.hooks.Role = append(c.hooks.Role, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `role.Intercept(f(g(h())))`.
+func (c *RoleClient) Intercept(interceptors ...Interceptor) {
+	c.inters.Role = append(c.inters.Role, interceptors...)
+}
+
+// Create returns a builder for creating a Role entity.
+func (c *RoleClient) Create() *RoleCreate {
+	mutation := newRoleMutation(c.config, OpCreate)
+	return &RoleCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of Role entities.
+func (c *RoleClient) CreateBulk(builders ...*RoleCreate) *RoleCreateBulk {
+	return &RoleCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *RoleClient) MapCreateBulk(slice any, setFunc func(*RoleCreate, int)) *RoleCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &RoleCreateBulk{err: fmt.Errorf("calling to RoleClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*RoleCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &RoleCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for Role.
+func (c *RoleClient) Update() *RoleUpdate {
+	mutation := newRoleMutation(c.config, OpUpdate)
+	return &RoleUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *RoleClient) UpdateOne(r *Role) *RoleUpdateOne {
+	mutation := newRoleMutation(c.config, OpUpdateOne, withRole(r))
+	return &RoleUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *RoleClient) UpdateOneID(id string) *RoleUpdateOne {
+	mutation := newRoleMutation(c.config, OpUpdateOne, withRoleID(id))
+	return &RoleUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for Role.
+func (c *RoleClient) Delete() *RoleDelete {
+	mutation := newRoleMutation(c.config, OpDelete)
+	return &RoleDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *RoleClient) DeleteOne(r *Role) *RoleDeleteOne {
+	return c.DeleteOneID(r.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *RoleClient) DeleteOneID(id string) *RoleDeleteOne {
+	builder := c.Delete().Where(role.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &RoleDeleteOne{builder}
+}
+
+// Query returns a query builder for Role.
+func (c *RoleClient) Query() *RoleQuery {
+	return &RoleQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeRole},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a Role entity by its id.
+func (c *RoleClient) Get(ctx context.Context, id string) (*Role, error) {
+	return c.Query().Where(role.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *RoleClient) GetX(ctx context.Context, id string) *Role {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryPermissions queries the permissions edge of a Role.
+func (c *RoleClient) QueryPermissions(r *Role) *PermissionQuery {
+	query := (&PermissionClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := r.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(role.Table, role.FieldID, id),
+			sqlgraph.To(permission.Table, permission.FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, false, role.PermissionsTable, role.PermissionsPrimaryKey...),
+		)
+		fromV = sqlgraph.Neighbors(r.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *RoleClient) Hooks() []Hook {
+	return c.hooks.Role
+}
+
+// Interceptors returns the client interceptors.
+func (c *RoleClient) Interceptors() []Interceptor {
+	return c.inters.Role
+}
+
+func (c *RoleClient) mutate(ctx context.Context, m *RoleMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&RoleCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&RoleUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&RoleUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&RoleDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown Role mutation op: %q", m.Op())
+	}
+}
+
+// ServiceClient is a client for the Service schema.
+type ServiceClient struct {
+	config
+}
+
+// NewServiceClient returns a client for the Service from the given config.
+func NewServiceClient(c config) *ServiceClient {
+	return &ServiceClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `service.Hooks(f(g(h())))`.
+func (c *ServiceClient) Use(hooks ...Hook) {
+	c.hooks.Service = append(c.hooks.Service, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `service.Intercept(f(g(h())))`.
+func (c *ServiceClient) Intercept(interceptors ...Interceptor) {
+	c.inters.Service = append(c.inters.Service, interceptors...)
+}
+
+// Create returns a builder for creating a Service entity.
+func (c *ServiceClient) Create() *ServiceCreate {
+	mutation := newServiceMutation(c.config, OpCreate)
+	return &ServiceCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of Service entities.
+func (c *ServiceClient) CreateBulk(builders ...*ServiceCreate) *ServiceCreateBulk {
+	return &ServiceCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *ServiceClient) MapCreateBulk(slice any, setFunc func(*ServiceCreate, int)) *ServiceCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &ServiceCreateBulk{err: fmt.Errorf("calling to ServiceClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*ServiceCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &ServiceCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for Service.
+func (c *ServiceClient) Update() *ServiceUpdate {
+	mutation := newServiceMutation(c.config, OpUpdate)
+	return &ServiceUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *ServiceClient) UpdateOne(s *Service) *ServiceUpdateOne {
+	mutation := newServiceMutation(c.config, OpUpdateOne, withService(s))
+	return &ServiceUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *ServiceClient) UpdateOneID(id string) *ServiceUpdateOne {
+	mutation := newServiceMutation(c.config, OpUpdateOne, withServiceID(id))
+	return &ServiceUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for Service.
+func (c *ServiceClient) Delete() *ServiceDelete {
+	mutation := newServiceMutation(c.config, OpDelete)
+	return &ServiceDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *ServiceClient) DeleteOne(s *Service) *ServiceDeleteOne {
+	return c.DeleteOneID(s.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *ServiceClient) DeleteOneID(id string) *ServiceDeleteOne {
+	builder := c.Delete().Where(service.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &ServiceDeleteOne{builder}
+}
+
+// Query returns a query builder for Service.
+func (c *ServiceClient) Query() *ServiceQuery {
+	return &ServiceQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeService},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a Service entity by its id.
+func (c *ServiceClient) Get(ctx context.Context, id string) (*Service, error) {
+	return c.Query().Where(service.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *ServiceClient) GetX(ctx context.Context, id string) *Service {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *ServiceClient) Hooks() []Hook {
+	return c.hooks.Service
+}
+
+// Interceptors returns the client interceptors.
+func (c *ServiceClient) Interceptors() []Interceptor {
+	return c.inters.Service
+}
+
+func (c *ServiceClient) mutate(ctx context.Context, m *ServiceMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&ServiceCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&ServiceUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&ServiceUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&ServiceDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown Service mutation op: %q", m.Op())
 	}
 }
 
@@ -618,7 +1928,7 @@ func (c *SocialClient) UpdateOne(s *Social) *SocialUpdateOne {
 }
 
 // UpdateOneID returns an update builder for the given id.
-func (c *SocialClient) UpdateOneID(id int) *SocialUpdateOne {
+func (c *SocialClient) UpdateOneID(id string) *SocialUpdateOne {
 	mutation := newSocialMutation(c.config, OpUpdateOne, withSocialID(id))
 	return &SocialUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
@@ -635,7 +1945,7 @@ func (c *SocialClient) DeleteOne(s *Social) *SocialDeleteOne {
 }
 
 // DeleteOneID returns a builder for deleting the given entity by its id.
-func (c *SocialClient) DeleteOneID(id int) *SocialDeleteOne {
+func (c *SocialClient) DeleteOneID(id string) *SocialDeleteOne {
 	builder := c.Delete().Where(social.ID(id))
 	builder.mutation.id = &id
 	builder.mutation.op = OpDeleteOne
@@ -652,12 +1962,12 @@ func (c *SocialClient) Query() *SocialQuery {
 }
 
 // Get returns a Social entity by its id.
-func (c *SocialClient) Get(ctx context.Context, id int) (*Social, error) {
+func (c *SocialClient) Get(ctx context.Context, id string) (*Social, error) {
 	return c.Query().Where(social.ID(id)).Only(ctx)
 }
 
 // GetX is like Get, but panics if an error occurs.
-func (c *SocialClient) GetX(ctx context.Context, id int) *Social {
+func (c *SocialClient) GetX(ctx context.Context, id string) *Social {
 	obj, err := c.Get(ctx, id)
 	if err != nil {
 		panic(err)
@@ -767,7 +2077,7 @@ func (c *UserClient) UpdateOne(u *User) *UserUpdateOne {
 }
 
 // UpdateOneID returns an update builder for the given id.
-func (c *UserClient) UpdateOneID(id int) *UserUpdateOne {
+func (c *UserClient) UpdateOneID(id string) *UserUpdateOne {
 	mutation := newUserMutation(c.config, OpUpdateOne, withUserID(id))
 	return &UserUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
@@ -784,7 +2094,7 @@ func (c *UserClient) DeleteOne(u *User) *UserDeleteOne {
 }
 
 // DeleteOneID returns a builder for deleting the given entity by its id.
-func (c *UserClient) DeleteOneID(id int) *UserDeleteOne {
+func (c *UserClient) DeleteOneID(id string) *UserDeleteOne {
 	builder := c.Delete().Where(user.ID(id))
 	builder.mutation.id = &id
 	builder.mutation.op = OpDeleteOne
@@ -801,12 +2111,12 @@ func (c *UserClient) Query() *UserQuery {
 }
 
 // Get returns a User entity by its id.
-func (c *UserClient) Get(ctx context.Context, id int) (*User, error) {
+func (c *UserClient) Get(ctx context.Context, id string) (*User, error) {
 	return c.Query().Where(user.ID(id)).Only(ctx)
 }
 
 // GetX is like Get, but panics if an error occurs.
-func (c *UserClient) GetX(ctx context.Context, id int) *User {
+func (c *UserClient) GetX(ctx context.Context, id string) *User {
 	obj, err := c.Get(ctx, id)
 	if err != nil {
 		panic(err)
@@ -814,15 +2124,63 @@ func (c *UserClient) GetX(ctx context.Context, id int) *User {
 	return obj
 }
 
-// QueryUserManager queries the user_manager edge of a User.
-func (c *UserClient) QueryUserManager(u *User) *ManagerQuery {
+// QueryManages queries the manages edge of a User.
+func (c *UserClient) QueryManages(u *User) *ManagerQuery {
 	query := (&ManagerClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := u.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(user.Table, user.FieldID, id),
 			sqlgraph.To(manager.Table, manager.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, user.UserManagerTable, user.UserManagerColumn),
+			sqlgraph.Edge(sqlgraph.O2M, false, user.ManagesTable, user.ManagesColumn),
+		)
+		fromV = sqlgraph.Neighbors(u.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryUserDocuments queries the user_documents edge of a User.
+func (c *UserClient) QueryUserDocuments(u *User) *UserDocumentQuery {
+	query := (&UserDocumentClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := u.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, id),
+			sqlgraph.To(userdocument.Table, userdocument.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, user.UserDocumentsTable, user.UserDocumentsColumn),
+		)
+		fromV = sqlgraph.Neighbors(u.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryVerifications queries the verifications edge of a User.
+func (c *UserClient) QueryVerifications(u *User) *VerificationQuery {
+	query := (&VerificationClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := u.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, id),
+			sqlgraph.To(verification.Table, verification.FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, true, user.VerificationsTable, user.VerificationsPrimaryKey...),
+		)
+		fromV = sqlgraph.Neighbors(u.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryRequestVerifications queries the request_verifications edge of a User.
+func (c *UserClient) QueryRequestVerifications(u *User) *RequestVerificationQuery {
+	query := (&RequestVerificationClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := u.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, id),
+			sqlgraph.To(requestverification.Table, requestverification.FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, true, user.RequestVerificationsTable, user.RequestVerificationsPrimaryKey...),
 		)
 		fromV = sqlgraph.Neighbors(u.driver.Dialect(), step)
 		return fromV, nil
@@ -855,12 +2213,330 @@ func (c *UserClient) mutate(ctx context.Context, m *UserMutation) (Value, error)
 	}
 }
 
+// UserDocumentClient is a client for the UserDocument schema.
+type UserDocumentClient struct {
+	config
+}
+
+// NewUserDocumentClient returns a client for the UserDocument from the given config.
+func NewUserDocumentClient(c config) *UserDocumentClient {
+	return &UserDocumentClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `userdocument.Hooks(f(g(h())))`.
+func (c *UserDocumentClient) Use(hooks ...Hook) {
+	c.hooks.UserDocument = append(c.hooks.UserDocument, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `userdocument.Intercept(f(g(h())))`.
+func (c *UserDocumentClient) Intercept(interceptors ...Interceptor) {
+	c.inters.UserDocument = append(c.inters.UserDocument, interceptors...)
+}
+
+// Create returns a builder for creating a UserDocument entity.
+func (c *UserDocumentClient) Create() *UserDocumentCreate {
+	mutation := newUserDocumentMutation(c.config, OpCreate)
+	return &UserDocumentCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of UserDocument entities.
+func (c *UserDocumentClient) CreateBulk(builders ...*UserDocumentCreate) *UserDocumentCreateBulk {
+	return &UserDocumentCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *UserDocumentClient) MapCreateBulk(slice any, setFunc func(*UserDocumentCreate, int)) *UserDocumentCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &UserDocumentCreateBulk{err: fmt.Errorf("calling to UserDocumentClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*UserDocumentCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &UserDocumentCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for UserDocument.
+func (c *UserDocumentClient) Update() *UserDocumentUpdate {
+	mutation := newUserDocumentMutation(c.config, OpUpdate)
+	return &UserDocumentUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *UserDocumentClient) UpdateOne(ud *UserDocument) *UserDocumentUpdateOne {
+	mutation := newUserDocumentMutation(c.config, OpUpdateOne, withUserDocument(ud))
+	return &UserDocumentUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *UserDocumentClient) UpdateOneID(id int) *UserDocumentUpdateOne {
+	mutation := newUserDocumentMutation(c.config, OpUpdateOne, withUserDocumentID(id))
+	return &UserDocumentUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for UserDocument.
+func (c *UserDocumentClient) Delete() *UserDocumentDelete {
+	mutation := newUserDocumentMutation(c.config, OpDelete)
+	return &UserDocumentDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *UserDocumentClient) DeleteOne(ud *UserDocument) *UserDocumentDeleteOne {
+	return c.DeleteOneID(ud.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *UserDocumentClient) DeleteOneID(id int) *UserDocumentDeleteOne {
+	builder := c.Delete().Where(userdocument.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &UserDocumentDeleteOne{builder}
+}
+
+// Query returns a query builder for UserDocument.
+func (c *UserDocumentClient) Query() *UserDocumentQuery {
+	return &UserDocumentQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeUserDocument},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a UserDocument entity by its id.
+func (c *UserDocumentClient) Get(ctx context.Context, id int) (*UserDocument, error) {
+	return c.Query().Where(userdocument.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *UserDocumentClient) GetX(ctx context.Context, id int) *UserDocument {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryUserDocument queries the user_document edge of a UserDocument.
+func (c *UserDocumentClient) QueryUserDocument(ud *UserDocument) *UserQuery {
+	query := (&UserClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := ud.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(userdocument.Table, userdocument.FieldID, id),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, userdocument.UserDocumentTable, userdocument.UserDocumentColumn),
+		)
+		fromV = sqlgraph.Neighbors(ud.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *UserDocumentClient) Hooks() []Hook {
+	return c.hooks.UserDocument
+}
+
+// Interceptors returns the client interceptors.
+func (c *UserDocumentClient) Interceptors() []Interceptor {
+	return c.inters.UserDocument
+}
+
+func (c *UserDocumentClient) mutate(ctx context.Context, m *UserDocumentMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&UserDocumentCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&UserDocumentUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&UserDocumentUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&UserDocumentDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown UserDocument mutation op: %q", m.Op())
+	}
+}
+
+// VerificationClient is a client for the Verification schema.
+type VerificationClient struct {
+	config
+}
+
+// NewVerificationClient returns a client for the Verification from the given config.
+func NewVerificationClient(c config) *VerificationClient {
+	return &VerificationClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `verification.Hooks(f(g(h())))`.
+func (c *VerificationClient) Use(hooks ...Hook) {
+	c.hooks.Verification = append(c.hooks.Verification, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `verification.Intercept(f(g(h())))`.
+func (c *VerificationClient) Intercept(interceptors ...Interceptor) {
+	c.inters.Verification = append(c.inters.Verification, interceptors...)
+}
+
+// Create returns a builder for creating a Verification entity.
+func (c *VerificationClient) Create() *VerificationCreate {
+	mutation := newVerificationMutation(c.config, OpCreate)
+	return &VerificationCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of Verification entities.
+func (c *VerificationClient) CreateBulk(builders ...*VerificationCreate) *VerificationCreateBulk {
+	return &VerificationCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *VerificationClient) MapCreateBulk(slice any, setFunc func(*VerificationCreate, int)) *VerificationCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &VerificationCreateBulk{err: fmt.Errorf("calling to VerificationClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*VerificationCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &VerificationCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for Verification.
+func (c *VerificationClient) Update() *VerificationUpdate {
+	mutation := newVerificationMutation(c.config, OpUpdate)
+	return &VerificationUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *VerificationClient) UpdateOne(v *Verification) *VerificationUpdateOne {
+	mutation := newVerificationMutation(c.config, OpUpdateOne, withVerification(v))
+	return &VerificationUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *VerificationClient) UpdateOneID(id string) *VerificationUpdateOne {
+	mutation := newVerificationMutation(c.config, OpUpdateOne, withVerificationID(id))
+	return &VerificationUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for Verification.
+func (c *VerificationClient) Delete() *VerificationDelete {
+	mutation := newVerificationMutation(c.config, OpDelete)
+	return &VerificationDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *VerificationClient) DeleteOne(v *Verification) *VerificationDeleteOne {
+	return c.DeleteOneID(v.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *VerificationClient) DeleteOneID(id string) *VerificationDeleteOne {
+	builder := c.Delete().Where(verification.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &VerificationDeleteOne{builder}
+}
+
+// Query returns a query builder for Verification.
+func (c *VerificationClient) Query() *VerificationQuery {
+	return &VerificationQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeVerification},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a Verification entity by its id.
+func (c *VerificationClient) Get(ctx context.Context, id string) (*Verification, error) {
+	return c.Query().Where(verification.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *VerificationClient) GetX(ctx context.Context, id string) *Verification {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryUser queries the user edge of a Verification.
+func (c *VerificationClient) QueryUser(v *Verification) *UserQuery {
+	query := (&UserClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := v.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(verification.Table, verification.FieldID, id),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, false, verification.UserTable, verification.UserPrimaryKey...),
+		)
+		fromV = sqlgraph.Neighbors(v.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryBusiness queries the business edge of a Verification.
+func (c *VerificationClient) QueryBusiness(v *Verification) *BusinessQuery {
+	query := (&BusinessClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := v.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(verification.Table, verification.FieldID, id),
+			sqlgraph.To(business.Table, business.FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, false, verification.BusinessTable, verification.BusinessPrimaryKey...),
+		)
+		fromV = sqlgraph.Neighbors(v.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *VerificationClient) Hooks() []Hook {
+	return c.hooks.Verification
+}
+
+// Interceptors returns the client interceptors.
+func (c *VerificationClient) Interceptors() []Interceptor {
+	return c.inters.Verification
+}
+
+func (c *VerificationClient) mutate(ctx context.Context, m *VerificationMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&VerificationCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&VerificationUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&VerificationUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&VerificationDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown Verification mutation op: %q", m.Op())
+	}
+}
+
 // hooks and interceptors per client, for fast access.
 type (
 	hooks struct {
-		Business, Manager, Social, User []ent.Hook
+		Business, BusinessDocument, BusinessFeature, BusinessServices, Manager,
+		Permission, Provider, RequestVerification, Role, Service, Social, User,
+		UserDocument, Verification []ent.Hook
 	}
 	inters struct {
-		Business, Manager, Social, User []ent.Interceptor
+		Business, BusinessDocument, BusinessFeature, BusinessServices, Manager,
+		Permission, Provider, RequestVerification, Role, Service, Social, User,
+		UserDocument, Verification []ent.Interceptor
 	}
 )

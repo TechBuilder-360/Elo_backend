@@ -1,8 +1,6 @@
 package schema
 
 import (
-	"time"
-
 	"entgo.io/ent"
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
@@ -13,12 +11,16 @@ type Social struct {
 	ent.Schema
 }
 
+func (Social) Mixin() []ent.Mixin {
+	return []ent.Mixin{
+		BaseMixin{},
+	}
+}
+
 // Fields of the Social.
 func (Social) Fields() []ent.Field {
 	return []ent.Field{
-		field.Time("created_at").
-			Default(time.Now).
-			Immutable(),
+		field.String("business_id"),
 		field.String("name").NotEmpty(),
 		field.String("url").NotEmpty(),
 	}
@@ -27,9 +29,10 @@ func (Social) Fields() []ent.Field {
 // Edges of the Social.
 func (Social) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.From("socials", Business.Type).
-			Ref("social").
-			Unique().
-			Required(),
+		edge.From("social", Business.Type).
+			Ref("socials").
+			Field("business_id").
+			Required().
+			Unique(),
 	}
 }

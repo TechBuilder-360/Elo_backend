@@ -1,0 +1,18 @@
+enum Entity {
+  USER_VERIFICATION
+BUSINESS_VERIFICATION
+}
+
+type verification {
+   link: String!
+   status: String!
+}
+
+input verificationPayload {
+  id: String!
+  entity: Entity
+}
+
+extend type Mutation {
+  requestVerification(input: verificationPayload!): verification!
+}

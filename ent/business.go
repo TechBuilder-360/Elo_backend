@@ -16,29 +16,37 @@ import (
 type Business struct {
 	config `json:"-"`
 	// ID of the ent.
-	ID int `json:"id,omitempty"`
+	ID string `json:"id,omitempty"`
+	// CreatedAt holds the value of the "created_at" field.
+	CreatedAt time.Time `json:"created_at,omitempty"`
+	// UpdatedAt holds the value of the "updated_at" field.
+	UpdatedAt time.Time `json:"updated_at,omitempty"`
+	// DeletedAt holds the value of the "deleted_at" field.
+	DeletedAt *time.Time `json:"deleted_at,omitempty"`
 	// Category holds the value of the "category" field.
 	Category string `json:"category,omitempty"`
 	// Name holds the value of the "name" field.
 	Name string `json:"name,omitempty"`
-	// LogoURL holds the value of the "logo_url" field.
-	LogoURL *string `json:"logo_url,omitempty"`
+	// About holds the value of the "about" field.
+	About string `json:"about,omitempty"`
+	// Logo holds the value of the "logo" field.
+	Logo string `json:"logo,omitempty"`
 	// Email holds the value of the "email" field.
 	Email string `json:"email,omitempty"`
 	// Website holds the value of the "website" field.
-	Website *string `json:"website,omitempty"`
+	Website string `json:"website,omitempty"`
+	// Active holds the value of the "active" field.
+	Active bool `json:"active,omitempty"`
 	// Disabled holds the value of the "disabled" field.
 	Disabled bool `json:"disabled,omitempty"`
 	// DisabledAt holds the value of the "disabled_at" field.
 	DisabledAt time.Time `json:"disabled_at,omitempty"`
 	// DisableReason holds the value of the "disable_reason" field.
-	DisableReason *string `json:"disable_reason,omitempty"`
+	DisableReason string `json:"disable_reason,omitempty"`
 	// Verified holds the value of the "verified" field.
 	Verified bool `json:"verified,omitempty"`
 	// VerifiedAt holds the value of the "verified_at" field.
-	VerifiedAt *time.Time `json:"verified_at,omitempty"`
-	// CreatedAt holds the value of the "created_at" field.
-	CreatedAt time.Time `json:"created_at,omitempty"`
+	VerifiedAt time.Time `json:"verified_at,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the BusinessQuery when eager-loading is set.
 	Edges        BusinessEdges `json:"edges"`
@@ -47,31 +55,75 @@ type Business struct {
 
 // BusinessEdges holds the relations/edges for other nodes in the graph.
 type BusinessEdges struct {
-	// BusinessSocial holds the value of the business_social edge.
-	BusinessSocial []*Social `json:"business_social,omitempty"`
-	// BusinessManager holds the value of the business_manager edge.
-	BusinessManager []*Manager `json:"business_manager,omitempty"`
+	// Socials holds the value of the socials edge.
+	Socials []*Social `json:"socials,omitempty"`
+	// Services holds the value of the services edge.
+	Services []*BusinessServices `json:"services,omitempty"`
+	// Manages holds the value of the manages edge.
+	Manages []*Manager `json:"manages,omitempty"`
+	// Verifications holds the value of the verifications edge.
+	Verifications []*Verification `json:"verifications,omitempty"`
+	// RequestVerifications holds the value of the request_verifications edge.
+	RequestVerifications []*RequestVerification `json:"request_verifications,omitempty"`
+	// BusinessDocuments holds the value of the business_documents edge.
+	BusinessDocuments []*BusinessDocument `json:"business_documents,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [2]bool
+	loadedTypes [6]bool
 }
 
-// BusinessSocialOrErr returns the BusinessSocial value or an error if the edge
+// SocialsOrErr returns the Socials value or an error if the edge
 // was not loaded in eager-loading.
-func (e BusinessEdges) BusinessSocialOrErr() ([]*Social, error) {
+func (e BusinessEdges) SocialsOrErr() ([]*Social, error) {
 	if e.loadedTypes[0] {
-		return e.BusinessSocial, nil
+		return e.Socials, nil
 	}
-	return nil, &NotLoadedError{edge: "business_social"}
+	return nil, &NotLoadedError{edge: "socials"}
 }
 
-// BusinessManagerOrErr returns the BusinessManager value or an error if the edge
+// ServicesOrErr returns the Services value or an error if the edge
 // was not loaded in eager-loading.
-func (e BusinessEdges) BusinessManagerOrErr() ([]*Manager, error) {
+func (e BusinessEdges) ServicesOrErr() ([]*BusinessServices, error) {
 	if e.loadedTypes[1] {
-		return e.BusinessManager, nil
+		return e.Services, nil
 	}
-	return nil, &NotLoadedError{edge: "business_manager"}
+	return nil, &NotLoadedError{edge: "services"}
+}
+
+// ManagesOrErr returns the Manages value or an error if the edge
+// was not loaded in eager-loading.
+func (e BusinessEdges) ManagesOrErr() ([]*Manager, error) {
+	if e.loadedTypes[2] {
+		return e.Manages, nil
+	}
+	return nil, &NotLoadedError{edge: "manages"}
+}
+
+// VerificationsOrErr returns the Verifications value or an error if the edge
+// was not loaded in eager-loading.
+func (e BusinessEdges) VerificationsOrErr() ([]*Verification, error) {
+	if e.loadedTypes[3] {
+		return e.Verifications, nil
+	}
+	return nil, &NotLoadedError{edge: "verifications"}
+}
+
+// RequestVerificationsOrErr returns the RequestVerifications value or an error if the edge
+// was not loaded in eager-loading.
+func (e BusinessEdges) RequestVerificationsOrErr() ([]*RequestVerification, error) {
+	if e.loadedTypes[4] {
+		return e.RequestVerifications, nil
+	}
+	return nil, &NotLoadedError{edge: "request_verifications"}
+}
+
+// BusinessDocumentsOrErr returns the BusinessDocuments value or an error if the edge
+// was not loaded in eager-loading.
+func (e BusinessEdges) BusinessDocumentsOrErr() ([]*BusinessDocument, error) {
+	if e.loadedTypes[5] {
+		return e.BusinessDocuments, nil
+	}
+	return nil, &NotLoadedError{edge: "business_documents"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -79,13 +131,11 @@ func (*Business) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case business.FieldDisabled, business.FieldVerified:
+		case business.FieldActive, business.FieldDisabled, business.FieldVerified:
 			values[i] = new(sql.NullBool)
-		case business.FieldID:
-			values[i] = new(sql.NullInt64)
-		case business.FieldCategory, business.FieldName, business.FieldLogoURL, business.FieldEmail, business.FieldWebsite, business.FieldDisableReason:
+		case business.FieldID, business.FieldCategory, business.FieldName, business.FieldAbout, business.FieldLogo, business.FieldEmail, business.FieldWebsite, business.FieldDisableReason:
 			values[i] = new(sql.NullString)
-		case business.FieldDisabledAt, business.FieldVerifiedAt, business.FieldCreatedAt:
+		case business.FieldCreatedAt, business.FieldUpdatedAt, business.FieldDeletedAt, business.FieldDisabledAt, business.FieldVerifiedAt:
 			values[i] = new(sql.NullTime)
 		default:
 			values[i] = new(sql.UnknownType)
@@ -103,11 +153,30 @@ func (b *Business) assignValues(columns []string, values []any) error {
 	for i := range columns {
 		switch columns[i] {
 		case business.FieldID:
-			value, ok := values[i].(*sql.NullInt64)
-			if !ok {
-				return fmt.Errorf("unexpected type %T for field id", value)
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field id", values[i])
+			} else if value.Valid {
+				b.ID = value.String
 			}
-			b.ID = int(value.Int64)
+		case business.FieldCreatedAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field created_at", values[i])
+			} else if value.Valid {
+				b.CreatedAt = value.Time
+			}
+		case business.FieldUpdatedAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field updated_at", values[i])
+			} else if value.Valid {
+				b.UpdatedAt = value.Time
+			}
+		case business.FieldDeletedAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field deleted_at", values[i])
+			} else if value.Valid {
+				b.DeletedAt = new(time.Time)
+				*b.DeletedAt = value.Time
+			}
 		case business.FieldCategory:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field category", values[i])
@@ -120,12 +189,17 @@ func (b *Business) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				b.Name = value.String
 			}
-		case business.FieldLogoURL:
+		case business.FieldAbout:
 			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field logo_url", values[i])
+				return fmt.Errorf("unexpected type %T for field about", values[i])
 			} else if value.Valid {
-				b.LogoURL = new(string)
-				*b.LogoURL = value.String
+				b.About = value.String
+			}
+		case business.FieldLogo:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field logo", values[i])
+			} else if value.Valid {
+				b.Logo = value.String
 			}
 		case business.FieldEmail:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -137,8 +211,13 @@ func (b *Business) assignValues(columns []string, values []any) error {
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field website", values[i])
 			} else if value.Valid {
-				b.Website = new(string)
-				*b.Website = value.String
+				b.Website = value.String
+			}
+		case business.FieldActive:
+			if value, ok := values[i].(*sql.NullBool); !ok {
+				return fmt.Errorf("unexpected type %T for field active", values[i])
+			} else if value.Valid {
+				b.Active = value.Bool
 			}
 		case business.FieldDisabled:
 			if value, ok := values[i].(*sql.NullBool); !ok {
@@ -156,8 +235,7 @@ func (b *Business) assignValues(columns []string, values []any) error {
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field disable_reason", values[i])
 			} else if value.Valid {
-				b.DisableReason = new(string)
-				*b.DisableReason = value.String
+				b.DisableReason = value.String
 			}
 		case business.FieldVerified:
 			if value, ok := values[i].(*sql.NullBool); !ok {
@@ -169,14 +247,7 @@ func (b *Business) assignValues(columns []string, values []any) error {
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field verified_at", values[i])
 			} else if value.Valid {
-				b.VerifiedAt = new(time.Time)
-				*b.VerifiedAt = value.Time
-			}
-		case business.FieldCreatedAt:
-			if value, ok := values[i].(*sql.NullTime); !ok {
-				return fmt.Errorf("unexpected type %T for field created_at", values[i])
-			} else if value.Valid {
-				b.CreatedAt = value.Time
+				b.VerifiedAt = value.Time
 			}
 		default:
 			b.selectValues.Set(columns[i], values[i])
@@ -191,14 +262,34 @@ func (b *Business) Value(name string) (ent.Value, error) {
 	return b.selectValues.Get(name)
 }
 
-// QueryBusinessSocial queries the "business_social" edge of the Business entity.
-func (b *Business) QueryBusinessSocial() *SocialQuery {
-	return NewBusinessClient(b.config).QueryBusinessSocial(b)
+// QuerySocials queries the "socials" edge of the Business entity.
+func (b *Business) QuerySocials() *SocialQuery {
+	return NewBusinessClient(b.config).QuerySocials(b)
 }
 
-// QueryBusinessManager queries the "business_manager" edge of the Business entity.
-func (b *Business) QueryBusinessManager() *ManagerQuery {
-	return NewBusinessClient(b.config).QueryBusinessManager(b)
+// QueryServices queries the "services" edge of the Business entity.
+func (b *Business) QueryServices() *BusinessServicesQuery {
+	return NewBusinessClient(b.config).QueryServices(b)
+}
+
+// QueryManages queries the "manages" edge of the Business entity.
+func (b *Business) QueryManages() *ManagerQuery {
+	return NewBusinessClient(b.config).QueryManages(b)
+}
+
+// QueryVerifications queries the "verifications" edge of the Business entity.
+func (b *Business) QueryVerifications() *VerificationQuery {
+	return NewBusinessClient(b.config).QueryVerifications(b)
+}
+
+// QueryRequestVerifications queries the "request_verifications" edge of the Business entity.
+func (b *Business) QueryRequestVerifications() *RequestVerificationQuery {
+	return NewBusinessClient(b.config).QueryRequestVerifications(b)
+}
+
+// QueryBusinessDocuments queries the "business_documents" edge of the Business entity.
+func (b *Business) QueryBusinessDocuments() *BusinessDocumentQuery {
+	return NewBusinessClient(b.config).QueryBusinessDocuments(b)
 }
 
 // Update returns a builder for updating this Business.
@@ -224,24 +315,37 @@ func (b *Business) String() string {
 	var builder strings.Builder
 	builder.WriteString("Business(")
 	builder.WriteString(fmt.Sprintf("id=%v, ", b.ID))
+	builder.WriteString("created_at=")
+	builder.WriteString(b.CreatedAt.Format(time.ANSIC))
+	builder.WriteString(", ")
+	builder.WriteString("updated_at=")
+	builder.WriteString(b.UpdatedAt.Format(time.ANSIC))
+	builder.WriteString(", ")
+	if v := b.DeletedAt; v != nil {
+		builder.WriteString("deleted_at=")
+		builder.WriteString(v.Format(time.ANSIC))
+	}
+	builder.WriteString(", ")
 	builder.WriteString("category=")
 	builder.WriteString(b.Category)
 	builder.WriteString(", ")
 	builder.WriteString("name=")
 	builder.WriteString(b.Name)
 	builder.WriteString(", ")
-	if v := b.LogoURL; v != nil {
-		builder.WriteString("logo_url=")
-		builder.WriteString(*v)
-	}
+	builder.WriteString("about=")
+	builder.WriteString(b.About)
+	builder.WriteString(", ")
+	builder.WriteString("logo=")
+	builder.WriteString(b.Logo)
 	builder.WriteString(", ")
 	builder.WriteString("email=")
 	builder.WriteString(b.Email)
 	builder.WriteString(", ")
-	if v := b.Website; v != nil {
-		builder.WriteString("website=")
-		builder.WriteString(*v)
-	}
+	builder.WriteString("website=")
+	builder.WriteString(b.Website)
+	builder.WriteString(", ")
+	builder.WriteString("active=")
+	builder.WriteString(fmt.Sprintf("%v", b.Active))
 	builder.WriteString(", ")
 	builder.WriteString("disabled=")
 	builder.WriteString(fmt.Sprintf("%v", b.Disabled))
@@ -249,21 +353,14 @@ func (b *Business) String() string {
 	builder.WriteString("disabled_at=")
 	builder.WriteString(b.DisabledAt.Format(time.ANSIC))
 	builder.WriteString(", ")
-	if v := b.DisableReason; v != nil {
-		builder.WriteString("disable_reason=")
-		builder.WriteString(*v)
-	}
+	builder.WriteString("disable_reason=")
+	builder.WriteString(b.DisableReason)
 	builder.WriteString(", ")
 	builder.WriteString("verified=")
 	builder.WriteString(fmt.Sprintf("%v", b.Verified))
 	builder.WriteString(", ")
-	if v := b.VerifiedAt; v != nil {
-		builder.WriteString("verified_at=")
-		builder.WriteString(v.Format(time.ANSIC))
-	}
-	builder.WriteString(", ")
-	builder.WriteString("created_at=")
-	builder.WriteString(b.CreatedAt.Format(time.ANSIC))
+	builder.WriteString("verified_at=")
+	builder.WriteString(b.VerifiedAt.Format(time.ANSIC))
 	builder.WriteByte(')')
 	return builder.String()
 }

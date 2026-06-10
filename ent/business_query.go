@@ -13,20 +13,28 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/Toflex/directory_v2/ent/business"
+	"github.com/Toflex/directory_v2/ent/businessdocument"
+	"github.com/Toflex/directory_v2/ent/businessservices"
 	"github.com/Toflex/directory_v2/ent/manager"
 	"github.com/Toflex/directory_v2/ent/predicate"
+	"github.com/Toflex/directory_v2/ent/requestverification"
 	"github.com/Toflex/directory_v2/ent/social"
+	"github.com/Toflex/directory_v2/ent/verification"
 )
 
 // BusinessQuery is the builder for querying Business entities.
 type BusinessQuery struct {
 	config
-	ctx                 *QueryContext
-	order               []business.OrderOption
-	inters              []Interceptor
-	predicates          []predicate.Business
-	withBusinessSocial  *SocialQuery
-	withBusinessManager *ManagerQuery
+	ctx                      *QueryContext
+	order                    []business.OrderOption
+	inters                   []Interceptor
+	predicates               []predicate.Business
+	withSocials              *SocialQuery
+	withServices             *BusinessServicesQuery
+	withManages              *ManagerQuery
+	withVerifications        *VerificationQuery
+	withRequestVerifications *RequestVerificationQuery
+	withBusinessDocuments    *BusinessDocumentQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -63,8 +71,8 @@ func (bq *BusinessQuery) Order(o ...business.OrderOption) *BusinessQuery {
 	return bq
 }
 
-// QueryBusinessSocial chains the current query on the "business_social" edge.
-func (bq *BusinessQuery) QueryBusinessSocial() *SocialQuery {
+// QuerySocials chains the current query on the "socials" edge.
+func (bq *BusinessQuery) QuerySocials() *SocialQuery {
 	query := (&SocialClient{config: bq.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := bq.prepareQuery(ctx); err != nil {
@@ -77,7 +85,7 @@ func (bq *BusinessQuery) QueryBusinessSocial() *SocialQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(business.Table, business.FieldID, selector),
 			sqlgraph.To(social.Table, social.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, business.BusinessSocialTable, business.BusinessSocialColumn),
+			sqlgraph.Edge(sqlgraph.O2M, false, business.SocialsTable, business.SocialsColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(bq.driver.Dialect(), step)
 		return fromU, nil
@@ -85,8 +93,30 @@ func (bq *BusinessQuery) QueryBusinessSocial() *SocialQuery {
 	return query
 }
 
-// QueryBusinessManager chains the current query on the "business_manager" edge.
-func (bq *BusinessQuery) QueryBusinessManager() *ManagerQuery {
+// QueryServices chains the current query on the "services" edge.
+func (bq *BusinessQuery) QueryServices() *BusinessServicesQuery {
+	query := (&BusinessServicesClient{config: bq.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := bq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := bq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(business.Table, business.FieldID, selector),
+			sqlgraph.To(businessservices.Table, businessservices.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, business.ServicesTable, business.ServicesColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(bq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryManages chains the current query on the "manages" edge.
+func (bq *BusinessQuery) QueryManages() *ManagerQuery {
 	query := (&ManagerClient{config: bq.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := bq.prepareQuery(ctx); err != nil {
@@ -99,7 +129,73 @@ func (bq *BusinessQuery) QueryBusinessManager() *ManagerQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(business.Table, business.FieldID, selector),
 			sqlgraph.To(manager.Table, manager.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, business.BusinessManagerTable, business.BusinessManagerColumn),
+			sqlgraph.Edge(sqlgraph.O2M, false, business.ManagesTable, business.ManagesColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(bq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryVerifications chains the current query on the "verifications" edge.
+func (bq *BusinessQuery) QueryVerifications() *VerificationQuery {
+	query := (&VerificationClient{config: bq.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := bq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := bq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(business.Table, business.FieldID, selector),
+			sqlgraph.To(verification.Table, verification.FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, true, business.VerificationsTable, business.VerificationsPrimaryKey...),
+		)
+		fromU = sqlgraph.SetNeighbors(bq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryRequestVerifications chains the current query on the "request_verifications" edge.
+func (bq *BusinessQuery) QueryRequestVerifications() *RequestVerificationQuery {
+	query := (&RequestVerificationClient{config: bq.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := bq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := bq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(business.Table, business.FieldID, selector),
+			sqlgraph.To(requestverification.Table, requestverification.FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, true, business.RequestVerificationsTable, business.RequestVerificationsPrimaryKey...),
+		)
+		fromU = sqlgraph.SetNeighbors(bq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryBusinessDocuments chains the current query on the "business_documents" edge.
+func (bq *BusinessQuery) QueryBusinessDocuments() *BusinessDocumentQuery {
+	query := (&BusinessDocumentClient{config: bq.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := bq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := bq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(business.Table, business.FieldID, selector),
+			sqlgraph.To(businessdocument.Table, businessdocument.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, business.BusinessDocumentsTable, business.BusinessDocumentsColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(bq.driver.Dialect(), step)
 		return fromU, nil
@@ -131,8 +227,8 @@ func (bq *BusinessQuery) FirstX(ctx context.Context) *Business {
 
 // FirstID returns the first Business ID from the query.
 // Returns a *NotFoundError when no Business ID was found.
-func (bq *BusinessQuery) FirstID(ctx context.Context) (id int, err error) {
-	var ids []int
+func (bq *BusinessQuery) FirstID(ctx context.Context) (id string, err error) {
+	var ids []string
 	if ids, err = bq.Limit(1).IDs(setContextOp(ctx, bq.ctx, ent.OpQueryFirstID)); err != nil {
 		return
 	}
@@ -144,7 +240,7 @@ func (bq *BusinessQuery) FirstID(ctx context.Context) (id int, err error) {
 }
 
 // FirstIDX is like FirstID, but panics if an error occurs.
-func (bq *BusinessQuery) FirstIDX(ctx context.Context) int {
+func (bq *BusinessQuery) FirstIDX(ctx context.Context) string {
 	id, err := bq.FirstID(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
@@ -182,8 +278,8 @@ func (bq *BusinessQuery) OnlyX(ctx context.Context) *Business {
 // OnlyID is like Only, but returns the only Business ID in the query.
 // Returns a *NotSingularError when more than one Business ID is found.
 // Returns a *NotFoundError when no entities are found.
-func (bq *BusinessQuery) OnlyID(ctx context.Context) (id int, err error) {
-	var ids []int
+func (bq *BusinessQuery) OnlyID(ctx context.Context) (id string, err error) {
+	var ids []string
 	if ids, err = bq.Limit(2).IDs(setContextOp(ctx, bq.ctx, ent.OpQueryOnlyID)); err != nil {
 		return
 	}
@@ -199,7 +295,7 @@ func (bq *BusinessQuery) OnlyID(ctx context.Context) (id int, err error) {
 }
 
 // OnlyIDX is like OnlyID, but panics if an error occurs.
-func (bq *BusinessQuery) OnlyIDX(ctx context.Context) int {
+func (bq *BusinessQuery) OnlyIDX(ctx context.Context) string {
 	id, err := bq.OnlyID(ctx)
 	if err != nil {
 		panic(err)
@@ -227,7 +323,7 @@ func (bq *BusinessQuery) AllX(ctx context.Context) []*Business {
 }
 
 // IDs executes the query and returns a list of Business IDs.
-func (bq *BusinessQuery) IDs(ctx context.Context) (ids []int, err error) {
+func (bq *BusinessQuery) IDs(ctx context.Context) (ids []string, err error) {
 	if bq.ctx.Unique == nil && bq.path != nil {
 		bq.Unique(true)
 	}
@@ -239,7 +335,7 @@ func (bq *BusinessQuery) IDs(ctx context.Context) (ids []int, err error) {
 }
 
 // IDsX is like IDs, but panics if an error occurs.
-func (bq *BusinessQuery) IDsX(ctx context.Context) []int {
+func (bq *BusinessQuery) IDsX(ctx context.Context) []string {
 	ids, err := bq.IDs(ctx)
 	if err != nil {
 		panic(err)
@@ -294,38 +390,86 @@ func (bq *BusinessQuery) Clone() *BusinessQuery {
 		return nil
 	}
 	return &BusinessQuery{
-		config:              bq.config,
-		ctx:                 bq.ctx.Clone(),
-		order:               append([]business.OrderOption{}, bq.order...),
-		inters:              append([]Interceptor{}, bq.inters...),
-		predicates:          append([]predicate.Business{}, bq.predicates...),
-		withBusinessSocial:  bq.withBusinessSocial.Clone(),
-		withBusinessManager: bq.withBusinessManager.Clone(),
+		config:                   bq.config,
+		ctx:                      bq.ctx.Clone(),
+		order:                    append([]business.OrderOption{}, bq.order...),
+		inters:                   append([]Interceptor{}, bq.inters...),
+		predicates:               append([]predicate.Business{}, bq.predicates...),
+		withSocials:              bq.withSocials.Clone(),
+		withServices:             bq.withServices.Clone(),
+		withManages:              bq.withManages.Clone(),
+		withVerifications:        bq.withVerifications.Clone(),
+		withRequestVerifications: bq.withRequestVerifications.Clone(),
+		withBusinessDocuments:    bq.withBusinessDocuments.Clone(),
 		// clone intermediate query.
 		sql:  bq.sql.Clone(),
 		path: bq.path,
 	}
 }
 
-// WithBusinessSocial tells the query-builder to eager-load the nodes that are connected to
-// the "business_social" edge. The optional arguments are used to configure the query builder of the edge.
-func (bq *BusinessQuery) WithBusinessSocial(opts ...func(*SocialQuery)) *BusinessQuery {
+// WithSocials tells the query-builder to eager-load the nodes that are connected to
+// the "socials" edge. The optional arguments are used to configure the query builder of the edge.
+func (bq *BusinessQuery) WithSocials(opts ...func(*SocialQuery)) *BusinessQuery {
 	query := (&SocialClient{config: bq.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
-	bq.withBusinessSocial = query
+	bq.withSocials = query
 	return bq
 }
 
-// WithBusinessManager tells the query-builder to eager-load the nodes that are connected to
-// the "business_manager" edge. The optional arguments are used to configure the query builder of the edge.
-func (bq *BusinessQuery) WithBusinessManager(opts ...func(*ManagerQuery)) *BusinessQuery {
+// WithServices tells the query-builder to eager-load the nodes that are connected to
+// the "services" edge. The optional arguments are used to configure the query builder of the edge.
+func (bq *BusinessQuery) WithServices(opts ...func(*BusinessServicesQuery)) *BusinessQuery {
+	query := (&BusinessServicesClient{config: bq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	bq.withServices = query
+	return bq
+}
+
+// WithManages tells the query-builder to eager-load the nodes that are connected to
+// the "manages" edge. The optional arguments are used to configure the query builder of the edge.
+func (bq *BusinessQuery) WithManages(opts ...func(*ManagerQuery)) *BusinessQuery {
 	query := (&ManagerClient{config: bq.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
-	bq.withBusinessManager = query
+	bq.withManages = query
+	return bq
+}
+
+// WithVerifications tells the query-builder to eager-load the nodes that are connected to
+// the "verifications" edge. The optional arguments are used to configure the query builder of the edge.
+func (bq *BusinessQuery) WithVerifications(opts ...func(*VerificationQuery)) *BusinessQuery {
+	query := (&VerificationClient{config: bq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	bq.withVerifications = query
+	return bq
+}
+
+// WithRequestVerifications tells the query-builder to eager-load the nodes that are connected to
+// the "request_verifications" edge. The optional arguments are used to configure the query builder of the edge.
+func (bq *BusinessQuery) WithRequestVerifications(opts ...func(*RequestVerificationQuery)) *BusinessQuery {
+	query := (&RequestVerificationClient{config: bq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	bq.withRequestVerifications = query
+	return bq
+}
+
+// WithBusinessDocuments tells the query-builder to eager-load the nodes that are connected to
+// the "business_documents" edge. The optional arguments are used to configure the query builder of the edge.
+func (bq *BusinessQuery) WithBusinessDocuments(opts ...func(*BusinessDocumentQuery)) *BusinessQuery {
+	query := (&BusinessDocumentClient{config: bq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	bq.withBusinessDocuments = query
 	return bq
 }
 
@@ -335,12 +479,12 @@ func (bq *BusinessQuery) WithBusinessManager(opts ...func(*ManagerQuery)) *Busin
 // Example:
 //
 //	var v []struct {
-//		Category string `json:"category,omitempty"`
+//		CreatedAt time.Time `json:"created_at,omitempty"`
 //		Count int `json:"count,omitempty"`
 //	}
 //
 //	client.Business.Query().
-//		GroupBy(business.FieldCategory).
+//		GroupBy(business.FieldCreatedAt).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
 func (bq *BusinessQuery) GroupBy(field string, fields ...string) *BusinessGroupBy {
@@ -358,11 +502,11 @@ func (bq *BusinessQuery) GroupBy(field string, fields ...string) *BusinessGroupB
 // Example:
 //
 //	var v []struct {
-//		Category string `json:"category,omitempty"`
+//		CreatedAt time.Time `json:"created_at,omitempty"`
 //	}
 //
 //	client.Business.Query().
-//		Select(business.FieldCategory).
+//		Select(business.FieldCreatedAt).
 //		Scan(ctx, &v)
 func (bq *BusinessQuery) Select(fields ...string) *BusinessSelect {
 	bq.ctx.Fields = append(bq.ctx.Fields, fields...)
@@ -407,9 +551,13 @@ func (bq *BusinessQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Bus
 	var (
 		nodes       = []*Business{}
 		_spec       = bq.querySpec()
-		loadedTypes = [2]bool{
-			bq.withBusinessSocial != nil,
-			bq.withBusinessManager != nil,
+		loadedTypes = [6]bool{
+			bq.withSocials != nil,
+			bq.withServices != nil,
+			bq.withManages != nil,
+			bq.withVerifications != nil,
+			bq.withRequestVerifications != nil,
+			bq.withBusinessDocuments != nil,
 		}
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
@@ -430,26 +578,58 @@ func (bq *BusinessQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Bus
 	if len(nodes) == 0 {
 		return nodes, nil
 	}
-	if query := bq.withBusinessSocial; query != nil {
-		if err := bq.loadBusinessSocial(ctx, query, nodes,
-			func(n *Business) { n.Edges.BusinessSocial = []*Social{} },
-			func(n *Business, e *Social) { n.Edges.BusinessSocial = append(n.Edges.BusinessSocial, e) }); err != nil {
+	if query := bq.withSocials; query != nil {
+		if err := bq.loadSocials(ctx, query, nodes,
+			func(n *Business) { n.Edges.Socials = []*Social{} },
+			func(n *Business, e *Social) { n.Edges.Socials = append(n.Edges.Socials, e) }); err != nil {
 			return nil, err
 		}
 	}
-	if query := bq.withBusinessManager; query != nil {
-		if err := bq.loadBusinessManager(ctx, query, nodes,
-			func(n *Business) { n.Edges.BusinessManager = []*Manager{} },
-			func(n *Business, e *Manager) { n.Edges.BusinessManager = append(n.Edges.BusinessManager, e) }); err != nil {
+	if query := bq.withServices; query != nil {
+		if err := bq.loadServices(ctx, query, nodes,
+			func(n *Business) { n.Edges.Services = []*BusinessServices{} },
+			func(n *Business, e *BusinessServices) { n.Edges.Services = append(n.Edges.Services, e) }); err != nil {
+			return nil, err
+		}
+	}
+	if query := bq.withManages; query != nil {
+		if err := bq.loadManages(ctx, query, nodes,
+			func(n *Business) { n.Edges.Manages = []*Manager{} },
+			func(n *Business, e *Manager) { n.Edges.Manages = append(n.Edges.Manages, e) }); err != nil {
+			return nil, err
+		}
+	}
+	if query := bq.withVerifications; query != nil {
+		if err := bq.loadVerifications(ctx, query, nodes,
+			func(n *Business) { n.Edges.Verifications = []*Verification{} },
+			func(n *Business, e *Verification) { n.Edges.Verifications = append(n.Edges.Verifications, e) }); err != nil {
+			return nil, err
+		}
+	}
+	if query := bq.withRequestVerifications; query != nil {
+		if err := bq.loadRequestVerifications(ctx, query, nodes,
+			func(n *Business) { n.Edges.RequestVerifications = []*RequestVerification{} },
+			func(n *Business, e *RequestVerification) {
+				n.Edges.RequestVerifications = append(n.Edges.RequestVerifications, e)
+			}); err != nil {
+			return nil, err
+		}
+	}
+	if query := bq.withBusinessDocuments; query != nil {
+		if err := bq.loadBusinessDocuments(ctx, query, nodes,
+			func(n *Business) { n.Edges.BusinessDocuments = []*BusinessDocument{} },
+			func(n *Business, e *BusinessDocument) {
+				n.Edges.BusinessDocuments = append(n.Edges.BusinessDocuments, e)
+			}); err != nil {
 			return nil, err
 		}
 	}
 	return nodes, nil
 }
 
-func (bq *BusinessQuery) loadBusinessSocial(ctx context.Context, query *SocialQuery, nodes []*Business, init func(*Business), assign func(*Business, *Social)) error {
+func (bq *BusinessQuery) loadSocials(ctx context.Context, query *SocialQuery, nodes []*Business, init func(*Business), assign func(*Business, *Social)) error {
 	fks := make([]driver.Value, 0, len(nodes))
-	nodeids := make(map[int]*Business)
+	nodeids := make(map[string]*Business)
 	for i := range nodes {
 		fks = append(fks, nodes[i].ID)
 		nodeids[nodes[i].ID] = nodes[i]
@@ -457,30 +637,211 @@ func (bq *BusinessQuery) loadBusinessSocial(ctx context.Context, query *SocialQu
 			init(nodes[i])
 		}
 	}
-	query.withFKs = true
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(social.FieldBusinessID)
+	}
 	query.Where(predicate.Social(func(s *sql.Selector) {
-		s.Where(sql.InValues(s.C(business.BusinessSocialColumn), fks...))
+		s.Where(sql.InValues(s.C(business.SocialsColumn), fks...))
 	}))
 	neighbors, err := query.All(ctx)
 	if err != nil {
 		return err
 	}
 	for _, n := range neighbors {
-		fk := n.business_business_social
-		if fk == nil {
-			return fmt.Errorf(`foreign-key "business_business_social" is nil for node %v`, n.ID)
-		}
-		node, ok := nodeids[*fk]
+		fk := n.BusinessID
+		node, ok := nodeids[fk]
 		if !ok {
-			return fmt.Errorf(`unexpected referenced foreign-key "business_business_social" returned %v for node %v`, *fk, n.ID)
+			return fmt.Errorf(`unexpected referenced foreign-key "business_id" returned %v for node %v`, fk, n.ID)
 		}
 		assign(node, n)
 	}
 	return nil
 }
-func (bq *BusinessQuery) loadBusinessManager(ctx context.Context, query *ManagerQuery, nodes []*Business, init func(*Business), assign func(*Business, *Manager)) error {
+func (bq *BusinessQuery) loadServices(ctx context.Context, query *BusinessServicesQuery, nodes []*Business, init func(*Business), assign func(*Business, *BusinessServices)) error {
 	fks := make([]driver.Value, 0, len(nodes))
-	nodeids := make(map[int]*Business)
+	nodeids := make(map[string]*Business)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(businessservices.FieldBusinessID)
+	}
+	query.Where(predicate.BusinessServices(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(business.ServicesColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.BusinessID
+		node, ok := nodeids[fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "business_id" returned %v for node %v`, fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (bq *BusinessQuery) loadManages(ctx context.Context, query *ManagerQuery, nodes []*Business, init func(*Business), assign func(*Business, *Manager)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[string]*Business)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(manager.FieldBusinessID)
+	}
+	query.Where(predicate.Manager(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(business.ManagesColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.BusinessID
+		node, ok := nodeids[fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "business_id" returned %v for node %v`, fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (bq *BusinessQuery) loadVerifications(ctx context.Context, query *VerificationQuery, nodes []*Business, init func(*Business), assign func(*Business, *Verification)) error {
+	edgeIDs := make([]driver.Value, len(nodes))
+	byID := make(map[string]*Business)
+	nids := make(map[string]map[*Business]struct{})
+	for i, node := range nodes {
+		edgeIDs[i] = node.ID
+		byID[node.ID] = node
+		if init != nil {
+			init(node)
+		}
+	}
+	query.Where(func(s *sql.Selector) {
+		joinT := sql.Table(business.VerificationsTable)
+		s.Join(joinT).On(s.C(verification.FieldID), joinT.C(business.VerificationsPrimaryKey[0]))
+		s.Where(sql.InValues(joinT.C(business.VerificationsPrimaryKey[1]), edgeIDs...))
+		columns := s.SelectedColumns()
+		s.Select(joinT.C(business.VerificationsPrimaryKey[1]))
+		s.AppendSelect(columns...)
+		s.SetDistinct(false)
+	})
+	if err := query.prepareQuery(ctx); err != nil {
+		return err
+	}
+	qr := QuerierFunc(func(ctx context.Context, q Query) (Value, error) {
+		return query.sqlAll(ctx, func(_ context.Context, spec *sqlgraph.QuerySpec) {
+			assign := spec.Assign
+			values := spec.ScanValues
+			spec.ScanValues = func(columns []string) ([]any, error) {
+				values, err := values(columns[1:])
+				if err != nil {
+					return nil, err
+				}
+				return append([]any{new(sql.NullString)}, values...), nil
+			}
+			spec.Assign = func(columns []string, values []any) error {
+				outValue := values[0].(*sql.NullString).String
+				inValue := values[1].(*sql.NullString).String
+				if nids[inValue] == nil {
+					nids[inValue] = map[*Business]struct{}{byID[outValue]: {}}
+					return assign(columns[1:], values[1:])
+				}
+				nids[inValue][byID[outValue]] = struct{}{}
+				return nil
+			}
+		})
+	})
+	neighbors, err := withInterceptors[[]*Verification](ctx, query, qr, query.inters)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		nodes, ok := nids[n.ID]
+		if !ok {
+			return fmt.Errorf(`unexpected "verifications" node returned %v`, n.ID)
+		}
+		for kn := range nodes {
+			assign(kn, n)
+		}
+	}
+	return nil
+}
+func (bq *BusinessQuery) loadRequestVerifications(ctx context.Context, query *RequestVerificationQuery, nodes []*Business, init func(*Business), assign func(*Business, *RequestVerification)) error {
+	edgeIDs := make([]driver.Value, len(nodes))
+	byID := make(map[string]*Business)
+	nids := make(map[string]map[*Business]struct{})
+	for i, node := range nodes {
+		edgeIDs[i] = node.ID
+		byID[node.ID] = node
+		if init != nil {
+			init(node)
+		}
+	}
+	query.Where(func(s *sql.Selector) {
+		joinT := sql.Table(business.RequestVerificationsTable)
+		s.Join(joinT).On(s.C(requestverification.FieldID), joinT.C(business.RequestVerificationsPrimaryKey[0]))
+		s.Where(sql.InValues(joinT.C(business.RequestVerificationsPrimaryKey[1]), edgeIDs...))
+		columns := s.SelectedColumns()
+		s.Select(joinT.C(business.RequestVerificationsPrimaryKey[1]))
+		s.AppendSelect(columns...)
+		s.SetDistinct(false)
+	})
+	if err := query.prepareQuery(ctx); err != nil {
+		return err
+	}
+	qr := QuerierFunc(func(ctx context.Context, q Query) (Value, error) {
+		return query.sqlAll(ctx, func(_ context.Context, spec *sqlgraph.QuerySpec) {
+			assign := spec.Assign
+			values := spec.ScanValues
+			spec.ScanValues = func(columns []string) ([]any, error) {
+				values, err := values(columns[1:])
+				if err != nil {
+					return nil, err
+				}
+				return append([]any{new(sql.NullString)}, values...), nil
+			}
+			spec.Assign = func(columns []string, values []any) error {
+				outValue := values[0].(*sql.NullString).String
+				inValue := values[1].(*sql.NullString).String
+				if nids[inValue] == nil {
+					nids[inValue] = map[*Business]struct{}{byID[outValue]: {}}
+					return assign(columns[1:], values[1:])
+				}
+				nids[inValue][byID[outValue]] = struct{}{}
+				return nil
+			}
+		})
+	})
+	neighbors, err := withInterceptors[[]*RequestVerification](ctx, query, qr, query.inters)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		nodes, ok := nids[n.ID]
+		if !ok {
+			return fmt.Errorf(`unexpected "request_verifications" node returned %v`, n.ID)
+		}
+		for kn := range nodes {
+			assign(kn, n)
+		}
+	}
+	return nil
+}
+func (bq *BusinessQuery) loadBusinessDocuments(ctx context.Context, query *BusinessDocumentQuery, nodes []*Business, init func(*Business), assign func(*Business, *BusinessDocument)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[string]*Business)
 	for i := range nodes {
 		fks = append(fks, nodes[i].ID)
 		nodeids[nodes[i].ID] = nodes[i]
@@ -489,21 +850,21 @@ func (bq *BusinessQuery) loadBusinessManager(ctx context.Context, query *Manager
 		}
 	}
 	query.withFKs = true
-	query.Where(predicate.Manager(func(s *sql.Selector) {
-		s.Where(sql.InValues(s.C(business.BusinessManagerColumn), fks...))
+	query.Where(predicate.BusinessDocument(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(business.BusinessDocumentsColumn), fks...))
 	}))
 	neighbors, err := query.All(ctx)
 	if err != nil {
 		return err
 	}
 	for _, n := range neighbors {
-		fk := n.business_business_manager
+		fk := n.business_business_documents
 		if fk == nil {
-			return fmt.Errorf(`foreign-key "business_business_manager" is nil for node %v`, n.ID)
+			return fmt.Errorf(`foreign-key "business_business_documents" is nil for node %v`, n.ID)
 		}
 		node, ok := nodeids[*fk]
 		if !ok {
-			return fmt.Errorf(`unexpected referenced foreign-key "business_business_manager" returned %v for node %v`, *fk, n.ID)
+			return fmt.Errorf(`unexpected referenced foreign-key "business_business_documents" returned %v for node %v`, *fk, n.ID)
 		}
 		assign(node, n)
 	}
@@ -520,7 +881,7 @@ func (bq *BusinessQuery) sqlCount(ctx context.Context) (int, error) {
 }
 
 func (bq *BusinessQuery) querySpec() *sqlgraph.QuerySpec {
-	_spec := sqlgraph.NewQuerySpec(business.Table, business.Columns, sqlgraph.NewFieldSpec(business.FieldID, field.TypeInt))
+	_spec := sqlgraph.NewQuerySpec(business.Table, business.Columns, sqlgraph.NewFieldSpec(business.FieldID, field.TypeString))
 	_spec.From = bq.sql
 	if unique := bq.ctx.Unique; unique != nil {
 		_spec.Unique = *unique

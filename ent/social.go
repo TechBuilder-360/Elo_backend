@@ -17,18 +17,23 @@ import (
 type Social struct {
 	config `json:"-"`
 	// ID of the ent.
-	ID int `json:"id,omitempty"`
+	ID string `json:"id,omitempty"`
 	// CreatedAt holds the value of the "created_at" field.
 	CreatedAt time.Time `json:"created_at,omitempty"`
+	// UpdatedAt holds the value of the "updated_at" field.
+	UpdatedAt time.Time `json:"updated_at,omitempty"`
+	// DeletedAt holds the value of the "deleted_at" field.
+	DeletedAt *time.Time `json:"deleted_at,omitempty"`
+	// BusinessID holds the value of the "business_id" field.
+	BusinessID string `json:"business_id,omitempty"`
 	// Name holds the value of the "name" field.
 	Name string `json:"name,omitempty"`
 	// URL holds the value of the "url" field.
 	URL string `json:"url,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the SocialQuery when eager-loading is set.
-	Edges                    SocialEdges `json:"edges"`
-	business_business_social *int
-	selectValues             sql.SelectValues
+	Edges        SocialEdges `json:"edges"`
+	selectValues sql.SelectValues
 }
 
 // SocialEdges holds the relations/edges for other nodes in the graph.
@@ -56,14 +61,10 @@ func (*Social) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case social.FieldID:
-			values[i] = new(sql.NullInt64)
-		case social.FieldName, social.FieldURL:
+		case social.FieldID, social.FieldBusinessID, social.FieldName, social.FieldURL:
 			values[i] = new(sql.NullString)
-		case social.FieldCreatedAt:
+		case social.FieldCreatedAt, social.FieldUpdatedAt, social.FieldDeletedAt:
 			values[i] = new(sql.NullTime)
-		case social.ForeignKeys[0]: // business_business_social
-			values[i] = new(sql.NullInt64)
 		default:
 			values[i] = new(sql.UnknownType)
 		}
@@ -80,16 +81,35 @@ func (s *Social) assignValues(columns []string, values []any) error {
 	for i := range columns {
 		switch columns[i] {
 		case social.FieldID:
-			value, ok := values[i].(*sql.NullInt64)
-			if !ok {
-				return fmt.Errorf("unexpected type %T for field id", value)
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field id", values[i])
+			} else if value.Valid {
+				s.ID = value.String
 			}
-			s.ID = int(value.Int64)
 		case social.FieldCreatedAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field created_at", values[i])
 			} else if value.Valid {
 				s.CreatedAt = value.Time
+			}
+		case social.FieldUpdatedAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field updated_at", values[i])
+			} else if value.Valid {
+				s.UpdatedAt = value.Time
+			}
+		case social.FieldDeletedAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field deleted_at", values[i])
+			} else if value.Valid {
+				s.DeletedAt = new(time.Time)
+				*s.DeletedAt = value.Time
+			}
+		case social.FieldBusinessID:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field business_id", values[i])
+			} else if value.Valid {
+				s.BusinessID = value.String
 			}
 		case social.FieldName:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -102,13 +122,6 @@ func (s *Social) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field url", values[i])
 			} else if value.Valid {
 				s.URL = value.String
-			}
-		case social.ForeignKeys[0]:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for edge-field business_business_social", value)
-			} else if value.Valid {
-				s.business_business_social = new(int)
-				*s.business_business_social = int(value.Int64)
 			}
 		default:
 			s.selectValues.Set(columns[i], values[i])
@@ -153,6 +166,17 @@ func (s *Social) String() string {
 	builder.WriteString(fmt.Sprintf("id=%v, ", s.ID))
 	builder.WriteString("created_at=")
 	builder.WriteString(s.CreatedAt.Format(time.ANSIC))
+	builder.WriteString(", ")
+	builder.WriteString("updated_at=")
+	builder.WriteString(s.UpdatedAt.Format(time.ANSIC))
+	builder.WriteString(", ")
+	if v := s.DeletedAt; v != nil {
+		builder.WriteString("deleted_at=")
+		builder.WriteString(v.Format(time.ANSIC))
+	}
+	builder.WriteString(", ")
+	builder.WriteString("business_id=")
+	builder.WriteString(s.BusinessID)
 	builder.WriteString(", ")
 	builder.WriteString("name=")
 	builder.WriteString(s.Name)
