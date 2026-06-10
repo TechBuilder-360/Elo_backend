@@ -46,7 +46,10 @@ func (Business) Edges() []ent.Edge {
 		edge.To("socials", Social.Type),
 		edge.To("services", BusinessServices.Type),
 		edge.To("manages", Manager.Type),
+		edge.From("verifications", Verification.Type).
+			Ref("business"),
+		edge.From("request_verifications", RequestVerification.Type).
+			Ref("business"),
 		edge.To("business_documents", BusinessDocument.Type),
-		edge.To("user_documents", UserDocument.Type),
 	}
 }

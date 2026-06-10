@@ -16,8 +16,9 @@ import (
 	"github.com/Toflex/directory_v2/ent/businessservices"
 	"github.com/Toflex/directory_v2/ent/manager"
 	"github.com/Toflex/directory_v2/ent/predicate"
+	"github.com/Toflex/directory_v2/ent/requestverification"
 	"github.com/Toflex/directory_v2/ent/social"
-	"github.com/Toflex/directory_v2/ent/userdocument"
+	"github.com/Toflex/directory_v2/ent/verification"
 )
 
 // BusinessUpdate is the builder for updating Business entities.
@@ -302,6 +303,36 @@ func (bu *BusinessUpdate) AddManages(m ...*Manager) *BusinessUpdate {
 	return bu.AddManageIDs(ids...)
 }
 
+// AddVerificationIDs adds the "verifications" edge to the Verification entity by IDs.
+func (bu *BusinessUpdate) AddVerificationIDs(ids ...string) *BusinessUpdate {
+	bu.mutation.AddVerificationIDs(ids...)
+	return bu
+}
+
+// AddVerifications adds the "verifications" edges to the Verification entity.
+func (bu *BusinessUpdate) AddVerifications(v ...*Verification) *BusinessUpdate {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return bu.AddVerificationIDs(ids...)
+}
+
+// AddRequestVerificationIDs adds the "request_verifications" edge to the RequestVerification entity by IDs.
+func (bu *BusinessUpdate) AddRequestVerificationIDs(ids ...string) *BusinessUpdate {
+	bu.mutation.AddRequestVerificationIDs(ids...)
+	return bu
+}
+
+// AddRequestVerifications adds the "request_verifications" edges to the RequestVerification entity.
+func (bu *BusinessUpdate) AddRequestVerifications(r ...*RequestVerification) *BusinessUpdate {
+	ids := make([]string, len(r))
+	for i := range r {
+		ids[i] = r[i].ID
+	}
+	return bu.AddRequestVerificationIDs(ids...)
+}
+
 // AddBusinessDocumentIDs adds the "business_documents" edge to the BusinessDocument entity by IDs.
 func (bu *BusinessUpdate) AddBusinessDocumentIDs(ids ...int) *BusinessUpdate {
 	bu.mutation.AddBusinessDocumentIDs(ids...)
@@ -315,21 +346,6 @@ func (bu *BusinessUpdate) AddBusinessDocuments(b ...*BusinessDocument) *Business
 		ids[i] = b[i].ID
 	}
 	return bu.AddBusinessDocumentIDs(ids...)
-}
-
-// AddUserDocumentIDs adds the "user_documents" edge to the UserDocument entity by IDs.
-func (bu *BusinessUpdate) AddUserDocumentIDs(ids ...int) *BusinessUpdate {
-	bu.mutation.AddUserDocumentIDs(ids...)
-	return bu
-}
-
-// AddUserDocuments adds the "user_documents" edges to the UserDocument entity.
-func (bu *BusinessUpdate) AddUserDocuments(u ...*UserDocument) *BusinessUpdate {
-	ids := make([]int, len(u))
-	for i := range u {
-		ids[i] = u[i].ID
-	}
-	return bu.AddUserDocumentIDs(ids...)
 }
 
 // Mutation returns the BusinessMutation object of the builder.
@@ -400,6 +416,48 @@ func (bu *BusinessUpdate) RemoveManages(m ...*Manager) *BusinessUpdate {
 	return bu.RemoveManageIDs(ids...)
 }
 
+// ClearVerifications clears all "verifications" edges to the Verification entity.
+func (bu *BusinessUpdate) ClearVerifications() *BusinessUpdate {
+	bu.mutation.ClearVerifications()
+	return bu
+}
+
+// RemoveVerificationIDs removes the "verifications" edge to Verification entities by IDs.
+func (bu *BusinessUpdate) RemoveVerificationIDs(ids ...string) *BusinessUpdate {
+	bu.mutation.RemoveVerificationIDs(ids...)
+	return bu
+}
+
+// RemoveVerifications removes "verifications" edges to Verification entities.
+func (bu *BusinessUpdate) RemoveVerifications(v ...*Verification) *BusinessUpdate {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return bu.RemoveVerificationIDs(ids...)
+}
+
+// ClearRequestVerifications clears all "request_verifications" edges to the RequestVerification entity.
+func (bu *BusinessUpdate) ClearRequestVerifications() *BusinessUpdate {
+	bu.mutation.ClearRequestVerifications()
+	return bu
+}
+
+// RemoveRequestVerificationIDs removes the "request_verifications" edge to RequestVerification entities by IDs.
+func (bu *BusinessUpdate) RemoveRequestVerificationIDs(ids ...string) *BusinessUpdate {
+	bu.mutation.RemoveRequestVerificationIDs(ids...)
+	return bu
+}
+
+// RemoveRequestVerifications removes "request_verifications" edges to RequestVerification entities.
+func (bu *BusinessUpdate) RemoveRequestVerifications(r ...*RequestVerification) *BusinessUpdate {
+	ids := make([]string, len(r))
+	for i := range r {
+		ids[i] = r[i].ID
+	}
+	return bu.RemoveRequestVerificationIDs(ids...)
+}
+
 // ClearBusinessDocuments clears all "business_documents" edges to the BusinessDocument entity.
 func (bu *BusinessUpdate) ClearBusinessDocuments() *BusinessUpdate {
 	bu.mutation.ClearBusinessDocuments()
@@ -419,27 +477,6 @@ func (bu *BusinessUpdate) RemoveBusinessDocuments(b ...*BusinessDocument) *Busin
 		ids[i] = b[i].ID
 	}
 	return bu.RemoveBusinessDocumentIDs(ids...)
-}
-
-// ClearUserDocuments clears all "user_documents" edges to the UserDocument entity.
-func (bu *BusinessUpdate) ClearUserDocuments() *BusinessUpdate {
-	bu.mutation.ClearUserDocuments()
-	return bu
-}
-
-// RemoveUserDocumentIDs removes the "user_documents" edge to UserDocument entities by IDs.
-func (bu *BusinessUpdate) RemoveUserDocumentIDs(ids ...int) *BusinessUpdate {
-	bu.mutation.RemoveUserDocumentIDs(ids...)
-	return bu
-}
-
-// RemoveUserDocuments removes "user_documents" edges to UserDocument entities.
-func (bu *BusinessUpdate) RemoveUserDocuments(u ...*UserDocument) *BusinessUpdate {
-	ids := make([]int, len(u))
-	for i := range u {
-		ids[i] = u[i].ID
-	}
-	return bu.RemoveUserDocumentIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -705,6 +742,96 @@ func (bu *BusinessUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	if bu.mutation.VerificationsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   business.VerificationsTable,
+			Columns: business.VerificationsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(verification.FieldID, field.TypeString),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := bu.mutation.RemovedVerificationsIDs(); len(nodes) > 0 && !bu.mutation.VerificationsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   business.VerificationsTable,
+			Columns: business.VerificationsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(verification.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := bu.mutation.VerificationsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   business.VerificationsTable,
+			Columns: business.VerificationsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(verification.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if bu.mutation.RequestVerificationsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   business.RequestVerificationsTable,
+			Columns: business.RequestVerificationsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(requestverification.FieldID, field.TypeString),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := bu.mutation.RemovedRequestVerificationsIDs(); len(nodes) > 0 && !bu.mutation.RequestVerificationsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   business.RequestVerificationsTable,
+			Columns: business.RequestVerificationsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(requestverification.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := bu.mutation.RequestVerificationsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   business.RequestVerificationsTable,
+			Columns: business.RequestVerificationsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(requestverification.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
 	if bu.mutation.BusinessDocumentsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
@@ -743,51 +870,6 @@ func (bu *BusinessUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(businessdocument.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
-	}
-	if bu.mutation.UserDocumentsCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   business.UserDocumentsTable,
-			Columns: []string{business.UserDocumentsColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(userdocument.FieldID, field.TypeInt),
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := bu.mutation.RemovedUserDocumentsIDs(); len(nodes) > 0 && !bu.mutation.UserDocumentsCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   business.UserDocumentsTable,
-			Columns: []string{business.UserDocumentsColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(userdocument.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := bu.mutation.UserDocumentsIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   business.UserDocumentsTable,
-			Columns: []string{business.UserDocumentsColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(userdocument.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -1084,6 +1166,36 @@ func (buo *BusinessUpdateOne) AddManages(m ...*Manager) *BusinessUpdateOne {
 	return buo.AddManageIDs(ids...)
 }
 
+// AddVerificationIDs adds the "verifications" edge to the Verification entity by IDs.
+func (buo *BusinessUpdateOne) AddVerificationIDs(ids ...string) *BusinessUpdateOne {
+	buo.mutation.AddVerificationIDs(ids...)
+	return buo
+}
+
+// AddVerifications adds the "verifications" edges to the Verification entity.
+func (buo *BusinessUpdateOne) AddVerifications(v ...*Verification) *BusinessUpdateOne {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return buo.AddVerificationIDs(ids...)
+}
+
+// AddRequestVerificationIDs adds the "request_verifications" edge to the RequestVerification entity by IDs.
+func (buo *BusinessUpdateOne) AddRequestVerificationIDs(ids ...string) *BusinessUpdateOne {
+	buo.mutation.AddRequestVerificationIDs(ids...)
+	return buo
+}
+
+// AddRequestVerifications adds the "request_verifications" edges to the RequestVerification entity.
+func (buo *BusinessUpdateOne) AddRequestVerifications(r ...*RequestVerification) *BusinessUpdateOne {
+	ids := make([]string, len(r))
+	for i := range r {
+		ids[i] = r[i].ID
+	}
+	return buo.AddRequestVerificationIDs(ids...)
+}
+
 // AddBusinessDocumentIDs adds the "business_documents" edge to the BusinessDocument entity by IDs.
 func (buo *BusinessUpdateOne) AddBusinessDocumentIDs(ids ...int) *BusinessUpdateOne {
 	buo.mutation.AddBusinessDocumentIDs(ids...)
@@ -1097,21 +1209,6 @@ func (buo *BusinessUpdateOne) AddBusinessDocuments(b ...*BusinessDocument) *Busi
 		ids[i] = b[i].ID
 	}
 	return buo.AddBusinessDocumentIDs(ids...)
-}
-
-// AddUserDocumentIDs adds the "user_documents" edge to the UserDocument entity by IDs.
-func (buo *BusinessUpdateOne) AddUserDocumentIDs(ids ...int) *BusinessUpdateOne {
-	buo.mutation.AddUserDocumentIDs(ids...)
-	return buo
-}
-
-// AddUserDocuments adds the "user_documents" edges to the UserDocument entity.
-func (buo *BusinessUpdateOne) AddUserDocuments(u ...*UserDocument) *BusinessUpdateOne {
-	ids := make([]int, len(u))
-	for i := range u {
-		ids[i] = u[i].ID
-	}
-	return buo.AddUserDocumentIDs(ids...)
 }
 
 // Mutation returns the BusinessMutation object of the builder.
@@ -1182,6 +1279,48 @@ func (buo *BusinessUpdateOne) RemoveManages(m ...*Manager) *BusinessUpdateOne {
 	return buo.RemoveManageIDs(ids...)
 }
 
+// ClearVerifications clears all "verifications" edges to the Verification entity.
+func (buo *BusinessUpdateOne) ClearVerifications() *BusinessUpdateOne {
+	buo.mutation.ClearVerifications()
+	return buo
+}
+
+// RemoveVerificationIDs removes the "verifications" edge to Verification entities by IDs.
+func (buo *BusinessUpdateOne) RemoveVerificationIDs(ids ...string) *BusinessUpdateOne {
+	buo.mutation.RemoveVerificationIDs(ids...)
+	return buo
+}
+
+// RemoveVerifications removes "verifications" edges to Verification entities.
+func (buo *BusinessUpdateOne) RemoveVerifications(v ...*Verification) *BusinessUpdateOne {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return buo.RemoveVerificationIDs(ids...)
+}
+
+// ClearRequestVerifications clears all "request_verifications" edges to the RequestVerification entity.
+func (buo *BusinessUpdateOne) ClearRequestVerifications() *BusinessUpdateOne {
+	buo.mutation.ClearRequestVerifications()
+	return buo
+}
+
+// RemoveRequestVerificationIDs removes the "request_verifications" edge to RequestVerification entities by IDs.
+func (buo *BusinessUpdateOne) RemoveRequestVerificationIDs(ids ...string) *BusinessUpdateOne {
+	buo.mutation.RemoveRequestVerificationIDs(ids...)
+	return buo
+}
+
+// RemoveRequestVerifications removes "request_verifications" edges to RequestVerification entities.
+func (buo *BusinessUpdateOne) RemoveRequestVerifications(r ...*RequestVerification) *BusinessUpdateOne {
+	ids := make([]string, len(r))
+	for i := range r {
+		ids[i] = r[i].ID
+	}
+	return buo.RemoveRequestVerificationIDs(ids...)
+}
+
 // ClearBusinessDocuments clears all "business_documents" edges to the BusinessDocument entity.
 func (buo *BusinessUpdateOne) ClearBusinessDocuments() *BusinessUpdateOne {
 	buo.mutation.ClearBusinessDocuments()
@@ -1201,27 +1340,6 @@ func (buo *BusinessUpdateOne) RemoveBusinessDocuments(b ...*BusinessDocument) *B
 		ids[i] = b[i].ID
 	}
 	return buo.RemoveBusinessDocumentIDs(ids...)
-}
-
-// ClearUserDocuments clears all "user_documents" edges to the UserDocument entity.
-func (buo *BusinessUpdateOne) ClearUserDocuments() *BusinessUpdateOne {
-	buo.mutation.ClearUserDocuments()
-	return buo
-}
-
-// RemoveUserDocumentIDs removes the "user_documents" edge to UserDocument entities by IDs.
-func (buo *BusinessUpdateOne) RemoveUserDocumentIDs(ids ...int) *BusinessUpdateOne {
-	buo.mutation.RemoveUserDocumentIDs(ids...)
-	return buo
-}
-
-// RemoveUserDocuments removes "user_documents" edges to UserDocument entities.
-func (buo *BusinessUpdateOne) RemoveUserDocuments(u ...*UserDocument) *BusinessUpdateOne {
-	ids := make([]int, len(u))
-	for i := range u {
-		ids[i] = u[i].ID
-	}
-	return buo.RemoveUserDocumentIDs(ids...)
 }
 
 // Where appends a list predicates to the BusinessUpdate builder.
@@ -1517,6 +1635,96 @@ func (buo *BusinessUpdateOne) sqlSave(ctx context.Context) (_node *Business, err
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	if buo.mutation.VerificationsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   business.VerificationsTable,
+			Columns: business.VerificationsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(verification.FieldID, field.TypeString),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := buo.mutation.RemovedVerificationsIDs(); len(nodes) > 0 && !buo.mutation.VerificationsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   business.VerificationsTable,
+			Columns: business.VerificationsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(verification.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := buo.mutation.VerificationsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   business.VerificationsTable,
+			Columns: business.VerificationsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(verification.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if buo.mutation.RequestVerificationsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   business.RequestVerificationsTable,
+			Columns: business.RequestVerificationsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(requestverification.FieldID, field.TypeString),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := buo.mutation.RemovedRequestVerificationsIDs(); len(nodes) > 0 && !buo.mutation.RequestVerificationsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   business.RequestVerificationsTable,
+			Columns: business.RequestVerificationsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(requestverification.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := buo.mutation.RequestVerificationsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   business.RequestVerificationsTable,
+			Columns: business.RequestVerificationsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(requestverification.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
 	if buo.mutation.BusinessDocumentsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
@@ -1555,51 +1763,6 @@ func (buo *BusinessUpdateOne) sqlSave(ctx context.Context) (_node *Business, err
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(businessdocument.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
-	}
-	if buo.mutation.UserDocumentsCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   business.UserDocumentsTable,
-			Columns: []string{business.UserDocumentsColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(userdocument.FieldID, field.TypeInt),
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := buo.mutation.RemovedUserDocumentsIDs(); len(nodes) > 0 && !buo.mutation.UserDocumentsCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   business.UserDocumentsTable,
-			Columns: []string{business.UserDocumentsColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(userdocument.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := buo.mutation.UserDocumentsIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   business.UserDocumentsTable,
-			Columns: []string{business.UserDocumentsColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(userdocument.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {

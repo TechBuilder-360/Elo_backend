@@ -19,11 +19,13 @@ import (
 	"github.com/Toflex/directory_v2/ent/manager"
 	"github.com/Toflex/directory_v2/ent/permission"
 	"github.com/Toflex/directory_v2/ent/provider"
+	"github.com/Toflex/directory_v2/ent/requestverification"
 	"github.com/Toflex/directory_v2/ent/role"
 	"github.com/Toflex/directory_v2/ent/service"
 	"github.com/Toflex/directory_v2/ent/social"
 	"github.com/Toflex/directory_v2/ent/user"
 	"github.com/Toflex/directory_v2/ent/userdocument"
+	"github.com/Toflex/directory_v2/ent/verification"
 )
 
 // ent aliases to avoid import conflicts in user's code.
@@ -84,18 +86,20 @@ var (
 func checkColumn(table, column string) error {
 	initCheck.Do(func() {
 		columnCheck = sql.NewColumnCheck(map[string]func(string) bool{
-			business.Table:         business.ValidColumn,
-			businessdocument.Table: businessdocument.ValidColumn,
-			businessfeature.Table:  businessfeature.ValidColumn,
-			businessservices.Table: businessservices.ValidColumn,
-			manager.Table:          manager.ValidColumn,
-			permission.Table:       permission.ValidColumn,
-			provider.Table:         provider.ValidColumn,
-			role.Table:             role.ValidColumn,
-			service.Table:          service.ValidColumn,
-			social.Table:           social.ValidColumn,
-			user.Table:             user.ValidColumn,
-			userdocument.Table:     userdocument.ValidColumn,
+			business.Table:            business.ValidColumn,
+			businessdocument.Table:    businessdocument.ValidColumn,
+			businessfeature.Table:     businessfeature.ValidColumn,
+			businessservices.Table:    businessservices.ValidColumn,
+			manager.Table:             manager.ValidColumn,
+			permission.Table:          permission.ValidColumn,
+			provider.Table:            provider.ValidColumn,
+			requestverification.Table: requestverification.ValidColumn,
+			role.Table:                role.ValidColumn,
+			service.Table:             service.ValidColumn,
+			social.Table:              social.ValidColumn,
+			user.Table:                user.ValidColumn,
+			userdocument.Table:        userdocument.ValidColumn,
+			verification.Table:        verification.ValidColumn,
 		})
 	})
 	return columnCheck(table, column)

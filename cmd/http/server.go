@@ -84,7 +84,7 @@ func main() {
 	l.Infof("connect to %s", addr)
 
 	srv := &http.Server{
-		Addr:    ":8080",
+		Addr:    fmt.Sprintf(":%s", port),
 		Handler: engine,
 	}
 

@@ -3,6 +3,8 @@
 package businessdocument
 
 import (
+	"fmt"
+
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 )
@@ -20,6 +22,8 @@ const (
 	FieldURL = "url"
 	// FieldVerified holds the string denoting the verified field in the database.
 	FieldVerified = "verified"
+	// FieldType holds the string denoting the type field in the database.
+	FieldType = "type"
 	// EdgeBusinessDocument holds the string denoting the business_document edge name in mutations.
 	EdgeBusinessDocument = "business_document"
 	// Table holds the table name of the businessdocument in the database.
@@ -40,6 +44,7 @@ var Columns = []string{
 	FieldDescription,
 	FieldURL,
 	FieldVerified,
+	FieldType,
 }
 
 // ForeignKeys holds the SQL foreign-keys that are owned by the "business_documents"
@@ -74,6 +79,30 @@ var (
 	DefaultVerified bool
 )
 
+// Type defines the type for the "type" enum field.
+type Type string
+
+// Type values.
+const (
+	TypeKYB     Type = "KYB"
+	TypeSERVICE Type = "SERVICE"
+	TypePRODUCT Type = "PRODUCT"
+)
+
+func (_type Type) String() string {
+	return string(_type)
+}
+
+// TypeValidator is a validator for the "type" field enum values. It is called by the builders before save.
+func TypeValidator(_type Type) error {
+	switch _type {
+	case TypeKYB, TypeSERVICE, TypePRODUCT:
+		return nil
+	default:
+		return fmt.Errorf("businessdocument: invalid enum value for type field: %q", _type)
+	}
+}
+
 // OrderOption defines the ordering options for the BusinessDocument queries.
 type OrderOption func(*sql.Selector)
 
@@ -100,6 +129,11 @@ func ByURL(opts ...sql.OrderTermOption) OrderOption {
 // ByVerified orders the results by the verified field.
 func ByVerified(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldVerified, opts...).ToFunc()
+}
+
+// ByType orders the results by the type field.
+func ByType(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldType, opts...).ToFunc()
 }
 
 // ByBusinessDocumentField orders the results by business_document field.

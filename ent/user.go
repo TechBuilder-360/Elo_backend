@@ -61,9 +61,13 @@ type UserEdges struct {
 	Manages []*Manager `json:"manages,omitempty"`
 	// UserDocuments holds the value of the user_documents edge.
 	UserDocuments []*UserDocument `json:"user_documents,omitempty"`
+	// Verifications holds the value of the verifications edge.
+	Verifications []*Verification `json:"verifications,omitempty"`
+	// RequestVerifications holds the value of the request_verifications edge.
+	RequestVerifications []*RequestVerification `json:"request_verifications,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [2]bool
+	loadedTypes [4]bool
 }
 
 // ManagesOrErr returns the Manages value or an error if the edge
@@ -82,6 +86,24 @@ func (e UserEdges) UserDocumentsOrErr() ([]*UserDocument, error) {
 		return e.UserDocuments, nil
 	}
 	return nil, &NotLoadedError{edge: "user_documents"}
+}
+
+// VerificationsOrErr returns the Verifications value or an error if the edge
+// was not loaded in eager-loading.
+func (e UserEdges) VerificationsOrErr() ([]*Verification, error) {
+	if e.loadedTypes[2] {
+		return e.Verifications, nil
+	}
+	return nil, &NotLoadedError{edge: "verifications"}
+}
+
+// RequestVerificationsOrErr returns the RequestVerifications value or an error if the edge
+// was not loaded in eager-loading.
+func (e UserEdges) RequestVerificationsOrErr() ([]*RequestVerification, error) {
+	if e.loadedTypes[3] {
+		return e.RequestVerifications, nil
+	}
+	return nil, &NotLoadedError{edge: "request_verifications"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -235,6 +257,16 @@ func (u *User) QueryManages() *ManagerQuery {
 // QueryUserDocuments queries the "user_documents" edge of the User entity.
 func (u *User) QueryUserDocuments() *UserDocumentQuery {
 	return NewUserClient(u.config).QueryUserDocuments(u)
+}
+
+// QueryVerifications queries the "verifications" edge of the User entity.
+func (u *User) QueryVerifications() *VerificationQuery {
+	return NewUserClient(u.config).QueryVerifications(u)
+}
+
+// QueryRequestVerifications queries the "request_verifications" edge of the User entity.
+func (u *User) QueryRequestVerifications() *RequestVerificationQuery {
+	return NewUserClient(u.config).QueryRequestVerifications(u)
 }
 
 // Update returns a builder for updating this User.

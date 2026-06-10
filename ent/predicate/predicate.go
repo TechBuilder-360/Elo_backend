@@ -27,6 +27,9 @@ type Permission func(*sql.Selector)
 // Provider is the predicate function for provider builders.
 type Provider func(*sql.Selector)
 
+// RequestVerification is the predicate function for requestverification builders.
+type RequestVerification func(*sql.Selector)
+
 // Role is the predicate function for role builders.
 type Role func(*sql.Selector)
 
@@ -41,3 +44,6 @@ type User func(*sql.Selector)
 
 // UserDocument is the predicate function for userdocument builders.
 type UserDocument func(*sql.Selector)
+
+// Verification is the predicate function for verification builders.
+type Verification func(*sql.Selector)

@@ -8,7 +8,7 @@ import (
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
-	"github.com/Toflex/directory_v2/ent/business"
+	"github.com/Toflex/directory_v2/ent/user"
 	"github.com/Toflex/directory_v2/ent/userdocument"
 )
 
@@ -25,16 +25,15 @@ type UserDocument struct {
 	URL string `json:"url,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the UserDocumentQuery when eager-loading is set.
-	Edges                   UserDocumentEdges `json:"edges"`
-	business_user_documents *string
-	user_user_documents     *string
-	selectValues            sql.SelectValues
+	Edges               UserDocumentEdges `json:"edges"`
+	user_user_documents *string
+	selectValues        sql.SelectValues
 }
 
 // UserDocumentEdges holds the relations/edges for other nodes in the graph.
 type UserDocumentEdges struct {
 	// UserDocument holds the value of the user_document edge.
-	UserDocument *Business `json:"user_document,omitempty"`
+	UserDocument *User `json:"user_document,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
 	loadedTypes [1]bool
@@ -42,11 +41,11 @@ type UserDocumentEdges struct {
 
 // UserDocumentOrErr returns the UserDocument value or an error if the edge
 // was not loaded in eager-loading, or loaded but was not found.
-func (e UserDocumentEdges) UserDocumentOrErr() (*Business, error) {
+func (e UserDocumentEdges) UserDocumentOrErr() (*User, error) {
 	if e.UserDocument != nil {
 		return e.UserDocument, nil
 	} else if e.loadedTypes[0] {
-		return nil, &NotFoundError{label: business.Label}
+		return nil, &NotFoundError{label: user.Label}
 	}
 	return nil, &NotLoadedError{edge: "user_document"}
 }
@@ -60,9 +59,7 @@ func (*UserDocument) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullInt64)
 		case userdocument.FieldTitle, userdocument.FieldDescription, userdocument.FieldURL:
 			values[i] = new(sql.NullString)
-		case userdocument.ForeignKeys[0]: // business_user_documents
-			values[i] = new(sql.NullString)
-		case userdocument.ForeignKeys[1]: // user_user_documents
+		case userdocument.ForeignKeys[0]: // user_user_documents
 			values[i] = new(sql.NullString)
 		default:
 			values[i] = new(sql.UnknownType)
@@ -105,13 +102,6 @@ func (ud *UserDocument) assignValues(columns []string, values []any) error {
 			}
 		case userdocument.ForeignKeys[0]:
 			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field business_user_documents", values[i])
-			} else if value.Valid {
-				ud.business_user_documents = new(string)
-				*ud.business_user_documents = value.String
-			}
-		case userdocument.ForeignKeys[1]:
-			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field user_user_documents", values[i])
 			} else if value.Valid {
 				ud.user_user_documents = new(string)
@@ -131,7 +121,7 @@ func (ud *UserDocument) Value(name string) (ent.Value, error) {
 }
 
 // QueryUserDocument queries the "user_document" edge of the UserDocument entity.
-func (ud *UserDocument) QueryUserDocument() *BusinessQuery {
+func (ud *UserDocument) QueryUserDocument() *UserQuery {
 	return NewUserDocumentClient(ud.config).QueryUserDocument(ud)
 }
 

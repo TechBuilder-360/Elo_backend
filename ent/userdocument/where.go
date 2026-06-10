@@ -275,7 +275,7 @@ func HasUserDocument() predicate.UserDocument {
 }
 
 // HasUserDocumentWith applies the HasEdge predicate on the "user_document" edge with a given conditions (other predicates).
-func HasUserDocumentWith(preds ...predicate.Business) predicate.UserDocument {
+func HasUserDocumentWith(preds ...predicate.User) predicate.UserDocument {
 	return predicate.UserDocument(func(s *sql.Selector) {
 		step := newUserDocumentStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {

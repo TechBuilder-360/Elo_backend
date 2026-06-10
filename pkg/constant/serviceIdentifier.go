@@ -1,5 +1,6 @@
 package constant
 
 const (
-	EmailServiceIdentifier string = "email-provider"
+	EmailServiceIdentifier                string = "email-provider"
+	IdentityVerificationServiceIdentifier string = "identity-verification"
 )

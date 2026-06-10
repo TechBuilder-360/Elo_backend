@@ -54,6 +54,12 @@ func (bdc *BusinessDocumentCreate) SetNillableVerified(b *bool) *BusinessDocumen
 	return bdc
 }
 
+// SetType sets the "type" field.
+func (bdc *BusinessDocumentCreate) SetType(b businessdocument.Type) *BusinessDocumentCreate {
+	bdc.mutation.SetType(b)
+	return bdc
+}
+
 // SetBusinessDocumentID sets the "business_document" edge to the Business entity by ID.
 func (bdc *BusinessDocumentCreate) SetBusinessDocumentID(id string) *BusinessDocumentCreate {
 	bdc.mutation.SetBusinessDocumentID(id)
@@ -135,6 +141,14 @@ func (bdc *BusinessDocumentCreate) check() error {
 	if _, ok := bdc.mutation.Verified(); !ok {
 		return &ValidationError{Name: "verified", err: errors.New(`ent: missing required field "BusinessDocument.verified"`)}
 	}
+	if _, ok := bdc.mutation.GetType(); !ok {
+		return &ValidationError{Name: "type", err: errors.New(`ent: missing required field "BusinessDocument.type"`)}
+	}
+	if v, ok := bdc.mutation.GetType(); ok {
+		if err := businessdocument.TypeValidator(v); err != nil {
+			return &ValidationError{Name: "type", err: fmt.Errorf(`ent: validator failed for field "BusinessDocument.type": %w`, err)}
+		}
+	}
 	if len(bdc.mutation.BusinessDocumentIDs()) == 0 {
 		return &ValidationError{Name: "business_document", err: errors.New(`ent: missing required edge "BusinessDocument.business_document"`)}
 	}
@@ -180,6 +194,10 @@ func (bdc *BusinessDocumentCreate) createSpec() (*BusinessDocument, *sqlgraph.Cr
 	if value, ok := bdc.mutation.Verified(); ok {
 		_spec.SetField(businessdocument.FieldVerified, field.TypeBool, value)
 		_node.Verified = value
+	}
+	if value, ok := bdc.mutation.GetType(); ok {
+		_spec.SetField(businessdocument.FieldType, field.TypeEnum, value)
+		_node.Type = value
 	}
 	if nodes := bdc.mutation.BusinessDocumentIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
@@ -298,6 +316,18 @@ func (u *BusinessDocumentUpsert) UpdateVerified() *BusinessDocumentUpsert {
 	return u
 }
 
+// SetType sets the "type" field.
+func (u *BusinessDocumentUpsert) SetType(v businessdocument.Type) *BusinessDocumentUpsert {
+	u.Set(businessdocument.FieldType, v)
+	return u
+}
+
+// UpdateType sets the "type" field to the value that was provided on create.
+func (u *BusinessDocumentUpsert) UpdateType() *BusinessDocumentUpsert {
+	u.SetExcluded(businessdocument.FieldType)
+	return u
+}
+
 // UpdateNewValues updates the mutable fields using the new values that were set on create.
 // Using this option is equivalent to using:
 //
@@ -391,6 +421,20 @@ func (u *BusinessDocumentUpsertOne) SetVerified(v bool) *BusinessDocumentUpsertO
 func (u *BusinessDocumentUpsertOne) UpdateVerified() *BusinessDocumentUpsertOne {
 	return u.Update(func(s *BusinessDocumentUpsert) {
 		s.UpdateVerified()
+	})
+}
+
+// SetType sets the "type" field.
+func (u *BusinessDocumentUpsertOne) SetType(v businessdocument.Type) *BusinessDocumentUpsertOne {
+	return u.Update(func(s *BusinessDocumentUpsert) {
+		s.SetType(v)
+	})
+}
+
+// UpdateType sets the "type" field to the value that was provided on create.
+func (u *BusinessDocumentUpsertOne) UpdateType() *BusinessDocumentUpsertOne {
+	return u.Update(func(s *BusinessDocumentUpsert) {
+		s.UpdateType()
 	})
 }
 
@@ -651,6 +695,20 @@ func (u *BusinessDocumentUpsertBulk) SetVerified(v bool) *BusinessDocumentUpsert
 func (u *BusinessDocumentUpsertBulk) UpdateVerified() *BusinessDocumentUpsertBulk {
 	return u.Update(func(s *BusinessDocumentUpsert) {
 		s.UpdateVerified()
+	})
+}
+
+// SetType sets the "type" field.
+func (u *BusinessDocumentUpsertBulk) SetType(v businessdocument.Type) *BusinessDocumentUpsertBulk {
+	return u.Update(func(s *BusinessDocumentUpsert) {
+		s.SetType(v)
+	})
+}
+
+// UpdateType sets the "type" field to the value that was provided on create.
+func (u *BusinessDocumentUpsertBulk) UpdateType() *BusinessDocumentUpsertBulk {
+	return u.Update(func(s *BusinessDocumentUpsert) {
+		s.UpdateType()
 	})
 }
 

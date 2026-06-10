@@ -13,8 +13,10 @@ import (
 	"entgo.io/ent/schema/field"
 	"github.com/Toflex/directory_v2/ent/manager"
 	"github.com/Toflex/directory_v2/ent/predicate"
+	"github.com/Toflex/directory_v2/ent/requestverification"
 	"github.com/Toflex/directory_v2/ent/user"
 	"github.com/Toflex/directory_v2/ent/userdocument"
+	"github.com/Toflex/directory_v2/ent/verification"
 )
 
 // UserUpdate is the builder for updating User entities.
@@ -304,6 +306,36 @@ func (uu *UserUpdate) AddUserDocuments(u ...*UserDocument) *UserUpdate {
 	return uu.AddUserDocumentIDs(ids...)
 }
 
+// AddVerificationIDs adds the "verifications" edge to the Verification entity by IDs.
+func (uu *UserUpdate) AddVerificationIDs(ids ...string) *UserUpdate {
+	uu.mutation.AddVerificationIDs(ids...)
+	return uu
+}
+
+// AddVerifications adds the "verifications" edges to the Verification entity.
+func (uu *UserUpdate) AddVerifications(v ...*Verification) *UserUpdate {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return uu.AddVerificationIDs(ids...)
+}
+
+// AddRequestVerificationIDs adds the "request_verifications" edge to the RequestVerification entity by IDs.
+func (uu *UserUpdate) AddRequestVerificationIDs(ids ...string) *UserUpdate {
+	uu.mutation.AddRequestVerificationIDs(ids...)
+	return uu
+}
+
+// AddRequestVerifications adds the "request_verifications" edges to the RequestVerification entity.
+func (uu *UserUpdate) AddRequestVerifications(r ...*RequestVerification) *UserUpdate {
+	ids := make([]string, len(r))
+	for i := range r {
+		ids[i] = r[i].ID
+	}
+	return uu.AddRequestVerificationIDs(ids...)
+}
+
 // Mutation returns the UserMutation object of the builder.
 func (uu *UserUpdate) Mutation() *UserMutation {
 	return uu.mutation
@@ -349,6 +381,48 @@ func (uu *UserUpdate) RemoveUserDocuments(u ...*UserDocument) *UserUpdate {
 		ids[i] = u[i].ID
 	}
 	return uu.RemoveUserDocumentIDs(ids...)
+}
+
+// ClearVerifications clears all "verifications" edges to the Verification entity.
+func (uu *UserUpdate) ClearVerifications() *UserUpdate {
+	uu.mutation.ClearVerifications()
+	return uu
+}
+
+// RemoveVerificationIDs removes the "verifications" edge to Verification entities by IDs.
+func (uu *UserUpdate) RemoveVerificationIDs(ids ...string) *UserUpdate {
+	uu.mutation.RemoveVerificationIDs(ids...)
+	return uu
+}
+
+// RemoveVerifications removes "verifications" edges to Verification entities.
+func (uu *UserUpdate) RemoveVerifications(v ...*Verification) *UserUpdate {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return uu.RemoveVerificationIDs(ids...)
+}
+
+// ClearRequestVerifications clears all "request_verifications" edges to the RequestVerification entity.
+func (uu *UserUpdate) ClearRequestVerifications() *UserUpdate {
+	uu.mutation.ClearRequestVerifications()
+	return uu
+}
+
+// RemoveRequestVerificationIDs removes the "request_verifications" edge to RequestVerification entities by IDs.
+func (uu *UserUpdate) RemoveRequestVerificationIDs(ids ...string) *UserUpdate {
+	uu.mutation.RemoveRequestVerificationIDs(ids...)
+	return uu
+}
+
+// RemoveRequestVerifications removes "request_verifications" edges to RequestVerification entities.
+func (uu *UserUpdate) RemoveRequestVerifications(r ...*RequestVerification) *UserUpdate {
+	ids := make([]string, len(r))
+	for i := range r {
+		ids[i] = r[i].ID
+	}
+	return uu.RemoveRequestVerificationIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -578,6 +652,96 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(userdocument.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if uu.mutation.VerificationsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   user.VerificationsTable,
+			Columns: user.VerificationsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(verification.FieldID, field.TypeString),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := uu.mutation.RemovedVerificationsIDs(); len(nodes) > 0 && !uu.mutation.VerificationsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   user.VerificationsTable,
+			Columns: user.VerificationsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(verification.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := uu.mutation.VerificationsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   user.VerificationsTable,
+			Columns: user.VerificationsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(verification.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if uu.mutation.RequestVerificationsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   user.RequestVerificationsTable,
+			Columns: user.RequestVerificationsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(requestverification.FieldID, field.TypeString),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := uu.mutation.RemovedRequestVerificationsIDs(); len(nodes) > 0 && !uu.mutation.RequestVerificationsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   user.RequestVerificationsTable,
+			Columns: user.RequestVerificationsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(requestverification.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := uu.mutation.RequestVerificationsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   user.RequestVerificationsTable,
+			Columns: user.RequestVerificationsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(requestverification.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {
@@ -879,6 +1043,36 @@ func (uuo *UserUpdateOne) AddUserDocuments(u ...*UserDocument) *UserUpdateOne {
 	return uuo.AddUserDocumentIDs(ids...)
 }
 
+// AddVerificationIDs adds the "verifications" edge to the Verification entity by IDs.
+func (uuo *UserUpdateOne) AddVerificationIDs(ids ...string) *UserUpdateOne {
+	uuo.mutation.AddVerificationIDs(ids...)
+	return uuo
+}
+
+// AddVerifications adds the "verifications" edges to the Verification entity.
+func (uuo *UserUpdateOne) AddVerifications(v ...*Verification) *UserUpdateOne {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return uuo.AddVerificationIDs(ids...)
+}
+
+// AddRequestVerificationIDs adds the "request_verifications" edge to the RequestVerification entity by IDs.
+func (uuo *UserUpdateOne) AddRequestVerificationIDs(ids ...string) *UserUpdateOne {
+	uuo.mutation.AddRequestVerificationIDs(ids...)
+	return uuo
+}
+
+// AddRequestVerifications adds the "request_verifications" edges to the RequestVerification entity.
+func (uuo *UserUpdateOne) AddRequestVerifications(r ...*RequestVerification) *UserUpdateOne {
+	ids := make([]string, len(r))
+	for i := range r {
+		ids[i] = r[i].ID
+	}
+	return uuo.AddRequestVerificationIDs(ids...)
+}
+
 // Mutation returns the UserMutation object of the builder.
 func (uuo *UserUpdateOne) Mutation() *UserMutation {
 	return uuo.mutation
@@ -924,6 +1118,48 @@ func (uuo *UserUpdateOne) RemoveUserDocuments(u ...*UserDocument) *UserUpdateOne
 		ids[i] = u[i].ID
 	}
 	return uuo.RemoveUserDocumentIDs(ids...)
+}
+
+// ClearVerifications clears all "verifications" edges to the Verification entity.
+func (uuo *UserUpdateOne) ClearVerifications() *UserUpdateOne {
+	uuo.mutation.ClearVerifications()
+	return uuo
+}
+
+// RemoveVerificationIDs removes the "verifications" edge to Verification entities by IDs.
+func (uuo *UserUpdateOne) RemoveVerificationIDs(ids ...string) *UserUpdateOne {
+	uuo.mutation.RemoveVerificationIDs(ids...)
+	return uuo
+}
+
+// RemoveVerifications removes "verifications" edges to Verification entities.
+func (uuo *UserUpdateOne) RemoveVerifications(v ...*Verification) *UserUpdateOne {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return uuo.RemoveVerificationIDs(ids...)
+}
+
+// ClearRequestVerifications clears all "request_verifications" edges to the RequestVerification entity.
+func (uuo *UserUpdateOne) ClearRequestVerifications() *UserUpdateOne {
+	uuo.mutation.ClearRequestVerifications()
+	return uuo
+}
+
+// RemoveRequestVerificationIDs removes the "request_verifications" edge to RequestVerification entities by IDs.
+func (uuo *UserUpdateOne) RemoveRequestVerificationIDs(ids ...string) *UserUpdateOne {
+	uuo.mutation.RemoveRequestVerificationIDs(ids...)
+	return uuo
+}
+
+// RemoveRequestVerifications removes "request_verifications" edges to RequestVerification entities.
+func (uuo *UserUpdateOne) RemoveRequestVerifications(r ...*RequestVerification) *UserUpdateOne {
+	ids := make([]string, len(r))
+	for i := range r {
+		ids[i] = r[i].ID
+	}
+	return uuo.RemoveRequestVerificationIDs(ids...)
 }
 
 // Where appends a list predicates to the UserUpdate builder.
@@ -1183,6 +1419,96 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(userdocument.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if uuo.mutation.VerificationsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   user.VerificationsTable,
+			Columns: user.VerificationsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(verification.FieldID, field.TypeString),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := uuo.mutation.RemovedVerificationsIDs(); len(nodes) > 0 && !uuo.mutation.VerificationsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   user.VerificationsTable,
+			Columns: user.VerificationsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(verification.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := uuo.mutation.VerificationsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   user.VerificationsTable,
+			Columns: user.VerificationsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(verification.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if uuo.mutation.RequestVerificationsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   user.RequestVerificationsTable,
+			Columns: user.RequestVerificationsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(requestverification.FieldID, field.TypeString),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := uuo.mutation.RemovedRequestVerificationsIDs(); len(nodes) > 0 && !uuo.mutation.RequestVerificationsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   user.RequestVerificationsTable,
+			Columns: user.RequestVerificationsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(requestverification.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := uuo.mutation.RequestVerificationsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   user.RequestVerificationsTable,
+			Columns: user.RequestVerificationsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(requestverification.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {

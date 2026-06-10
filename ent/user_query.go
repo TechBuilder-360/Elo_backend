@@ -14,19 +14,23 @@ import (
 	"entgo.io/ent/schema/field"
 	"github.com/Toflex/directory_v2/ent/manager"
 	"github.com/Toflex/directory_v2/ent/predicate"
+	"github.com/Toflex/directory_v2/ent/requestverification"
 	"github.com/Toflex/directory_v2/ent/user"
 	"github.com/Toflex/directory_v2/ent/userdocument"
+	"github.com/Toflex/directory_v2/ent/verification"
 )
 
 // UserQuery is the builder for querying User entities.
 type UserQuery struct {
 	config
-	ctx               *QueryContext
-	order             []user.OrderOption
-	inters            []Interceptor
-	predicates        []predicate.User
-	withManages       *ManagerQuery
-	withUserDocuments *UserDocumentQuery
+	ctx                      *QueryContext
+	order                    []user.OrderOption
+	inters                   []Interceptor
+	predicates               []predicate.User
+	withManages              *ManagerQuery
+	withUserDocuments        *UserDocumentQuery
+	withVerifications        *VerificationQuery
+	withRequestVerifications *RequestVerificationQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -100,6 +104,50 @@ func (uq *UserQuery) QueryUserDocuments() *UserDocumentQuery {
 			sqlgraph.From(user.Table, user.FieldID, selector),
 			sqlgraph.To(userdocument.Table, userdocument.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, user.UserDocumentsTable, user.UserDocumentsColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(uq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryVerifications chains the current query on the "verifications" edge.
+func (uq *UserQuery) QueryVerifications() *VerificationQuery {
+	query := (&VerificationClient{config: uq.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := uq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := uq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, selector),
+			sqlgraph.To(verification.Table, verification.FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, true, user.VerificationsTable, user.VerificationsPrimaryKey...),
+		)
+		fromU = sqlgraph.SetNeighbors(uq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryRequestVerifications chains the current query on the "request_verifications" edge.
+func (uq *UserQuery) QueryRequestVerifications() *RequestVerificationQuery {
+	query := (&RequestVerificationClient{config: uq.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := uq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := uq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, selector),
+			sqlgraph.To(requestverification.Table, requestverification.FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, true, user.RequestVerificationsTable, user.RequestVerificationsPrimaryKey...),
 		)
 		fromU = sqlgraph.SetNeighbors(uq.driver.Dialect(), step)
 		return fromU, nil
@@ -294,13 +342,15 @@ func (uq *UserQuery) Clone() *UserQuery {
 		return nil
 	}
 	return &UserQuery{
-		config:            uq.config,
-		ctx:               uq.ctx.Clone(),
-		order:             append([]user.OrderOption{}, uq.order...),
-		inters:            append([]Interceptor{}, uq.inters...),
-		predicates:        append([]predicate.User{}, uq.predicates...),
-		withManages:       uq.withManages.Clone(),
-		withUserDocuments: uq.withUserDocuments.Clone(),
+		config:                   uq.config,
+		ctx:                      uq.ctx.Clone(),
+		order:                    append([]user.OrderOption{}, uq.order...),
+		inters:                   append([]Interceptor{}, uq.inters...),
+		predicates:               append([]predicate.User{}, uq.predicates...),
+		withManages:              uq.withManages.Clone(),
+		withUserDocuments:        uq.withUserDocuments.Clone(),
+		withVerifications:        uq.withVerifications.Clone(),
+		withRequestVerifications: uq.withRequestVerifications.Clone(),
 		// clone intermediate query.
 		sql:  uq.sql.Clone(),
 		path: uq.path,
@@ -326,6 +376,28 @@ func (uq *UserQuery) WithUserDocuments(opts ...func(*UserDocumentQuery)) *UserQu
 		opt(query)
 	}
 	uq.withUserDocuments = query
+	return uq
+}
+
+// WithVerifications tells the query-builder to eager-load the nodes that are connected to
+// the "verifications" edge. The optional arguments are used to configure the query builder of the edge.
+func (uq *UserQuery) WithVerifications(opts ...func(*VerificationQuery)) *UserQuery {
+	query := (&VerificationClient{config: uq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	uq.withVerifications = query
+	return uq
+}
+
+// WithRequestVerifications tells the query-builder to eager-load the nodes that are connected to
+// the "request_verifications" edge. The optional arguments are used to configure the query builder of the edge.
+func (uq *UserQuery) WithRequestVerifications(opts ...func(*RequestVerificationQuery)) *UserQuery {
+	query := (&RequestVerificationClient{config: uq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	uq.withRequestVerifications = query
 	return uq
 }
 
@@ -407,9 +479,11 @@ func (uq *UserQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*User, e
 	var (
 		nodes       = []*User{}
 		_spec       = uq.querySpec()
-		loadedTypes = [2]bool{
+		loadedTypes = [4]bool{
 			uq.withManages != nil,
 			uq.withUserDocuments != nil,
+			uq.withVerifications != nil,
+			uq.withRequestVerifications != nil,
 		}
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
@@ -441,6 +515,22 @@ func (uq *UserQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*User, e
 		if err := uq.loadUserDocuments(ctx, query, nodes,
 			func(n *User) { n.Edges.UserDocuments = []*UserDocument{} },
 			func(n *User, e *UserDocument) { n.Edges.UserDocuments = append(n.Edges.UserDocuments, e) }); err != nil {
+			return nil, err
+		}
+	}
+	if query := uq.withVerifications; query != nil {
+		if err := uq.loadVerifications(ctx, query, nodes,
+			func(n *User) { n.Edges.Verifications = []*Verification{} },
+			func(n *User, e *Verification) { n.Edges.Verifications = append(n.Edges.Verifications, e) }); err != nil {
+			return nil, err
+		}
+	}
+	if query := uq.withRequestVerifications; query != nil {
+		if err := uq.loadRequestVerifications(ctx, query, nodes,
+			func(n *User) { n.Edges.RequestVerifications = []*RequestVerification{} },
+			func(n *User, e *RequestVerification) {
+				n.Edges.RequestVerifications = append(n.Edges.RequestVerifications, e)
+			}); err != nil {
 			return nil, err
 		}
 	}
@@ -505,6 +595,128 @@ func (uq *UserQuery) loadUserDocuments(ctx context.Context, query *UserDocumentQ
 			return fmt.Errorf(`unexpected referenced foreign-key "user_user_documents" returned %v for node %v`, *fk, n.ID)
 		}
 		assign(node, n)
+	}
+	return nil
+}
+func (uq *UserQuery) loadVerifications(ctx context.Context, query *VerificationQuery, nodes []*User, init func(*User), assign func(*User, *Verification)) error {
+	edgeIDs := make([]driver.Value, len(nodes))
+	byID := make(map[string]*User)
+	nids := make(map[string]map[*User]struct{})
+	for i, node := range nodes {
+		edgeIDs[i] = node.ID
+		byID[node.ID] = node
+		if init != nil {
+			init(node)
+		}
+	}
+	query.Where(func(s *sql.Selector) {
+		joinT := sql.Table(user.VerificationsTable)
+		s.Join(joinT).On(s.C(verification.FieldID), joinT.C(user.VerificationsPrimaryKey[0]))
+		s.Where(sql.InValues(joinT.C(user.VerificationsPrimaryKey[1]), edgeIDs...))
+		columns := s.SelectedColumns()
+		s.Select(joinT.C(user.VerificationsPrimaryKey[1]))
+		s.AppendSelect(columns...)
+		s.SetDistinct(false)
+	})
+	if err := query.prepareQuery(ctx); err != nil {
+		return err
+	}
+	qr := QuerierFunc(func(ctx context.Context, q Query) (Value, error) {
+		return query.sqlAll(ctx, func(_ context.Context, spec *sqlgraph.QuerySpec) {
+			assign := spec.Assign
+			values := spec.ScanValues
+			spec.ScanValues = func(columns []string) ([]any, error) {
+				values, err := values(columns[1:])
+				if err != nil {
+					return nil, err
+				}
+				return append([]any{new(sql.NullString)}, values...), nil
+			}
+			spec.Assign = func(columns []string, values []any) error {
+				outValue := values[0].(*sql.NullString).String
+				inValue := values[1].(*sql.NullString).String
+				if nids[inValue] == nil {
+					nids[inValue] = map[*User]struct{}{byID[outValue]: {}}
+					return assign(columns[1:], values[1:])
+				}
+				nids[inValue][byID[outValue]] = struct{}{}
+				return nil
+			}
+		})
+	})
+	neighbors, err := withInterceptors[[]*Verification](ctx, query, qr, query.inters)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		nodes, ok := nids[n.ID]
+		if !ok {
+			return fmt.Errorf(`unexpected "verifications" node returned %v`, n.ID)
+		}
+		for kn := range nodes {
+			assign(kn, n)
+		}
+	}
+	return nil
+}
+func (uq *UserQuery) loadRequestVerifications(ctx context.Context, query *RequestVerificationQuery, nodes []*User, init func(*User), assign func(*User, *RequestVerification)) error {
+	edgeIDs := make([]driver.Value, len(nodes))
+	byID := make(map[string]*User)
+	nids := make(map[string]map[*User]struct{})
+	for i, node := range nodes {
+		edgeIDs[i] = node.ID
+		byID[node.ID] = node
+		if init != nil {
+			init(node)
+		}
+	}
+	query.Where(func(s *sql.Selector) {
+		joinT := sql.Table(user.RequestVerificationsTable)
+		s.Join(joinT).On(s.C(requestverification.FieldID), joinT.C(user.RequestVerificationsPrimaryKey[0]))
+		s.Where(sql.InValues(joinT.C(user.RequestVerificationsPrimaryKey[1]), edgeIDs...))
+		columns := s.SelectedColumns()
+		s.Select(joinT.C(user.RequestVerificationsPrimaryKey[1]))
+		s.AppendSelect(columns...)
+		s.SetDistinct(false)
+	})
+	if err := query.prepareQuery(ctx); err != nil {
+		return err
+	}
+	qr := QuerierFunc(func(ctx context.Context, q Query) (Value, error) {
+		return query.sqlAll(ctx, func(_ context.Context, spec *sqlgraph.QuerySpec) {
+			assign := spec.Assign
+			values := spec.ScanValues
+			spec.ScanValues = func(columns []string) ([]any, error) {
+				values, err := values(columns[1:])
+				if err != nil {
+					return nil, err
+				}
+				return append([]any{new(sql.NullString)}, values...), nil
+			}
+			spec.Assign = func(columns []string, values []any) error {
+				outValue := values[0].(*sql.NullString).String
+				inValue := values[1].(*sql.NullString).String
+				if nids[inValue] == nil {
+					nids[inValue] = map[*User]struct{}{byID[outValue]: {}}
+					return assign(columns[1:], values[1:])
+				}
+				nids[inValue][byID[outValue]] = struct{}{}
+				return nil
+			}
+		})
+	})
+	neighbors, err := withInterceptors[[]*RequestVerification](ctx, query, qr, query.inters)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		nodes, ok := nids[n.ID]
+		if !ok {
+			return fmt.Errorf(`unexpected "request_verifications" node returned %v`, n.ID)
+		}
+		for kn := range nodes {
+			assign(kn, n)
+		}
 	}
 	return nil
 }

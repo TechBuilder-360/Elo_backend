@@ -40,6 +40,7 @@ var (
 		{Name: "description", Type: field.TypeString},
 		{Name: "url", Type: field.TypeString},
 		{Name: "verified", Type: field.TypeBool, Default: false},
+		{Name: "type", Type: field.TypeEnum, Enums: []string{"KYB", "SERVICE", "PRODUCT"}},
 		{Name: "business_business_documents", Type: field.TypeString},
 	}
 	// BusinessDocumentsTable holds the schema information for the "business_documents" table.
@@ -50,7 +51,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "business_documents_businesses_business_documents",
-				Columns:    []*schema.Column{BusinessDocumentsColumns[5]},
+				Columns:    []*schema.Column{BusinessDocumentsColumns[6]},
 				RefColumns: []*schema.Column{BusinessesColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
@@ -167,6 +168,25 @@ var (
 			},
 		},
 	}
+	// RequestVerificationsColumns holds the columns for the "request_verifications" table.
+	RequestVerificationsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeString},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "deleted_at", Type: field.TypeTime, Nullable: true},
+		{Name: "reference_id", Type: field.TypeString, Unique: true},
+		{Name: "verification_type", Type: field.TypeString},
+		{Name: "provider", Type: field.TypeString},
+		{Name: "link", Type: field.TypeString},
+		{Name: "provider_link", Type: field.TypeString},
+		{Name: "status", Type: field.TypeEnum, Enums: []string{"PENDING", "IN_PROGRESS", "VERIFIED", "FAILED", "REJECTED", "EXPIRED"}, Default: "PENDING"},
+	}
+	// RequestVerificationsTable holds the schema information for the "request_verifications" table.
+	RequestVerificationsTable = &schema.Table{
+		Name:       "request_verifications",
+		Columns:    RequestVerificationsColumns,
+		PrimaryKey: []*schema.Column{RequestVerificationsColumns[0]},
+	}
 	// RolesColumns holds the columns for the "roles" table.
 	RolesColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeString},
@@ -266,8 +286,7 @@ var (
 		{Name: "title", Type: field.TypeString},
 		{Name: "description", Type: field.TypeString},
 		{Name: "url", Type: field.TypeString},
-		{Name: "business_user_documents", Type: field.TypeString},
-		{Name: "user_user_documents", Type: field.TypeString, Nullable: true},
+		{Name: "user_user_documents", Type: field.TypeString},
 	}
 	// UserDocumentsTable holds the schema information for the "user_documents" table.
 	UserDocumentsTable = &schema.Table{
@@ -276,16 +295,82 @@ var (
 		PrimaryKey: []*schema.Column{UserDocumentsColumns[0]},
 		ForeignKeys: []*schema.ForeignKey{
 			{
-				Symbol:     "user_documents_businesses_user_documents",
+				Symbol:     "user_documents_users_user_documents",
 				Columns:    []*schema.Column{UserDocumentsColumns[4]},
-				RefColumns: []*schema.Column{BusinessesColumns[0]},
+				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
+		},
+	}
+	// VerificationsColumns holds the columns for the "verifications" table.
+	VerificationsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeString},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "deleted_at", Type: field.TypeTime, Nullable: true},
+		{Name: "provider", Type: field.TypeString},
+		{Name: "verification_type", Type: field.TypeEnum, Enums: []string{"BVN", "NIN", "PASSPORT", "VOTER_ID", "DRIVERS_LICENSE"}},
+		{Name: "status", Type: field.TypeEnum, Enums: []string{"PENDING", "IN_PROGRESS", "VERIFIED", "FAILED", "REJECTED", "EXPIRED"}, Default: "IN_PROGRESS"},
+		{Name: "reference_id", Type: field.TypeString},
+		{Name: "provider_reference", Type: field.TypeString},
+		{Name: "metadata", Type: field.TypeJSON},
+		{Name: "data", Type: field.TypeJSON},
+		{Name: "verified_at", Type: field.TypeTime, Nullable: true},
+		{Name: "is_obsolate", Type: field.TypeBool, Default: false},
+	}
+	// VerificationsTable holds the schema information for the "verifications" table.
+	VerificationsTable = &schema.Table{
+		Name:       "verifications",
+		Columns:    VerificationsColumns,
+		PrimaryKey: []*schema.Column{VerificationsColumns[0]},
+	}
+	// RequestVerificationUserColumns holds the columns for the "request_verification_user" table.
+	RequestVerificationUserColumns = []*schema.Column{
+		{Name: "request_verification_id", Type: field.TypeString},
+		{Name: "user_id", Type: field.TypeString},
+	}
+	// RequestVerificationUserTable holds the schema information for the "request_verification_user" table.
+	RequestVerificationUserTable = &schema.Table{
+		Name:       "request_verification_user",
+		Columns:    RequestVerificationUserColumns,
+		PrimaryKey: []*schema.Column{RequestVerificationUserColumns[0], RequestVerificationUserColumns[1]},
+		ForeignKeys: []*schema.ForeignKey{
 			{
-				Symbol:     "user_documents_users_user_documents",
-				Columns:    []*schema.Column{UserDocumentsColumns[5]},
+				Symbol:     "request_verification_user_request_verification_id",
+				Columns:    []*schema.Column{RequestVerificationUserColumns[0]},
+				RefColumns: []*schema.Column{RequestVerificationsColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+			{
+				Symbol:     "request_verification_user_user_id",
+				Columns:    []*schema.Column{RequestVerificationUserColumns[1]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
-				OnDelete:   schema.SetNull,
+				OnDelete:   schema.Cascade,
+			},
+		},
+	}
+	// RequestVerificationBusinessColumns holds the columns for the "request_verification_business" table.
+	RequestVerificationBusinessColumns = []*schema.Column{
+		{Name: "request_verification_id", Type: field.TypeString},
+		{Name: "business_id", Type: field.TypeString},
+	}
+	// RequestVerificationBusinessTable holds the schema information for the "request_verification_business" table.
+	RequestVerificationBusinessTable = &schema.Table{
+		Name:       "request_verification_business",
+		Columns:    RequestVerificationBusinessColumns,
+		PrimaryKey: []*schema.Column{RequestVerificationBusinessColumns[0], RequestVerificationBusinessColumns[1]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "request_verification_business_request_verification_id",
+				Columns:    []*schema.Column{RequestVerificationBusinessColumns[0]},
+				RefColumns: []*schema.Column{RequestVerificationsColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+			{
+				Symbol:     "request_verification_business_business_id",
+				Columns:    []*schema.Column{RequestVerificationBusinessColumns[1]},
+				RefColumns: []*schema.Column{BusinessesColumns[0]},
+				OnDelete:   schema.Cascade,
 			},
 		},
 	}
@@ -314,6 +399,56 @@ var (
 			},
 		},
 	}
+	// VerificationUserColumns holds the columns for the "verification_user" table.
+	VerificationUserColumns = []*schema.Column{
+		{Name: "verification_id", Type: field.TypeString},
+		{Name: "user_id", Type: field.TypeString},
+	}
+	// VerificationUserTable holds the schema information for the "verification_user" table.
+	VerificationUserTable = &schema.Table{
+		Name:       "verification_user",
+		Columns:    VerificationUserColumns,
+		PrimaryKey: []*schema.Column{VerificationUserColumns[0], VerificationUserColumns[1]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "verification_user_verification_id",
+				Columns:    []*schema.Column{VerificationUserColumns[0]},
+				RefColumns: []*schema.Column{VerificationsColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+			{
+				Symbol:     "verification_user_user_id",
+				Columns:    []*schema.Column{VerificationUserColumns[1]},
+				RefColumns: []*schema.Column{UsersColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+		},
+	}
+	// VerificationBusinessColumns holds the columns for the "verification_business" table.
+	VerificationBusinessColumns = []*schema.Column{
+		{Name: "verification_id", Type: field.TypeString},
+		{Name: "business_id", Type: field.TypeString},
+	}
+	// VerificationBusinessTable holds the schema information for the "verification_business" table.
+	VerificationBusinessTable = &schema.Table{
+		Name:       "verification_business",
+		Columns:    VerificationBusinessColumns,
+		PrimaryKey: []*schema.Column{VerificationBusinessColumns[0], VerificationBusinessColumns[1]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "verification_business_verification_id",
+				Columns:    []*schema.Column{VerificationBusinessColumns[0]},
+				RefColumns: []*schema.Column{VerificationsColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+			{
+				Symbol:     "verification_business_business_id",
+				Columns:    []*schema.Column{VerificationBusinessColumns[1]},
+				RefColumns: []*schema.Column{BusinessesColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+		},
+	}
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
 		BusinessesTable,
@@ -323,12 +458,18 @@ var (
 		ManagersTable,
 		PermissionsTable,
 		ProvidersTable,
+		RequestVerificationsTable,
 		RolesTable,
 		ServicesTable,
 		SocialsTable,
 		UsersTable,
 		UserDocumentsTable,
+		VerificationsTable,
+		RequestVerificationUserTable,
+		RequestVerificationBusinessTable,
 		RolePermissionsTable,
+		VerificationUserTable,
+		VerificationBusinessTable,
 	}
 )
 
@@ -338,8 +479,15 @@ func init() {
 	ManagersTable.ForeignKeys[0].RefTable = BusinessesTable
 	ManagersTable.ForeignKeys[1].RefTable = UsersTable
 	SocialsTable.ForeignKeys[0].RefTable = BusinessesTable
-	UserDocumentsTable.ForeignKeys[0].RefTable = BusinessesTable
-	UserDocumentsTable.ForeignKeys[1].RefTable = UsersTable
+	UserDocumentsTable.ForeignKeys[0].RefTable = UsersTable
+	RequestVerificationUserTable.ForeignKeys[0].RefTable = RequestVerificationsTable
+	RequestVerificationUserTable.ForeignKeys[1].RefTable = UsersTable
+	RequestVerificationBusinessTable.ForeignKeys[0].RefTable = RequestVerificationsTable
+	RequestVerificationBusinessTable.ForeignKeys[1].RefTable = BusinessesTable
 	RolePermissionsTable.ForeignKeys[0].RefTable = RolesTable
 	RolePermissionsTable.ForeignKeys[1].RefTable = PermissionsTable
+	VerificationUserTable.ForeignKeys[0].RefTable = VerificationsTable
+	VerificationUserTable.ForeignKeys[1].RefTable = UsersTable
+	VerificationBusinessTable.ForeignKeys[0].RefTable = VerificationsTable
+	VerificationBusinessTable.ForeignKeys[1].RefTable = BusinessesTable
 }

@@ -23,7 +23,7 @@ func (UserDocument) Fields() []ent.Field {
 // Edges of the UserDocument.
 func (UserDocument) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.From("user_document", Business.Type).
+		edge.From("user_document", User.Type).
 			Ref("user_documents").
 			Required().
 			Unique(),

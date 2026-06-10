@@ -42,5 +42,9 @@ func (User) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.To("manages", Manager.Type),
 		edge.To("user_documents", UserDocument.Type),
+		edge.From("verifications", Verification.Type).
+			Ref("user"),
+		edge.From("request_verifications", RequestVerification.Type).
+			Ref("user"),
 	}
 }

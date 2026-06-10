@@ -22,11 +22,13 @@ import (
 	"github.com/Toflex/directory_v2/ent/manager"
 	"github.com/Toflex/directory_v2/ent/permission"
 	"github.com/Toflex/directory_v2/ent/provider"
+	"github.com/Toflex/directory_v2/ent/requestverification"
 	"github.com/Toflex/directory_v2/ent/role"
 	"github.com/Toflex/directory_v2/ent/service"
 	"github.com/Toflex/directory_v2/ent/social"
 	"github.com/Toflex/directory_v2/ent/user"
 	"github.com/Toflex/directory_v2/ent/userdocument"
+	"github.com/Toflex/directory_v2/ent/verification"
 )
 
 // Client is the client that holds all ent builders.
@@ -48,6 +50,8 @@ type Client struct {
 	Permission *PermissionClient
 	// Provider is the client for interacting with the Provider builders.
 	Provider *ProviderClient
+	// RequestVerification is the client for interacting with the RequestVerification builders.
+	RequestVerification *RequestVerificationClient
 	// Role is the client for interacting with the Role builders.
 	Role *RoleClient
 	// Service is the client for interacting with the Service builders.
@@ -58,6 +62,8 @@ type Client struct {
 	User *UserClient
 	// UserDocument is the client for interacting with the UserDocument builders.
 	UserDocument *UserDocumentClient
+	// Verification is the client for interacting with the Verification builders.
+	Verification *VerificationClient
 }
 
 // NewClient creates a new client configured with the given options.
@@ -76,11 +82,13 @@ func (c *Client) init() {
 	c.Manager = NewManagerClient(c.config)
 	c.Permission = NewPermissionClient(c.config)
 	c.Provider = NewProviderClient(c.config)
+	c.RequestVerification = NewRequestVerificationClient(c.config)
 	c.Role = NewRoleClient(c.config)
 	c.Service = NewServiceClient(c.config)
 	c.Social = NewSocialClient(c.config)
 	c.User = NewUserClient(c.config)
 	c.UserDocument = NewUserDocumentClient(c.config)
+	c.Verification = NewVerificationClient(c.config)
 }
 
 type (
@@ -171,20 +179,22 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 	cfg := c.config
 	cfg.driver = tx
 	return &Tx{
-		ctx:              ctx,
-		config:           cfg,
-		Business:         NewBusinessClient(cfg),
-		BusinessDocument: NewBusinessDocumentClient(cfg),
-		BusinessFeature:  NewBusinessFeatureClient(cfg),
-		BusinessServices: NewBusinessServicesClient(cfg),
-		Manager:          NewManagerClient(cfg),
-		Permission:       NewPermissionClient(cfg),
-		Provider:         NewProviderClient(cfg),
-		Role:             NewRoleClient(cfg),
-		Service:          NewServiceClient(cfg),
-		Social:           NewSocialClient(cfg),
-		User:             NewUserClient(cfg),
-		UserDocument:     NewUserDocumentClient(cfg),
+		ctx:                 ctx,
+		config:              cfg,
+		Business:            NewBusinessClient(cfg),
+		BusinessDocument:    NewBusinessDocumentClient(cfg),
+		BusinessFeature:     NewBusinessFeatureClient(cfg),
+		BusinessServices:    NewBusinessServicesClient(cfg),
+		Manager:             NewManagerClient(cfg),
+		Permission:          NewPermissionClient(cfg),
+		Provider:            NewProviderClient(cfg),
+		RequestVerification: NewRequestVerificationClient(cfg),
+		Role:                NewRoleClient(cfg),
+		Service:             NewServiceClient(cfg),
+		Social:              NewSocialClient(cfg),
+		User:                NewUserClient(cfg),
+		UserDocument:        NewUserDocumentClient(cfg),
+		Verification:        NewVerificationClient(cfg),
 	}, nil
 }
 
@@ -202,20 +212,22 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 	cfg := c.config
 	cfg.driver = &txDriver{tx: tx, drv: c.driver}
 	return &Tx{
-		ctx:              ctx,
-		config:           cfg,
-		Business:         NewBusinessClient(cfg),
-		BusinessDocument: NewBusinessDocumentClient(cfg),
-		BusinessFeature:  NewBusinessFeatureClient(cfg),
-		BusinessServices: NewBusinessServicesClient(cfg),
-		Manager:          NewManagerClient(cfg),
-		Permission:       NewPermissionClient(cfg),
-		Provider:         NewProviderClient(cfg),
-		Role:             NewRoleClient(cfg),
-		Service:          NewServiceClient(cfg),
-		Social:           NewSocialClient(cfg),
-		User:             NewUserClient(cfg),
-		UserDocument:     NewUserDocumentClient(cfg),
+		ctx:                 ctx,
+		config:              cfg,
+		Business:            NewBusinessClient(cfg),
+		BusinessDocument:    NewBusinessDocumentClient(cfg),
+		BusinessFeature:     NewBusinessFeatureClient(cfg),
+		BusinessServices:    NewBusinessServicesClient(cfg),
+		Manager:             NewManagerClient(cfg),
+		Permission:          NewPermissionClient(cfg),
+		Provider:            NewProviderClient(cfg),
+		RequestVerification: NewRequestVerificationClient(cfg),
+		Role:                NewRoleClient(cfg),
+		Service:             NewServiceClient(cfg),
+		Social:              NewSocialClient(cfg),
+		User:                NewUserClient(cfg),
+		UserDocument:        NewUserDocumentClient(cfg),
+		Verification:        NewVerificationClient(cfg),
 	}, nil
 }
 
@@ -246,8 +258,8 @@ func (c *Client) Close() error {
 func (c *Client) Use(hooks ...Hook) {
 	for _, n := range []interface{ Use(...Hook) }{
 		c.Business, c.BusinessDocument, c.BusinessFeature, c.BusinessServices,
-		c.Manager, c.Permission, c.Provider, c.Role, c.Service, c.Social, c.User,
-		c.UserDocument,
+		c.Manager, c.Permission, c.Provider, c.RequestVerification, c.Role, c.Service,
+		c.Social, c.User, c.UserDocument, c.Verification,
 	} {
 		n.Use(hooks...)
 	}
@@ -258,8 +270,8 @@ func (c *Client) Use(hooks ...Hook) {
 func (c *Client) Intercept(interceptors ...Interceptor) {
 	for _, n := range []interface{ Intercept(...Interceptor) }{
 		c.Business, c.BusinessDocument, c.BusinessFeature, c.BusinessServices,
-		c.Manager, c.Permission, c.Provider, c.Role, c.Service, c.Social, c.User,
-		c.UserDocument,
+		c.Manager, c.Permission, c.Provider, c.RequestVerification, c.Role, c.Service,
+		c.Social, c.User, c.UserDocument, c.Verification,
 	} {
 		n.Intercept(interceptors...)
 	}
@@ -282,6 +294,8 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.Permission.mutate(ctx, m)
 	case *ProviderMutation:
 		return c.Provider.mutate(ctx, m)
+	case *RequestVerificationMutation:
+		return c.RequestVerification.mutate(ctx, m)
 	case *RoleMutation:
 		return c.Role.mutate(ctx, m)
 	case *ServiceMutation:
@@ -292,6 +306,8 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.User.mutate(ctx, m)
 	case *UserDocumentMutation:
 		return c.UserDocument.mutate(ctx, m)
+	case *VerificationMutation:
+		return c.Verification.mutate(ctx, m)
 	default:
 		return nil, fmt.Errorf("ent: unknown mutation type %T", m)
 	}
@@ -453,6 +469,38 @@ func (c *BusinessClient) QueryManages(b *Business) *ManagerQuery {
 	return query
 }
 
+// QueryVerifications queries the verifications edge of a Business.
+func (c *BusinessClient) QueryVerifications(b *Business) *VerificationQuery {
+	query := (&VerificationClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := b.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(business.Table, business.FieldID, id),
+			sqlgraph.To(verification.Table, verification.FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, true, business.VerificationsTable, business.VerificationsPrimaryKey...),
+		)
+		fromV = sqlgraph.Neighbors(b.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryRequestVerifications queries the request_verifications edge of a Business.
+func (c *BusinessClient) QueryRequestVerifications(b *Business) *RequestVerificationQuery {
+	query := (&RequestVerificationClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := b.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(business.Table, business.FieldID, id),
+			sqlgraph.To(requestverification.Table, requestverification.FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, true, business.RequestVerificationsTable, business.RequestVerificationsPrimaryKey...),
+		)
+		fromV = sqlgraph.Neighbors(b.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // QueryBusinessDocuments queries the business_documents edge of a Business.
 func (c *BusinessClient) QueryBusinessDocuments(b *Business) *BusinessDocumentQuery {
 	query := (&BusinessDocumentClient{config: c.config}).Query()
@@ -462,22 +510,6 @@ func (c *BusinessClient) QueryBusinessDocuments(b *Business) *BusinessDocumentQu
 			sqlgraph.From(business.Table, business.FieldID, id),
 			sqlgraph.To(businessdocument.Table, businessdocument.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, business.BusinessDocumentsTable, business.BusinessDocumentsColumn),
-		)
-		fromV = sqlgraph.Neighbors(b.driver.Dialect(), step)
-		return fromV, nil
-	}
-	return query
-}
-
-// QueryUserDocuments queries the user_documents edge of a Business.
-func (c *BusinessClient) QueryUserDocuments(b *Business) *UserDocumentQuery {
-	query := (&UserDocumentClient{config: c.config}).Query()
-	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := b.ID
-		step := sqlgraph.NewStep(
-			sqlgraph.From(business.Table, business.FieldID, id),
-			sqlgraph.To(userdocument.Table, userdocument.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, business.UserDocumentsTable, business.UserDocumentsColumn),
 		)
 		fromV = sqlgraph.Neighbors(b.driver.Dialect(), step)
 		return fromV, nil
@@ -1388,6 +1420,171 @@ func (c *ProviderClient) mutate(ctx context.Context, m *ProviderMutation) (Value
 	}
 }
 
+// RequestVerificationClient is a client for the RequestVerification schema.
+type RequestVerificationClient struct {
+	config
+}
+
+// NewRequestVerificationClient returns a client for the RequestVerification from the given config.
+func NewRequestVerificationClient(c config) *RequestVerificationClient {
+	return &RequestVerificationClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `requestverification.Hooks(f(g(h())))`.
+func (c *RequestVerificationClient) Use(hooks ...Hook) {
+	c.hooks.RequestVerification = append(c.hooks.RequestVerification, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `requestverification.Intercept(f(g(h())))`.
+func (c *RequestVerificationClient) Intercept(interceptors ...Interceptor) {
+	c.inters.RequestVerification = append(c.inters.RequestVerification, interceptors...)
+}
+
+// Create returns a builder for creating a RequestVerification entity.
+func (c *RequestVerificationClient) Create() *RequestVerificationCreate {
+	mutation := newRequestVerificationMutation(c.config, OpCreate)
+	return &RequestVerificationCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of RequestVerification entities.
+func (c *RequestVerificationClient) CreateBulk(builders ...*RequestVerificationCreate) *RequestVerificationCreateBulk {
+	return &RequestVerificationCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *RequestVerificationClient) MapCreateBulk(slice any, setFunc func(*RequestVerificationCreate, int)) *RequestVerificationCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &RequestVerificationCreateBulk{err: fmt.Errorf("calling to RequestVerificationClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*RequestVerificationCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &RequestVerificationCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for RequestVerification.
+func (c *RequestVerificationClient) Update() *RequestVerificationUpdate {
+	mutation := newRequestVerificationMutation(c.config, OpUpdate)
+	return &RequestVerificationUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *RequestVerificationClient) UpdateOne(rv *RequestVerification) *RequestVerificationUpdateOne {
+	mutation := newRequestVerificationMutation(c.config, OpUpdateOne, withRequestVerification(rv))
+	return &RequestVerificationUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *RequestVerificationClient) UpdateOneID(id string) *RequestVerificationUpdateOne {
+	mutation := newRequestVerificationMutation(c.config, OpUpdateOne, withRequestVerificationID(id))
+	return &RequestVerificationUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for RequestVerification.
+func (c *RequestVerificationClient) Delete() *RequestVerificationDelete {
+	mutation := newRequestVerificationMutation(c.config, OpDelete)
+	return &RequestVerificationDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *RequestVerificationClient) DeleteOne(rv *RequestVerification) *RequestVerificationDeleteOne {
+	return c.DeleteOneID(rv.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *RequestVerificationClient) DeleteOneID(id string) *RequestVerificationDeleteOne {
+	builder := c.Delete().Where(requestverification.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &RequestVerificationDeleteOne{builder}
+}
+
+// Query returns a query builder for RequestVerification.
+func (c *RequestVerificationClient) Query() *RequestVerificationQuery {
+	return &RequestVerificationQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeRequestVerification},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a RequestVerification entity by its id.
+func (c *RequestVerificationClient) Get(ctx context.Context, id string) (*RequestVerification, error) {
+	return c.Query().Where(requestverification.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *RequestVerificationClient) GetX(ctx context.Context, id string) *RequestVerification {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryUser queries the user edge of a RequestVerification.
+func (c *RequestVerificationClient) QueryUser(rv *RequestVerification) *UserQuery {
+	query := (&UserClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := rv.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(requestverification.Table, requestverification.FieldID, id),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, false, requestverification.UserTable, requestverification.UserPrimaryKey...),
+		)
+		fromV = sqlgraph.Neighbors(rv.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryBusiness queries the business edge of a RequestVerification.
+func (c *RequestVerificationClient) QueryBusiness(rv *RequestVerification) *BusinessQuery {
+	query := (&BusinessClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := rv.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(requestverification.Table, requestverification.FieldID, id),
+			sqlgraph.To(business.Table, business.FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, false, requestverification.BusinessTable, requestverification.BusinessPrimaryKey...),
+		)
+		fromV = sqlgraph.Neighbors(rv.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *RequestVerificationClient) Hooks() []Hook {
+	return c.hooks.RequestVerification
+}
+
+// Interceptors returns the client interceptors.
+func (c *RequestVerificationClient) Interceptors() []Interceptor {
+	return c.inters.RequestVerification
+}
+
+func (c *RequestVerificationClient) mutate(ctx context.Context, m *RequestVerificationMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&RequestVerificationCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&RequestVerificationUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&RequestVerificationUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&RequestVerificationDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown RequestVerification mutation op: %q", m.Op())
+	}
+}
+
 // RoleClient is a client for the Role schema.
 type RoleClient struct {
 	config
@@ -1959,6 +2156,38 @@ func (c *UserClient) QueryUserDocuments(u *User) *UserDocumentQuery {
 	return query
 }
 
+// QueryVerifications queries the verifications edge of a User.
+func (c *UserClient) QueryVerifications(u *User) *VerificationQuery {
+	query := (&VerificationClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := u.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, id),
+			sqlgraph.To(verification.Table, verification.FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, true, user.VerificationsTable, user.VerificationsPrimaryKey...),
+		)
+		fromV = sqlgraph.Neighbors(u.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryRequestVerifications queries the request_verifications edge of a User.
+func (c *UserClient) QueryRequestVerifications(u *User) *RequestVerificationQuery {
+	query := (&RequestVerificationClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := u.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, id),
+			sqlgraph.To(requestverification.Table, requestverification.FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, true, user.RequestVerificationsTable, user.RequestVerificationsPrimaryKey...),
+		)
+		fromV = sqlgraph.Neighbors(u.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // Hooks returns the client hooks.
 func (c *UserClient) Hooks() []Hook {
 	return c.hooks.User
@@ -2093,13 +2322,13 @@ func (c *UserDocumentClient) GetX(ctx context.Context, id int) *UserDocument {
 }
 
 // QueryUserDocument queries the user_document edge of a UserDocument.
-func (c *UserDocumentClient) QueryUserDocument(ud *UserDocument) *BusinessQuery {
-	query := (&BusinessClient{config: c.config}).Query()
+func (c *UserDocumentClient) QueryUserDocument(ud *UserDocument) *UserQuery {
+	query := (&UserClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := ud.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(userdocument.Table, userdocument.FieldID, id),
-			sqlgraph.To(business.Table, business.FieldID),
+			sqlgraph.To(user.Table, user.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, true, userdocument.UserDocumentTable, userdocument.UserDocumentColumn),
 		)
 		fromV = sqlgraph.Neighbors(ud.driver.Dialect(), step)
@@ -2133,15 +2362,181 @@ func (c *UserDocumentClient) mutate(ctx context.Context, m *UserDocumentMutation
 	}
 }
 
+// VerificationClient is a client for the Verification schema.
+type VerificationClient struct {
+	config
+}
+
+// NewVerificationClient returns a client for the Verification from the given config.
+func NewVerificationClient(c config) *VerificationClient {
+	return &VerificationClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `verification.Hooks(f(g(h())))`.
+func (c *VerificationClient) Use(hooks ...Hook) {
+	c.hooks.Verification = append(c.hooks.Verification, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `verification.Intercept(f(g(h())))`.
+func (c *VerificationClient) Intercept(interceptors ...Interceptor) {
+	c.inters.Verification = append(c.inters.Verification, interceptors...)
+}
+
+// Create returns a builder for creating a Verification entity.
+func (c *VerificationClient) Create() *VerificationCreate {
+	mutation := newVerificationMutation(c.config, OpCreate)
+	return &VerificationCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of Verification entities.
+func (c *VerificationClient) CreateBulk(builders ...*VerificationCreate) *VerificationCreateBulk {
+	return &VerificationCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *VerificationClient) MapCreateBulk(slice any, setFunc func(*VerificationCreate, int)) *VerificationCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &VerificationCreateBulk{err: fmt.Errorf("calling to VerificationClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*VerificationCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &VerificationCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for Verification.
+func (c *VerificationClient) Update() *VerificationUpdate {
+	mutation := newVerificationMutation(c.config, OpUpdate)
+	return &VerificationUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *VerificationClient) UpdateOne(v *Verification) *VerificationUpdateOne {
+	mutation := newVerificationMutation(c.config, OpUpdateOne, withVerification(v))
+	return &VerificationUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *VerificationClient) UpdateOneID(id string) *VerificationUpdateOne {
+	mutation := newVerificationMutation(c.config, OpUpdateOne, withVerificationID(id))
+	return &VerificationUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for Verification.
+func (c *VerificationClient) Delete() *VerificationDelete {
+	mutation := newVerificationMutation(c.config, OpDelete)
+	return &VerificationDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *VerificationClient) DeleteOne(v *Verification) *VerificationDeleteOne {
+	return c.DeleteOneID(v.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *VerificationClient) DeleteOneID(id string) *VerificationDeleteOne {
+	builder := c.Delete().Where(verification.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &VerificationDeleteOne{builder}
+}
+
+// Query returns a query builder for Verification.
+func (c *VerificationClient) Query() *VerificationQuery {
+	return &VerificationQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeVerification},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a Verification entity by its id.
+func (c *VerificationClient) Get(ctx context.Context, id string) (*Verification, error) {
+	return c.Query().Where(verification.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *VerificationClient) GetX(ctx context.Context, id string) *Verification {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryUser queries the user edge of a Verification.
+func (c *VerificationClient) QueryUser(v *Verification) *UserQuery {
+	query := (&UserClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := v.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(verification.Table, verification.FieldID, id),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, false, verification.UserTable, verification.UserPrimaryKey...),
+		)
+		fromV = sqlgraph.Neighbors(v.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryBusiness queries the business edge of a Verification.
+func (c *VerificationClient) QueryBusiness(v *Verification) *BusinessQuery {
+	query := (&BusinessClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := v.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(verification.Table, verification.FieldID, id),
+			sqlgraph.To(business.Table, business.FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, false, verification.BusinessTable, verification.BusinessPrimaryKey...),
+		)
+		fromV = sqlgraph.Neighbors(v.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *VerificationClient) Hooks() []Hook {
+	return c.hooks.Verification
+}
+
+// Interceptors returns the client interceptors.
+func (c *VerificationClient) Interceptors() []Interceptor {
+	return c.inters.Verification
+}
+
+func (c *VerificationClient) mutate(ctx context.Context, m *VerificationMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&VerificationCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&VerificationUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&VerificationUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&VerificationDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown Verification mutation op: %q", m.Op())
+	}
+}
+
 // hooks and interceptors per client, for fast access.
 type (
 	hooks struct {
 		Business, BusinessDocument, BusinessFeature, BusinessServices, Manager,
-		Permission, Provider, Role, Service, Social, User, UserDocument []ent.Hook
+		Permission, Provider, RequestVerification, Role, Service, Social, User,
+		UserDocument, Verification []ent.Hook
 	}
 	inters struct {
 		Business, BusinessDocument, BusinessFeature, BusinessServices, Manager,
-		Permission, Provider, Role, Service, Social, User,
-		UserDocument []ent.Interceptor
+		Permission, Provider, RequestVerification, Role, Service, Social, User,
+		UserDocument, Verification []ent.Interceptor
 	}
 )

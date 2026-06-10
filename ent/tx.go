@@ -26,6 +26,8 @@ type Tx struct {
 	Permission *PermissionClient
 	// Provider is the client for interacting with the Provider builders.
 	Provider *ProviderClient
+	// RequestVerification is the client for interacting with the RequestVerification builders.
+	RequestVerification *RequestVerificationClient
 	// Role is the client for interacting with the Role builders.
 	Role *RoleClient
 	// Service is the client for interacting with the Service builders.
@@ -36,6 +38,8 @@ type Tx struct {
 	User *UserClient
 	// UserDocument is the client for interacting with the UserDocument builders.
 	UserDocument *UserDocumentClient
+	// Verification is the client for interacting with the Verification builders.
+	Verification *VerificationClient
 
 	// lazily loaded.
 	client     *Client
@@ -174,11 +178,13 @@ func (tx *Tx) init() {
 	tx.Manager = NewManagerClient(tx.config)
 	tx.Permission = NewPermissionClient(tx.config)
 	tx.Provider = NewProviderClient(tx.config)
+	tx.RequestVerification = NewRequestVerificationClient(tx.config)
 	tx.Role = NewRoleClient(tx.config)
 	tx.Service = NewServiceClient(tx.config)
 	tx.Social = NewSocialClient(tx.config)
 	tx.User = NewUserClient(tx.config)
 	tx.UserDocument = NewUserDocumentClient(tx.config)
+	tx.Verification = NewVerificationClient(tx.config)
 }
 
 // txDriver wraps the given dialect.Tx with a nop dialect.Driver implementation.

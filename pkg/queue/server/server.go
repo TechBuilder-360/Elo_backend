@@ -6,6 +6,7 @@ import (
 	"github.com/Toflex/directory_v2/internal/email"
 	"github.com/Toflex/directory_v2/pkg/configuration"
 	"github.com/Toflex/directory_v2/pkg/constant"
+	"github.com/Toflex/directory_v2/pkg/verification"
 	"github.com/hibiken/asynq"
 	"github.com/samber/do/v2"
 )
@@ -53,6 +54,7 @@ func NewServer(i do.Injector) (*Server, error) {
 	mux := asynq.NewServeMux()
 	mux.HandleFunc(constant.TaskTypeWelcomeEmail, email.HandleWelcomeEmailTask)
 	mux.HandleFunc(constant.TaskTypeOTPEmail, email.HandleOTPEmailTask)
+	mux.HandleFunc(constant.TaskTypeIdentityVerification, verification.ProcessVerificationTask)
 
 	return &Server{srv: srv, mux: mux}, nil
 }
