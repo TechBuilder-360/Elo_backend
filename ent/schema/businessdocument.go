@@ -18,6 +18,11 @@ func (BusinessDocument) Fields() []ent.Field {
 		field.String("description").NotEmpty(),
 		field.String("url").NotEmpty(),
 		field.Bool("verified").Default(false),
+		field.Enum("type").Values(
+			"KYB",
+			"SERVICE",
+			"PRODUCT",
+		),
 	}
 }
 

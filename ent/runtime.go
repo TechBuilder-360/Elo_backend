@@ -12,12 +12,14 @@ import (
 	"github.com/Toflex/directory_v2/ent/manager"
 	"github.com/Toflex/directory_v2/ent/permission"
 	"github.com/Toflex/directory_v2/ent/provider"
+	"github.com/Toflex/directory_v2/ent/requestverification"
 	"github.com/Toflex/directory_v2/ent/role"
 	"github.com/Toflex/directory_v2/ent/schema"
 	"github.com/Toflex/directory_v2/ent/service"
 	"github.com/Toflex/directory_v2/ent/social"
 	"github.com/Toflex/directory_v2/ent/user"
 	"github.com/Toflex/directory_v2/ent/userdocument"
+	"github.com/Toflex/directory_v2/ent/verification"
 )
 
 // The init function reads all schema descriptors with runtime code
@@ -237,6 +239,73 @@ func init() {
 	providerDescID := providerMixinFields0[0].Descriptor()
 	// provider.DefaultID holds the default value on creation for the id field.
 	provider.DefaultID = providerDescID.Default.(func() string)
+	requestverificationMixin := schema.RequestVerification{}.Mixin()
+	requestverificationMixinFields0 := requestverificationMixin[0].Fields()
+	_ = requestverificationMixinFields0
+	requestverificationFields := schema.RequestVerification{}.Fields()
+	_ = requestverificationFields
+	// requestverificationDescCreatedAt is the schema descriptor for created_at field.
+	requestverificationDescCreatedAt := requestverificationMixinFields0[1].Descriptor()
+	// requestverification.DefaultCreatedAt holds the default value on creation for the created_at field.
+	requestverification.DefaultCreatedAt = requestverificationDescCreatedAt.Default.(func() time.Time)
+	// requestverificationDescUpdatedAt is the schema descriptor for updated_at field.
+	requestverificationDescUpdatedAt := requestverificationMixinFields0[2].Descriptor()
+	// requestverification.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	requestverification.DefaultUpdatedAt = requestverificationDescUpdatedAt.Default.(func() time.Time)
+	// requestverification.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	requestverification.UpdateDefaultUpdatedAt = requestverificationDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// requestverificationDescReferenceID is the schema descriptor for reference_id field.
+	requestverificationDescReferenceID := requestverificationFields[0].Descriptor()
+	// requestverification.ReferenceIDValidator is a validator for the "reference_id" field. It is called by the builders before save.
+	requestverification.ReferenceIDValidator = requestverificationDescReferenceID.Validators[0].(func(string) error)
+	// requestverificationDescVerificationType is the schema descriptor for verification_type field.
+	requestverificationDescVerificationType := requestverificationFields[1].Descriptor()
+	// requestverification.VerificationTypeValidator is a validator for the "verification_type" field. It is called by the builders before save.
+	requestverification.VerificationTypeValidator = requestverificationDescVerificationType.Validators[0].(func(string) error)
+	// requestverificationDescProvider is the schema descriptor for provider field.
+	requestverificationDescProvider := requestverificationFields[2].Descriptor()
+	// requestverification.ProviderValidator is a validator for the "provider" field. It is called by the builders before save.
+	requestverification.ProviderValidator = requestverificationDescProvider.Validators[0].(func(string) error)
+	// requestverificationDescLink is the schema descriptor for link field.
+	requestverificationDescLink := requestverificationFields[3].Descriptor()
+	// requestverification.LinkValidator is a validator for the "link" field. It is called by the builders before save.
+	requestverification.LinkValidator = func() func(string) error {
+		validators := requestverificationDescLink.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(link string) error {
+			for _, fn := range fns {
+				if err := fn(link); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// requestverificationDescProviderLink is the schema descriptor for provider_link field.
+	requestverificationDescProviderLink := requestverificationFields[4].Descriptor()
+	// requestverification.ProviderLinkValidator is a validator for the "provider_link" field. It is called by the builders before save.
+	requestverification.ProviderLinkValidator = func() func(string) error {
+		validators := requestverificationDescProviderLink.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(provider_link string) error {
+			for _, fn := range fns {
+				if err := fn(provider_link); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// requestverificationDescID is the schema descriptor for id field.
+	requestverificationDescID := requestverificationMixinFields0[0].Descriptor()
+	// requestverification.DefaultID holds the default value on creation for the id field.
+	requestverification.DefaultID = requestverificationDescID.Default.(func() string)
 	roleMixin := schema.Role{}.Mixin()
 	roleMixinFields0 := roleMixin[0].Fields()
 	_ = roleMixinFields0
@@ -417,4 +486,43 @@ func init() {
 	userdocumentDescURL := userdocumentFields[2].Descriptor()
 	// userdocument.URLValidator is a validator for the "url" field. It is called by the builders before save.
 	userdocument.URLValidator = userdocumentDescURL.Validators[0].(func(string) error)
+	verificationMixin := schema.Verification{}.Mixin()
+	verificationMixinFields0 := verificationMixin[0].Fields()
+	_ = verificationMixinFields0
+	verificationFields := schema.Verification{}.Fields()
+	_ = verificationFields
+	// verificationDescCreatedAt is the schema descriptor for created_at field.
+	verificationDescCreatedAt := verificationMixinFields0[1].Descriptor()
+	// verification.DefaultCreatedAt holds the default value on creation for the created_at field.
+	verification.DefaultCreatedAt = verificationDescCreatedAt.Default.(func() time.Time)
+	// verificationDescUpdatedAt is the schema descriptor for updated_at field.
+	verificationDescUpdatedAt := verificationMixinFields0[2].Descriptor()
+	// verification.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	verification.DefaultUpdatedAt = verificationDescUpdatedAt.Default.(func() time.Time)
+	// verification.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	verification.UpdateDefaultUpdatedAt = verificationDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// verificationDescProvider is the schema descriptor for provider field.
+	verificationDescProvider := verificationFields[0].Descriptor()
+	// verification.ProviderValidator is a validator for the "provider" field. It is called by the builders before save.
+	verification.ProviderValidator = verificationDescProvider.Validators[0].(func(string) error)
+	// verificationDescReferenceID is the schema descriptor for reference_id field.
+	verificationDescReferenceID := verificationFields[3].Descriptor()
+	// verification.ReferenceIDValidator is a validator for the "reference_id" field. It is called by the builders before save.
+	verification.ReferenceIDValidator = verificationDescReferenceID.Validators[0].(func(string) error)
+	// verificationDescProviderReference is the schema descriptor for provider_reference field.
+	verificationDescProviderReference := verificationFields[4].Descriptor()
+	// verification.ProviderReferenceValidator is a validator for the "provider_reference" field. It is called by the builders before save.
+	verification.ProviderReferenceValidator = verificationDescProviderReference.Validators[0].(func(string) error)
+	// verificationDescVerifiedAt is the schema descriptor for verified_at field.
+	verificationDescVerifiedAt := verificationFields[7].Descriptor()
+	// verification.DefaultVerifiedAt holds the default value on creation for the verified_at field.
+	verification.DefaultVerifiedAt = verificationDescVerifiedAt.Default.(time.Time)
+	// verificationDescIsObsolate is the schema descriptor for is_obsolate field.
+	verificationDescIsObsolate := verificationFields[8].Descriptor()
+	// verification.DefaultIsObsolate holds the default value on creation for the is_obsolate field.
+	verification.DefaultIsObsolate = verificationDescIsObsolate.Default.(bool)
+	// verificationDescID is the schema descriptor for id field.
+	verificationDescID := verificationMixinFields0[0].Descriptor()
+	// verification.DefaultID holds the default value on creation for the id field.
+	verification.DefaultID = verificationDescID.Default.(func() string)
 }

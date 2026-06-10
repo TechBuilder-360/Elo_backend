@@ -93,6 +93,18 @@ func (f ProviderFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, er
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.ProviderMutation", m)
 }
 
+// The RequestVerificationFunc type is an adapter to allow the use of ordinary
+// function as RequestVerification mutator.
+type RequestVerificationFunc func(context.Context, *ent.RequestVerificationMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f RequestVerificationFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.RequestVerificationMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.RequestVerificationMutation", m)
+}
+
 // The RoleFunc type is an adapter to allow the use of ordinary
 // function as Role mutator.
 type RoleFunc func(context.Context, *ent.RoleMutation) (ent.Value, error)
@@ -151,6 +163,18 @@ func (f UserDocumentFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value
 		return f(ctx, mv)
 	}
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.UserDocumentMutation", m)
+}
+
+// The VerificationFunc type is an adapter to allow the use of ordinary
+// function as Verification mutator.
+type VerificationFunc func(context.Context, *ent.VerificationMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f VerificationFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.VerificationMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.VerificationMutation", m)
 }
 
 // Condition is a hook condition function.

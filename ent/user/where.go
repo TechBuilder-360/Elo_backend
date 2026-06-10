@@ -981,6 +981,52 @@ func HasUserDocumentsWith(preds ...predicate.UserDocument) predicate.User {
 	})
 }
 
+// HasVerifications applies the HasEdge predicate on the "verifications" edge.
+func HasVerifications() predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, true, VerificationsTable, VerificationsPrimaryKey...),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasVerificationsWith applies the HasEdge predicate on the "verifications" edge with a given conditions (other predicates).
+func HasVerificationsWith(preds ...predicate.Verification) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		step := newVerificationsStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasRequestVerifications applies the HasEdge predicate on the "request_verifications" edge.
+func HasRequestVerifications() predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, true, RequestVerificationsTable, RequestVerificationsPrimaryKey...),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasRequestVerificationsWith applies the HasEdge predicate on the "request_verifications" edge with a given conditions (other predicates).
+func HasRequestVerificationsWith(preds ...predicate.RequestVerification) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		step := newRequestVerificationsStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
 // And groups predicates with the AND operator between them.
 func And(predicates ...predicate.User) predicate.User {
 	return predicate.User(sql.AndPredicates(predicates...))

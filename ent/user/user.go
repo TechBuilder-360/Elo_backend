@@ -50,6 +50,10 @@ const (
 	EdgeManages = "manages"
 	// EdgeUserDocuments holds the string denoting the user_documents edge name in mutations.
 	EdgeUserDocuments = "user_documents"
+	// EdgeVerifications holds the string denoting the verifications edge name in mutations.
+	EdgeVerifications = "verifications"
+	// EdgeRequestVerifications holds the string denoting the request_verifications edge name in mutations.
+	EdgeRequestVerifications = "request_verifications"
 	// Table holds the table name of the user in the database.
 	Table = "users"
 	// ManagesTable is the table that holds the manages relation/edge.
@@ -66,6 +70,16 @@ const (
 	UserDocumentsInverseTable = "user_documents"
 	// UserDocumentsColumn is the table column denoting the user_documents relation/edge.
 	UserDocumentsColumn = "user_user_documents"
+	// VerificationsTable is the table that holds the verifications relation/edge. The primary key declared below.
+	VerificationsTable = "verification_user"
+	// VerificationsInverseTable is the table name for the Verification entity.
+	// It exists in this package in order to avoid circular dependency with the "verification" package.
+	VerificationsInverseTable = "verifications"
+	// RequestVerificationsTable is the table that holds the request_verifications relation/edge. The primary key declared below.
+	RequestVerificationsTable = "request_verification_user"
+	// RequestVerificationsInverseTable is the table name for the RequestVerification entity.
+	// It exists in this package in order to avoid circular dependency with the "requestverification" package.
+	RequestVerificationsInverseTable = "request_verifications"
 )
 
 // Columns holds all SQL columns for user fields.
@@ -88,6 +102,15 @@ var Columns = []string{
 	FieldDisableReason,
 	FieldVerified,
 }
+
+var (
+	// VerificationsPrimaryKey and VerificationsColumn2 are the table columns denoting the
+	// primary key for the verifications relation (M2M).
+	VerificationsPrimaryKey = []string{"verification_id", "user_id"}
+	// RequestVerificationsPrimaryKey and RequestVerificationsColumn2 are the table columns denoting the
+	// primary key for the request_verifications relation (M2M).
+	RequestVerificationsPrimaryKey = []string{"request_verification_id", "user_id"}
+)
 
 // ValidColumn reports if the column name is valid (part of the table columns).
 func ValidColumn(column string) bool {
@@ -241,6 +264,34 @@ func ByUserDocuments(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 		sqlgraph.OrderByNeighborTerms(s, newUserDocumentsStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
+
+// ByVerificationsCount orders the results by verifications count.
+func ByVerificationsCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newVerificationsStep(), opts...)
+	}
+}
+
+// ByVerifications orders the results by verifications terms.
+func ByVerifications(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newVerificationsStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+
+// ByRequestVerificationsCount orders the results by request_verifications count.
+func ByRequestVerificationsCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newRequestVerificationsStep(), opts...)
+	}
+}
+
+// ByRequestVerifications orders the results by request_verifications terms.
+func ByRequestVerifications(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newRequestVerificationsStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
 func newManagesStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
@@ -253,5 +304,19 @@ func newUserDocumentsStep() *sqlgraph.Step {
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(UserDocumentsInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.O2M, false, UserDocumentsTable, UserDocumentsColumn),
+	)
+}
+func newVerificationsStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(VerificationsInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.M2M, true, VerificationsTable, VerificationsPrimaryKey...),
+	)
+}
+func newRequestVerificationsStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(RequestVerificationsInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.M2M, true, RequestVerificationsTable, RequestVerificationsPrimaryKey...),
 	)
 }

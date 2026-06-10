@@ -84,6 +84,20 @@ func (bdu *BusinessDocumentUpdate) SetNillableVerified(b *bool) *BusinessDocumen
 	return bdu
 }
 
+// SetType sets the "type" field.
+func (bdu *BusinessDocumentUpdate) SetType(b businessdocument.Type) *BusinessDocumentUpdate {
+	bdu.mutation.SetType(b)
+	return bdu
+}
+
+// SetNillableType sets the "type" field if the given value is not nil.
+func (bdu *BusinessDocumentUpdate) SetNillableType(b *businessdocument.Type) *BusinessDocumentUpdate {
+	if b != nil {
+		bdu.SetType(*b)
+	}
+	return bdu
+}
+
 // SetBusinessDocumentID sets the "business_document" edge to the Business entity by ID.
 func (bdu *BusinessDocumentUpdate) SetBusinessDocumentID(id string) *BusinessDocumentUpdate {
 	bdu.mutation.SetBusinessDocumentID(id)
@@ -150,6 +164,11 @@ func (bdu *BusinessDocumentUpdate) check() error {
 			return &ValidationError{Name: "url", err: fmt.Errorf(`ent: validator failed for field "BusinessDocument.url": %w`, err)}
 		}
 	}
+	if v, ok := bdu.mutation.GetType(); ok {
+		if err := businessdocument.TypeValidator(v); err != nil {
+			return &ValidationError{Name: "type", err: fmt.Errorf(`ent: validator failed for field "BusinessDocument.type": %w`, err)}
+		}
+	}
 	if bdu.mutation.BusinessDocumentCleared() && len(bdu.mutation.BusinessDocumentIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "BusinessDocument.business_document"`)
 	}
@@ -179,6 +198,9 @@ func (bdu *BusinessDocumentUpdate) sqlSave(ctx context.Context) (n int, err erro
 	}
 	if value, ok := bdu.mutation.Verified(); ok {
 		_spec.SetField(businessdocument.FieldVerified, field.TypeBool, value)
+	}
+	if value, ok := bdu.mutation.GetType(); ok {
+		_spec.SetField(businessdocument.FieldType, field.TypeEnum, value)
 	}
 	if bdu.mutation.BusinessDocumentCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -285,6 +307,20 @@ func (bduo *BusinessDocumentUpdateOne) SetNillableVerified(b *bool) *BusinessDoc
 	return bduo
 }
 
+// SetType sets the "type" field.
+func (bduo *BusinessDocumentUpdateOne) SetType(b businessdocument.Type) *BusinessDocumentUpdateOne {
+	bduo.mutation.SetType(b)
+	return bduo
+}
+
+// SetNillableType sets the "type" field if the given value is not nil.
+func (bduo *BusinessDocumentUpdateOne) SetNillableType(b *businessdocument.Type) *BusinessDocumentUpdateOne {
+	if b != nil {
+		bduo.SetType(*b)
+	}
+	return bduo
+}
+
 // SetBusinessDocumentID sets the "business_document" edge to the Business entity by ID.
 func (bduo *BusinessDocumentUpdateOne) SetBusinessDocumentID(id string) *BusinessDocumentUpdateOne {
 	bduo.mutation.SetBusinessDocumentID(id)
@@ -364,6 +400,11 @@ func (bduo *BusinessDocumentUpdateOne) check() error {
 			return &ValidationError{Name: "url", err: fmt.Errorf(`ent: validator failed for field "BusinessDocument.url": %w`, err)}
 		}
 	}
+	if v, ok := bduo.mutation.GetType(); ok {
+		if err := businessdocument.TypeValidator(v); err != nil {
+			return &ValidationError{Name: "type", err: fmt.Errorf(`ent: validator failed for field "BusinessDocument.type": %w`, err)}
+		}
+	}
 	if bduo.mutation.BusinessDocumentCleared() && len(bduo.mutation.BusinessDocumentIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "BusinessDocument.business_document"`)
 	}
@@ -410,6 +451,9 @@ func (bduo *BusinessDocumentUpdateOne) sqlSave(ctx context.Context) (_node *Busi
 	}
 	if value, ok := bduo.mutation.Verified(); ok {
 		_spec.SetField(businessdocument.FieldVerified, field.TypeBool, value)
+	}
+	if value, ok := bduo.mutation.GetType(); ok {
+		_spec.SetField(businessdocument.FieldType, field.TypeEnum, value)
 	}
 	if bduo.mutation.BusinessDocumentCleared() {
 		edge := &sqlgraph.EdgeSpec{

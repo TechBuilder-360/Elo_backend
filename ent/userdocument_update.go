@@ -10,8 +10,8 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/Toflex/directory_v2/ent/business"
 	"github.com/Toflex/directory_v2/ent/predicate"
+	"github.com/Toflex/directory_v2/ent/user"
 	"github.com/Toflex/directory_v2/ent/userdocument"
 )
 
@@ -70,15 +70,15 @@ func (udu *UserDocumentUpdate) SetNillableURL(s *string) *UserDocumentUpdate {
 	return udu
 }
 
-// SetUserDocumentID sets the "user_document" edge to the Business entity by ID.
+// SetUserDocumentID sets the "user_document" edge to the User entity by ID.
 func (udu *UserDocumentUpdate) SetUserDocumentID(id string) *UserDocumentUpdate {
 	udu.mutation.SetUserDocumentID(id)
 	return udu
 }
 
-// SetUserDocument sets the "user_document" edge to the Business entity.
-func (udu *UserDocumentUpdate) SetUserDocument(b *Business) *UserDocumentUpdate {
-	return udu.SetUserDocumentID(b.ID)
+// SetUserDocument sets the "user_document" edge to the User entity.
+func (udu *UserDocumentUpdate) SetUserDocument(u *User) *UserDocumentUpdate {
+	return udu.SetUserDocumentID(u.ID)
 }
 
 // Mutation returns the UserDocumentMutation object of the builder.
@@ -86,7 +86,7 @@ func (udu *UserDocumentUpdate) Mutation() *UserDocumentMutation {
 	return udu.mutation
 }
 
-// ClearUserDocument clears the "user_document" edge to the Business entity.
+// ClearUserDocument clears the "user_document" edge to the User entity.
 func (udu *UserDocumentUpdate) ClearUserDocument() *UserDocumentUpdate {
 	udu.mutation.ClearUserDocument()
 	return udu
@@ -171,7 +171,7 @@ func (udu *UserDocumentUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{userdocument.UserDocumentColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(business.FieldID, field.TypeString),
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeString),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -184,7 +184,7 @@ func (udu *UserDocumentUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{userdocument.UserDocumentColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(business.FieldID, field.TypeString),
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {
@@ -254,15 +254,15 @@ func (uduo *UserDocumentUpdateOne) SetNillableURL(s *string) *UserDocumentUpdate
 	return uduo
 }
 
-// SetUserDocumentID sets the "user_document" edge to the Business entity by ID.
+// SetUserDocumentID sets the "user_document" edge to the User entity by ID.
 func (uduo *UserDocumentUpdateOne) SetUserDocumentID(id string) *UserDocumentUpdateOne {
 	uduo.mutation.SetUserDocumentID(id)
 	return uduo
 }
 
-// SetUserDocument sets the "user_document" edge to the Business entity.
-func (uduo *UserDocumentUpdateOne) SetUserDocument(b *Business) *UserDocumentUpdateOne {
-	return uduo.SetUserDocumentID(b.ID)
+// SetUserDocument sets the "user_document" edge to the User entity.
+func (uduo *UserDocumentUpdateOne) SetUserDocument(u *User) *UserDocumentUpdateOne {
+	return uduo.SetUserDocumentID(u.ID)
 }
 
 // Mutation returns the UserDocumentMutation object of the builder.
@@ -270,7 +270,7 @@ func (uduo *UserDocumentUpdateOne) Mutation() *UserDocumentMutation {
 	return uduo.mutation
 }
 
-// ClearUserDocument clears the "user_document" edge to the Business entity.
+// ClearUserDocument clears the "user_document" edge to the User entity.
 func (uduo *UserDocumentUpdateOne) ClearUserDocument() *UserDocumentUpdateOne {
 	uduo.mutation.ClearUserDocument()
 	return uduo
@@ -385,7 +385,7 @@ func (uduo *UserDocumentUpdateOne) sqlSave(ctx context.Context) (_node *UserDocu
 			Columns: []string{userdocument.UserDocumentColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(business.FieldID, field.TypeString),
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeString),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -398,7 +398,7 @@ func (uduo *UserDocumentUpdateOne) sqlSave(ctx context.Context) (_node *UserDocu
 			Columns: []string{userdocument.UserDocumentColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(business.FieldID, field.TypeString),
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {

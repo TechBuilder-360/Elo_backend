@@ -10,7 +10,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/Toflex/directory_v2/ent/business"
+	"github.com/Toflex/directory_v2/ent/user"
 	"github.com/Toflex/directory_v2/ent/userdocument"
 )
 
@@ -40,15 +40,15 @@ func (udc *UserDocumentCreate) SetURL(s string) *UserDocumentCreate {
 	return udc
 }
 
-// SetUserDocumentID sets the "user_document" edge to the Business entity by ID.
+// SetUserDocumentID sets the "user_document" edge to the User entity by ID.
 func (udc *UserDocumentCreate) SetUserDocumentID(id string) *UserDocumentCreate {
 	udc.mutation.SetUserDocumentID(id)
 	return udc
 }
 
-// SetUserDocument sets the "user_document" edge to the Business entity.
-func (udc *UserDocumentCreate) SetUserDocument(b *Business) *UserDocumentCreate {
-	return udc.SetUserDocumentID(b.ID)
+// SetUserDocument sets the "user_document" edge to the User entity.
+func (udc *UserDocumentCreate) SetUserDocument(u *User) *UserDocumentCreate {
+	return udc.SetUserDocumentID(u.ID)
 }
 
 // Mutation returns the UserDocumentMutation object of the builder.
@@ -159,13 +159,13 @@ func (udc *UserDocumentCreate) createSpec() (*UserDocument, *sqlgraph.CreateSpec
 			Columns: []string{userdocument.UserDocumentColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(business.FieldID, field.TypeString),
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		_node.business_user_documents = &nodes[0]
+		_node.user_user_documents = &nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec

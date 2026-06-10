@@ -16,8 +16,9 @@ import (
 	"github.com/Toflex/directory_v2/ent/businessdocument"
 	"github.com/Toflex/directory_v2/ent/businessservices"
 	"github.com/Toflex/directory_v2/ent/manager"
+	"github.com/Toflex/directory_v2/ent/requestverification"
 	"github.com/Toflex/directory_v2/ent/social"
-	"github.com/Toflex/directory_v2/ent/userdocument"
+	"github.com/Toflex/directory_v2/ent/verification"
 )
 
 // BusinessCreate is the builder for creating a Business entity.
@@ -281,6 +282,36 @@ func (bc *BusinessCreate) AddManages(m ...*Manager) *BusinessCreate {
 	return bc.AddManageIDs(ids...)
 }
 
+// AddVerificationIDs adds the "verifications" edge to the Verification entity by IDs.
+func (bc *BusinessCreate) AddVerificationIDs(ids ...string) *BusinessCreate {
+	bc.mutation.AddVerificationIDs(ids...)
+	return bc
+}
+
+// AddVerifications adds the "verifications" edges to the Verification entity.
+func (bc *BusinessCreate) AddVerifications(v ...*Verification) *BusinessCreate {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return bc.AddVerificationIDs(ids...)
+}
+
+// AddRequestVerificationIDs adds the "request_verifications" edge to the RequestVerification entity by IDs.
+func (bc *BusinessCreate) AddRequestVerificationIDs(ids ...string) *BusinessCreate {
+	bc.mutation.AddRequestVerificationIDs(ids...)
+	return bc
+}
+
+// AddRequestVerifications adds the "request_verifications" edges to the RequestVerification entity.
+func (bc *BusinessCreate) AddRequestVerifications(r ...*RequestVerification) *BusinessCreate {
+	ids := make([]string, len(r))
+	for i := range r {
+		ids[i] = r[i].ID
+	}
+	return bc.AddRequestVerificationIDs(ids...)
+}
+
 // AddBusinessDocumentIDs adds the "business_documents" edge to the BusinessDocument entity by IDs.
 func (bc *BusinessCreate) AddBusinessDocumentIDs(ids ...int) *BusinessCreate {
 	bc.mutation.AddBusinessDocumentIDs(ids...)
@@ -294,21 +325,6 @@ func (bc *BusinessCreate) AddBusinessDocuments(b ...*BusinessDocument) *Business
 		ids[i] = b[i].ID
 	}
 	return bc.AddBusinessDocumentIDs(ids...)
-}
-
-// AddUserDocumentIDs adds the "user_documents" edge to the UserDocument entity by IDs.
-func (bc *BusinessCreate) AddUserDocumentIDs(ids ...int) *BusinessCreate {
-	bc.mutation.AddUserDocumentIDs(ids...)
-	return bc
-}
-
-// AddUserDocuments adds the "user_documents" edges to the UserDocument entity.
-func (bc *BusinessCreate) AddUserDocuments(u ...*UserDocument) *BusinessCreate {
-	ids := make([]int, len(u))
-	for i := range u {
-		ids[i] = u[i].ID
-	}
-	return bc.AddUserDocumentIDs(ids...)
 }
 
 // Mutation returns the BusinessMutation object of the builder.
@@ -568,6 +584,38 @@ func (bc *BusinessCreate) createSpec() (*Business, *sqlgraph.CreateSpec) {
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
+	if nodes := bc.mutation.VerificationsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   business.VerificationsTable,
+			Columns: business.VerificationsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(verification.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := bc.mutation.RequestVerificationsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   business.RequestVerificationsTable,
+			Columns: business.RequestVerificationsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(requestverification.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
 	if nodes := bc.mutation.BusinessDocumentsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
@@ -577,22 +625,6 @@ func (bc *BusinessCreate) createSpec() (*Business, *sqlgraph.CreateSpec) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(businessdocument.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges = append(_spec.Edges, edge)
-	}
-	if nodes := bc.mutation.UserDocumentsIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   business.UserDocumentsTable,
-			Columns: []string{business.UserDocumentsColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(userdocument.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {

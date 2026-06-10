@@ -24,11 +24,11 @@ const (
 	Table = "user_documents"
 	// UserDocumentTable is the table that holds the user_document relation/edge.
 	UserDocumentTable = "user_documents"
-	// UserDocumentInverseTable is the table name for the Business entity.
-	// It exists in this package in order to avoid circular dependency with the "business" package.
-	UserDocumentInverseTable = "businesses"
+	// UserDocumentInverseTable is the table name for the User entity.
+	// It exists in this package in order to avoid circular dependency with the "user" package.
+	UserDocumentInverseTable = "users"
 	// UserDocumentColumn is the table column denoting the user_document relation/edge.
-	UserDocumentColumn = "business_user_documents"
+	UserDocumentColumn = "user_user_documents"
 )
 
 // Columns holds all SQL columns for userdocument fields.
@@ -42,7 +42,6 @@ var Columns = []string{
 // ForeignKeys holds the SQL foreign-keys that are owned by the "user_documents"
 // table and are not defined as standalone fields in the schema.
 var ForeignKeys = []string{
-	"business_user_documents",
 	"user_user_documents",
 }
 

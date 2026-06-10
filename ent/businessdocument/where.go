@@ -278,6 +278,26 @@ func VerifiedNEQ(v bool) predicate.BusinessDocument {
 	return predicate.BusinessDocument(sql.FieldNEQ(FieldVerified, v))
 }
 
+// TypeEQ applies the EQ predicate on the "type" field.
+func TypeEQ(v Type) predicate.BusinessDocument {
+	return predicate.BusinessDocument(sql.FieldEQ(FieldType, v))
+}
+
+// TypeNEQ applies the NEQ predicate on the "type" field.
+func TypeNEQ(v Type) predicate.BusinessDocument {
+	return predicate.BusinessDocument(sql.FieldNEQ(FieldType, v))
+}
+
+// TypeIn applies the In predicate on the "type" field.
+func TypeIn(vs ...Type) predicate.BusinessDocument {
+	return predicate.BusinessDocument(sql.FieldIn(FieldType, vs...))
+}
+
+// TypeNotIn applies the NotIn predicate on the "type" field.
+func TypeNotIn(vs ...Type) predicate.BusinessDocument {
+	return predicate.BusinessDocument(sql.FieldNotIn(FieldType, vs...))
+}
+
 // HasBusinessDocument applies the HasEdge predicate on the "business_document" edge.
 func HasBusinessDocument() predicate.BusinessDocument {
 	return predicate.BusinessDocument(func(s *sql.Selector) {

@@ -1,6 +1,8 @@
 package configuration
 
 import (
+	"strings"
+
 	"go.deanishe.net/env"
 )
 
@@ -11,6 +13,11 @@ const (
 	development ENVIRONMENT = "DEVELOPMENT"
 	sandbox     ENVIRONMENT = "SANDBOX"
 )
+
+var baseURL = map[string]string{
+	string(production):  "https://api.elo.com",
+	string(development): "https://dev.api.elo.com",
+}
 
 var Instance *baseConfig
 
@@ -44,7 +51,7 @@ func Load(conf interface{}) interface{} {
 }
 
 func GetEnv() ENVIRONMENT {
-	return Instance.Environment
+	return ENVIRONMENT(strings.ToLower(string(Instance.Environment)))
 }
 
 func IsProduction() bool {
@@ -57,4 +64,12 @@ func IsSandbox() bool {
 
 func IsDevelopment() bool {
 	return Instance.Environment == development
+}
+
+func GetBaseURL() string {
+	url, ok := baseURL[strings.ToUpper(string(GetEnv()))]
+	if !ok {
+		return ""
+	}
+	return url
 }

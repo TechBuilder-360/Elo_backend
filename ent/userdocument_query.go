@@ -11,8 +11,8 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/Toflex/directory_v2/ent/business"
 	"github.com/Toflex/directory_v2/ent/predicate"
+	"github.com/Toflex/directory_v2/ent/user"
 	"github.com/Toflex/directory_v2/ent/userdocument"
 )
 
@@ -23,7 +23,7 @@ type UserDocumentQuery struct {
 	order            []userdocument.OrderOption
 	inters           []Interceptor
 	predicates       []predicate.UserDocument
-	withUserDocument *BusinessQuery
+	withUserDocument *UserQuery
 	withFKs          bool
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
@@ -62,8 +62,8 @@ func (udq *UserDocumentQuery) Order(o ...userdocument.OrderOption) *UserDocument
 }
 
 // QueryUserDocument chains the current query on the "user_document" edge.
-func (udq *UserDocumentQuery) QueryUserDocument() *BusinessQuery {
-	query := (&BusinessClient{config: udq.config}).Query()
+func (udq *UserDocumentQuery) QueryUserDocument() *UserQuery {
+	query := (&UserClient{config: udq.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := udq.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -74,7 +74,7 @@ func (udq *UserDocumentQuery) QueryUserDocument() *BusinessQuery {
 		}
 		step := sqlgraph.NewStep(
 			sqlgraph.From(userdocument.Table, userdocument.FieldID, selector),
-			sqlgraph.To(business.Table, business.FieldID),
+			sqlgraph.To(user.Table, user.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, true, userdocument.UserDocumentTable, userdocument.UserDocumentColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(udq.driver.Dialect(), step)
@@ -284,8 +284,8 @@ func (udq *UserDocumentQuery) Clone() *UserDocumentQuery {
 
 // WithUserDocument tells the query-builder to eager-load the nodes that are connected to
 // the "user_document" edge. The optional arguments are used to configure the query builder of the edge.
-func (udq *UserDocumentQuery) WithUserDocument(opts ...func(*BusinessQuery)) *UserDocumentQuery {
-	query := (&BusinessClient{config: udq.config}).Query()
+func (udq *UserDocumentQuery) WithUserDocument(opts ...func(*UserQuery)) *UserDocumentQuery {
+	query := (&UserClient{config: udq.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -402,21 +402,21 @@ func (udq *UserDocumentQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([
 	}
 	if query := udq.withUserDocument; query != nil {
 		if err := udq.loadUserDocument(ctx, query, nodes, nil,
-			func(n *UserDocument, e *Business) { n.Edges.UserDocument = e }); err != nil {
+			func(n *UserDocument, e *User) { n.Edges.UserDocument = e }); err != nil {
 			return nil, err
 		}
 	}
 	return nodes, nil
 }
 
-func (udq *UserDocumentQuery) loadUserDocument(ctx context.Context, query *BusinessQuery, nodes []*UserDocument, init func(*UserDocument), assign func(*UserDocument, *Business)) error {
+func (udq *UserDocumentQuery) loadUserDocument(ctx context.Context, query *UserQuery, nodes []*UserDocument, init func(*UserDocument), assign func(*UserDocument, *User)) error {
 	ids := make([]string, 0, len(nodes))
 	nodeids := make(map[string][]*UserDocument)
 	for i := range nodes {
-		if nodes[i].business_user_documents == nil {
+		if nodes[i].user_user_documents == nil {
 			continue
 		}
-		fk := *nodes[i].business_user_documents
+		fk := *nodes[i].user_user_documents
 		if _, ok := nodeids[fk]; !ok {
 			ids = append(ids, fk)
 		}
@@ -425,7 +425,7 @@ func (udq *UserDocumentQuery) loadUserDocument(ctx context.Context, query *Busin
 	if len(ids) == 0 {
 		return nil
 	}
-	query.Where(business.IDIn(ids...))
+	query.Where(user.IDIn(ids...))
 	neighbors, err := query.All(ctx)
 	if err != nil {
 		return err
@@ -433,7 +433,7 @@ func (udq *UserDocumentQuery) loadUserDocument(ctx context.Context, query *Busin
 	for _, n := range neighbors {
 		nodes, ok := nodeids[n.ID]
 		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "business_user_documents" returned %v`, n.ID)
+			return fmt.Errorf(`unexpected foreign-key "user_user_documents" returned %v`, n.ID)
 		}
 		for i := range nodes {
 			assign(nodes[i], n)

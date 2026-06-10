@@ -954,6 +954,52 @@ func HasManagesWith(preds ...predicate.Manager) predicate.Business {
 	})
 }
 
+// HasVerifications applies the HasEdge predicate on the "verifications" edge.
+func HasVerifications() predicate.Business {
+	return predicate.Business(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, true, VerificationsTable, VerificationsPrimaryKey...),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasVerificationsWith applies the HasEdge predicate on the "verifications" edge with a given conditions (other predicates).
+func HasVerificationsWith(preds ...predicate.Verification) predicate.Business {
+	return predicate.Business(func(s *sql.Selector) {
+		step := newVerificationsStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasRequestVerifications applies the HasEdge predicate on the "request_verifications" edge.
+func HasRequestVerifications() predicate.Business {
+	return predicate.Business(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, true, RequestVerificationsTable, RequestVerificationsPrimaryKey...),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasRequestVerificationsWith applies the HasEdge predicate on the "request_verifications" edge with a given conditions (other predicates).
+func HasRequestVerificationsWith(preds ...predicate.RequestVerification) predicate.Business {
+	return predicate.Business(func(s *sql.Selector) {
+		step := newRequestVerificationsStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
 // HasBusinessDocuments applies the HasEdge predicate on the "business_documents" edge.
 func HasBusinessDocuments() predicate.Business {
 	return predicate.Business(func(s *sql.Selector) {
@@ -969,29 +1015,6 @@ func HasBusinessDocuments() predicate.Business {
 func HasBusinessDocumentsWith(preds ...predicate.BusinessDocument) predicate.Business {
 	return predicate.Business(func(s *sql.Selector) {
 		step := newBusinessDocumentsStep()
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
-		})
-	})
-}
-
-// HasUserDocuments applies the HasEdge predicate on the "user_documents" edge.
-func HasUserDocuments() predicate.Business {
-	return predicate.Business(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, UserDocumentsTable, UserDocumentsColumn),
-		)
-		sqlgraph.HasNeighbors(s, step)
-	})
-}
-
-// HasUserDocumentsWith applies the HasEdge predicate on the "user_documents" edge with a given conditions (other predicates).
-func HasUserDocumentsWith(preds ...predicate.UserDocument) predicate.Business {
-	return predicate.Business(func(s *sql.Selector) {
-		step := newUserDocumentsStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)

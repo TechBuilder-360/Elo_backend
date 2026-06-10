@@ -50,10 +50,12 @@ const (
 	EdgeServices = "services"
 	// EdgeManages holds the string denoting the manages edge name in mutations.
 	EdgeManages = "manages"
+	// EdgeVerifications holds the string denoting the verifications edge name in mutations.
+	EdgeVerifications = "verifications"
+	// EdgeRequestVerifications holds the string denoting the request_verifications edge name in mutations.
+	EdgeRequestVerifications = "request_verifications"
 	// EdgeBusinessDocuments holds the string denoting the business_documents edge name in mutations.
 	EdgeBusinessDocuments = "business_documents"
-	// EdgeUserDocuments holds the string denoting the user_documents edge name in mutations.
-	EdgeUserDocuments = "user_documents"
 	// Table holds the table name of the business in the database.
 	Table = "businesses"
 	// SocialsTable is the table that holds the socials relation/edge.
@@ -77,6 +79,16 @@ const (
 	ManagesInverseTable = "managers"
 	// ManagesColumn is the table column denoting the manages relation/edge.
 	ManagesColumn = "business_id"
+	// VerificationsTable is the table that holds the verifications relation/edge. The primary key declared below.
+	VerificationsTable = "verification_business"
+	// VerificationsInverseTable is the table name for the Verification entity.
+	// It exists in this package in order to avoid circular dependency with the "verification" package.
+	VerificationsInverseTable = "verifications"
+	// RequestVerificationsTable is the table that holds the request_verifications relation/edge. The primary key declared below.
+	RequestVerificationsTable = "request_verification_business"
+	// RequestVerificationsInverseTable is the table name for the RequestVerification entity.
+	// It exists in this package in order to avoid circular dependency with the "requestverification" package.
+	RequestVerificationsInverseTable = "request_verifications"
 	// BusinessDocumentsTable is the table that holds the business_documents relation/edge.
 	BusinessDocumentsTable = "business_documents"
 	// BusinessDocumentsInverseTable is the table name for the BusinessDocument entity.
@@ -84,13 +96,6 @@ const (
 	BusinessDocumentsInverseTable = "business_documents"
 	// BusinessDocumentsColumn is the table column denoting the business_documents relation/edge.
 	BusinessDocumentsColumn = "business_business_documents"
-	// UserDocumentsTable is the table that holds the user_documents relation/edge.
-	UserDocumentsTable = "user_documents"
-	// UserDocumentsInverseTable is the table name for the UserDocument entity.
-	// It exists in this package in order to avoid circular dependency with the "userdocument" package.
-	UserDocumentsInverseTable = "user_documents"
-	// UserDocumentsColumn is the table column denoting the user_documents relation/edge.
-	UserDocumentsColumn = "business_user_documents"
 )
 
 // Columns holds all SQL columns for business fields.
@@ -112,6 +117,15 @@ var Columns = []string{
 	FieldVerified,
 	FieldVerifiedAt,
 }
+
+var (
+	// VerificationsPrimaryKey and VerificationsColumn2 are the table columns denoting the
+	// primary key for the verifications relation (M2M).
+	VerificationsPrimaryKey = []string{"verification_id", "business_id"}
+	// RequestVerificationsPrimaryKey and RequestVerificationsColumn2 are the table columns denoting the
+	// primary key for the request_verifications relation (M2M).
+	RequestVerificationsPrimaryKey = []string{"request_verification_id", "business_id"}
+)
 
 // ValidColumn reports if the column name is valid (part of the table columns).
 func ValidColumn(column string) bool {
@@ -275,6 +289,34 @@ func ByManages(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 	}
 }
 
+// ByVerificationsCount orders the results by verifications count.
+func ByVerificationsCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newVerificationsStep(), opts...)
+	}
+}
+
+// ByVerifications orders the results by verifications terms.
+func ByVerifications(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newVerificationsStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+
+// ByRequestVerificationsCount orders the results by request_verifications count.
+func ByRequestVerificationsCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newRequestVerificationsStep(), opts...)
+	}
+}
+
+// ByRequestVerifications orders the results by request_verifications terms.
+func ByRequestVerifications(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newRequestVerificationsStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+
 // ByBusinessDocumentsCount orders the results by business_documents count.
 func ByBusinessDocumentsCount(opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
@@ -286,20 +328,6 @@ func ByBusinessDocumentsCount(opts ...sql.OrderTermOption) OrderOption {
 func ByBusinessDocuments(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 	return func(s *sql.Selector) {
 		sqlgraph.OrderByNeighborTerms(s, newBusinessDocumentsStep(), append([]sql.OrderTerm{term}, terms...)...)
-	}
-}
-
-// ByUserDocumentsCount orders the results by user_documents count.
-func ByUserDocumentsCount(opts ...sql.OrderTermOption) OrderOption {
-	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborsCount(s, newUserDocumentsStep(), opts...)
-	}
-}
-
-// ByUserDocuments orders the results by user_documents terms.
-func ByUserDocuments(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
-	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newUserDocumentsStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
 func newSocialsStep() *sqlgraph.Step {
@@ -323,17 +351,24 @@ func newManagesStep() *sqlgraph.Step {
 		sqlgraph.Edge(sqlgraph.O2M, false, ManagesTable, ManagesColumn),
 	)
 }
+func newVerificationsStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(VerificationsInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.M2M, true, VerificationsTable, VerificationsPrimaryKey...),
+	)
+}
+func newRequestVerificationsStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(RequestVerificationsInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.M2M, true, RequestVerificationsTable, RequestVerificationsPrimaryKey...),
+	)
+}
 func newBusinessDocumentsStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(BusinessDocumentsInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.O2M, false, BusinessDocumentsTable, BusinessDocumentsColumn),
-	)
-}
-func newUserDocumentsStep() *sqlgraph.Step {
-	return sqlgraph.NewStep(
-		sqlgraph.From(Table, FieldID),
-		sqlgraph.To(UserDocumentsInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.O2M, false, UserDocumentsTable, UserDocumentsColumn),
 	)
 }

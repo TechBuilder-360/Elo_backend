@@ -25,6 +25,8 @@ type BusinessDocument struct {
 	URL string `json:"url,omitempty"`
 	// Verified holds the value of the "verified" field.
 	Verified bool `json:"verified,omitempty"`
+	// Type holds the value of the "type" field.
+	Type businessdocument.Type `json:"type,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the BusinessDocumentQuery when eager-loading is set.
 	Edges                       BusinessDocumentEdges `json:"edges"`
@@ -61,7 +63,7 @@ func (*BusinessDocument) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullBool)
 		case businessdocument.FieldID:
 			values[i] = new(sql.NullInt64)
-		case businessdocument.FieldTitle, businessdocument.FieldDescription, businessdocument.FieldURL:
+		case businessdocument.FieldTitle, businessdocument.FieldDescription, businessdocument.FieldURL, businessdocument.FieldType:
 			values[i] = new(sql.NullString)
 		case businessdocument.ForeignKeys[0]: // business_business_documents
 			values[i] = new(sql.NullString)
@@ -109,6 +111,12 @@ func (bd *BusinessDocument) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field verified", values[i])
 			} else if value.Valid {
 				bd.Verified = value.Bool
+			}
+		case businessdocument.FieldType:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field type", values[i])
+			} else if value.Valid {
+				bd.Type = businessdocument.Type(value.String)
 			}
 		case businessdocument.ForeignKeys[0]:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -169,6 +177,9 @@ func (bd *BusinessDocument) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("verified=")
 	builder.WriteString(fmt.Sprintf("%v", bd.Verified))
+	builder.WriteString(", ")
+	builder.WriteString("type=")
+	builder.WriteString(fmt.Sprintf("%v", bd.Type))
 	builder.WriteByte(')')
 	return builder.String()
 }

@@ -18,6 +18,13 @@ func seedServices(ctx context.Context, db *ent.Client) error {
 			SetMax(0).
 			SetActive(true).
 			SetProvider("brevo").SetFee(&schema.Fee{}),
+		db.Service.Create().
+			SetName("Identity Verification").
+			SetIdentifier("identity-verification").
+			SetMin(0).
+			SetMax(0).
+			SetActive(true).
+			SetProvider("dojah").SetFee(&schema.Fee{}),
 	).OnConflict(
 		sql.ConflictColumns(service.FieldIdentifier),
 		sql.DoNothing(),

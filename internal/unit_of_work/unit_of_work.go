@@ -1,4 +1,4 @@
-package repository
+package unitofwork
 
 import (
 	"context"
@@ -7,20 +7,23 @@ import (
 )
 
 type IUnitOfWorkRepository interface {
-	Begin(ctx context.Context, db *ent.Client) (*ent.Tx, error)
+	Begin(ctx context.Context) (*ent.Tx, error)
 	Commit(db *ent.Tx) error
 	Rollback(db *ent.Tx) error
 }
 
 type UnitOfWorkRepository struct {
+	db *ent.Client
 }
 
 func NewUnitOfWorkRepository(db *ent.Client) IUnitOfWorkRepository {
-	return &UnitOfWorkRepository{}
+	return &UnitOfWorkRepository{
+		db: db,
+	}
 }
 
-func (*UnitOfWorkRepository) Begin(ctx context.Context, db *ent.Client) (*ent.Tx, error) {
-	tx, err := db.Tx(ctx)
+func (u *UnitOfWorkRepository) Begin(ctx context.Context) (*ent.Tx, error) {
+	tx, err := u.db.Tx(ctx)
 	if err != nil {
 		return nil, err
 	}
