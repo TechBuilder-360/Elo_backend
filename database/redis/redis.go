@@ -43,7 +43,7 @@ func connectRedis() *redis.Client {
 		opt.TLSConfig = &tls.Config{}
 	}
 
-	rdb := redis.NewClient(opt)
+	rdb = redis.NewClient(opt)
 
 	// Test redis connection
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
