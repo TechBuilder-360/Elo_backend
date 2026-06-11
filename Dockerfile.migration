@@ -1,16 +1,22 @@
-FROM golang:1.26.4
+FROM golang:1.25 AS builder
 
 WORKDIR /usr/src/migration
 
-# pre-copy/cache go.mod for pre-downloading dependencies and only redownloading them in subsequent builds if they change
 COPY go.mod go.sum ./
 RUN go mod download
 RUN go install ariga.io/atlas/cmd/atlas@latest && cp /go/bin/atlas /usr/local/bin/atlas
 
-RUN apk --no-cache add ca-certificates libc6-compat curl \ 
-    && curl -sSf https://atlasgo.sh | sh
-
 COPY . .
-RUN go build -v -o /usr/local/bin/app ./cmd/migration/migration.go
+RUN go build -v -o /migration ./cmd/migration/migration.go
+
+
+FROM debian:bookworm-slim
+
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends ca-certificates curl && \
+    rm -rf /var/lib/apt/lists/* && \
+    curl -sSf https://atlasgo.sh | sh
+
+COPY --from=builder /migration /usr/local/bin/app
 
 CMD ["/usr/local/bin/app"]
