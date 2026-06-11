@@ -9,4 +9,4 @@ RUN go mod download
 COPY . .
 RUN go build -v -o /usr/local/bin/app ./cmd/migration/migration.go
 
-CMD ["migration"]
+CMD ["/usr/local/bin/app"]
