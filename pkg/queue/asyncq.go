@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/Toflex/directory_v2/pkg/configuration"
+	"github.com/Toflex/directory_v2/pkg/log"
 	"github.com/hibiken/asynq"
 	"github.com/samber/do/v2"
 )
@@ -36,11 +37,13 @@ func NewClient(i do.Injector) (*Client, error) {
 	conf := &asynqConfig{}
 	configuration.Load(conf)
 
-	asynqclient := asynq.NewClient(asynq.RedisClientOpt{
-		Addr:     conf.RedisURL,
-		Password: conf.RedisPassword,
-		DB:       conf.RedisDB,
-	})
+	opt, err := asynq.ParseRedisURI(conf.RedisURL)
+	if err != nil {
+		log.WithError(err).Error("Failed to parse redus url")
+		return nil, err
+	}
+
+	asynqclient := asynq.NewClient(opt)
 
 	ClientQueue = &Client{client: asynqclient}
 
