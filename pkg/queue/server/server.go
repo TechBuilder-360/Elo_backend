@@ -1,11 +1,10 @@
 package server
 
 import (
-	"time"
-
 	"github.com/Toflex/directory_v2/internal/email"
 	"github.com/Toflex/directory_v2/pkg/configuration"
 	"github.com/Toflex/directory_v2/pkg/constant"
+	"github.com/Toflex/directory_v2/pkg/log"
 	"github.com/Toflex/directory_v2/pkg/verification"
 	"github.com/hibiken/asynq"
 	"github.com/samber/do/v2"
@@ -33,17 +32,15 @@ func NewServer(i do.Injector) (*Server, error) {
 
 	queues := make(map[string]int)
 	queues["email"] = 1
+	queues["verification"] = 1
 
-	srv := asynq.NewServer(
-		asynq.RedisClientOpt{
-			Addr:         conf.RedisURL,
-			Password:     conf.RedisPassword,
-			DB:           conf.RedisDB,
-			PoolSize:     20,
-			ReadTimeout:  15 * time.Second,
-			WriteTimeout: 15 * time.Second,
-			DialTimeout:  15 * time.Second,
-		},
+	opt, err := asynq.ParseRedisURI(conf.RedisURL)
+	if err != nil {
+		log.WithError(err).Error("Failed to parse redus url")
+		return nil, err
+	}
+
+	srv := asynq.NewServer(opt,
 		asynq.Config{
 			Concurrency: conf.Concurrency,
 			Queues:      queues,

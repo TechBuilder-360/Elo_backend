@@ -2,7 +2,9 @@ package redis
 
 import (
 	"context"
+	"crypto/tls"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/Toflex/directory_v2/pkg/configuration"
@@ -30,11 +32,18 @@ func connectRedis() *redis.Client {
 	co := configuration.Load(conf)
 	conf = co.(*config)
 
-	rdb = redis.NewClient(&redis.Options{
-		Addr:     conf.RedisURL,
-		Password: conf.RedisPassword,
-		DB:       conf.RedisDB,
-	})
+	opt, err := redis.ParseURL(conf.RedisURL)
+	if err != nil {
+		log.Panic("Failed to parse redus url %s", err.Error())
+	}
+
+	opt.MaxRetries = 10
+	opt.DialTimeout = time.Second * 30
+	if strings.HasPrefix(strings.ToLower(conf.RedisURL), "rediss://") {
+		opt.TLSConfig = &tls.Config{}
+	}
+
+	rdb = redis.NewClient(opt)
 
 	// Test redis connection
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
