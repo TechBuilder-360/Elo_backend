@@ -6,6 +6,9 @@ COPY go.mod go.sum ./
 RUN go mod download
 RUN go install ariga.io/atlas/cmd/atlas@latest && cp /go/bin/atlas /usr/local/bin/atlas
 
+RUN apk --no-cache add ca-certificates libc6-compat curl \ 
+    && curl -sSf https://atlasgo.sh | sh
+
 COPY . .
 RUN go build -v -o /migration ./cmd/migration/migration.go
 
