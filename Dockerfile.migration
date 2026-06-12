@@ -17,5 +17,6 @@ RUN apt-get update && \
     curl -sSf https://atlasgo.sh | sh
 
 COPY --from=builder /migration /usr/local/bin/app
+COPY --from=builder /usr/src/migration/ent/migrate/migrations ./ent/migrate/migrations
 
 CMD ["/usr/local/bin/app"]

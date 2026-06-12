@@ -9,4 +9,6 @@ RUN go mod download
 COPY . .
 RUN go build -v -o /usr/local/bin/app ./cmd/http/server.go
 
+EXPOSE $PORT
+
 CMD ["app"]
