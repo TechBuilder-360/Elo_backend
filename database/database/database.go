@@ -12,11 +12,12 @@ import (
 )
 
 type config struct {
-	DbName string `env:"DB_NAME"`
-	DbUser string `env:"DB_USER"`
-	DbPass string `env:"DB_PASS"`
-	DbHost string `env:"DB_HOST"`
-	DbPort uint   `env:"DB_PORT"`
+	DbName    string `env:"DB_NAME"`
+	DbUser    string `env:"DB_USER"`
+	DbPass    string `env:"DB_PASS"`
+	DbHost    string `env:"DB_HOST"`
+	DbPort    uint   `env:"DB_PORT"`
+	DbSSLMode string `env:"DB_SSL_MODE"`
 }
 
 var dbInstance *ent.Client
@@ -25,7 +26,7 @@ func initializeDB() {
 	conf := &config{}
 	conf = configuration.Load(conf).(*config)
 
-	uri := fmt.Sprintf("host=%s port=%d user=%s dbname=%s password=%s sslmode=disable", conf.DbHost, conf.DbPort, conf.DbUser, conf.DbName, conf.DbPass)
+	uri := fmt.Sprintf("host=%s port=%d user=%s dbname=%s password=%s sslmode=%s", conf.DbHost, conf.DbPort, conf.DbUser, conf.DbName, conf.DbPass, conf.DbSSLMode)
 	client, err := ent.Open("postgres", uri)
 	if err != nil {
 		log.Panic("failed opening connection to postgres: %v", err)

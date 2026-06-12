@@ -11,11 +11,12 @@ import (
 )
 
 type config struct {
-	DbName string `env:"DB_NAME"`
-	DbUser string `env:"DB_USER"`
-	DbPass string `env:"DB_PASS"`
-	DbHost string `env:"DB_HOST"`
-	DbPort uint   `env:"DB_PORT"`
+	DbName    string `env:"DB_NAME"`
+	DbUser    string `env:"DB_USER"`
+	DbPass    string `env:"DB_PASS"`
+	DbHost    string `env:"DB_HOST"`
+	DbPort    uint   `env:"DB_PORT"`
+	DbSSLMode string `env:"DB_SSL_MODE"`
 }
 
 func AtlasMigration() {
@@ -40,8 +41,11 @@ func AtlasMigration() {
 	if err != nil {
 		log.Fatalf("failed to initialize client: %v", err)
 	}
+
 	// Run `atlas migrate apply` on DB
-	uri := fmt.Sprintf("postgresql://%s:%s@%s:%d/%s?sslmode=disable", conf.DbUser, conf.DbPass, conf.DbHost, conf.DbPort, conf.DbName)
+	uri := fmt.Sprintf("postgresql://%s:%s@%s:%d/%s?sslmode=%s",
+		conf.DbUser, conf.DbPass, conf.DbHost, conf.DbPort, conf.DbName, conf.DbSSLMode)
+
 	res, err := client.MigrateApply(context.Background(), &atlasexec.MigrateApplyParams{
 		URL:        uri,
 		AllowDirty: true,
