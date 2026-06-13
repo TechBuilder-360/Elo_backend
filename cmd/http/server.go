@@ -72,9 +72,6 @@ func main() {
 
 	// http engine
 	engine := do.MustInvoke[*gin.Engine](runtime.Injector)
-	if configuration.IsProduction() {
-		gin.SetMode(gin.ReleaseMode)
-	}
 
 	// initialize routes
 	router.InitializeRoutes(engine)
