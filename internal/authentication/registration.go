@@ -10,6 +10,10 @@ import (
 )
 
 func (s *Service) RegisterUser(ctx context.Context, body Registration, log log.Entry) (*string, error) {
+	if err := s.enforceRateLimit(ctx, registrationRateLimitKey(body.EmailAddress), registrationRateLimitCount, registrationRateLimitWindow, log); err != nil {
+		return nil, err
+	}
+
 	// Check if email address exist
 	existingUser, err := s.repo.GetUserByEmail(ctx, body.EmailAddress)
 	if err != nil {

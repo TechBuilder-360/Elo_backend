@@ -16,7 +16,6 @@ import (
 	"github.com/Toflex/directory_v2/graph/generated"
 	resolver "github.com/Toflex/directory_v2/graph/resolvers"
 	"github.com/Toflex/directory_v2/internal/authentication"
-	"github.com/Toflex/directory_v2/middlewares"
 	"github.com/Toflex/directory_v2/pkg/configuration"
 	apperrors "github.com/Toflex/directory_v2/pkg/errors"
 	"github.com/Toflex/directory_v2/pkg/log"
@@ -36,7 +35,13 @@ type asynqMonitorConfig struct {
 
 func InitializeRoutes(engine *gin.Engine) {
 
-	engine.GET("/health", middlewares.Logger(), func(c *gin.Context) {
+	engine.GET("/", func(c *gin.Context) {
+		c.AbortWithStatusJSON(http.StatusOK, gin.H{
+			"message": "ELO 👋🏾",
+		})
+	})
+
+	engine.GET("/health", func(c *gin.Context) {
 		c.AbortWithStatusJSON(http.StatusOK, gin.H{
 			"message": "Server is up 🚀",
 		})
@@ -84,7 +89,7 @@ func InitializeRoutes(engine *gin.Engine) {
 	})
 
 	// GraphQL endpoint
-	engine.POST("/api", middlewares.Logger(), func(c *gin.Context) {
+	engine.POST("/api", func(c *gin.Context) {
 		ctx := log.SetLoggerInContext(c.Request.Context())
 		gqlHandler.ServeHTTP(c.Writer, c.Request.WithContext(ctx))
 	})
@@ -101,13 +106,14 @@ func InitializeRoutes(engine *gin.Engine) {
 	monitorConf := &asynqMonitorConfig{}
 	configuration.Load(monitorConf)
 
+	parsedOpt, err := asynq.ParseRedisURI(monitorConf.RedisURL)
+	if err != nil {
+		log.WithError(err).Error("failed to parse REDIS_URL for asynq monitor")
+	}
+
 	monitorHandler := asynqmon.New(asynqmon.Options{
-		RootPath: "/monitoring",
-		RedisConnOpt: asynq.RedisClientOpt{
-			Addr:     monitorConf.RedisURL,
-			Password: monitorConf.RedisPassword,
-			DB:       monitorConf.RedisDB,
-		},
+		RootPath:     "/monitoring",
+		RedisConnOpt: parsedOpt,
 	})
 
 	engine.Any(monitorHandler.RootPath(), basicAuth, gin.WrapH(monitorHandler))

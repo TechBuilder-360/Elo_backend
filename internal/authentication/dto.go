@@ -55,6 +55,18 @@ func (r *Registration) Validate() error {
 		return errors.New(errors.ErrInvalidInput, err.Error())
 	}
 
+	if strings.Contains(r.EmailAddress, "+") {
+		email := r.EmailAddress
+		plusIndex := strings.Index(email, "+")
+		atIndex := strings.Index(email, "@")
+
+		if plusIndex < atIndex {
+			email = email[:plusIndex] + email[atIndex:]
+		}
+
+		r.EmailAddress = email
+	}
+
 	r.EmailAddress = strings.ToLower(r.EmailAddress)
 
 	// validate first name

@@ -20,6 +20,7 @@ func (r *repository) Create(ctx context.Context, payload Onboarding) (*string, e
 		SetEmailVerified(payload.EmailVerified).
 		SetDisplayName(util.AddressToString(payload.DisplayName)).
 		SetPhoneNumber(util.AddressToString(payload.PhoneNumber)).
+		SetPassword(payload.Password).
 		Save(ctx)
 
 	if err != nil {

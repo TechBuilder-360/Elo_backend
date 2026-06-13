@@ -17,6 +17,10 @@ import (
 )
 
 func (s *Service) Login(ctx context.Context, payload Login, log log.Entry) (*model.LoginResponse, error) {
+	if err := s.enforceRateLimit(ctx, loginRateLimitKey(payload.Identifier), loginRateLimitCount, loginRateLimitWindow, log); err != nil {
+		return nil, err
+	}
+
 	cacheOTPString, err := s.cache.Get(ctx, payload.Identifier)
 	if err != nil {
 		log.WithError(err).Error("unable to fetch stored OTP")
@@ -44,13 +48,18 @@ func (s *Service) Login(ctx context.Context, payload Login, log log.Entry) (*mod
 				return nil, errors.New(errors.ErrFailed, "request failed")
 			}
 		} else {
-			s.cache.Delete(ctx, payload.Identifier)
+			_ = s.cache.Delete(ctx, payload.Identifier)
 		}
+		return nil, errors.New(errors.ErrFailed, "invalid OTP")
 	}
 
 	saferoutine.Run(func() {
-		s.cache.Delete(ctx, payload.Identifier)
+		if err := s.cache.Delete(ctx, payload.Identifier); err != nil {
+			log.WithError(err).Error("failed to delete OTP token after login")
+		}
 	})
+
+	s.resetRateLimit(ctx, loginRateLimitKey(payload.Identifier), log)
 
 	user, err := s.repo.GetUserByID(ctx, data.UserID)
 	if err != nil {
@@ -67,6 +76,10 @@ func (s *Service) Login(ctx context.Context, payload Login, log log.Entry) (*mod
 }
 
 func (s *Service) RequestOTP(ctx context.Context, payload OTPRequest, log log.Entry) (*string, error) {
+	if err := s.enforceRateLimit(ctx, requestOTPRateLimitKey(payload.Email), otpRequestRateLimitCount, otpRequestRateLimitWindow, log); err != nil {
+		return nil, err
+	}
+
 	user, err := s.repo.GetUserByEmail(ctx, payload.Email)
 	if err != nil {
 		log.WithError(err).Error("failed to fetch user")
