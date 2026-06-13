@@ -72,6 +72,21 @@ func (c *Client) Set(ctx context.Context, key, value string, expiration time.Dur
 	return err
 }
 
+func (c *Client) IncrWithExpire(ctx context.Context, key string, expiration time.Duration) (int64, error) {
+	key = fmt.Sprintf("%s-%s", c.Namespace, key)
+	count, err := c.rdb.Incr(ctx, key).Result()
+	if err != nil {
+		return 0, err
+	}
+	if count == 1 {
+		_, err = c.rdb.Expire(ctx, key, expiration).Result()
+		if err != nil {
+			return 0, err
+		}
+	}
+	return count, nil
+}
+
 func (c *Client) Delete(ctx context.Context, key string) error {
 	key = fmt.Sprintf("%s-%s", c.Namespace, key)
 	return c.rdb.Del(ctx, key).Err()
