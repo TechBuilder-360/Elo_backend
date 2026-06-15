@@ -11,12 +11,7 @@ import (
 	"github.com/Toflex/directory_v2/graph/model"
 )
 
-// CreateUser is the resolver for the createUser field.
-func (r *mutationResolver) CreateUser(ctx context.Context, input model.NewUser) (*model.User, error) {
-	panic(fmt.Errorf("not implemented: CreateUser - createUser"))
-}
-
-// GetUser is the resolver for the getUser field.
-func (r *queryResolver) GetUser(ctx context.Context) ([]*model.User, error) {
-	panic(fmt.Errorf("not implemented: GetUser - getUser"))
+// GetUserBusinsses is the resolver for the getUserBusinsses field.
+func (r *queryResolver) GetUserBusinsses(ctx context.Context) ([]*model.UserBusiness, error) {
+	panic(fmt.Errorf("not implemented: GetUserBusinsses - getUserBusinsses"))
 }

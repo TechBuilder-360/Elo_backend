@@ -156,3 +156,6 @@ models:
   Int64:
     model:
       - github.com/99designs/gqlgen/graphql.Int64
+  Upload:
+    model:
+      - github.com/99designs/gqlgen/graphql.Upload
