@@ -1,16 +1,10 @@
-type User {
-  id: String!
- Name: String!
-}
-
-input NewUser {
+type UserBusiness {
+  id: ID!
   name: String!
+  role: String!
+  logo: String!
+  industry: String!
 }
-
 extend type Query {
-  getUser: [User!]!
-}
-
-extend type Mutation {
-  createUser(input: NewUser!): User!
+  getUserBusinsses: [UserBusiness!]!
 }

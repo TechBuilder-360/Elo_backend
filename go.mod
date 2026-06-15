@@ -6,6 +6,7 @@ require (
 	ariga.io/atlas-go-sdk v0.7.0
 	entgo.io/ent v0.14.4
 	github.com/99designs/gqlgen v0.17.86
+	github.com/cloudinary/cloudinary-go/v2 v2.16.0
 	github.com/gin-gonic/gin v1.10.0
 	github.com/golang-jwt/jwt/v4 v4.5.2
 	github.com/google/uuid v1.6.0
@@ -17,7 +18,6 @@ require (
 )
 
 require (
-	github.com/cloudinary/cloudinary-go/v2 v2.16.0 // indirect
 	github.com/creasty/defaults v1.7.0 // indirect
 	github.com/goccy/go-yaml v1.19.2 // indirect
 	github.com/gorilla/mux v1.8.0 // indirect

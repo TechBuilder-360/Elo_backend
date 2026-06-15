@@ -2,13 +2,45 @@
 
 package model
 
+import (
+	"bytes"
+	"fmt"
+	"io"
+	"strconv"
+
+	"github.com/99designs/gqlgen/graphql"
+)
+
 type Business struct {
+	ID       string    `json:"id"`
 	Name     string    `json:"name"`
 	Logo     *string   `json:"logo,omitempty"`
 	Email    *string   `json:"email,omitempty"`
 	About    *string   `json:"about,omitempty"`
 	Services []*string `json:"services"`
 	Socials  []*Social `json:"socials"`
+}
+
+type BusinessAddress struct {
+	Number  *int32 `json:"number,omitempty"`
+	Street  string `json:"street"`
+	State   string `json:"state"`
+	Country string `json:"country"`
+	ZipCode string `json:"zip_code"`
+}
+
+type BusinessRegistrationDetail struct {
+	Number                     string         `json:"number"`
+	CountryOfIncorporation     string         `json:"country_of_incorporation"`
+	DateOfIncorporation        string         `json:"date_of_incorporation"`
+	CertificateOfIncorporation graphql.Upload `json:"certificate_of_incorporation"`
+	ArticlesOfAssociation      graphql.Upload `json:"articles_of_association"`
+	StatusCertificate          graphql.Upload `json:"status_certificate"`
+}
+
+type Document struct {
+	Description string         `json:"description"`
+	File        graphql.Upload `json:"file"`
 }
 
 type Login struct {
@@ -24,15 +56,23 @@ type LoginResponse struct {
 type Mutation struct {
 }
 
-type NewUser struct {
-	Name string `json:"name"`
-}
-
 type OTPResponse struct {
 	Identifier string `json:"Identifier"`
 }
 
 type Query struct {
+}
+
+type RegisterBusinessInput struct {
+	Name               string                      `json:"name"`
+	About              string                      `json:"about"`
+	Email              string                      `json:"email"`
+	OnSite             *bool                       `json:"on_site,omitempty"`
+	Industry           string                      `json:"industry"`
+	IsRegistered       *bool                       `json:"is_registered,omitempty"`
+	Address            *BusinessAddress            `json:"address"`
+	RegistrationDetail *BusinessRegistrationDetail `json:"registration_detail,omitempty"`
+	OtherDocument      []*Document                 `json:"other_document,omitempty"`
 }
 
 type Registration struct {
@@ -54,9 +94,15 @@ type RequestOtp struct {
 	Password     string `json:"password"`
 }
 
+type Response struct {
+	Ok *bool `json:"ok,omitempty"`
+}
+
 type SearchBusiness struct {
-	Name string  `json:"name"`
-	Logo *string `json:"logo,omitempty"`
+	ID       string  `json:"id"`
+	Name     string  `json:"name"`
+	Industry string  `json:"industry"`
+	Logo     *string `json:"logo,omitempty"`
 }
 
 type Social struct {
@@ -64,7 +110,75 @@ type Social struct {
 	URL  string `json:"url"`
 }
 
-type User struct {
-	ID   string `json:"id"`
-	Name string `json:"Name"`
+type UserBusiness struct {
+	ID       string `json:"id"`
+	Name     string `json:"name"`
+	Role     string `json:"role"`
+	Logo     string `json:"logo"`
+	Industry string `json:"industry"`
+}
+
+type Verification struct {
+	Link   string `json:"link"`
+	Status string `json:"status"`
+}
+
+type VerificationPayload struct {
+	ID     string  `json:"id"`
+	Entity *Entity `json:"entity,omitempty"`
+}
+
+type Entity string
+
+const (
+	EntityUserVerification     Entity = "USER_VERIFICATION"
+	EntityBusinessVerification Entity = "BUSINESS_VERIFICATION"
+)
+
+var AllEntity = []Entity{
+	EntityUserVerification,
+	EntityBusinessVerification,
+}
+
+func (e Entity) IsValid() bool {
+	switch e {
+	case EntityUserVerification, EntityBusinessVerification:
+		return true
+	}
+	return false
+}
+
+func (e Entity) String() string {
+	return string(e)
+}
+
+func (e *Entity) UnmarshalGQL(v any) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = Entity(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid Entity", str)
+	}
+	return nil
+}
+
+func (e Entity) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *Entity) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e Entity) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
 }
