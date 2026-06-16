@@ -509,12 +509,9 @@ var sources = []*ast.Source{
 	{Name: "../schema/authentication.graphqls", Input: `scalar Int64
 
 input Registration {
-  display_name: String
   email_address: String!
   first_name: String!
   last_name: String!
-  phone_number: String
-  avatar: String
   password: String!
 }
 
@@ -575,9 +572,9 @@ input RegisterBusinessInput {
   name: String!
   about: String!
   email: String!
-  on_site: Boolean
+  on_site: Boolean!
   industry: String!
-  is_registered: Boolean
+  is_registered: Boolean!
   address: BusinessAddress!
   registration_detail: BusinessRegistrationDetail
   other_document: [Document!]
@@ -589,7 +586,7 @@ input Document {
 }
 
 input BusinessAddress {
-  number: Int
+  number: String
   street: String!
   state: String!
   country: String!

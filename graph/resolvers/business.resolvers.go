@@ -24,5 +24,6 @@ func (r *queryResolver) FindBusiness(ctx context.Context, name *string, service 
 
 // RegisterBusiness is the resolver for the registerBusiness field.
 func (r *mutationResolver) RegisterBusiness(ctx context.Context, input model.RegisterBusinessInput) (*model.Response, error) {
-	panic(fmt.Errorf("not implemented: RegisterBusiness - registerBusiness"))
+	// logger := log.LoggerInContext(ctx)
+	return nil, nil
 }

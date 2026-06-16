@@ -7,6 +7,7 @@ type ErrorCode string
 const (
 	ErrNotFound        ErrorCode = "NOT FOUND"
 	ErrInvalidInput    ErrorCode = "INVALID INPUT"
+	ErrValidation      ErrorCode = "VALIDATION ERROR"
 	ErrInternal        ErrorCode = "INTERNAL ERROR"
 	ErrFailed          ErrorCode = "REQUEST FAILED"
 	ErrTooManyRequests ErrorCode = "TOO MANY REQUESTS"

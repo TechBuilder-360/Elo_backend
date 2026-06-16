@@ -9831,7 +9831,7 @@ func (m *UserMutation) PhoneNumber() (r string, exists bool) {
 // OldPhoneNumber returns the old "phone_number" field's value of the User entity.
 // If the User object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *UserMutation) OldPhoneNumber(ctx context.Context) (v string, err error) {
+func (m *UserMutation) OldPhoneNumber(ctx context.Context) (v *string, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldPhoneNumber is only allowed on UpdateOne operations")
 	}
@@ -9880,7 +9880,7 @@ func (m *UserMutation) Avatar() (r string, exists bool) {
 // OldAvatar returns the old "avatar" field's value of the User entity.
 // If the User object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *UserMutation) OldAvatar(ctx context.Context) (v string, err error) {
+func (m *UserMutation) OldAvatar(ctx context.Context) (v *string, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldAvatar is only allowed on UpdateOne operations")
 	}

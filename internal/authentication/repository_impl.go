@@ -3,6 +3,7 @@ package authentication
 import (
 	"context"
 	"strings"
+	"time"
 
 	"github.com/Toflex/directory_v2/ent"
 	"github.com/Toflex/directory_v2/ent/user"
@@ -18,8 +19,8 @@ func (r *repository) Create(ctx context.Context, payload Onboarding) (*string, e
 		SetEmailAddress(payload.EmailAddress).
 		SetEmailVerifiedAt(payload.EmailVerifiedAt).
 		SetEmailVerified(payload.EmailVerified).
-		SetDisplayName(util.AddressToString(payload.DisplayName)).
-		SetPhoneNumber(util.AddressToString(payload.PhoneNumber)).
+		SetNillableDisplayName(payload.DisplayName).
+		SetNillablePhoneNumber(payload.PhoneNumber).
 		SetPassword(payload.Password).
 		Save(ctx)
 
@@ -59,4 +60,45 @@ func (r *repository) GetUserByID(ctx context.Context, id string) (*User, error) 
 	}
 
 	return &User{*u}, nil
+}
+
+func (r *repository) Update(ctx context.Context, user *User, opt *UpdateUser) error {
+	urs := r.db.User.UpdateOneID(user.ID)
+
+	if opt.EmailVerified {
+		urs.SetEmailVerified(true).
+			SetEmailVerifiedAt(time.Now())
+	}
+
+	if opt.Avartar {
+		urs.SetAvatar(*user.Avatar)
+	}
+
+	if opt.Disable {
+		urs.SetDisabled(user.Disabled).
+			SetDisableReason(*user.DisableReason)
+	}
+
+	if opt.Password {
+		urs.SetPassword(user.Password)
+	}
+
+	if opt.PersonalInfo {
+		urs.SetFirstName(user.FirstName).
+			SetLastName(user.LastName).
+			SetMiddleName(user.MiddleName).
+			SetPhoneNumber(*user.PhoneNumber)
+	}
+
+	if opt.Verified {
+		urs.SetVerified(user.Verified)
+	}
+
+	if opt.Avartar {
+		urs.SetAvatar(*user.Avatar)
+	}
+
+	_, err := urs.Save(ctx)
+
+	return err
 }

@@ -26,9 +26,9 @@ input RegisterBusinessInput {
   name: String!
   about: String!
   email: String!
-  on_site: Boolean
+  on_site: Boolean!
   industry: String!
-  is_registered: Boolean
+  is_registered: Boolean!
   address: BusinessAddress!
   registration_detail: BusinessRegistrationDetail
   other_document: [Document!]
@@ -40,7 +40,7 @@ input Document {
 }
 
 input BusinessAddress {
-  number: Int
+  number: String
   street: String!
   state: String!
   country: String!

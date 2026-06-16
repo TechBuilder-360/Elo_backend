@@ -767,7 +767,7 @@ func (ec *executionContext) unmarshalInputBusinessAddress(ctx context.Context, o
 		switch k {
 		case "number":
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("number"))
-			data, err := ec.unmarshalOInt2ᚖint32(ctx, v)
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -939,7 +939,7 @@ func (ec *executionContext) unmarshalInputRegisterBusinessInput(ctx context.Cont
 			it.Email = data
 		case "on_site":
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("on_site"))
-			data, err := ec.unmarshalOBoolean2ᚖbool(ctx, v)
+			data, err := ec.unmarshalNBoolean2bool(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -953,7 +953,7 @@ func (ec *executionContext) unmarshalInputRegisterBusinessInput(ctx context.Cont
 			it.Industry = data
 		case "is_registered":
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("is_registered"))
-			data, err := ec.unmarshalOBoolean2ᚖbool(ctx, v)
+			data, err := ec.unmarshalNBoolean2bool(ctx, v)
 			if err != nil {
 				return it, err
 			}

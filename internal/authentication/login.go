@@ -72,6 +72,13 @@ func (s *Service) Login(ctx context.Context, payload Login, log log.Entry) (*mod
 		return nil, errors.New(errors.ErrFailed, "account is disabled")
 	}
 
+	if !user.EmailVerified {
+		err = s.repo.Update(ctx, user, &UpdateUser{EmailVerified: true})
+		if err != nil {
+			log.WithError(err).WithField("user_id", user.ID).Error("failed to update user email verification status")
+		}
+	}
+
 	return s.generateJWT(ctx, data.UserID)
 }
 

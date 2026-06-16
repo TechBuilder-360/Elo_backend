@@ -40,9 +40,9 @@ type User struct {
 	// EmailVerifiedAt holds the value of the "email_verified_at" field.
 	EmailVerifiedAt time.Time `json:"email_verified_at,omitempty"`
 	// PhoneNumber holds the value of the "phone_number" field.
-	PhoneNumber string `json:"phone_number,omitempty"`
+	PhoneNumber *string `json:"phone_number,omitempty"`
 	// Avatar holds the value of the "avatar" field.
-	Avatar string `json:"avatar,omitempty"`
+	Avatar *string `json:"avatar,omitempty"`
 	// Disabled holds the value of the "disabled" field.
 	Disabled bool `json:"disabled,omitempty"`
 	// DisableReason holds the value of the "disable_reason" field.
@@ -209,13 +209,15 @@ func (u *User) assignValues(columns []string, values []any) error {
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field phone_number", values[i])
 			} else if value.Valid {
-				u.PhoneNumber = value.String
+				u.PhoneNumber = new(string)
+				*u.PhoneNumber = value.String
 			}
 		case user.FieldAvatar:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field avatar", values[i])
 			} else if value.Valid {
-				u.Avatar = value.String
+				u.Avatar = new(string)
+				*u.Avatar = value.String
 			}
 		case user.FieldDisabled:
 			if value, ok := values[i].(*sql.NullBool); !ok {
@@ -327,11 +329,15 @@ func (u *User) String() string {
 	builder.WriteString("email_verified_at=")
 	builder.WriteString(u.EmailVerifiedAt.Format(time.ANSIC))
 	builder.WriteString(", ")
-	builder.WriteString("phone_number=")
-	builder.WriteString(u.PhoneNumber)
+	if v := u.PhoneNumber; v != nil {
+		builder.WriteString("phone_number=")
+		builder.WriteString(*v)
+	}
 	builder.WriteString(", ")
-	builder.WriteString("avatar=")
-	builder.WriteString(u.Avatar)
+	if v := u.Avatar; v != nil {
+		builder.WriteString("avatar=")
+		builder.WriteString(*v)
+	}
 	builder.WriteString(", ")
 	builder.WriteString("disabled=")
 	builder.WriteString(fmt.Sprintf("%v", u.Disabled))

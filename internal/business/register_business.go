@@ -3,7 +3,6 @@ package business
 import (
 	"context"
 	"errors"
-	"strings"
 
 	"github.com/Toflex/directory_v2/pkg/log"
 	"github.com/Toflex/directory_v2/pkg/util"
@@ -15,9 +14,9 @@ func (s *service) CreateBusiness(ctx context.Context, payload CreateBusinessRequ
 		return err
 	}
 
-	user, err := s.userRepository.GetByID(ctx, payload.UserID)
+	user, err := s.userRepository.GetByID(ctx, payload.User.ID)
 	if err != nil {
-		logger.WithField("ID", payload.UserID).WithError(err).Error("user request failed")
+		logger.WithField("ID", payload.User.ID).WithError(err).Error("user request failed")
 		return errors.New("request failed")
 	}
 
@@ -45,17 +44,17 @@ func (s *service) CreateBusiness(ctx context.Context, payload CreateBusinessRequ
 		return errors.New("business name already registered")
 	}
 
-	body := createBusiness{
-		Name:     util.ToTitleCase(payload.Name),
-		Category: payload.Category,
-		Email:    strings.ToLower(payload.Email),
-	}
+	// body := createBusiness{
+	// 	Name:     util.ToTitleCase(payload.Name),
+	// 	Category: payload.Category,
+	// 	Email:    strings.ToLower(payload.Email),
+	// }
 
-	err = s.repo.Create(ctx, body)
-	if err != nil {
-		logger.WithError(err).Error("failed to create business on db")
-		return errors.New("request failed")
-	}
+	// err = s.repo.Create(ctx, body)
+	// if err != nil {
+	// 	logger.WithError(err).Error("failed to create business on db")
+	// 	return errors.New("request failed")
+	// }
 
 	return nil
 }

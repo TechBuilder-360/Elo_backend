@@ -82,7 +82,7 @@ func (r *Registration) Validate() error {
 	}
 
 	// validate phone number
-	if r.PhoneNumber == nil {
+	if r.PhoneNumber != nil {
 		err = util.IsValidPhoneNumber(util.AddressToString(r.PhoneNumber))
 		if err != nil {
 			return errors.New(errors.ErrInvalidInput, err.Error())
@@ -90,7 +90,7 @@ func (r *Registration) Validate() error {
 	}
 
 	// validate avatar
-	if r.Avatar == nil {
+	if r.Avatar != nil {
 		avatar := strings.ReplaceAll(strings.ToLower(*r.Avatar), " ", "")
 		r.Avatar = &avatar
 	}
@@ -117,6 +117,15 @@ func (r *Registration) Validate() error {
 
 type User struct {
 	ent.User
+}
+
+type UpdateUser struct {
+	EmailVerified bool
+	Disable       bool
+	Password      bool
+	Verified      bool
+	PersonalInfo  bool
+	Avartar       bool
 }
 
 type Login struct {

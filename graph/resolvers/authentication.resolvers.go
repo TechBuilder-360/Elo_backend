@@ -21,10 +21,7 @@ func (r *mutationResolver) Registration(ctx context.Context, input model.Registr
 	payload := m.Registration{
 		FirstName:    input.FirstName,
 		LastName:     input.LastName,
-		Avatar:       input.Avatar,
 		EmailAddress: input.EmailAddress,
-		DisplayName:  input.DisplayName,
-		PhoneNumber:  input.PhoneNumber,
 		Password:     input.Password,
 	}
 

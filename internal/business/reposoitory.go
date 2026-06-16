@@ -10,7 +10,7 @@ type IRepository interface {
 	WithTransaction(db *ent.Client) IRepository
 	GetBusinessByName(ctx context.Context, name string) (*businessResult, error)
 	GetBusinessByID(ctx context.Context, id string) (*businessResult, error)
-	Create(ctx context.Context, payload createBusiness) error
+	Create(ctx context.Context, payload interface{}) error
 }
 
 type repository struct {
