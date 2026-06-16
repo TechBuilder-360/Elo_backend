@@ -45,14 +45,14 @@ func (r *repository) GetBusinessByID(ctx context.Context, id string) (*businessR
 	return &businessResult{*b}, nil
 }
 
-func (r *repository) Create(ctx context.Context, payload createBusiness) error {
-	_, err := r.db.Business.
-		Create().
-		SetName(payload.Name).
-		SetCategory(payload.Category).
-		SetEmail(payload.Email).
-		// SetWebsite(payload.Website).
-		Save(ctx)
+func (r *repository) Create(ctx context.Context, payload interface{}) error {
+	// _, err := r.db.Business.
+	// Create().
+	// SetName(payload.Name).
+	// SetCategory(payload.Category).
+	// SetEmail(payload.Email).
+	// // SetWebsite(payload.Website).
+	// Save(ctx)
 
-	return err
+	return nil
 }
