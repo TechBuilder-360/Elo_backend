@@ -22,11 +22,11 @@ type Business struct {
 }
 
 type BusinessAddress struct {
-	Number  *int32 `json:"number,omitempty"`
-	Street  string `json:"street"`
-	State   string `json:"state"`
-	Country string `json:"country"`
-	ZipCode string `json:"zip_code"`
+	Number  *string `json:"number,omitempty"`
+	Street  string  `json:"street"`
+	State   string  `json:"state"`
+	Country string  `json:"country"`
+	ZipCode string  `json:"zip_code"`
 }
 
 type BusinessRegistrationDetail struct {
@@ -67,22 +67,19 @@ type RegisterBusinessInput struct {
 	Name               string                      `json:"name"`
 	About              string                      `json:"about"`
 	Email              string                      `json:"email"`
-	OnSite             *bool                       `json:"on_site,omitempty"`
+	OnSite             bool                        `json:"on_site"`
 	Industry           string                      `json:"industry"`
-	IsRegistered       *bool                       `json:"is_registered,omitempty"`
+	IsRegistered       bool                        `json:"is_registered"`
 	Address            *BusinessAddress            `json:"address"`
 	RegistrationDetail *BusinessRegistrationDetail `json:"registration_detail,omitempty"`
 	OtherDocument      []*Document                 `json:"other_document,omitempty"`
 }
 
 type Registration struct {
-	DisplayName  *string `json:"display_name,omitempty"`
-	EmailAddress string  `json:"email_address"`
-	FirstName    string  `json:"first_name"`
-	LastName     string  `json:"last_name"`
-	PhoneNumber  *string `json:"phone_number,omitempty"`
-	Avatar       *string `json:"avatar,omitempty"`
-	Password     string  `json:"password"`
+	EmailAddress string `json:"email_address"`
+	FirstName    string `json:"first_name"`
+	LastName     string `json:"last_name"`
+	Password     string `json:"password"`
 }
 
 type RegistrationResponse struct {

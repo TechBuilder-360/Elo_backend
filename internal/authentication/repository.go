@@ -10,6 +10,7 @@ type IRepository interface {
 	Create(ctx context.Context, payload Onboarding) (*string, error)
 	GetUserByID(ctx context.Context, id string) (*User, error)
 	GetUserByEmail(ctx context.Context, email string) (*User, error)
+	Update(ctx context.Context, user *User, opt *UpdateUser) error
 }
 
 type repository struct {
