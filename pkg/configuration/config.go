@@ -67,6 +67,10 @@ func IsDevelopment() bool {
 }
 
 func GetBaseURL() string {
+	if Instance.BASEURL != "" {
+		return Instance.BASEURL
+	}
+
 	url, ok := baseURL[strings.ToUpper(string(GetEnv()))]
 	if !ok {
 		return ""

@@ -85,11 +85,6 @@ func ReferenceID(v string) predicate.RequestVerification {
 	return predicate.RequestVerification(sql.FieldEQ(FieldReferenceID, v))
 }
 
-// VerificationType applies equality check predicate on the "verification_type" field. It's identical to VerificationTypeEQ.
-func VerificationType(v string) predicate.RequestVerification {
-	return predicate.RequestVerification(sql.FieldEQ(FieldVerificationType, v))
-}
-
 // Provider applies equality check predicate on the "provider" field. It's identical to ProviderEQ.
 func Provider(v string) predicate.RequestVerification {
 	return predicate.RequestVerification(sql.FieldEQ(FieldProvider, v))
@@ -98,11 +93,6 @@ func Provider(v string) predicate.RequestVerification {
 // Link applies equality check predicate on the "link" field. It's identical to LinkEQ.
 func Link(v string) predicate.RequestVerification {
 	return predicate.RequestVerification(sql.FieldEQ(FieldLink, v))
-}
-
-// ProviderLink applies equality check predicate on the "provider_link" field. It's identical to ProviderLinkEQ.
-func ProviderLink(v string) predicate.RequestVerification {
-	return predicate.RequestVerification(sql.FieldEQ(FieldProviderLink, v))
 }
 
 // CreatedAtEQ applies the EQ predicate on the "created_at" field.
@@ -301,68 +291,23 @@ func ReferenceIDContainsFold(v string) predicate.RequestVerification {
 }
 
 // VerificationTypeEQ applies the EQ predicate on the "verification_type" field.
-func VerificationTypeEQ(v string) predicate.RequestVerification {
+func VerificationTypeEQ(v VerificationType) predicate.RequestVerification {
 	return predicate.RequestVerification(sql.FieldEQ(FieldVerificationType, v))
 }
 
 // VerificationTypeNEQ applies the NEQ predicate on the "verification_type" field.
-func VerificationTypeNEQ(v string) predicate.RequestVerification {
+func VerificationTypeNEQ(v VerificationType) predicate.RequestVerification {
 	return predicate.RequestVerification(sql.FieldNEQ(FieldVerificationType, v))
 }
 
 // VerificationTypeIn applies the In predicate on the "verification_type" field.
-func VerificationTypeIn(vs ...string) predicate.RequestVerification {
+func VerificationTypeIn(vs ...VerificationType) predicate.RequestVerification {
 	return predicate.RequestVerification(sql.FieldIn(FieldVerificationType, vs...))
 }
 
 // VerificationTypeNotIn applies the NotIn predicate on the "verification_type" field.
-func VerificationTypeNotIn(vs ...string) predicate.RequestVerification {
+func VerificationTypeNotIn(vs ...VerificationType) predicate.RequestVerification {
 	return predicate.RequestVerification(sql.FieldNotIn(FieldVerificationType, vs...))
-}
-
-// VerificationTypeGT applies the GT predicate on the "verification_type" field.
-func VerificationTypeGT(v string) predicate.RequestVerification {
-	return predicate.RequestVerification(sql.FieldGT(FieldVerificationType, v))
-}
-
-// VerificationTypeGTE applies the GTE predicate on the "verification_type" field.
-func VerificationTypeGTE(v string) predicate.RequestVerification {
-	return predicate.RequestVerification(sql.FieldGTE(FieldVerificationType, v))
-}
-
-// VerificationTypeLT applies the LT predicate on the "verification_type" field.
-func VerificationTypeLT(v string) predicate.RequestVerification {
-	return predicate.RequestVerification(sql.FieldLT(FieldVerificationType, v))
-}
-
-// VerificationTypeLTE applies the LTE predicate on the "verification_type" field.
-func VerificationTypeLTE(v string) predicate.RequestVerification {
-	return predicate.RequestVerification(sql.FieldLTE(FieldVerificationType, v))
-}
-
-// VerificationTypeContains applies the Contains predicate on the "verification_type" field.
-func VerificationTypeContains(v string) predicate.RequestVerification {
-	return predicate.RequestVerification(sql.FieldContains(FieldVerificationType, v))
-}
-
-// VerificationTypeHasPrefix applies the HasPrefix predicate on the "verification_type" field.
-func VerificationTypeHasPrefix(v string) predicate.RequestVerification {
-	return predicate.RequestVerification(sql.FieldHasPrefix(FieldVerificationType, v))
-}
-
-// VerificationTypeHasSuffix applies the HasSuffix predicate on the "verification_type" field.
-func VerificationTypeHasSuffix(v string) predicate.RequestVerification {
-	return predicate.RequestVerification(sql.FieldHasSuffix(FieldVerificationType, v))
-}
-
-// VerificationTypeEqualFold applies the EqualFold predicate on the "verification_type" field.
-func VerificationTypeEqualFold(v string) predicate.RequestVerification {
-	return predicate.RequestVerification(sql.FieldEqualFold(FieldVerificationType, v))
-}
-
-// VerificationTypeContainsFold applies the ContainsFold predicate on the "verification_type" field.
-func VerificationTypeContainsFold(v string) predicate.RequestVerification {
-	return predicate.RequestVerification(sql.FieldContainsFold(FieldVerificationType, v))
 }
 
 // ProviderEQ applies the EQ predicate on the "provider" field.
@@ -493,71 +438,6 @@ func LinkEqualFold(v string) predicate.RequestVerification {
 // LinkContainsFold applies the ContainsFold predicate on the "link" field.
 func LinkContainsFold(v string) predicate.RequestVerification {
 	return predicate.RequestVerification(sql.FieldContainsFold(FieldLink, v))
-}
-
-// ProviderLinkEQ applies the EQ predicate on the "provider_link" field.
-func ProviderLinkEQ(v string) predicate.RequestVerification {
-	return predicate.RequestVerification(sql.FieldEQ(FieldProviderLink, v))
-}
-
-// ProviderLinkNEQ applies the NEQ predicate on the "provider_link" field.
-func ProviderLinkNEQ(v string) predicate.RequestVerification {
-	return predicate.RequestVerification(sql.FieldNEQ(FieldProviderLink, v))
-}
-
-// ProviderLinkIn applies the In predicate on the "provider_link" field.
-func ProviderLinkIn(vs ...string) predicate.RequestVerification {
-	return predicate.RequestVerification(sql.FieldIn(FieldProviderLink, vs...))
-}
-
-// ProviderLinkNotIn applies the NotIn predicate on the "provider_link" field.
-func ProviderLinkNotIn(vs ...string) predicate.RequestVerification {
-	return predicate.RequestVerification(sql.FieldNotIn(FieldProviderLink, vs...))
-}
-
-// ProviderLinkGT applies the GT predicate on the "provider_link" field.
-func ProviderLinkGT(v string) predicate.RequestVerification {
-	return predicate.RequestVerification(sql.FieldGT(FieldProviderLink, v))
-}
-
-// ProviderLinkGTE applies the GTE predicate on the "provider_link" field.
-func ProviderLinkGTE(v string) predicate.RequestVerification {
-	return predicate.RequestVerification(sql.FieldGTE(FieldProviderLink, v))
-}
-
-// ProviderLinkLT applies the LT predicate on the "provider_link" field.
-func ProviderLinkLT(v string) predicate.RequestVerification {
-	return predicate.RequestVerification(sql.FieldLT(FieldProviderLink, v))
-}
-
-// ProviderLinkLTE applies the LTE predicate on the "provider_link" field.
-func ProviderLinkLTE(v string) predicate.RequestVerification {
-	return predicate.RequestVerification(sql.FieldLTE(FieldProviderLink, v))
-}
-
-// ProviderLinkContains applies the Contains predicate on the "provider_link" field.
-func ProviderLinkContains(v string) predicate.RequestVerification {
-	return predicate.RequestVerification(sql.FieldContains(FieldProviderLink, v))
-}
-
-// ProviderLinkHasPrefix applies the HasPrefix predicate on the "provider_link" field.
-func ProviderLinkHasPrefix(v string) predicate.RequestVerification {
-	return predicate.RequestVerification(sql.FieldHasPrefix(FieldProviderLink, v))
-}
-
-// ProviderLinkHasSuffix applies the HasSuffix predicate on the "provider_link" field.
-func ProviderLinkHasSuffix(v string) predicate.RequestVerification {
-	return predicate.RequestVerification(sql.FieldHasSuffix(FieldProviderLink, v))
-}
-
-// ProviderLinkEqualFold applies the EqualFold predicate on the "provider_link" field.
-func ProviderLinkEqualFold(v string) predicate.RequestVerification {
-	return predicate.RequestVerification(sql.FieldEqualFold(FieldProviderLink, v))
-}
-
-// ProviderLinkContainsFold applies the ContainsFold predicate on the "provider_link" field.
-func ProviderLinkContainsFold(v string) predicate.RequestVerification {
-	return predicate.RequestVerification(sql.FieldContainsFold(FieldProviderLink, v))
 }
 
 // StatusEQ applies the EQ predicate on the "status" field.

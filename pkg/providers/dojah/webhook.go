@@ -2,10 +2,8 @@ package dojah
 
 import (
 	"context"
-	"crypto/hmac"
 	"crypto/sha256"
 	"encoding/hex"
-	"io"
 	"net/http"
 
 	"github.com/Toflex/directory_v2/pkg/constant"
@@ -14,8 +12,8 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func (d *dojah) RegisterRoutes() {
-	route := d.engine.Group("/webhook")
+func (d *dojah) RegisterRoutes(engine *gin.Engine) {
+	route := engine.Group("/webhook")
 
 	route.POST("/dojah", d.handleDojahWebhook)
 }
@@ -25,23 +23,19 @@ func (d *dojah) handleDojahWebhook(ctx *gin.Context) {
 	logger = logger.WithField("provider", "dojah")
 	logger.Info("Process dojah webhook")
 
-	body, _ := io.ReadAll(ctx.Request.Body)
-	defer ctx.Request.Body.Close()
+	h := sha256.Sum256([]byte(d.config.SecretKey))
+	hash := hex.EncodeToString(h[:])
 
-	mac := hmac.New(sha256.New, []byte(d.config.ApiKey))
-	mac.Write(body)
-	hash := hex.EncodeToString(mac.Sum(nil))
-
-	if hash != ctx.GetHeader("x-dojah-signature") {
+	if hash != ctx.GetHeader("x-dojah-signature-v2") {
 		logger.Error("Failed to verify dojah webhook signature")
 		ctx.AbortWithStatus(http.StatusNotAcceptable)
 		return
 	}
 
-	var payload *WebhookPayload
+	payload := new(WebhookPayload)
 	err := ctx.ShouldBindJSON(payload)
 	if err != nil {
-		logger.Error("Failed to bind dojah webhook body")
+		logger.WithError(err).Error("Failed to bind dojah webhook body")
 		ctx.AbortWithStatus(http.StatusBadRequest)
 		return
 	}
@@ -63,9 +57,14 @@ func (d *dojah) processDojahWebhook(ctx context.Context, payload *WebhookPayload
 
 	var (
 		identificationDetails = verification.VerificationResult{
-			Provider:    constant.Dojah,
-			ReferenceID: payload.ReferenceID,
-			Metadata:    payload.Metadata,
+			Provider:       constant.Dojah,
+			ReferenceID:    payload.ReferenceID,
+			Metadata:       payload.Metadata,
+			NationalID:     &verification.NationalID{},
+			Passport:       &verification.Passport{},
+			BVN:            &verification.BVN{},
+			DriversLicense: &verification.DriversLicense{},
+			VoterID:        &verification.VoterID{},
 		}
 		documentType = payload.Data.ID.Data.IDData.DocumentType
 		idData       = payload.Data.ID.Data.IDData
@@ -133,9 +132,9 @@ func (d *dojah) processDojahWebhook(ctx context.Context, payload *WebhookPayload
 		identificationDetails.BVN.DateOfBirth = bvnDetails.Entity.DateOfBirth
 	}
 
-	if payload.Data.BusinessID.BusinessName != "" {
+	// if payload.Data.BusinessID.BusinessName != "" {
 
-	}
+	// }
 
 	return verification.QueueVerificationTask(identificationDetails)
 }

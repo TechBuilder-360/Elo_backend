@@ -48,7 +48,6 @@ func AtlasMigration() {
 		conf.DbUser, conf.DbPass, conf.DbHost, conf.DbPort, conf.DbName, conf.DbSSLMode)
 	migrationsDir := workdir.Path("migrations")
 	dirURL := fmt.Sprintf("file://%s", migrationsDir)
-	log.Printf("Atlas working dir=%q, migrations dir=%q", workdir.Path(), migrationsDir)
 
 	status, statusErr := client.MigrateStatus(context.Background(), &atlasexec.MigrateStatusParams{
 		URL:             uri,

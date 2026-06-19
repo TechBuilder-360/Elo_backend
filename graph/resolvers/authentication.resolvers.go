@@ -10,6 +10,7 @@ import (
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/Toflex/directory_v2/graph/model"
 	m "github.com/Toflex/directory_v2/internal/authentication"
+	"github.com/Toflex/directory_v2/middlewares"
 	"github.com/Toflex/directory_v2/pkg/log"
 	"github.com/Toflex/directory_v2/pkg/util"
 )
@@ -69,4 +70,19 @@ func (r *mutationResolver) RequestOtp(ctx context.Context, input *model.RequestO
 	}
 
 	return &model.OTPResponse{Identifier: util.AddressToString(identifier)}, nil
+}
+
+// Logout is the resolver for the logout field.
+func (r *mutationResolver) Logout(ctx context.Context) (bool, error) {
+	logger := log.LoggerInContext(ctx)
+
+	u, err := middlewares.UserFromContext(ctx)
+	if err != nil {
+		logger.WithError(err).Error("failed to fetch user in context")
+		return false, nil
+	}
+
+	r.AuthenticationService.Logout(ctx, u)
+
+	return true, nil
 }

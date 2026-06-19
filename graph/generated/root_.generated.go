@@ -38,6 +38,7 @@ type ResolverRoot interface {
 }
 
 type DirectiveRoot struct {
+	AuthUser func(ctx context.Context, obj any, next graphql.Resolver) (res any, err error)
 }
 
 type ComplexityRoot struct {
@@ -54,14 +55,16 @@ type ComplexityRoot struct {
 	LoginResponse struct {
 		AccessToken func(childComplexity int) int
 		ExpireAt    func(childComplexity int) int
+		User        func(childComplexity int) int
 	}
 
 	Mutation struct {
-		Login               func(childComplexity int, input model.Login) int
-		RegisterBusiness    func(childComplexity int, input model.RegisterBusinessInput) int
-		Registration        func(childComplexity int, input model.Registration) int
-		RequestOtp          func(childComplexity int, input *model.RequestOtp) int
-		RequestVerification func(childComplexity int, input model.VerificationPayload) int
+		Login                   func(childComplexity int, input model.Login) int
+		Logout                  func(childComplexity int) int
+		RegisterBusiness        func(childComplexity int, input model.RegisterBusinessInput) int
+		Registration            func(childComplexity int, input model.Registration) int
+		RequestOtp              func(childComplexity int, input *model.RequestOtp) int
+		RequestUserVerification func(childComplexity int, input model.VerificationPayload) int
 	}
 
 	OTPResponse struct {
@@ -72,6 +75,7 @@ type ComplexityRoot struct {
 		FindBusiness     func(childComplexity int, name *string, service *string, limit *int32) int
 		GetBusiness      func(childComplexity int, id string) int
 		GetUserBusinsses func(childComplexity int) int
+		Me               func(childComplexity int) int
 	}
 
 	RegistrationResponse struct {
@@ -94,6 +98,15 @@ type ComplexityRoot struct {
 		URL  func(childComplexity int) int
 	}
 
+	User struct {
+		DisableReason func(childComplexity int) int
+		Disabled      func(childComplexity int) int
+		DisplayName   func(childComplexity int) int
+		FirstName     func(childComplexity int) int
+		IsVerified    func(childComplexity int) int
+		LastName      func(childComplexity int) int
+	}
+
 	UserBusiness struct {
 		ID       func(childComplexity int) int
 		Industry func(childComplexity int) int
@@ -102,7 +115,12 @@ type ComplexityRoot struct {
 		Role     func(childComplexity int) int
 	}
 
-	Verification struct {
+	VerificationError struct {
+		Code    func(childComplexity int) int
+		Message func(childComplexity int) int
+	}
+
+	VerificationSuccess struct {
 		Link   func(childComplexity int) int
 		Status func(childComplexity int) int
 	}
@@ -190,6 +208,13 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 
 		return e.complexity.LoginResponse.ExpireAt(childComplexity), true
 
+	case "LoginResponse.user":
+		if e.complexity.LoginResponse.User == nil {
+			break
+		}
+
+		return e.complexity.LoginResponse.User(childComplexity), true
+
 	case "Mutation.login":
 		if e.complexity.Mutation.Login == nil {
 			break
@@ -201,6 +226,13 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.complexity.Mutation.Login(childComplexity, args["input"].(model.Login)), true
+
+	case "Mutation.logout":
+		if e.complexity.Mutation.Logout == nil {
+			break
+		}
+
+		return e.complexity.Mutation.Logout(childComplexity), true
 
 	case "Mutation.registerBusiness":
 		if e.complexity.Mutation.RegisterBusiness == nil {
@@ -238,17 +270,17 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 
 		return e.complexity.Mutation.RequestOtp(childComplexity, args["input"].(*model.RequestOtp)), true
 
-	case "Mutation.requestVerification":
-		if e.complexity.Mutation.RequestVerification == nil {
+	case "Mutation.requestUserVerification":
+		if e.complexity.Mutation.RequestUserVerification == nil {
 			break
 		}
 
-		args, err := ec.field_Mutation_requestVerification_args(ctx, rawArgs)
+		args, err := ec.field_Mutation_requestUserVerification_args(ctx, rawArgs)
 		if err != nil {
 			return 0, false
 		}
 
-		return e.complexity.Mutation.RequestVerification(childComplexity, args["input"].(model.VerificationPayload)), true
+		return e.complexity.Mutation.RequestUserVerification(childComplexity, args["input"].(model.VerificationPayload)), true
 
 	case "OTPResponse.Identifier":
 		if e.complexity.OTPResponse.Identifier == nil {
@@ -287,6 +319,13 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.complexity.Query.GetUserBusinsses(childComplexity), true
+
+	case "Query.me":
+		if e.complexity.Query.Me == nil {
+			break
+		}
+
+		return e.complexity.Query.Me(childComplexity), true
 
 	case "RegistrationResponse.user_id":
 		if e.complexity.RegistrationResponse.UserID == nil {
@@ -344,6 +383,48 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 
 		return e.complexity.Social.URL(childComplexity), true
 
+	case "User.disable_reason":
+		if e.complexity.User.DisableReason == nil {
+			break
+		}
+
+		return e.complexity.User.DisableReason(childComplexity), true
+
+	case "User.disabled":
+		if e.complexity.User.Disabled == nil {
+			break
+		}
+
+		return e.complexity.User.Disabled(childComplexity), true
+
+	case "User.display_name":
+		if e.complexity.User.DisplayName == nil {
+			break
+		}
+
+		return e.complexity.User.DisplayName(childComplexity), true
+
+	case "User.first_name":
+		if e.complexity.User.FirstName == nil {
+			break
+		}
+
+		return e.complexity.User.FirstName(childComplexity), true
+
+	case "User.is_verified":
+		if e.complexity.User.IsVerified == nil {
+			break
+		}
+
+		return e.complexity.User.IsVerified(childComplexity), true
+
+	case "User.last_name":
+		if e.complexity.User.LastName == nil {
+			break
+		}
+
+		return e.complexity.User.LastName(childComplexity), true
+
 	case "UserBusiness.id":
 		if e.complexity.UserBusiness.ID == nil {
 			break
@@ -379,19 +460,33 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 
 		return e.complexity.UserBusiness.Role(childComplexity), true
 
-	case "verification.link":
-		if e.complexity.Verification.Link == nil {
+	case "VerificationError.code":
+		if e.complexity.VerificationError.Code == nil {
 			break
 		}
 
-		return e.complexity.Verification.Link(childComplexity), true
+		return e.complexity.VerificationError.Code(childComplexity), true
 
-	case "verification.status":
-		if e.complexity.Verification.Status == nil {
+	case "VerificationError.message":
+		if e.complexity.VerificationError.Message == nil {
 			break
 		}
 
-		return e.complexity.Verification.Status(childComplexity), true
+		return e.complexity.VerificationError.Message(childComplexity), true
+
+	case "VerificationSuccess.link":
+		if e.complexity.VerificationSuccess.Link == nil {
+			break
+		}
+
+		return e.complexity.VerificationSuccess.Link(childComplexity), true
+
+	case "VerificationSuccess.status":
+		if e.complexity.VerificationSuccess.Status == nil {
+			break
+		}
+
+		return e.complexity.VerificationSuccess.Status(childComplexity), true
 
 	}
 	return 0, false
@@ -527,6 +622,7 @@ input Login {
 type LoginResponse {
   access_token: String!
   expire_at: Int64!
+  user: User!
 }
 
 input RequestOTP {
@@ -538,10 +634,13 @@ type OTPResponse {
   Identifier: String!
 }
 
+
+
 type Mutation {
   registration(input: Registration!): RegistrationResponse!
   login(input: Login!): LoginResponse!
   requestOtp(input: RequestOTP): OTPResponse!
+  logout: Boolean! @authUser
 }
 `, BuiltIn: false},
 	{Name: "../schema/business.graphqls", Input: `scalar Upload
@@ -619,7 +718,18 @@ extend type Mutation {
   registerBusiness(input: RegisterBusinessInput!): Response!
 }
 `, BuiltIn: false},
-	{Name: "../schema/user.graphqls", Input: `type UserBusiness {
+	{Name: "../schema/user.graphqls", Input: `directive @authUser on FIELD_DEFINITION
+
+type User {
+  first_name: String!
+  last_name: String!
+  display_name: String!
+  is_verified: Boolean!
+  disabled: Boolean!
+  disable_reason: String!
+}
+
+type UserBusiness {
   id: ID!
   name: String!
   role: String!
@@ -627,26 +737,36 @@ extend type Mutation {
   industry: String!
 }
 extend type Query {
+  me: User! @authUser
   getUserBusinsses: [UserBusiness!]!
 }
 `, BuiltIn: false},
-	{Name: "../schema/verification.graphqls", Input: `enum Entity {
+	{Name: "../schema/verification.graphqls", Input: `# directive @authUser on FIELD_DEFINITION
+
+enum Entity {
   USER_VERIFICATION
 BUSINESS_VERIFICATION
 }
 
-type verification {
+type VerificationSuccess {
    link: String!
    status: String!
 }
 
+type VerificationError {
+  code: String!
+  message: String!
+}
+
 input verificationPayload {
-  id: String!
   entity: Entity
 }
 
+union VerificationResponse = VerificationSuccess | VerificationError
+
+
 extend type Mutation {
-  requestVerification(input: verificationPayload!): verification!
+  requestUserVerification(input: verificationPayload!): VerificationResponse! @authUser
 }`, BuiltIn: false},
 }
 var parsedSchema = gqlparser.MustLoadSchema(sources...)

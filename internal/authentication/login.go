@@ -79,7 +79,23 @@ func (s *Service) Login(ctx context.Context, payload Login, log log.Entry) (*mod
 		}
 	}
 
-	return s.generateJWT(ctx, data.UserID)
+	result, err := s.generateJWT(ctx, data.UserID)
+	if err != nil {
+		return nil, err
+	}
+
+	userInfo := model.User{
+		FirstName:     user.FirstName,
+		LastName:      user.LastName,
+		IsVerified:    user.Verified,
+		DisplayName:   user.DisplayName,
+		Disabled:      user.Disabled,
+		DisableReason: util.AddressToString(user.DisableReason),
+	}
+
+	result.User = &userInfo
+
+	return result, nil
 }
 
 func (s *Service) RequestOTP(ctx context.Context, payload OTPRequest, log log.Entry) (*string, error) {

@@ -9,7 +9,30 @@ import (
 	"fmt"
 
 	"github.com/Toflex/directory_v2/graph/model"
+	"github.com/Toflex/directory_v2/middlewares"
+	"github.com/Toflex/directory_v2/pkg/log"
+	"github.com/Toflex/directory_v2/pkg/util"
 )
+
+// Me is the resolver for the me field.
+func (r *queryResolver) Me(ctx context.Context) (*model.User, error) {
+	logger := log.LoggerInContext(ctx)
+
+	u, err := middlewares.UserFromContext(ctx)
+	if err != nil {
+		logger.WithError(err).Error("failed to fetch user in context")
+		return nil, err
+	}
+
+	return &model.User{
+		FirstName:     u.FirstName,
+		LastName:      u.LastName,
+		DisplayName:   u.DisplayName,
+		IsVerified:    u.Verified,
+		Disabled:      u.Disabled,
+		DisableReason: util.AddressToString(u.DisableReason),
+	}, nil
+}
 
 // GetUserBusinsses is the resolver for the getUserBusinsses field.
 func (r *queryResolver) GetUserBusinsses(ctx context.Context) ([]*model.UserBusiness, error) {

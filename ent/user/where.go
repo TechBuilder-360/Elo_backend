@@ -136,7 +136,7 @@ func Disabled(v bool) predicate.User {
 }
 
 // DisableReason applies equality check predicate on the "disable_reason" field. It's identical to DisableReasonEQ.
-func DisableReason(v bool) predicate.User {
+func DisableReason(v string) predicate.User {
 	return predicate.User(sql.FieldEQ(FieldDisableReason, v))
 }
 
@@ -906,13 +906,58 @@ func DisabledNEQ(v bool) predicate.User {
 }
 
 // DisableReasonEQ applies the EQ predicate on the "disable_reason" field.
-func DisableReasonEQ(v bool) predicate.User {
+func DisableReasonEQ(v string) predicate.User {
 	return predicate.User(sql.FieldEQ(FieldDisableReason, v))
 }
 
 // DisableReasonNEQ applies the NEQ predicate on the "disable_reason" field.
-func DisableReasonNEQ(v bool) predicate.User {
+func DisableReasonNEQ(v string) predicate.User {
 	return predicate.User(sql.FieldNEQ(FieldDisableReason, v))
+}
+
+// DisableReasonIn applies the In predicate on the "disable_reason" field.
+func DisableReasonIn(vs ...string) predicate.User {
+	return predicate.User(sql.FieldIn(FieldDisableReason, vs...))
+}
+
+// DisableReasonNotIn applies the NotIn predicate on the "disable_reason" field.
+func DisableReasonNotIn(vs ...string) predicate.User {
+	return predicate.User(sql.FieldNotIn(FieldDisableReason, vs...))
+}
+
+// DisableReasonGT applies the GT predicate on the "disable_reason" field.
+func DisableReasonGT(v string) predicate.User {
+	return predicate.User(sql.FieldGT(FieldDisableReason, v))
+}
+
+// DisableReasonGTE applies the GTE predicate on the "disable_reason" field.
+func DisableReasonGTE(v string) predicate.User {
+	return predicate.User(sql.FieldGTE(FieldDisableReason, v))
+}
+
+// DisableReasonLT applies the LT predicate on the "disable_reason" field.
+func DisableReasonLT(v string) predicate.User {
+	return predicate.User(sql.FieldLT(FieldDisableReason, v))
+}
+
+// DisableReasonLTE applies the LTE predicate on the "disable_reason" field.
+func DisableReasonLTE(v string) predicate.User {
+	return predicate.User(sql.FieldLTE(FieldDisableReason, v))
+}
+
+// DisableReasonContains applies the Contains predicate on the "disable_reason" field.
+func DisableReasonContains(v string) predicate.User {
+	return predicate.User(sql.FieldContains(FieldDisableReason, v))
+}
+
+// DisableReasonHasPrefix applies the HasPrefix predicate on the "disable_reason" field.
+func DisableReasonHasPrefix(v string) predicate.User {
+	return predicate.User(sql.FieldHasPrefix(FieldDisableReason, v))
+}
+
+// DisableReasonHasSuffix applies the HasSuffix predicate on the "disable_reason" field.
+func DisableReasonHasSuffix(v string) predicate.User {
+	return predicate.User(sql.FieldHasSuffix(FieldDisableReason, v))
 }
 
 // DisableReasonIsNil applies the IsNil predicate on the "disable_reason" field.
@@ -923,6 +968,16 @@ func DisableReasonIsNil() predicate.User {
 // DisableReasonNotNil applies the NotNil predicate on the "disable_reason" field.
 func DisableReasonNotNil() predicate.User {
 	return predicate.User(sql.FieldNotNull(FieldDisableReason))
+}
+
+// DisableReasonEqualFold applies the EqualFold predicate on the "disable_reason" field.
+func DisableReasonEqualFold(v string) predicate.User {
+	return predicate.User(sql.FieldEqualFold(FieldDisableReason, v))
+}
+
+// DisableReasonContainsFold applies the ContainsFold predicate on the "disable_reason" field.
+func DisableReasonContainsFold(v string) predicate.User {
+	return predicate.User(sql.FieldContainsFold(FieldDisableReason, v))
 }
 
 // VerifiedEQ applies the EQ predicate on the "verified" field.
