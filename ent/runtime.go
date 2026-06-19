@@ -258,10 +258,6 @@ func init() {
 	requestverificationDescReferenceID := requestverificationFields[0].Descriptor()
 	// requestverification.ReferenceIDValidator is a validator for the "reference_id" field. It is called by the builders before save.
 	requestverification.ReferenceIDValidator = requestverificationDescReferenceID.Validators[0].(func(string) error)
-	// requestverificationDescVerificationType is the schema descriptor for verification_type field.
-	requestverificationDescVerificationType := requestverificationFields[1].Descriptor()
-	// requestverification.VerificationTypeValidator is a validator for the "verification_type" field. It is called by the builders before save.
-	requestverification.VerificationTypeValidator = requestverificationDescVerificationType.Validators[0].(func(string) error)
 	// requestverificationDescProvider is the schema descriptor for provider field.
 	requestverificationDescProvider := requestverificationFields[2].Descriptor()
 	// requestverification.ProviderValidator is a validator for the "provider" field. It is called by the builders before save.
@@ -278,24 +274,6 @@ func init() {
 		return func(link string) error {
 			for _, fn := range fns {
 				if err := fn(link); err != nil {
-					return err
-				}
-			}
-			return nil
-		}
-	}()
-	// requestverificationDescProviderLink is the schema descriptor for provider_link field.
-	requestverificationDescProviderLink := requestverificationFields[4].Descriptor()
-	// requestverification.ProviderLinkValidator is a validator for the "provider_link" field. It is called by the builders before save.
-	requestverification.ProviderLinkValidator = func() func(string) error {
-		validators := requestverificationDescProviderLink.Validators
-		fns := [...]func(string) error{
-			validators[0].(func(string) error),
-			validators[1].(func(string) error),
-		}
-		return func(provider_link string) error {
-			for _, fn := range fns {
-				if err := fn(provider_link); err != nil {
 					return err
 				}
 			}

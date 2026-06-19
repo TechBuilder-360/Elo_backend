@@ -7,6 +7,7 @@ import (
 	"github.com/Toflex/directory_v2/cmd/migration/seed"
 	"github.com/Toflex/directory_v2/database/database"
 	"github.com/Toflex/directory_v2/ent"
+	"github.com/Toflex/directory_v2/pkg/log"
 	"github.com/samber/do/v2"
 )
 
@@ -34,4 +35,6 @@ func main() {
 	atlas.AtlasMigration()
 
 	seed.Seeder(db)
+
+	log.Info("Migration completed")
 }

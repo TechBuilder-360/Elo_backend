@@ -1,3 +1,14 @@
+directive @authUser on FIELD_DEFINITION
+
+type User {
+  first_name: String!
+  last_name: String!
+  display_name: String!
+  is_verified: Boolean!
+  disabled: Boolean!
+  disable_reason: String!
+}
+
 type UserBusiness {
   id: ID!
   name: String!
@@ -6,5 +17,6 @@ type UserBusiness {
   industry: String!
 }
 extend type Query {
+  me: User! @authUser
   getUserBusinsses: [UserBusiness!]!
 }

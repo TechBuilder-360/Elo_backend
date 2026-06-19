@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/Toflex/directory_v2/pkg/configuration"
 	"github.com/Toflex/directory_v2/pkg/verification"
 )
 
@@ -13,9 +12,8 @@ func (d *dojah) VerifyUser(ctx context.Context, referenceID string) (*verificati
 	url := fmt.Sprintf("%s?widget_id=%s&reference_id=%s", d.config.IdentityBaseURL, d.config.UserVerificationWidgetID, referenceID)
 
 	return &verification.VerifyResult{
-		Link:         url,
-		ReferenceID:  referenceID,
-		ProviderLink: fmt.Sprintf("%s/%s", configuration.GetBaseURL(), referenceID),
+		ReferenceID: referenceID,
+		Link:        url,
 	}, nil
 }
 
@@ -24,8 +22,7 @@ func (d *dojah) VerifyBusiness(ctx context.Context, referenceID string) (*verifi
 	url := fmt.Sprintf("%s?widget_id=%s&reference_id=%s", d.config.IdentityBaseURL, d.config.BusinessVerificationWidgetID, referenceID)
 
 	return &verification.VerifyResult{
-		Link:         url,
-		ReferenceID:  referenceID,
-		ProviderLink: fmt.Sprintf("%s/%s", configuration.GetBaseURL(), referenceID),
+		Link:        url,
+		ReferenceID: referenceID,
 	}, nil
 }

@@ -74,8 +74,8 @@ func (rvc *RequestVerificationCreate) SetReferenceID(s string) *RequestVerificat
 }
 
 // SetVerificationType sets the "verification_type" field.
-func (rvc *RequestVerificationCreate) SetVerificationType(s string) *RequestVerificationCreate {
-	rvc.mutation.SetVerificationType(s)
+func (rvc *RequestVerificationCreate) SetVerificationType(rt requestverification.VerificationType) *RequestVerificationCreate {
+	rvc.mutation.SetVerificationType(rt)
 	return rvc
 }
 
@@ -88,12 +88,6 @@ func (rvc *RequestVerificationCreate) SetProvider(s string) *RequestVerification
 // SetLink sets the "link" field.
 func (rvc *RequestVerificationCreate) SetLink(s string) *RequestVerificationCreate {
 	rvc.mutation.SetLink(s)
-	return rvc
-}
-
-// SetProviderLink sets the "provider_link" field.
-func (rvc *RequestVerificationCreate) SetProviderLink(s string) *RequestVerificationCreate {
-	rvc.mutation.SetProviderLink(s)
 	return rvc
 }
 
@@ -248,14 +242,6 @@ func (rvc *RequestVerificationCreate) check() error {
 			return &ValidationError{Name: "link", err: fmt.Errorf(`ent: validator failed for field "RequestVerification.link": %w`, err)}
 		}
 	}
-	if _, ok := rvc.mutation.ProviderLink(); !ok {
-		return &ValidationError{Name: "provider_link", err: errors.New(`ent: missing required field "RequestVerification.provider_link"`)}
-	}
-	if v, ok := rvc.mutation.ProviderLink(); ok {
-		if err := requestverification.ProviderLinkValidator(v); err != nil {
-			return &ValidationError{Name: "provider_link", err: fmt.Errorf(`ent: validator failed for field "RequestVerification.provider_link": %w`, err)}
-		}
-	}
 	if _, ok := rvc.mutation.Status(); !ok {
 		return &ValidationError{Name: "status", err: errors.New(`ent: missing required field "RequestVerification.status"`)}
 	}
@@ -317,7 +303,7 @@ func (rvc *RequestVerificationCreate) createSpec() (*RequestVerification, *sqlgr
 		_node.ReferenceID = value
 	}
 	if value, ok := rvc.mutation.VerificationType(); ok {
-		_spec.SetField(requestverification.FieldVerificationType, field.TypeString, value)
+		_spec.SetField(requestverification.FieldVerificationType, field.TypeEnum, value)
 		_node.VerificationType = value
 	}
 	if value, ok := rvc.mutation.Provider(); ok {
@@ -327,10 +313,6 @@ func (rvc *RequestVerificationCreate) createSpec() (*RequestVerification, *sqlgr
 	if value, ok := rvc.mutation.Link(); ok {
 		_spec.SetField(requestverification.FieldLink, field.TypeString, value)
 		_node.Link = value
-	}
-	if value, ok := rvc.mutation.ProviderLink(); ok {
-		_spec.SetField(requestverification.FieldProviderLink, field.TypeString, value)
-		_node.ProviderLink = value
 	}
 	if value, ok := rvc.mutation.Status(); ok {
 		_spec.SetField(requestverification.FieldStatus, field.TypeEnum, value)
@@ -463,7 +445,7 @@ func (u *RequestVerificationUpsert) UpdateReferenceID() *RequestVerificationUpse
 }
 
 // SetVerificationType sets the "verification_type" field.
-func (u *RequestVerificationUpsert) SetVerificationType(v string) *RequestVerificationUpsert {
+func (u *RequestVerificationUpsert) SetVerificationType(v requestverification.VerificationType) *RequestVerificationUpsert {
 	u.Set(requestverification.FieldVerificationType, v)
 	return u
 }
@@ -495,18 +477,6 @@ func (u *RequestVerificationUpsert) SetLink(v string) *RequestVerificationUpsert
 // UpdateLink sets the "link" field to the value that was provided on create.
 func (u *RequestVerificationUpsert) UpdateLink() *RequestVerificationUpsert {
 	u.SetExcluded(requestverification.FieldLink)
-	return u
-}
-
-// SetProviderLink sets the "provider_link" field.
-func (u *RequestVerificationUpsert) SetProviderLink(v string) *RequestVerificationUpsert {
-	u.Set(requestverification.FieldProviderLink, v)
-	return u
-}
-
-// UpdateProviderLink sets the "provider_link" field to the value that was provided on create.
-func (u *RequestVerificationUpsert) UpdateProviderLink() *RequestVerificationUpsert {
-	u.SetExcluded(requestverification.FieldProviderLink)
 	return u
 }
 
@@ -623,7 +593,7 @@ func (u *RequestVerificationUpsertOne) UpdateReferenceID() *RequestVerificationU
 }
 
 // SetVerificationType sets the "verification_type" field.
-func (u *RequestVerificationUpsertOne) SetVerificationType(v string) *RequestVerificationUpsertOne {
+func (u *RequestVerificationUpsertOne) SetVerificationType(v requestverification.VerificationType) *RequestVerificationUpsertOne {
 	return u.Update(func(s *RequestVerificationUpsert) {
 		s.SetVerificationType(v)
 	})
@@ -661,20 +631,6 @@ func (u *RequestVerificationUpsertOne) SetLink(v string) *RequestVerificationUps
 func (u *RequestVerificationUpsertOne) UpdateLink() *RequestVerificationUpsertOne {
 	return u.Update(func(s *RequestVerificationUpsert) {
 		s.UpdateLink()
-	})
-}
-
-// SetProviderLink sets the "provider_link" field.
-func (u *RequestVerificationUpsertOne) SetProviderLink(v string) *RequestVerificationUpsertOne {
-	return u.Update(func(s *RequestVerificationUpsert) {
-		s.SetProviderLink(v)
-	})
-}
-
-// UpdateProviderLink sets the "provider_link" field to the value that was provided on create.
-func (u *RequestVerificationUpsertOne) UpdateProviderLink() *RequestVerificationUpsertOne {
-	return u.Update(func(s *RequestVerificationUpsert) {
-		s.UpdateProviderLink()
 	})
 }
 
@@ -960,7 +916,7 @@ func (u *RequestVerificationUpsertBulk) UpdateReferenceID() *RequestVerification
 }
 
 // SetVerificationType sets the "verification_type" field.
-func (u *RequestVerificationUpsertBulk) SetVerificationType(v string) *RequestVerificationUpsertBulk {
+func (u *RequestVerificationUpsertBulk) SetVerificationType(v requestverification.VerificationType) *RequestVerificationUpsertBulk {
 	return u.Update(func(s *RequestVerificationUpsert) {
 		s.SetVerificationType(v)
 	})
@@ -998,20 +954,6 @@ func (u *RequestVerificationUpsertBulk) SetLink(v string) *RequestVerificationUp
 func (u *RequestVerificationUpsertBulk) UpdateLink() *RequestVerificationUpsertBulk {
 	return u.Update(func(s *RequestVerificationUpsert) {
 		s.UpdateLink()
-	})
-}
-
-// SetProviderLink sets the "provider_link" field.
-func (u *RequestVerificationUpsertBulk) SetProviderLink(v string) *RequestVerificationUpsertBulk {
-	return u.Update(func(s *RequestVerificationUpsert) {
-		s.SetProviderLink(v)
-	})
-}
-
-// UpdateProviderLink sets the "provider_link" field to the value that was provided on create.
-func (u *RequestVerificationUpsertBulk) UpdateProviderLink() *RequestVerificationUpsertBulk {
-	return u.Update(func(s *RequestVerificationUpsert) {
-		s.UpdateProviderLink()
 	})
 }
 

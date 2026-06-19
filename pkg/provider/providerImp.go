@@ -18,7 +18,8 @@ var providers = map[string]Impl{}
 var ServiceProviders = []string{}
 
 func init() {
-	ServiceProviders = append(ServiceProviders, constant.Brevo.ToString())
+	ServiceProviders = append(ServiceProviders,
+		constant.Brevo.ToString(), constant.Dojah.ToString())
 }
 
 // RegisterProvider registers a provider

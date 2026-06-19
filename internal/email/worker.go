@@ -15,7 +15,6 @@ import (
 )
 
 func GetEmailProvider(ctx context.Context, logger log.Entry) (IEmailProvider, error) {
-
 	p := provider.NewService()
 
 	serviceLocator, err := p.GetServiceByIdentifier(ctx, constant.EmailServiceIdentifier)

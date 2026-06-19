@@ -3,9 +3,8 @@ package verification
 import "context"
 
 type VerifyResult struct {
-	Link         string `json:"url"`
-	ProviderLink string `json:"provider_link"`
-	ReferenceID  string `json:"reference_id"`
+	Link        string `json:"url"`
+	ReferenceID string `json:"reference_id"`
 }
 
 type Verifier interface {

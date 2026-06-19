@@ -3,7 +3,6 @@ package dojah
 import (
 	"strings"
 
-	"github.com/Toflex/directory_v2/cmd/http/runtime"
 	"github.com/Toflex/directory_v2/pkg/configuration"
 	"github.com/Toflex/directory_v2/pkg/constant"
 	"github.com/Toflex/directory_v2/pkg/provider"
@@ -12,10 +11,15 @@ import (
 	"github.com/samber/do/v2"
 )
 
+type IDojah interface {
+	RegisterRoutes(engine *gin.Engine)
+}
+
 type config struct {
 	BaseURL                      string `env:"DOJAH_BASE_URL" required:"true"`
 	IdentityBaseURL              string `env:"DOJAH_IDENTITY_BASE_URL" required:"true"`
 	ApiKey                       string `env:"DOJAH_API_KEY" required:"true"`
+	SecretKey                    string `env:"DOJAH_SECRET_KEY" required:"true"`
 	UserVerificationWidgetID     string `env:"DOJAH_USER_VERIFICATION_WIDGET_ID" required:"true"`
 	BusinessVerificationWidgetID string `env:"DOJAH_BUSINESS_VERIFICATION_WIDGET_ID" required:"true"`
 }
@@ -25,12 +29,12 @@ type dojah struct {
 	engine *gin.Engine
 }
 
-func New() *dojah {
+func New(i do.Injector) *dojah {
 	config := config{}
 	configuration.Load(&config)
 
 	// http engine
-	engine := do.MustInvoke[*gin.Engine](runtime.Injector)
+	engine := do.MustInvoke[*gin.Engine](i)
 
 	return &dojah{
 		config: config,

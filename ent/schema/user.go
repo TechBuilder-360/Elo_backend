@@ -32,7 +32,7 @@ func (User) Fields() []ent.Field {
 		field.String("phone_number").Optional().Nillable().Validate(util.IsValidPhoneNumber),
 		field.String("avatar").Optional().Nillable(),
 		field.Bool("disabled").Default(false),
-		field.Bool("disable_reason").Nillable().Optional(),
+		field.String("disable_reason").Nillable().Optional(),
 		field.Bool("verified").Default(false),
 	}
 }

@@ -13,12 +13,18 @@ import (
 	"github.com/99designs/gqlgen/graphql/handler/transport"
 	"github.com/99designs/gqlgen/graphql/playground"
 	"github.com/Toflex/directory_v2/cmd/http/runtime"
+	"github.com/Toflex/directory_v2/database/database"
+	"github.com/Toflex/directory_v2/ent/user"
 	"github.com/Toflex/directory_v2/graph/generated"
 	resolver "github.com/Toflex/directory_v2/graph/resolvers"
 	"github.com/Toflex/directory_v2/internal/authentication"
+	"github.com/Toflex/directory_v2/middlewares"
 	"github.com/Toflex/directory_v2/pkg/configuration"
+	"github.com/Toflex/directory_v2/pkg/errors"
 	apperrors "github.com/Toflex/directory_v2/pkg/errors"
 	"github.com/Toflex/directory_v2/pkg/log"
+	"github.com/Toflex/directory_v2/pkg/providers/dojah"
+	"github.com/Toflex/directory_v2/pkg/verification"
 	"github.com/gin-gonic/gin"
 	"github.com/hibiken/asynq"
 	"github.com/hibiken/asynqmon"
@@ -33,25 +39,46 @@ type asynqMonitorConfig struct {
 	RedisPassword string `env:"REDIS_PASSWORD"`
 }
 
-func InitializeRoutes(engine *gin.Engine) {
+func authUserDirective(a authentication.IService) func(ctx context.Context, obj any, next graphql.Resolver) (res any, err error) {
+	return func(ctx context.Context, obj any, next graphql.Resolver) (res any, err error) {
+		logger := log.LoggerInContext(ctx)
+		opCtx := graphql.GetRequestContext(ctx)
+		authHeader := opCtx.Headers.Get("Authorization")
 
-	engine.GET("/", func(c *gin.Context) {
-		c.AbortWithStatusJSON(http.StatusOK, gin.H{
-			"message": "ELO 👋🏾",
-		})
-	})
+		token, err := middlewares.ExtractBearerToken(authHeader)
+		if err != nil {
+			logger.WithError(err).Error("failed to extract token from Authorization header")
+			return nil, gqlerror.Errorf("unauthorized")
+		}
 
-	engine.GET("/health", func(c *gin.Context) {
-		c.AbortWithStatusJSON(http.StatusOK, gin.H{
-			"message": "Server is up 🚀",
-		})
-	})
+		userID, valid := a.VerifyJWT(ctx, token)
+		if !valid || userID == "" {
+			logger.Error("unable to validate jwt token")
+			return nil, gqlerror.Errorf("unauthorized")
+		}
 
+		usr, err := database.DBInstance().User.Query().Where(user.IDEQ(userID)).First(ctx)
+		if err != nil {
+			logger.WithError(err).WithField("user_id", userID).Error("failed to fetch user")
+			return nil, gqlerror.Errorf("unauthorized")
+		}
+
+		ctx = context.WithValue(ctx, middlewares.UserContextKey, usr)
+		return next(ctx)
+	}
+}
+
+func initalizeGQLRoute(engine *gin.Engine, basicAuth gin.HandlerFunc) {
 	resolverStruct := resolver.Resolver{
 		AuthenticationService: do.MustInvoke[authentication.IService](runtime.Injector),
+		VerificationService:   verification.NewService(),
 	}
 
-	gqlHandler := handler.New(generated.NewExecutableSchema(generated.Config{Resolvers: &resolverStruct}))
+	c := generated.Config{Resolvers: &resolverStruct}
+
+	c.Directives.AuthUser = authUserDirective(resolverStruct.AuthenticationService)
+
+	gqlHandler := handler.New(generated.NewExecutableSchema(c))
 	playgroundHandler := playground.Handler("API GraphQL playground", "/api")
 
 	gqlHandler.AddTransport(transport.Options{})
@@ -66,25 +93,35 @@ func InitializeRoutes(engine *gin.Engine) {
 	})
 
 	gqlHandler.SetRecoverFunc(func(ctx context.Context, err interface{}) error {
-		log.Error("GraphQL panic recovered: %v", err)
+		log.WithError(err).Error("GraphQL panic recovered")
 		return gqlerror.Errorf("internal server error")
 	})
 
 	gqlHandler.SetErrorPresenter(func(ctx context.Context, err error) *gqlerror.Error {
 		var gqlErr *gqlerror.Error
 		if stderrors.As(err, &gqlErr) {
-			return gqlErr
+			log.WithError(gqlErr).Error("gql error presenter")
+			return &gqlerror.Error{
+				Message: gqlErr.Message,
+				Extensions: map[string]any{
+					"code": string(errors.ErrFailed),
+				},
+			}
 		}
 
 		var safe *apperrors.SafeError
 		if stderrors.As(err, &safe) {
+			log.WithError(safe).Error("gql error presenter")
 			return &gqlerror.Error{
 				Message: safe.Message,
 				Extensions: map[string]any{
-					"code": string(safe.Code),
+					"code":  string(safe.Code),
+					"stack": safe.Stack,
 				},
 			}
 		}
+
+		log.WithError(err).Error("gql error presenter")
 		return graphql.DefaultErrorPresenter(ctx, err)
 	})
 
@@ -94,15 +131,35 @@ func InitializeRoutes(engine *gin.Engine) {
 		gqlHandler.ServeHTTP(c.Writer, c.Request.WithContext(ctx))
 	})
 
-	basicAuth := gin.BasicAuth(gin.Accounts{
-		configuration.Instance.BasicUsername: configuration.Instance.BasicPassword,
-	})
-
 	// GraphQL Playground
 	engine.GET("/api", basicAuth, func(c *gin.Context) {
 		playgroundHandler.ServeHTTP(c.Writer, c.Request)
 	})
+}
 
+func InitializeRoutes(engine *gin.Engine) {
+	engine.GET("/", func(c *gin.Context) {
+		c.AbortWithStatusJSON(http.StatusOK, gin.H{
+			"message": "ELO 👋🏾",
+		})
+	})
+
+	engine.GET("/health", func(c *gin.Context) {
+		c.AbortWithStatusJSON(http.StatusOK, gin.H{
+			"message": "Server is up 🚀",
+		})
+	})
+
+	basicAuth := gin.BasicAuth(gin.Accounts{
+		configuration.Instance.BasicUsername: configuration.Instance.BasicPassword,
+	})
+
+	initializeRestAPI(engine)
+	initalizeGQLRoute(engine, basicAuth)
+	initializeAsynqServer(engine, basicAuth)
+}
+
+func initializeAsynqServer(engine *gin.Engine, basicAuth gin.HandlerFunc) {
 	monitorConf := &asynqMonitorConfig{}
 	configuration.Load(monitorConf)
 
@@ -118,5 +175,22 @@ func InitializeRoutes(engine *gin.Engine) {
 
 	engine.Any(monitorHandler.RootPath(), basicAuth, gin.WrapH(monitorHandler))
 	engine.Any(monitorHandler.RootPath()+"/*path", basicAuth, gin.WrapH(monitorHandler))
+}
+
+func initializeRestAPI(engine *gin.Engine) {
+	var (
+		// verificationController = verification.NewVerificationController(verification.NewService())
+		dojahController = dojah.New(runtime.Injector)
+	)
+
+	// ****************************************
+	// ********* Verification Route ***********
+	// ****************************************
+	// verificationController.RegisterRoutes(engine)
+
+	// ****************************************
+	// ********* Dojah Route ***********
+	// ****************************************
+	dojahController.RegisterRoutes(engine)
 
 }

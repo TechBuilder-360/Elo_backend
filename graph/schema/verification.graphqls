@@ -1,18 +1,27 @@
+# directive @authUser on FIELD_DEFINITION
+
 enum Entity {
   USER_VERIFICATION
 BUSINESS_VERIFICATION
 }
 
-type verification {
+type VerificationSuccess {
    link: String!
    status: String!
 }
 
+type VerificationError {
+  code: String!
+  message: String!
+}
+
 input verificationPayload {
-  id: String!
   entity: Entity
 }
 
+union VerificationResponse = VerificationSuccess | VerificationError
+
+
 extend type Mutation {
-  requestVerification(input: verificationPayload!): verification!
+  requestUserVerification(input: verificationPayload!): VerificationResponse! @authUser
 }

@@ -5,6 +5,7 @@ package resolver
 import (
 	"github.com/Toflex/directory_v2/graph/generated"
 	"github.com/Toflex/directory_v2/internal/authentication"
+	"github.com/Toflex/directory_v2/pkg/verification"
 )
 
 //go:generate go run github.com/99designs/gqlgen generate
@@ -15,6 +16,7 @@ import (
 
 type Resolver struct {
 	AuthenticationService authentication.IService
+	VerificationService   verification.IService
 }
 
 // Query returns generated.QueryResolver implementation.

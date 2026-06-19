@@ -5,6 +5,7 @@ package generated
 import (
 	"context"
 	"errors"
+	"fmt"
 	"strconv"
 	"sync/atomic"
 
@@ -27,14 +28,14 @@ import (
 
 // region    **************************** field.gotpl *****************************
 
-func (ec *executionContext) _verification_link(ctx context.Context, field graphql.CollectedField, obj *model.Verification) (ret graphql.Marshaler) {
+func (ec *executionContext) _VerificationError_code(ctx context.Context, field graphql.CollectedField, obj *model.VerificationError) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_verification_link,
+		ec.fieldContext_VerificationError_code,
 		func(ctx context.Context) (any, error) {
-			return obj.Link, nil
+			return obj.Code, nil
 		},
 		nil,
 		ec.marshalNString2string,
@@ -43,9 +44,9 @@ func (ec *executionContext) _verification_link(ctx context.Context, field graphq
 	)
 }
 
-func (ec *executionContext) fieldContext_verification_link(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_VerificationError_code(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
-		Object:     "verification",
+		Object:     "VerificationError",
 		Field:      field,
 		IsMethod:   false,
 		IsResolver: false,
@@ -56,12 +57,70 @@ func (ec *executionContext) fieldContext_verification_link(_ context.Context, fi
 	return fc, nil
 }
 
-func (ec *executionContext) _verification_status(ctx context.Context, field graphql.CollectedField, obj *model.Verification) (ret graphql.Marshaler) {
+func (ec *executionContext) _VerificationError_message(ctx context.Context, field graphql.CollectedField, obj *model.VerificationError) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_verification_status,
+		ec.fieldContext_VerificationError_message,
+		func(ctx context.Context) (any, error) {
+			return obj.Message, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_VerificationError_message(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "VerificationError",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _VerificationSuccess_link(ctx context.Context, field graphql.CollectedField, obj *model.VerificationSuccess) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_VerificationSuccess_link,
+		func(ctx context.Context) (any, error) {
+			return obj.Link, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_VerificationSuccess_link(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "VerificationSuccess",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _VerificationSuccess_status(ctx context.Context, field graphql.CollectedField, obj *model.VerificationSuccess) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_VerificationSuccess_status,
 		func(ctx context.Context) (any, error) {
 			return obj.Status, nil
 		},
@@ -72,9 +131,9 @@ func (ec *executionContext) _verification_status(ctx context.Context, field grap
 	)
 }
 
-func (ec *executionContext) fieldContext_verification_status(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_VerificationSuccess_status(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
-		Object:     "verification",
+		Object:     "VerificationSuccess",
 		Field:      field,
 		IsMethod:   false,
 		IsResolver: false,
@@ -96,20 +155,13 @@ func (ec *executionContext) unmarshalInputverificationPayload(ctx context.Contex
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"id", "entity"}
+	fieldsInOrder := [...]string{"entity"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
 			continue
 		}
 		switch k {
-		case "id":
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
-			data, err := ec.unmarshalNString2string(ctx, v)
-			if err != nil {
-				return it, err
-			}
-			it.ID = data
 		case "entity":
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("entity"))
 			data, err := ec.unmarshalOEntity2ᚖgithubᚗcomᚋToflexᚋdirectory_v2ᚋgraphᚋmodelᚐEntity(ctx, v)
@@ -127,28 +179,99 @@ func (ec *executionContext) unmarshalInputverificationPayload(ctx context.Contex
 
 // region    ************************** interface.gotpl ***************************
 
+func (ec *executionContext) _VerificationResponse(ctx context.Context, sel ast.SelectionSet, obj model.VerificationResponse) graphql.Marshaler {
+	switch obj := (obj).(type) {
+	case nil:
+		return graphql.Null
+	case model.VerificationSuccess:
+		return ec._VerificationSuccess(ctx, sel, &obj)
+	case *model.VerificationSuccess:
+		if obj == nil {
+			return graphql.Null
+		}
+		return ec._VerificationSuccess(ctx, sel, obj)
+	case model.VerificationError:
+		return ec._VerificationError(ctx, sel, &obj)
+	case *model.VerificationError:
+		if obj == nil {
+			return graphql.Null
+		}
+		return ec._VerificationError(ctx, sel, obj)
+	default:
+		if typedObj, ok := obj.(graphql.Marshaler); ok {
+			return typedObj
+		} else {
+			panic(fmt.Errorf("unexpected type %T; non-generated variants of VerificationResponse must implement graphql.Marshaler", obj))
+		}
+	}
+}
+
 // endregion ************************** interface.gotpl ***************************
 
 // region    **************************** object.gotpl ****************************
 
-var verificationImplementors = []string{"verification"}
+var verificationErrorImplementors = []string{"VerificationError", "VerificationResponse"}
 
-func (ec *executionContext) _verification(ctx context.Context, sel ast.SelectionSet, obj *model.Verification) graphql.Marshaler {
-	fields := graphql.CollectFields(ec.OperationContext, sel, verificationImplementors)
+func (ec *executionContext) _VerificationError(ctx context.Context, sel ast.SelectionSet, obj *model.VerificationError) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, verificationErrorImplementors)
 
 	out := graphql.NewFieldSet(fields)
 	deferred := make(map[string]*graphql.FieldSet)
 	for i, field := range fields {
 		switch field.Name {
 		case "__typename":
-			out.Values[i] = graphql.MarshalString("verification")
+			out.Values[i] = graphql.MarshalString("VerificationError")
+		case "code":
+			out.Values[i] = ec._VerificationError_code(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "message":
+			out.Values[i] = ec._VerificationError_message(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.processDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
+var verificationSuccessImplementors = []string{"VerificationSuccess", "VerificationResponse"}
+
+func (ec *executionContext) _VerificationSuccess(ctx context.Context, sel ast.SelectionSet, obj *model.VerificationSuccess) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, verificationSuccessImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("VerificationSuccess")
 		case "link":
-			out.Values[i] = ec._verification_link(ctx, field, obj)
+			out.Values[i] = ec._VerificationSuccess_link(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
 		case "status":
-			out.Values[i] = ec._verification_status(ctx, field, obj)
+			out.Values[i] = ec._VerificationSuccess_status(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
@@ -179,18 +302,14 @@ func (ec *executionContext) _verification(ctx context.Context, sel ast.Selection
 
 // region    ***************************** type.gotpl *****************************
 
-func (ec *executionContext) marshalNverification2githubᚗcomᚋToflexᚋdirectory_v2ᚋgraphᚋmodelᚐVerification(ctx context.Context, sel ast.SelectionSet, v model.Verification) graphql.Marshaler {
-	return ec._verification(ctx, sel, &v)
-}
-
-func (ec *executionContext) marshalNverification2ᚖgithubᚗcomᚋToflexᚋdirectory_v2ᚋgraphᚋmodelᚐVerification(ctx context.Context, sel ast.SelectionSet, v *model.Verification) graphql.Marshaler {
+func (ec *executionContext) marshalNVerificationResponse2githubᚗcomᚋToflexᚋdirectory_v2ᚋgraphᚋmodelᚐVerificationResponse(ctx context.Context, sel ast.SelectionSet, v model.VerificationResponse) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
 		}
 		return graphql.Null
 	}
-	return ec._verification(ctx, sel, v)
+	return ec._VerificationResponse(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalNverificationPayload2githubᚗcomᚋToflexᚋdirectory_v2ᚋgraphᚋmodelᚐVerificationPayload(ctx context.Context, v any) (model.VerificationPayload, error) {

@@ -192,15 +192,15 @@ func (uc *UserCreate) SetNillableDisabled(b *bool) *UserCreate {
 }
 
 // SetDisableReason sets the "disable_reason" field.
-func (uc *UserCreate) SetDisableReason(b bool) *UserCreate {
-	uc.mutation.SetDisableReason(b)
+func (uc *UserCreate) SetDisableReason(s string) *UserCreate {
+	uc.mutation.SetDisableReason(s)
 	return uc
 }
 
 // SetNillableDisableReason sets the "disable_reason" field if the given value is not nil.
-func (uc *UserCreate) SetNillableDisableReason(b *bool) *UserCreate {
-	if b != nil {
-		uc.SetDisableReason(*b)
+func (uc *UserCreate) SetNillableDisableReason(s *string) *UserCreate {
+	if s != nil {
+		uc.SetDisableReason(*s)
 	}
 	return uc
 }
@@ -501,7 +501,7 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 		_node.Disabled = value
 	}
 	if value, ok := uc.mutation.DisableReason(); ok {
-		_spec.SetField(user.FieldDisableReason, field.TypeBool, value)
+		_spec.SetField(user.FieldDisableReason, field.TypeString, value)
 		_node.DisableReason = &value
 	}
 	if value, ok := uc.mutation.Verified(); ok {
@@ -817,7 +817,7 @@ func (u *UserUpsert) UpdateDisabled() *UserUpsert {
 }
 
 // SetDisableReason sets the "disable_reason" field.
-func (u *UserUpsert) SetDisableReason(v bool) *UserUpsert {
+func (u *UserUpsert) SetDisableReason(v string) *UserUpsert {
 	u.Set(user.FieldDisableReason, v)
 	return u
 }
@@ -1122,7 +1122,7 @@ func (u *UserUpsertOne) UpdateDisabled() *UserUpsertOne {
 }
 
 // SetDisableReason sets the "disable_reason" field.
-func (u *UserUpsertOne) SetDisableReason(v bool) *UserUpsertOne {
+func (u *UserUpsertOne) SetDisableReason(v string) *UserUpsertOne {
 	return u.Update(func(s *UserUpsert) {
 		s.SetDisableReason(v)
 	})
@@ -1599,7 +1599,7 @@ func (u *UserUpsertBulk) UpdateDisabled() *UserUpsertBulk {
 }
 
 // SetDisableReason sets the "disable_reason" field.
-func (u *UserUpsertBulk) SetDisableReason(v bool) *UserUpsertBulk {
+func (u *UserUpsertBulk) SetDisableReason(v string) *UserUpsertBulk {
 	return u.Update(func(s *UserUpsert) {
 		s.SetDisableReason(v)
 	})

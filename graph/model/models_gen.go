@@ -11,6 +11,10 @@ import (
 	"github.com/99designs/gqlgen/graphql"
 )
 
+type VerificationResponse interface {
+	IsVerificationResponse()
+}
+
 type Business struct {
 	ID       string    `json:"id"`
 	Name     string    `json:"name"`
@@ -51,6 +55,7 @@ type Login struct {
 type LoginResponse struct {
 	AccessToken string `json:"access_token"`
 	ExpireAt    int64  `json:"expire_at"`
+	User        *User  `json:"user"`
 }
 
 type Mutation struct {
@@ -107,6 +112,15 @@ type Social struct {
 	URL  string `json:"url"`
 }
 
+type User struct {
+	FirstName     string `json:"first_name"`
+	LastName      string `json:"last_name"`
+	DisplayName   string `json:"display_name"`
+	IsVerified    bool   `json:"is_verified"`
+	Disabled      bool   `json:"disabled"`
+	DisableReason string `json:"disable_reason"`
+}
+
 type UserBusiness struct {
 	ID       string `json:"id"`
 	Name     string `json:"name"`
@@ -115,13 +129,21 @@ type UserBusiness struct {
 	Industry string `json:"industry"`
 }
 
-type Verification struct {
+type VerificationError struct {
+	Code    string `json:"code"`
+	Message string `json:"message"`
+}
+
+func (VerificationError) IsVerificationResponse() {}
+
+type VerificationSuccess struct {
 	Link   string `json:"link"`
 	Status string `json:"status"`
 }
 
+func (VerificationSuccess) IsVerificationResponse() {}
+
 type VerificationPayload struct {
-	ID     string  `json:"id"`
 	Entity *Entity `json:"entity,omitempty"`
 }
 

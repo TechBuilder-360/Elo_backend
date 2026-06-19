@@ -5953,10 +5953,9 @@ type RequestVerificationMutation struct {
 	updated_at        *time.Time
 	deleted_at        *time.Time
 	reference_id      *string
-	verification_type *string
+	verification_type *requestverification.VerificationType
 	provider          *string
 	link              *string
-	provider_link     *string
 	status            *requestverification.Status
 	clearedFields     map[string]struct{}
 	user              map[string]struct{}
@@ -6232,12 +6231,12 @@ func (m *RequestVerificationMutation) ResetReferenceID() {
 }
 
 // SetVerificationType sets the "verification_type" field.
-func (m *RequestVerificationMutation) SetVerificationType(s string) {
-	m.verification_type = &s
+func (m *RequestVerificationMutation) SetVerificationType(rt requestverification.VerificationType) {
+	m.verification_type = &rt
 }
 
 // VerificationType returns the value of the "verification_type" field in the mutation.
-func (m *RequestVerificationMutation) VerificationType() (r string, exists bool) {
+func (m *RequestVerificationMutation) VerificationType() (r requestverification.VerificationType, exists bool) {
 	v := m.verification_type
 	if v == nil {
 		return
@@ -6248,7 +6247,7 @@ func (m *RequestVerificationMutation) VerificationType() (r string, exists bool)
 // OldVerificationType returns the old "verification_type" field's value of the RequestVerification entity.
 // If the RequestVerification object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *RequestVerificationMutation) OldVerificationType(ctx context.Context) (v string, err error) {
+func (m *RequestVerificationMutation) OldVerificationType(ctx context.Context) (v requestverification.VerificationType, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldVerificationType is only allowed on UpdateOne operations")
 	}
@@ -6337,42 +6336,6 @@ func (m *RequestVerificationMutation) OldLink(ctx context.Context) (v string, er
 // ResetLink resets all changes to the "link" field.
 func (m *RequestVerificationMutation) ResetLink() {
 	m.link = nil
-}
-
-// SetProviderLink sets the "provider_link" field.
-func (m *RequestVerificationMutation) SetProviderLink(s string) {
-	m.provider_link = &s
-}
-
-// ProviderLink returns the value of the "provider_link" field in the mutation.
-func (m *RequestVerificationMutation) ProviderLink() (r string, exists bool) {
-	v := m.provider_link
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldProviderLink returns the old "provider_link" field's value of the RequestVerification entity.
-// If the RequestVerification object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *RequestVerificationMutation) OldProviderLink(ctx context.Context) (v string, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldProviderLink is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldProviderLink requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldProviderLink: %w", err)
-	}
-	return oldValue.ProviderLink, nil
-}
-
-// ResetProviderLink resets all changes to the "provider_link" field.
-func (m *RequestVerificationMutation) ResetProviderLink() {
-	m.provider_link = nil
 }
 
 // SetStatus sets the "status" field.
@@ -6553,7 +6516,7 @@ func (m *RequestVerificationMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *RequestVerificationMutation) Fields() []string {
-	fields := make([]string, 0, 9)
+	fields := make([]string, 0, 8)
 	if m.created_at != nil {
 		fields = append(fields, requestverification.FieldCreatedAt)
 	}
@@ -6574,9 +6537,6 @@ func (m *RequestVerificationMutation) Fields() []string {
 	}
 	if m.link != nil {
 		fields = append(fields, requestverification.FieldLink)
-	}
-	if m.provider_link != nil {
-		fields = append(fields, requestverification.FieldProviderLink)
 	}
 	if m.status != nil {
 		fields = append(fields, requestverification.FieldStatus)
@@ -6603,8 +6563,6 @@ func (m *RequestVerificationMutation) Field(name string) (ent.Value, bool) {
 		return m.Provider()
 	case requestverification.FieldLink:
 		return m.Link()
-	case requestverification.FieldProviderLink:
-		return m.ProviderLink()
 	case requestverification.FieldStatus:
 		return m.Status()
 	}
@@ -6630,8 +6588,6 @@ func (m *RequestVerificationMutation) OldField(ctx context.Context, name string)
 		return m.OldProvider(ctx)
 	case requestverification.FieldLink:
 		return m.OldLink(ctx)
-	case requestverification.FieldProviderLink:
-		return m.OldProviderLink(ctx)
 	case requestverification.FieldStatus:
 		return m.OldStatus(ctx)
 	}
@@ -6672,7 +6628,7 @@ func (m *RequestVerificationMutation) SetField(name string, value ent.Value) err
 		m.SetReferenceID(v)
 		return nil
 	case requestverification.FieldVerificationType:
-		v, ok := value.(string)
+		v, ok := value.(requestverification.VerificationType)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
@@ -6691,13 +6647,6 @@ func (m *RequestVerificationMutation) SetField(name string, value ent.Value) err
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetLink(v)
-		return nil
-	case requestverification.FieldProviderLink:
-		v, ok := value.(string)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetProviderLink(v)
 		return nil
 	case requestverification.FieldStatus:
 		v, ok := value.(requestverification.Status)
@@ -6784,9 +6733,6 @@ func (m *RequestVerificationMutation) ResetField(name string) error {
 		return nil
 	case requestverification.FieldLink:
 		m.ResetLink()
-		return nil
-	case requestverification.FieldProviderLink:
-		m.ResetProviderLink()
 		return nil
 	case requestverification.FieldStatus:
 		m.ResetStatus()
@@ -9242,7 +9188,7 @@ type UserMutation struct {
 	phone_number                 *string
 	avatar                       *string
 	disabled                     *bool
-	disable_reason               *bool
+	disable_reason               *string
 	verified                     *bool
 	clearedFields                map[string]struct{}
 	manages                      map[string]struct{}
@@ -9949,12 +9895,12 @@ func (m *UserMutation) ResetDisabled() {
 }
 
 // SetDisableReason sets the "disable_reason" field.
-func (m *UserMutation) SetDisableReason(b bool) {
-	m.disable_reason = &b
+func (m *UserMutation) SetDisableReason(s string) {
+	m.disable_reason = &s
 }
 
 // DisableReason returns the value of the "disable_reason" field in the mutation.
-func (m *UserMutation) DisableReason() (r bool, exists bool) {
+func (m *UserMutation) DisableReason() (r string, exists bool) {
 	v := m.disable_reason
 	if v == nil {
 		return
@@ -9965,7 +9911,7 @@ func (m *UserMutation) DisableReason() (r bool, exists bool) {
 // OldDisableReason returns the old "disable_reason" field's value of the User entity.
 // If the User object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *UserMutation) OldDisableReason(ctx context.Context) (v *bool, err error) {
+func (m *UserMutation) OldDisableReason(ctx context.Context) (v *string, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldDisableReason is only allowed on UpdateOne operations")
 	}
@@ -10521,7 +10467,7 @@ func (m *UserMutation) SetField(name string, value ent.Value) error {
 		m.SetDisabled(v)
 		return nil
 	case user.FieldDisableReason:
-		v, ok := value.(bool)
+		v, ok := value.(string)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}

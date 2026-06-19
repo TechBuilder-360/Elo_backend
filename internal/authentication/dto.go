@@ -140,7 +140,8 @@ type CacheOTP struct {
 }
 
 type JWTToken struct {
-	UserID string
+	UserID string `json:"user_id"`
+	JTI    string `json:"jti"`
 }
 
 type OTPRequest struct {
