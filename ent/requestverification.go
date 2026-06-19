@@ -26,13 +26,11 @@ type RequestVerification struct {
 	// ReferenceID holds the value of the "reference_id" field.
 	ReferenceID string `json:"reference_id,omitempty"`
 	// VerificationType holds the value of the "verification_type" field.
-	VerificationType string `json:"verification_type,omitempty"`
+	VerificationType requestverification.VerificationType `json:"verification_type,omitempty"`
 	// Provider holds the value of the "provider" field.
 	Provider string `json:"provider,omitempty"`
 	// Link holds the value of the "link" field.
 	Link string `json:"link,omitempty"`
-	// ProviderLink holds the value of the "provider_link" field.
-	ProviderLink string `json:"provider_link,omitempty"`
 	// Status holds the value of the "status" field.
 	Status requestverification.Status `json:"status,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
@@ -75,7 +73,7 @@ func (*RequestVerification) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case requestverification.FieldID, requestverification.FieldReferenceID, requestverification.FieldVerificationType, requestverification.FieldProvider, requestverification.FieldLink, requestverification.FieldProviderLink, requestverification.FieldStatus:
+		case requestverification.FieldID, requestverification.FieldReferenceID, requestverification.FieldVerificationType, requestverification.FieldProvider, requestverification.FieldLink, requestverification.FieldStatus:
 			values[i] = new(sql.NullString)
 		case requestverification.FieldCreatedAt, requestverification.FieldUpdatedAt, requestverification.FieldDeletedAt:
 			values[i] = new(sql.NullTime)
@@ -129,7 +127,7 @@ func (rv *RequestVerification) assignValues(columns []string, values []any) erro
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field verification_type", values[i])
 			} else if value.Valid {
-				rv.VerificationType = value.String
+				rv.VerificationType = requestverification.VerificationType(value.String)
 			}
 		case requestverification.FieldProvider:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -142,12 +140,6 @@ func (rv *RequestVerification) assignValues(columns []string, values []any) erro
 				return fmt.Errorf("unexpected type %T for field link", values[i])
 			} else if value.Valid {
 				rv.Link = value.String
-			}
-		case requestverification.FieldProviderLink:
-			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field provider_link", values[i])
-			} else if value.Valid {
-				rv.ProviderLink = value.String
 			}
 		case requestverification.FieldStatus:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -216,16 +208,13 @@ func (rv *RequestVerification) String() string {
 	builder.WriteString(rv.ReferenceID)
 	builder.WriteString(", ")
 	builder.WriteString("verification_type=")
-	builder.WriteString(rv.VerificationType)
+	builder.WriteString(fmt.Sprintf("%v", rv.VerificationType))
 	builder.WriteString(", ")
 	builder.WriteString("provider=")
 	builder.WriteString(rv.Provider)
 	builder.WriteString(", ")
 	builder.WriteString("link=")
 	builder.WriteString(rv.Link)
-	builder.WriteString(", ")
-	builder.WriteString("provider_link=")
-	builder.WriteString(rv.ProviderLink)
 	builder.WriteString(", ")
 	builder.WriteString("status=")
 	builder.WriteString(fmt.Sprintf("%v", rv.Status))

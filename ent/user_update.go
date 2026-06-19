@@ -243,15 +243,15 @@ func (uu *UserUpdate) SetNillableDisabled(b *bool) *UserUpdate {
 }
 
 // SetDisableReason sets the "disable_reason" field.
-func (uu *UserUpdate) SetDisableReason(b bool) *UserUpdate {
-	uu.mutation.SetDisableReason(b)
+func (uu *UserUpdate) SetDisableReason(s string) *UserUpdate {
+	uu.mutation.SetDisableReason(s)
 	return uu
 }
 
 // SetNillableDisableReason sets the "disable_reason" field if the given value is not nil.
-func (uu *UserUpdate) SetNillableDisableReason(b *bool) *UserUpdate {
-	if b != nil {
-		uu.SetDisableReason(*b)
+func (uu *UserUpdate) SetNillableDisableReason(s *string) *UserUpdate {
+	if s != nil {
+		uu.SetDisableReason(*s)
 	}
 	return uu
 }
@@ -561,10 +561,10 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		_spec.SetField(user.FieldDisabled, field.TypeBool, value)
 	}
 	if value, ok := uu.mutation.DisableReason(); ok {
-		_spec.SetField(user.FieldDisableReason, field.TypeBool, value)
+		_spec.SetField(user.FieldDisableReason, field.TypeString, value)
 	}
 	if uu.mutation.DisableReasonCleared() {
-		_spec.ClearField(user.FieldDisableReason, field.TypeBool)
+		_spec.ClearField(user.FieldDisableReason, field.TypeString)
 	}
 	if value, ok := uu.mutation.Verified(); ok {
 		_spec.SetField(user.FieldVerified, field.TypeBool, value)
@@ -980,15 +980,15 @@ func (uuo *UserUpdateOne) SetNillableDisabled(b *bool) *UserUpdateOne {
 }
 
 // SetDisableReason sets the "disable_reason" field.
-func (uuo *UserUpdateOne) SetDisableReason(b bool) *UserUpdateOne {
-	uuo.mutation.SetDisableReason(b)
+func (uuo *UserUpdateOne) SetDisableReason(s string) *UserUpdateOne {
+	uuo.mutation.SetDisableReason(s)
 	return uuo
 }
 
 // SetNillableDisableReason sets the "disable_reason" field if the given value is not nil.
-func (uuo *UserUpdateOne) SetNillableDisableReason(b *bool) *UserUpdateOne {
-	if b != nil {
-		uuo.SetDisableReason(*b)
+func (uuo *UserUpdateOne) SetNillableDisableReason(s *string) *UserUpdateOne {
+	if s != nil {
+		uuo.SetDisableReason(*s)
 	}
 	return uuo
 }
@@ -1328,10 +1328,10 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 		_spec.SetField(user.FieldDisabled, field.TypeBool, value)
 	}
 	if value, ok := uuo.mutation.DisableReason(); ok {
-		_spec.SetField(user.FieldDisableReason, field.TypeBool, value)
+		_spec.SetField(user.FieldDisableReason, field.TypeString, value)
 	}
 	if uuo.mutation.DisableReasonCleared() {
-		_spec.ClearField(user.FieldDisableReason, field.TypeBool)
+		_spec.ClearField(user.FieldDisableReason, field.TypeString)
 	}
 	if value, ok := uuo.mutation.Verified(); ok {
 		_spec.SetField(user.FieldVerified, field.TypeBool, value)

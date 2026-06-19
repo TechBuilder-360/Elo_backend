@@ -20,8 +20,9 @@ type MutationResolver interface {
 	Registration(ctx context.Context, input model.Registration) (*model.RegistrationResponse, error)
 	Login(ctx context.Context, input model.Login) (*model.LoginResponse, error)
 	RequestOtp(ctx context.Context, input *model.RequestOtp) (*model.OTPResponse, error)
+	Logout(ctx context.Context) (bool, error)
 	RegisterBusiness(ctx context.Context, input model.RegisterBusinessInput) (*model.Response, error)
-	RequestVerification(ctx context.Context, input model.VerificationPayload) (*model.Verification, error)
+	RequestUserVerification(ctx context.Context, input model.VerificationPayload) (model.VerificationResponse, error)
 }
 
 // endregion ************************** generated!.gotpl **************************
@@ -72,7 +73,7 @@ func (ec *executionContext) field_Mutation_requestOtp_args(ctx context.Context, 
 	return args, nil
 }
 
-func (ec *executionContext) field_Mutation_requestVerification_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+func (ec *executionContext) field_Mutation_requestUserVerification_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
 	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input", ec.unmarshalNverificationPayload2githubᚗcomᚋToflexᚋdirectory_v2ᚋgraphᚋmodelᚐVerificationPayload)
@@ -144,6 +145,49 @@ func (ec *executionContext) fieldContext_LoginResponse_expire_at(_ context.Conte
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return nil, errors.New("field of type Int64 does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _LoginResponse_user(ctx context.Context, field graphql.CollectedField, obj *model.LoginResponse) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_LoginResponse_user,
+		func(ctx context.Context) (any, error) {
+			return obj.User, nil
+		},
+		nil,
+		ec.marshalNUser2ᚖgithubᚗcomᚋToflexᚋdirectory_v2ᚋgraphᚋmodelᚐUser,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_LoginResponse_user(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "LoginResponse",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "first_name":
+				return ec.fieldContext_User_first_name(ctx, field)
+			case "last_name":
+				return ec.fieldContext_User_last_name(ctx, field)
+			case "display_name":
+				return ec.fieldContext_User_display_name(ctx, field)
+			case "is_verified":
+				return ec.fieldContext_User_is_verified(ctx, field)
+			case "disabled":
+				return ec.fieldContext_User_disabled(ctx, field)
+			case "disable_reason":
+				return ec.fieldContext_User_disable_reason(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type User", field.Name)
 		},
 	}
 	return fc, nil
@@ -223,6 +267,8 @@ func (ec *executionContext) fieldContext_Mutation_login(ctx context.Context, fie
 				return ec.fieldContext_LoginResponse_access_token(ctx, field)
 			case "expire_at":
 				return ec.fieldContext_LoginResponse_expire_at(ctx, field)
+			case "user":
+				return ec.fieldContext_LoginResponse_user(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type LoginResponse", field.Name)
 		},
@@ -286,6 +332,48 @@ func (ec *executionContext) fieldContext_Mutation_requestOtp(ctx context.Context
 	return fc, nil
 }
 
+func (ec *executionContext) _Mutation_logout(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Mutation_logout,
+		func(ctx context.Context) (any, error) {
+			return ec.resolvers.Mutation().Logout(ctx)
+		},
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			directive0 := next
+
+			directive1 := func(ctx context.Context) (any, error) {
+				if ec.directives.AuthUser == nil {
+					var zeroVal bool
+					return zeroVal, errors.New("directive authUser is not implemented")
+				}
+				return ec.directives.AuthUser(ctx, nil, directive0)
+			}
+
+			next = directive1
+			return next
+		},
+		ec.marshalNBoolean2bool,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Mutation_logout(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Boolean does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _Mutation_registerBusiness(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
@@ -331,37 +419,44 @@ func (ec *executionContext) fieldContext_Mutation_registerBusiness(ctx context.C
 	return fc, nil
 }
 
-func (ec *executionContext) _Mutation_requestVerification(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+func (ec *executionContext) _Mutation_requestUserVerification(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Mutation_requestVerification,
+		ec.fieldContext_Mutation_requestUserVerification,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Mutation().RequestVerification(ctx, fc.Args["input"].(model.VerificationPayload))
+			return ec.resolvers.Mutation().RequestUserVerification(ctx, fc.Args["input"].(model.VerificationPayload))
 		},
-		nil,
-		ec.marshalNverification2ᚖgithubᚗcomᚋToflexᚋdirectory_v2ᚋgraphᚋmodelᚐVerification,
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			directive0 := next
+
+			directive1 := func(ctx context.Context) (any, error) {
+				if ec.directives.AuthUser == nil {
+					var zeroVal model.VerificationResponse
+					return zeroVal, errors.New("directive authUser is not implemented")
+				}
+				return ec.directives.AuthUser(ctx, nil, directive0)
+			}
+
+			next = directive1
+			return next
+		},
+		ec.marshalNVerificationResponse2githubᚗcomᚋToflexᚋdirectory_v2ᚋgraphᚋmodelᚐVerificationResponse,
 		true,
 		true,
 	)
 }
 
-func (ec *executionContext) fieldContext_Mutation_requestVerification(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Mutation_requestUserVerification(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Mutation",
 		Field:      field,
 		IsMethod:   true,
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "link":
-				return ec.fieldContext_verification_link(ctx, field)
-			case "status":
-				return ec.fieldContext_verification_status(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type verification", field.Name)
+			return nil, errors.New("field of type VerificationResponse does not have child fields")
 		},
 	}
 	defer func() {
@@ -371,7 +466,7 @@ func (ec *executionContext) fieldContext_Mutation_requestVerification(ctx contex
 		}
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Mutation_requestVerification_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+	if fc.Args, err = ec.field_Mutation_requestUserVerification_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
 	}
@@ -585,6 +680,11 @@ func (ec *executionContext) _LoginResponse(ctx context.Context, sel ast.Selectio
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
+		case "user":
+			out.Values[i] = ec._LoginResponse_user(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -648,6 +748,13 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
+		case "logout":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_logout(ctx, field)
+			})
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
 		case "registerBusiness":
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Mutation_registerBusiness(ctx, field)
@@ -655,9 +762,9 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
-		case "requestVerification":
+		case "requestUserVerification":
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
-				return ec._Mutation_requestVerification(ctx, field)
+				return ec._Mutation_requestUserVerification(ctx, field)
 			})
 			if out.Values[i] == graphql.Null {
 				out.Invalids++

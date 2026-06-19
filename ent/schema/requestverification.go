@@ -22,12 +22,9 @@ func (RequestVerification) Mixin() []ent.Mixin {
 func (RequestVerification) Fields() []ent.Field {
 	return []ent.Field{
 		field.String("reference_id").Unique().NotEmpty(),
-		field.String("verification_type").NotEmpty(),
+		field.Enum("verification_type").Values("USER", "BUSINESS"),
 		field.String("provider").NotEmpty(),
 		field.String("link").NotEmpty().Validate(func(s string) error {
-			return util.ValidateURL(s)
-		}),
-		field.String("provider_link").NotEmpty().Validate(func(s string) error {
 			return util.ValidateURL(s)
 		}),
 		field.Enum("status").Values(

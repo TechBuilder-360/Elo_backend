@@ -29,8 +29,6 @@ const (
 	FieldProvider = "provider"
 	// FieldLink holds the string denoting the link field in the database.
 	FieldLink = "link"
-	// FieldProviderLink holds the string denoting the provider_link field in the database.
-	FieldProviderLink = "provider_link"
 	// FieldStatus holds the string denoting the status field in the database.
 	FieldStatus = "status"
 	// EdgeUser holds the string denoting the user edge name in mutations.
@@ -61,7 +59,6 @@ var Columns = []string{
 	FieldVerificationType,
 	FieldProvider,
 	FieldLink,
-	FieldProviderLink,
 	FieldStatus,
 }
 
@@ -93,17 +90,36 @@ var (
 	UpdateDefaultUpdatedAt func() time.Time
 	// ReferenceIDValidator is a validator for the "reference_id" field. It is called by the builders before save.
 	ReferenceIDValidator func(string) error
-	// VerificationTypeValidator is a validator for the "verification_type" field. It is called by the builders before save.
-	VerificationTypeValidator func(string) error
 	// ProviderValidator is a validator for the "provider" field. It is called by the builders before save.
 	ProviderValidator func(string) error
 	// LinkValidator is a validator for the "link" field. It is called by the builders before save.
 	LinkValidator func(string) error
-	// ProviderLinkValidator is a validator for the "provider_link" field. It is called by the builders before save.
-	ProviderLinkValidator func(string) error
 	// DefaultID holds the default value on creation for the "id" field.
 	DefaultID func() string
 )
+
+// VerificationType defines the type for the "verification_type" enum field.
+type VerificationType string
+
+// VerificationType values.
+const (
+	VerificationTypeUSER     VerificationType = "USER"
+	VerificationTypeBUSINESS VerificationType = "BUSINESS"
+)
+
+func (vt VerificationType) String() string {
+	return string(vt)
+}
+
+// VerificationTypeValidator is a validator for the "verification_type" field enum values. It is called by the builders before save.
+func VerificationTypeValidator(vt VerificationType) error {
+	switch vt {
+	case VerificationTypeUSER, VerificationTypeBUSINESS:
+		return nil
+	default:
+		return fmt.Errorf("requestverification: invalid enum value for verification_type field: %q", vt)
+	}
+}
 
 // Status defines the type for the "status" enum field.
 type Status string
@@ -176,11 +192,6 @@ func ByProvider(opts ...sql.OrderTermOption) OrderOption {
 // ByLink orders the results by the link field.
 func ByLink(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldLink, opts...).ToFunc()
-}
-
-// ByProviderLink orders the results by the provider_link field.
-func ByProviderLink(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldProviderLink, opts...).ToFunc()
 }
 
 // ByStatus orders the results by the status field.

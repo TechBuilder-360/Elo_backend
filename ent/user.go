@@ -46,7 +46,7 @@ type User struct {
 	// Disabled holds the value of the "disabled" field.
 	Disabled bool `json:"disabled,omitempty"`
 	// DisableReason holds the value of the "disable_reason" field.
-	DisableReason *bool `json:"disable_reason,omitempty"`
+	DisableReason *string `json:"disable_reason,omitempty"`
 	// Verified holds the value of the "verified" field.
 	Verified bool `json:"verified,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
@@ -111,9 +111,9 @@ func (*User) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case user.FieldEmailVerified, user.FieldDisabled, user.FieldDisableReason, user.FieldVerified:
+		case user.FieldEmailVerified, user.FieldDisabled, user.FieldVerified:
 			values[i] = new(sql.NullBool)
-		case user.FieldID, user.FieldFirstName, user.FieldLastName, user.FieldPassword, user.FieldMiddleName, user.FieldDisplayName, user.FieldEmailAddress, user.FieldPhoneNumber, user.FieldAvatar:
+		case user.FieldID, user.FieldFirstName, user.FieldLastName, user.FieldPassword, user.FieldMiddleName, user.FieldDisplayName, user.FieldEmailAddress, user.FieldPhoneNumber, user.FieldAvatar, user.FieldDisableReason:
 			values[i] = new(sql.NullString)
 		case user.FieldCreatedAt, user.FieldUpdatedAt, user.FieldDeletedAt, user.FieldEmailVerifiedAt:
 			values[i] = new(sql.NullTime)
@@ -226,11 +226,11 @@ func (u *User) assignValues(columns []string, values []any) error {
 				u.Disabled = value.Bool
 			}
 		case user.FieldDisableReason:
-			if value, ok := values[i].(*sql.NullBool); !ok {
+			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field disable_reason", values[i])
 			} else if value.Valid {
-				u.DisableReason = new(bool)
-				*u.DisableReason = value.Bool
+				u.DisableReason = new(string)
+				*u.DisableReason = value.String
 			}
 		case user.FieldVerified:
 			if value, ok := values[i].(*sql.NullBool); !ok {
@@ -344,7 +344,7 @@ func (u *User) String() string {
 	builder.WriteString(", ")
 	if v := u.DisableReason; v != nil {
 		builder.WriteString("disable_reason=")
-		builder.WriteString(fmt.Sprintf("%v", *v))
+		builder.WriteString(*v)
 	}
 	builder.WriteString(", ")
 	builder.WriteString("verified=")

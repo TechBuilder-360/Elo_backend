@@ -7,12 +7,42 @@ package resolver
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/Toflex/directory_v2/graph/model"
+	"github.com/Toflex/directory_v2/middlewares"
+	"github.com/Toflex/directory_v2/pkg/errors"
+	"github.com/Toflex/directory_v2/pkg/log"
+	"github.com/Toflex/directory_v2/pkg/types"
+	"github.com/Toflex/directory_v2/pkg/verification"
 )
 
 // RequestVerification is the resolver for the requestVerification field.
-func (r *mutationResolver) RequestVerification(ctx context.Context, input model.VerificationPayload) (*model.Verification, error) {
-	panic(fmt.Errorf("not implemented: RequestVerification - requestVerification"))
+func (r *mutationResolver) RequestUserVerification(ctx context.Context, input model.VerificationPayload) (model.VerificationResponse, error) {
+	logger := log.LoggerInContext(ctx)
+
+	u, err := middlewares.UserFromContext(ctx)
+	if err != nil {
+		logger.WithError(err).Error("failed to fetch user in context")
+		return model.VerificationError{
+			Code:    string(errors.ErrFailed),
+			Message: "unauthorized",
+		}, nil
+	}
+
+	res, err := r.VerificationService.RequestVerificationLink(ctx, &verification.VerificationRequest{
+		Entity: types.EntityType(*input.Entity),
+		ID:     u.ID,
+	})
+	if err != nil {
+		logger.WithError(err).Error("failed to generate verification link")
+		return model.VerificationError{
+			Code:    string(errors.ErrFailed),
+			Message: err.Error(),
+		}, nil
+	}
+
+	return model.VerificationSuccess{
+		Link:   res.URL,
+		Status: res.Status,
+	}, nil
 }

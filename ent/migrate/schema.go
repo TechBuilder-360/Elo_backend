@@ -175,10 +175,9 @@ var (
 		{Name: "updated_at", Type: field.TypeTime},
 		{Name: "deleted_at", Type: field.TypeTime, Nullable: true},
 		{Name: "reference_id", Type: field.TypeString, Unique: true},
-		{Name: "verification_type", Type: field.TypeString},
+		{Name: "verification_type", Type: field.TypeEnum, Enums: []string{"USER", "BUSINESS"}},
 		{Name: "provider", Type: field.TypeString},
 		{Name: "link", Type: field.TypeString},
-		{Name: "provider_link", Type: field.TypeString},
 		{Name: "status", Type: field.TypeEnum, Enums: []string{"PENDING", "IN_PROGRESS", "VERIFIED", "FAILED", "REJECTED", "EXPIRED"}, Default: "PENDING"},
 	}
 	// RequestVerificationsTable holds the schema information for the "request_verifications" table.
@@ -271,7 +270,7 @@ var (
 		{Name: "phone_number", Type: field.TypeString, Nullable: true},
 		{Name: "avatar", Type: field.TypeString, Nullable: true},
 		{Name: "disabled", Type: field.TypeBool, Default: false},
-		{Name: "disable_reason", Type: field.TypeBool, Nullable: true},
+		{Name: "disable_reason", Type: field.TypeString, Nullable: true},
 		{Name: "verified", Type: field.TypeBool, Default: false},
 	}
 	// UsersTable holds the schema information for the "users" table.

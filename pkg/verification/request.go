@@ -2,12 +2,14 @@ package verification
 
 import (
 	"context"
+	"fmt"
 
 	"entgo.io/ent/dialect/sql"
 	"github.com/Toflex/directory_v2/ent"
 	"github.com/Toflex/directory_v2/ent/business"
 	"github.com/Toflex/directory_v2/ent/requestverification"
 	"github.com/Toflex/directory_v2/ent/user"
+	"github.com/Toflex/directory_v2/pkg/configuration"
 	"github.com/Toflex/directory_v2/pkg/constant"
 	"github.com/Toflex/directory_v2/pkg/errors"
 	"github.com/Toflex/directory_v2/pkg/log"
@@ -62,7 +64,7 @@ func (s *Service) RequestVerificationLink(ctx context.Context, payload *Verifica
 		case requestverification.StatusIN_PROGRESS, requestverification.StatusPENDING, requestverification.StatusVERIFIED:
 			{
 				return &VerificationResponse{
-					Link:   verification.Link,
+					URL:    verification.Link,
 					Status: string(verification.Status),
 				}, nil
 			}
@@ -104,8 +106,9 @@ func (s *Service) RequestVerificationLink(ctx context.Context, payload *Verifica
 
 			_, err = s.db.RequestVerification.Create().
 				SetLink(result.Link).
-				SetProviderLink(result.ProviderLink).
 				SetReferenceID(result.ReferenceID).
+				SetProvider(serv.ActiveProvider.Slug).
+				SetVerificationType(requestverification.VerificationTypeUSER).
 				AddUser(usr).
 				Save(ctx)
 		}
@@ -119,7 +122,8 @@ func (s *Service) RequestVerificationLink(ctx context.Context, payload *Verifica
 
 			_, err = s.db.RequestVerification.Create().
 				SetLink(result.Link).
-				SetProviderLink(result.ProviderLink).
+				SetVerificationType(requestverification.VerificationTypeBUSINESS).
+				SetProvider(serv.ActiveProvider.Slug).
 				SetReferenceID(result.ReferenceID).
 				AddBusiness(biz).
 				Save(ctx)
@@ -133,6 +137,27 @@ func (s *Service) RequestVerificationLink(ctx context.Context, payload *Verifica
 
 	return &VerificationResponse{
 		Status: string(requestverification.StatusIN_PROGRESS),
-		Link:   result.Link,
+		URL:    result.Link,
 	}, nil
+}
+
+func getVerificationLink(ref string) string {
+	return fmt.Sprintf("%s/v1/verification/%s", configuration.GetBaseURL(), ref)
+}
+
+func (s *Service) GetProviderLink(ctx context.Context, reference string) (string, error) {
+	verification, err := s.db.RequestVerification.Query().Where(requestverification.ReferenceIDEQ(reference)).First(ctx)
+	if err != nil {
+		log.WithError(err).WithField("reference", reference).Error("failed to fetch verfication link")
+		return "", errors.New(errors.ErrFailed, "invalid url")
+	}
+
+	switch verification.Status {
+	case requestverification.StatusREJECTED,
+		requestverification.StatusEXPIRED,
+		requestverification.StatusFAILED:
+		return "", errors.New(errors.ErrFailed, "link has expired!")
+	}
+
+	return verification.Link, nil
 }

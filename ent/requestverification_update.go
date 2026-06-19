@@ -71,15 +71,15 @@ func (rvu *RequestVerificationUpdate) SetNillableReferenceID(s *string) *Request
 }
 
 // SetVerificationType sets the "verification_type" field.
-func (rvu *RequestVerificationUpdate) SetVerificationType(s string) *RequestVerificationUpdate {
-	rvu.mutation.SetVerificationType(s)
+func (rvu *RequestVerificationUpdate) SetVerificationType(rt requestverification.VerificationType) *RequestVerificationUpdate {
+	rvu.mutation.SetVerificationType(rt)
 	return rvu
 }
 
 // SetNillableVerificationType sets the "verification_type" field if the given value is not nil.
-func (rvu *RequestVerificationUpdate) SetNillableVerificationType(s *string) *RequestVerificationUpdate {
-	if s != nil {
-		rvu.SetVerificationType(*s)
+func (rvu *RequestVerificationUpdate) SetNillableVerificationType(rt *requestverification.VerificationType) *RequestVerificationUpdate {
+	if rt != nil {
+		rvu.SetVerificationType(*rt)
 	}
 	return rvu
 }
@@ -108,20 +108,6 @@ func (rvu *RequestVerificationUpdate) SetLink(s string) *RequestVerificationUpda
 func (rvu *RequestVerificationUpdate) SetNillableLink(s *string) *RequestVerificationUpdate {
 	if s != nil {
 		rvu.SetLink(*s)
-	}
-	return rvu
-}
-
-// SetProviderLink sets the "provider_link" field.
-func (rvu *RequestVerificationUpdate) SetProviderLink(s string) *RequestVerificationUpdate {
-	rvu.mutation.SetProviderLink(s)
-	return rvu
-}
-
-// SetNillableProviderLink sets the "provider_link" field if the given value is not nil.
-func (rvu *RequestVerificationUpdate) SetNillableProviderLink(s *string) *RequestVerificationUpdate {
-	if s != nil {
-		rvu.SetProviderLink(*s)
 	}
 	return rvu
 }
@@ -275,11 +261,6 @@ func (rvu *RequestVerificationUpdate) check() error {
 			return &ValidationError{Name: "link", err: fmt.Errorf(`ent: validator failed for field "RequestVerification.link": %w`, err)}
 		}
 	}
-	if v, ok := rvu.mutation.ProviderLink(); ok {
-		if err := requestverification.ProviderLinkValidator(v); err != nil {
-			return &ValidationError{Name: "provider_link", err: fmt.Errorf(`ent: validator failed for field "RequestVerification.provider_link": %w`, err)}
-		}
-	}
 	if v, ok := rvu.mutation.Status(); ok {
 		if err := requestverification.StatusValidator(v); err != nil {
 			return &ValidationError{Name: "status", err: fmt.Errorf(`ent: validator failed for field "RequestVerification.status": %w`, err)}
@@ -313,16 +294,13 @@ func (rvu *RequestVerificationUpdate) sqlSave(ctx context.Context) (n int, err e
 		_spec.SetField(requestverification.FieldReferenceID, field.TypeString, value)
 	}
 	if value, ok := rvu.mutation.VerificationType(); ok {
-		_spec.SetField(requestverification.FieldVerificationType, field.TypeString, value)
+		_spec.SetField(requestverification.FieldVerificationType, field.TypeEnum, value)
 	}
 	if value, ok := rvu.mutation.Provider(); ok {
 		_spec.SetField(requestverification.FieldProvider, field.TypeString, value)
 	}
 	if value, ok := rvu.mutation.Link(); ok {
 		_spec.SetField(requestverification.FieldLink, field.TypeString, value)
-	}
-	if value, ok := rvu.mutation.ProviderLink(); ok {
-		_spec.SetField(requestverification.FieldProviderLink, field.TypeString, value)
 	}
 	if value, ok := rvu.mutation.Status(); ok {
 		_spec.SetField(requestverification.FieldStatus, field.TypeEnum, value)
@@ -478,15 +456,15 @@ func (rvuo *RequestVerificationUpdateOne) SetNillableReferenceID(s *string) *Req
 }
 
 // SetVerificationType sets the "verification_type" field.
-func (rvuo *RequestVerificationUpdateOne) SetVerificationType(s string) *RequestVerificationUpdateOne {
-	rvuo.mutation.SetVerificationType(s)
+func (rvuo *RequestVerificationUpdateOne) SetVerificationType(rt requestverification.VerificationType) *RequestVerificationUpdateOne {
+	rvuo.mutation.SetVerificationType(rt)
 	return rvuo
 }
 
 // SetNillableVerificationType sets the "verification_type" field if the given value is not nil.
-func (rvuo *RequestVerificationUpdateOne) SetNillableVerificationType(s *string) *RequestVerificationUpdateOne {
-	if s != nil {
-		rvuo.SetVerificationType(*s)
+func (rvuo *RequestVerificationUpdateOne) SetNillableVerificationType(rt *requestverification.VerificationType) *RequestVerificationUpdateOne {
+	if rt != nil {
+		rvuo.SetVerificationType(*rt)
 	}
 	return rvuo
 }
@@ -515,20 +493,6 @@ func (rvuo *RequestVerificationUpdateOne) SetLink(s string) *RequestVerification
 func (rvuo *RequestVerificationUpdateOne) SetNillableLink(s *string) *RequestVerificationUpdateOne {
 	if s != nil {
 		rvuo.SetLink(*s)
-	}
-	return rvuo
-}
-
-// SetProviderLink sets the "provider_link" field.
-func (rvuo *RequestVerificationUpdateOne) SetProviderLink(s string) *RequestVerificationUpdateOne {
-	rvuo.mutation.SetProviderLink(s)
-	return rvuo
-}
-
-// SetNillableProviderLink sets the "provider_link" field if the given value is not nil.
-func (rvuo *RequestVerificationUpdateOne) SetNillableProviderLink(s *string) *RequestVerificationUpdateOne {
-	if s != nil {
-		rvuo.SetProviderLink(*s)
 	}
 	return rvuo
 }
@@ -695,11 +659,6 @@ func (rvuo *RequestVerificationUpdateOne) check() error {
 			return &ValidationError{Name: "link", err: fmt.Errorf(`ent: validator failed for field "RequestVerification.link": %w`, err)}
 		}
 	}
-	if v, ok := rvuo.mutation.ProviderLink(); ok {
-		if err := requestverification.ProviderLinkValidator(v); err != nil {
-			return &ValidationError{Name: "provider_link", err: fmt.Errorf(`ent: validator failed for field "RequestVerification.provider_link": %w`, err)}
-		}
-	}
 	if v, ok := rvuo.mutation.Status(); ok {
 		if err := requestverification.StatusValidator(v); err != nil {
 			return &ValidationError{Name: "status", err: fmt.Errorf(`ent: validator failed for field "RequestVerification.status": %w`, err)}
@@ -750,16 +709,13 @@ func (rvuo *RequestVerificationUpdateOne) sqlSave(ctx context.Context) (_node *R
 		_spec.SetField(requestverification.FieldReferenceID, field.TypeString, value)
 	}
 	if value, ok := rvuo.mutation.VerificationType(); ok {
-		_spec.SetField(requestverification.FieldVerificationType, field.TypeString, value)
+		_spec.SetField(requestverification.FieldVerificationType, field.TypeEnum, value)
 	}
 	if value, ok := rvuo.mutation.Provider(); ok {
 		_spec.SetField(requestverification.FieldProvider, field.TypeString, value)
 	}
 	if value, ok := rvuo.mutation.Link(); ok {
 		_spec.SetField(requestverification.FieldLink, field.TypeString, value)
-	}
-	if value, ok := rvuo.mutation.ProviderLink(); ok {
-		_spec.SetField(requestverification.FieldProviderLink, field.TypeString, value)
 	}
 	if value, ok := rvuo.mutation.Status(); ok {
 		_spec.SetField(requestverification.FieldStatus, field.TypeEnum, value)

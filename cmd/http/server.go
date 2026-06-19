@@ -13,6 +13,7 @@ import (
 	"github.com/Toflex/directory_v2/cmd/http/runtime"
 	r "github.com/Toflex/directory_v2/database/redis"
 	"github.com/Toflex/directory_v2/ent"
+	"github.com/Toflex/directory_v2/middlewares"
 	"github.com/Toflex/directory_v2/pkg/configuration"
 	"github.com/Toflex/directory_v2/pkg/queue"
 	qserver "github.com/Toflex/directory_v2/pkg/queue/server"
@@ -46,7 +47,7 @@ func main() {
 	runtime.InitializeDI()
 
 	// register providers
-	runtime.Register()
+	runtime.Register(runtime.Injector)
 
 	// close database
 	db := do.MustInvoke[*ent.Client](runtime.Injector)
@@ -72,6 +73,9 @@ func main() {
 
 	// http engine
 	engine := do.MustInvoke[*gin.Engine](runtime.Injector)
+
+	// initialaze Middlewares
+	middlewares.InitializeMiddleWares(runtime.Injector)
 
 	// initialize routes
 	router.InitializeRoutes(engine)

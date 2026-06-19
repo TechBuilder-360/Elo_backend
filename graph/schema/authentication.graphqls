@@ -19,6 +19,7 @@ input Login {
 type LoginResponse {
   access_token: String!
   expire_at: Int64!
+  user: User!
 }
 
 input RequestOTP {
@@ -30,8 +31,11 @@ type OTPResponse {
   Identifier: String!
 }
 
+
+
 type Mutation {
   registration(input: Registration!): RegistrationResponse!
   login(input: Login!): LoginResponse!
   requestOtp(input: RequestOTP): OTPResponse!
+  logout: Boolean! @authUser
 }
