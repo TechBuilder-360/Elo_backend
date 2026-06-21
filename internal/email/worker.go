@@ -70,13 +70,13 @@ func HandleWelcomeEmailTask(ctx context.Context, t *asynq.Task) error {
 		return err
 	}
 
-	impl.Send(ctx, MailPayload{
+	err = impl.Send(ctx, MailPayload{
 		HTMLContent: htmlContent.String(),
 		Subject:     "Welcome to ELO",
 		To:          []Sender{{Email: data.ToMail, Name: data.ToName}},
 	})
 
-	return nil
+	return err
 }
 
 func HandleOTPEmailTask(ctx context.Context, t *asynq.Task) error {
@@ -99,11 +99,40 @@ func HandleOTPEmailTask(ctx context.Context, t *asynq.Task) error {
 		return err
 	}
 
-	impl.Send(ctx, MailPayload{
+	err = impl.Send(ctx, MailPayload{
 		HTMLContent: htmlContent.String(),
 		Subject:     "ELO OTP",
 		To:          []Sender{{Email: data.ToMail, Name: data.ToName}},
 	})
 
-	return nil
+	return err
+}
+
+func HandleVericationEmailTask(ctx context.Context, t *asynq.Task) error {
+	logger := log.LoggerInContext(ctx)
+
+	var data VerificationMailPayload
+	if err := json.Unmarshal(t.Payload(), &data); err != nil {
+		return fmt.Errorf("json.Unmarshal failed: %v: %w", err, asynq.SkipRetry)
+	}
+
+	// Email delivery code ...
+	impl, err := GetEmailProvider(ctx, logger)
+	if err != nil {
+		logger.WithError(err).Error("failed to get active email provider")
+		return errors.New(errors.ErrFailed, "request failed")
+	}
+
+	htmlContent, err := extractEmailTemplate(data, logger, "user_verification")
+	if err != nil {
+		return err
+	}
+
+	err = impl.Send(ctx, MailPayload{
+		HTMLContent: htmlContent.String(),
+		Subject:     "Your Account Verification Status Has Been Updated",
+		To:          []Sender{{Email: data.ToMail, Name: data.FullName}},
+	})
+
+	return err
 }

@@ -177,6 +177,7 @@ var (
 		{Name: "reference_id", Type: field.TypeString, Unique: true},
 		{Name: "verification_type", Type: field.TypeEnum, Enums: []string{"USER", "BUSINESS"}},
 		{Name: "provider", Type: field.TypeString},
+		{Name: "message", Type: field.TypeString, Nullable: true},
 		{Name: "link", Type: field.TypeString},
 		{Name: "status", Type: field.TypeEnum, Enums: []string{"PENDING", "IN_PROGRESS", "VERIFIED", "FAILED", "REJECTED", "EXPIRED"}, Default: "PENDING"},
 	}

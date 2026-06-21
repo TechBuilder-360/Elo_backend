@@ -6,6 +6,7 @@ import (
 	"github.com/Toflex/directory_v2/database/database"
 	"github.com/Toflex/directory_v2/ent"
 	"github.com/Toflex/directory_v2/pkg/provider"
+	"github.com/Toflex/directory_v2/pkg/providers/cloudinary"
 )
 
 type IService interface {
@@ -17,11 +18,13 @@ type IService interface {
 type Service struct {
 	db             *ent.Client
 	serviceLocator provider.IService
+	cloudinary     cloudinary.Cloud
 }
 
 func NewService() IService {
 	return &Service{
 		db:             database.DBInstance(),
 		serviceLocator: provider.NewService(),
+		cloudinary:     *cloudinary.New(),
 	}
 }

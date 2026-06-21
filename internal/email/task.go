@@ -33,3 +33,15 @@ func NewOTPTask(request OTPMailRequest) error {
 		Data:      request,
 	})
 }
+
+func NewUserVerificationTask(request VerificationMailPayload) error {
+	return queue.Enqueue(constant.TaskUserVerification, queue.TaskPayload{
+		TaskID:    util.GenerateUUID(),
+		QueueName: queueName,
+		Retention: time.Hour,
+		Retry:     3,
+		Timeout:   time.Second * 30,
+		WaitTime:  0,
+		Data:      request,
+	})
+}

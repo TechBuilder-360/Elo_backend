@@ -2,10 +2,13 @@ package util
 
 import (
 	"crypto/rand"
+	"encoding/base64"
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"math/big"
+	"net/http"
 	"net/url"
 	"regexp"
 	"strconv"
@@ -163,4 +166,33 @@ func PasswordStrength(password string) (bool, error) {
 	}
 
 	return true, nil
+}
+
+func Contains(arr []string, s string) bool {
+	for _, v := range arr {
+		if strings.EqualFold(v, s) {
+			return true
+		}
+	}
+
+	return false
+}
+
+func URLToBase64(url string) (string, error) {
+	resp, err := http.Get(url)
+	if err != nil {
+		return "", err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return "", fmt.Errorf("failed to download: %s", resp.Status)
+	}
+
+	data, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return "", err
+	}
+
+	return base64.RawStdEncoding.EncodeToString(data), nil
 }

@@ -3,7 +3,6 @@ package verification
 import (
 	"encoding/base64"
 	"encoding/json"
-	"fmt"
 	"time"
 
 	"github.com/Toflex/directory_v2/pkg/constant"
@@ -20,7 +19,6 @@ func QueueVerificationTask(request VerificationResult) error {
 
 	b64 := base64.RawStdEncoding.EncodeToString(byt)
 
-	fmt.Println(string(b64))
 	return queue.Enqueue(constant.TaskTypeIdentityVerification, queue.TaskPayload{
 		TaskID:    request.ReferenceID,
 		QueueName: queueName,
