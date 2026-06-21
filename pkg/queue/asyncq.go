@@ -2,7 +2,6 @@ package queue
 
 import (
 	"encoding/json"
-	"fmt"
 	"time"
 
 	"github.com/Toflex/directory_v2/pkg/configuration"
@@ -64,8 +63,6 @@ func Enqueue(taskType string, payload TaskPayload) error {
 	if err != nil {
 		return err
 	}
-
-	fmt.Println(string(data))
 
 	task := asynq.NewTask(taskType, data)
 

@@ -27,6 +27,8 @@ const (
 	FieldVerificationType = "verification_type"
 	// FieldProvider holds the string denoting the provider field in the database.
 	FieldProvider = "provider"
+	// FieldMessage holds the string denoting the message field in the database.
+	FieldMessage = "message"
 	// FieldLink holds the string denoting the link field in the database.
 	FieldLink = "link"
 	// FieldStatus holds the string denoting the status field in the database.
@@ -58,6 +60,7 @@ var Columns = []string{
 	FieldReferenceID,
 	FieldVerificationType,
 	FieldProvider,
+	FieldMessage,
 	FieldLink,
 	FieldStatus,
 }
@@ -187,6 +190,11 @@ func ByVerificationType(opts ...sql.OrderTermOption) OrderOption {
 // ByProvider orders the results by the provider field.
 func ByProvider(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldProvider, opts...).ToFunc()
+}
+
+// ByMessage orders the results by the message field.
+func ByMessage(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldMessage, opts...).ToFunc()
 }
 
 // ByLink orders the results by the link field.

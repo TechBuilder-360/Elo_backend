@@ -29,6 +29,8 @@ type RequestVerification struct {
 	VerificationType requestverification.VerificationType `json:"verification_type,omitempty"`
 	// Provider holds the value of the "provider" field.
 	Provider string `json:"provider,omitempty"`
+	// Message holds the value of the "message" field.
+	Message *string `json:"message,omitempty"`
 	// Link holds the value of the "link" field.
 	Link string `json:"link,omitempty"`
 	// Status holds the value of the "status" field.
@@ -73,7 +75,7 @@ func (*RequestVerification) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case requestverification.FieldID, requestverification.FieldReferenceID, requestverification.FieldVerificationType, requestverification.FieldProvider, requestverification.FieldLink, requestverification.FieldStatus:
+		case requestverification.FieldID, requestverification.FieldReferenceID, requestverification.FieldVerificationType, requestverification.FieldProvider, requestverification.FieldMessage, requestverification.FieldLink, requestverification.FieldStatus:
 			values[i] = new(sql.NullString)
 		case requestverification.FieldCreatedAt, requestverification.FieldUpdatedAt, requestverification.FieldDeletedAt:
 			values[i] = new(sql.NullTime)
@@ -134,6 +136,13 @@ func (rv *RequestVerification) assignValues(columns []string, values []any) erro
 				return fmt.Errorf("unexpected type %T for field provider", values[i])
 			} else if value.Valid {
 				rv.Provider = value.String
+			}
+		case requestverification.FieldMessage:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field message", values[i])
+			} else if value.Valid {
+				rv.Message = new(string)
+				*rv.Message = value.String
 			}
 		case requestverification.FieldLink:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -212,6 +221,11 @@ func (rv *RequestVerification) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("provider=")
 	builder.WriteString(rv.Provider)
+	builder.WriteString(", ")
+	if v := rv.Message; v != nil {
+		builder.WriteString("message=")
+		builder.WriteString(*v)
+	}
 	builder.WriteString(", ")
 	builder.WriteString("link=")
 	builder.WriteString(rv.Link)

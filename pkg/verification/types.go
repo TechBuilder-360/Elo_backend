@@ -3,14 +3,16 @@ package verification
 import "github.com/Toflex/directory_v2/pkg/types"
 
 type VerificationResult struct {
-	Provider       types.Provider  `json:"provider"`
-	ReferenceID    string          `json:"reference_id"`
-	Metadata       interface{}     `json:"meta_map"`
-	BVN            *BVN            `json:"bvn"`
-	NationalID     *NationalID     `json:"nin"`
-	Passport       *Passport       `json:"passport"`
-	DriversLicense *DriversLicense `json:"drivers_license"`
-	VoterID        *VoterID        `json:"voter_id"`
+	Provider       types.Provider           `json:"provider"`
+	ReferenceID    string                   `json:"reference_id"`
+	Message        string                   `json:"message"`
+	Metadata       interface{}              `json:"meta_map"`
+	Status         types.VerificationStatus `json:"status"`
+	BVN            BVN                      `json:"bvn"`
+	NationalID     NationalID               `json:"nin"`
+	Passport       Passport                 `json:"passport"`
+	DriversLicense DriversLicense           `json:"drivers_license"`
+	VoterID        VoterID                  `json:"voter_id"`
 }
 
 type VerificationRequest struct {

@@ -98,6 +98,26 @@ func (rvu *RequestVerificationUpdate) SetNillableProvider(s *string) *RequestVer
 	return rvu
 }
 
+// SetMessage sets the "message" field.
+func (rvu *RequestVerificationUpdate) SetMessage(s string) *RequestVerificationUpdate {
+	rvu.mutation.SetMessage(s)
+	return rvu
+}
+
+// SetNillableMessage sets the "message" field if the given value is not nil.
+func (rvu *RequestVerificationUpdate) SetNillableMessage(s *string) *RequestVerificationUpdate {
+	if s != nil {
+		rvu.SetMessage(*s)
+	}
+	return rvu
+}
+
+// ClearMessage clears the value of the "message" field.
+func (rvu *RequestVerificationUpdate) ClearMessage() *RequestVerificationUpdate {
+	rvu.mutation.ClearMessage()
+	return rvu
+}
+
 // SetLink sets the "link" field.
 func (rvu *RequestVerificationUpdate) SetLink(s string) *RequestVerificationUpdate {
 	rvu.mutation.SetLink(s)
@@ -299,6 +319,12 @@ func (rvu *RequestVerificationUpdate) sqlSave(ctx context.Context) (n int, err e
 	if value, ok := rvu.mutation.Provider(); ok {
 		_spec.SetField(requestverification.FieldProvider, field.TypeString, value)
 	}
+	if value, ok := rvu.mutation.Message(); ok {
+		_spec.SetField(requestverification.FieldMessage, field.TypeString, value)
+	}
+	if rvu.mutation.MessageCleared() {
+		_spec.ClearField(requestverification.FieldMessage, field.TypeString)
+	}
 	if value, ok := rvu.mutation.Link(); ok {
 		_spec.SetField(requestverification.FieldLink, field.TypeString, value)
 	}
@@ -480,6 +506,26 @@ func (rvuo *RequestVerificationUpdateOne) SetNillableProvider(s *string) *Reques
 	if s != nil {
 		rvuo.SetProvider(*s)
 	}
+	return rvuo
+}
+
+// SetMessage sets the "message" field.
+func (rvuo *RequestVerificationUpdateOne) SetMessage(s string) *RequestVerificationUpdateOne {
+	rvuo.mutation.SetMessage(s)
+	return rvuo
+}
+
+// SetNillableMessage sets the "message" field if the given value is not nil.
+func (rvuo *RequestVerificationUpdateOne) SetNillableMessage(s *string) *RequestVerificationUpdateOne {
+	if s != nil {
+		rvuo.SetMessage(*s)
+	}
+	return rvuo
+}
+
+// ClearMessage clears the value of the "message" field.
+func (rvuo *RequestVerificationUpdateOne) ClearMessage() *RequestVerificationUpdateOne {
+	rvuo.mutation.ClearMessage()
 	return rvuo
 }
 
@@ -713,6 +759,12 @@ func (rvuo *RequestVerificationUpdateOne) sqlSave(ctx context.Context) (_node *R
 	}
 	if value, ok := rvuo.mutation.Provider(); ok {
 		_spec.SetField(requestverification.FieldProvider, field.TypeString, value)
+	}
+	if value, ok := rvuo.mutation.Message(); ok {
+		_spec.SetField(requestverification.FieldMessage, field.TypeString, value)
+	}
+	if rvuo.mutation.MessageCleared() {
+		_spec.ClearField(requestverification.FieldMessage, field.TypeString)
 	}
 	if value, ok := rvuo.mutation.Link(); ok {
 		_spec.SetField(requestverification.FieldLink, field.TypeString, value)

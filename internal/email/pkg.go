@@ -20,6 +20,14 @@ type MailPayload struct {
 	To          []Sender `json:"to"`
 }
 
+type VerificationMailPayload struct {
+	ToMail             string
+	FullName           string
+	VerificationStatus string
+	StatusMessage      string
+	DashboardURL       string
+}
+
 type Sender struct {
 	Email string `json:"email"`
 	Name  string `json:"name"`

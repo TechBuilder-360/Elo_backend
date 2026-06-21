@@ -90,6 +90,11 @@ func Provider(v string) predicate.RequestVerification {
 	return predicate.RequestVerification(sql.FieldEQ(FieldProvider, v))
 }
 
+// Message applies equality check predicate on the "message" field. It's identical to MessageEQ.
+func Message(v string) predicate.RequestVerification {
+	return predicate.RequestVerification(sql.FieldEQ(FieldMessage, v))
+}
+
 // Link applies equality check predicate on the "link" field. It's identical to LinkEQ.
 func Link(v string) predicate.RequestVerification {
 	return predicate.RequestVerification(sql.FieldEQ(FieldLink, v))
@@ -373,6 +378,81 @@ func ProviderEqualFold(v string) predicate.RequestVerification {
 // ProviderContainsFold applies the ContainsFold predicate on the "provider" field.
 func ProviderContainsFold(v string) predicate.RequestVerification {
 	return predicate.RequestVerification(sql.FieldContainsFold(FieldProvider, v))
+}
+
+// MessageEQ applies the EQ predicate on the "message" field.
+func MessageEQ(v string) predicate.RequestVerification {
+	return predicate.RequestVerification(sql.FieldEQ(FieldMessage, v))
+}
+
+// MessageNEQ applies the NEQ predicate on the "message" field.
+func MessageNEQ(v string) predicate.RequestVerification {
+	return predicate.RequestVerification(sql.FieldNEQ(FieldMessage, v))
+}
+
+// MessageIn applies the In predicate on the "message" field.
+func MessageIn(vs ...string) predicate.RequestVerification {
+	return predicate.RequestVerification(sql.FieldIn(FieldMessage, vs...))
+}
+
+// MessageNotIn applies the NotIn predicate on the "message" field.
+func MessageNotIn(vs ...string) predicate.RequestVerification {
+	return predicate.RequestVerification(sql.FieldNotIn(FieldMessage, vs...))
+}
+
+// MessageGT applies the GT predicate on the "message" field.
+func MessageGT(v string) predicate.RequestVerification {
+	return predicate.RequestVerification(sql.FieldGT(FieldMessage, v))
+}
+
+// MessageGTE applies the GTE predicate on the "message" field.
+func MessageGTE(v string) predicate.RequestVerification {
+	return predicate.RequestVerification(sql.FieldGTE(FieldMessage, v))
+}
+
+// MessageLT applies the LT predicate on the "message" field.
+func MessageLT(v string) predicate.RequestVerification {
+	return predicate.RequestVerification(sql.FieldLT(FieldMessage, v))
+}
+
+// MessageLTE applies the LTE predicate on the "message" field.
+func MessageLTE(v string) predicate.RequestVerification {
+	return predicate.RequestVerification(sql.FieldLTE(FieldMessage, v))
+}
+
+// MessageContains applies the Contains predicate on the "message" field.
+func MessageContains(v string) predicate.RequestVerification {
+	return predicate.RequestVerification(sql.FieldContains(FieldMessage, v))
+}
+
+// MessageHasPrefix applies the HasPrefix predicate on the "message" field.
+func MessageHasPrefix(v string) predicate.RequestVerification {
+	return predicate.RequestVerification(sql.FieldHasPrefix(FieldMessage, v))
+}
+
+// MessageHasSuffix applies the HasSuffix predicate on the "message" field.
+func MessageHasSuffix(v string) predicate.RequestVerification {
+	return predicate.RequestVerification(sql.FieldHasSuffix(FieldMessage, v))
+}
+
+// MessageIsNil applies the IsNil predicate on the "message" field.
+func MessageIsNil() predicate.RequestVerification {
+	return predicate.RequestVerification(sql.FieldIsNull(FieldMessage))
+}
+
+// MessageNotNil applies the NotNil predicate on the "message" field.
+func MessageNotNil() predicate.RequestVerification {
+	return predicate.RequestVerification(sql.FieldNotNull(FieldMessage))
+}
+
+// MessageEqualFold applies the EqualFold predicate on the "message" field.
+func MessageEqualFold(v string) predicate.RequestVerification {
+	return predicate.RequestVerification(sql.FieldEqualFold(FieldMessage, v))
+}
+
+// MessageContainsFold applies the ContainsFold predicate on the "message" field.
+func MessageContainsFold(v string) predicate.RequestVerification {
+	return predicate.RequestVerification(sql.FieldContainsFold(FieldMessage, v))
 }
 
 // LinkEQ applies the EQ predicate on the "link" field.

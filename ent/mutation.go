@@ -5955,6 +5955,7 @@ type RequestVerificationMutation struct {
 	reference_id      *string
 	verification_type *requestverification.VerificationType
 	provider          *string
+	message           *string
 	link              *string
 	status            *requestverification.Status
 	clearedFields     map[string]struct{}
@@ -6302,6 +6303,55 @@ func (m *RequestVerificationMutation) ResetProvider() {
 	m.provider = nil
 }
 
+// SetMessage sets the "message" field.
+func (m *RequestVerificationMutation) SetMessage(s string) {
+	m.message = &s
+}
+
+// Message returns the value of the "message" field in the mutation.
+func (m *RequestVerificationMutation) Message() (r string, exists bool) {
+	v := m.message
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldMessage returns the old "message" field's value of the RequestVerification entity.
+// If the RequestVerification object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *RequestVerificationMutation) OldMessage(ctx context.Context) (v *string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldMessage is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldMessage requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldMessage: %w", err)
+	}
+	return oldValue.Message, nil
+}
+
+// ClearMessage clears the value of the "message" field.
+func (m *RequestVerificationMutation) ClearMessage() {
+	m.message = nil
+	m.clearedFields[requestverification.FieldMessage] = struct{}{}
+}
+
+// MessageCleared returns if the "message" field was cleared in this mutation.
+func (m *RequestVerificationMutation) MessageCleared() bool {
+	_, ok := m.clearedFields[requestverification.FieldMessage]
+	return ok
+}
+
+// ResetMessage resets all changes to the "message" field.
+func (m *RequestVerificationMutation) ResetMessage() {
+	m.message = nil
+	delete(m.clearedFields, requestverification.FieldMessage)
+}
+
 // SetLink sets the "link" field.
 func (m *RequestVerificationMutation) SetLink(s string) {
 	m.link = &s
@@ -6516,7 +6566,7 @@ func (m *RequestVerificationMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *RequestVerificationMutation) Fields() []string {
-	fields := make([]string, 0, 8)
+	fields := make([]string, 0, 9)
 	if m.created_at != nil {
 		fields = append(fields, requestverification.FieldCreatedAt)
 	}
@@ -6534,6 +6584,9 @@ func (m *RequestVerificationMutation) Fields() []string {
 	}
 	if m.provider != nil {
 		fields = append(fields, requestverification.FieldProvider)
+	}
+	if m.message != nil {
+		fields = append(fields, requestverification.FieldMessage)
 	}
 	if m.link != nil {
 		fields = append(fields, requestverification.FieldLink)
@@ -6561,6 +6614,8 @@ func (m *RequestVerificationMutation) Field(name string) (ent.Value, bool) {
 		return m.VerificationType()
 	case requestverification.FieldProvider:
 		return m.Provider()
+	case requestverification.FieldMessage:
+		return m.Message()
 	case requestverification.FieldLink:
 		return m.Link()
 	case requestverification.FieldStatus:
@@ -6586,6 +6641,8 @@ func (m *RequestVerificationMutation) OldField(ctx context.Context, name string)
 		return m.OldVerificationType(ctx)
 	case requestverification.FieldProvider:
 		return m.OldProvider(ctx)
+	case requestverification.FieldMessage:
+		return m.OldMessage(ctx)
 	case requestverification.FieldLink:
 		return m.OldLink(ctx)
 	case requestverification.FieldStatus:
@@ -6641,6 +6698,13 @@ func (m *RequestVerificationMutation) SetField(name string, value ent.Value) err
 		}
 		m.SetProvider(v)
 		return nil
+	case requestverification.FieldMessage:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetMessage(v)
+		return nil
 	case requestverification.FieldLink:
 		v, ok := value.(string)
 		if !ok {
@@ -6688,6 +6752,9 @@ func (m *RequestVerificationMutation) ClearedFields() []string {
 	if m.FieldCleared(requestverification.FieldDeletedAt) {
 		fields = append(fields, requestverification.FieldDeletedAt)
 	}
+	if m.FieldCleared(requestverification.FieldMessage) {
+		fields = append(fields, requestverification.FieldMessage)
+	}
 	return fields
 }
 
@@ -6704,6 +6771,9 @@ func (m *RequestVerificationMutation) ClearField(name string) error {
 	switch name {
 	case requestverification.FieldDeletedAt:
 		m.ClearDeletedAt()
+		return nil
+	case requestverification.FieldMessage:
+		m.ClearMessage()
 		return nil
 	}
 	return fmt.Errorf("unknown RequestVerification nullable field %s", name)
@@ -6730,6 +6800,9 @@ func (m *RequestVerificationMutation) ResetField(name string) error {
 		return nil
 	case requestverification.FieldProvider:
 		m.ResetProvider()
+		return nil
+	case requestverification.FieldMessage:
+		m.ResetMessage()
 		return nil
 	case requestverification.FieldLink:
 		m.ResetLink()
