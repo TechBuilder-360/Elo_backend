@@ -263,7 +263,7 @@ func init() {
 	// requestverification.ProviderValidator is a validator for the "provider" field. It is called by the builders before save.
 	requestverification.ProviderValidator = requestverificationDescProvider.Validators[0].(func(string) error)
 	// requestverificationDescLink is the schema descriptor for link field.
-	requestverificationDescLink := requestverificationFields[3].Descriptor()
+	requestverificationDescLink := requestverificationFields[4].Descriptor()
 	// requestverification.LinkValidator is a validator for the "link" field. It is called by the builders before save.
 	requestverification.LinkValidator = func() func(string) error {
 		validators := requestverificationDescLink.Validators

@@ -85,6 +85,20 @@ func (rvc *RequestVerificationCreate) SetProvider(s string) *RequestVerification
 	return rvc
 }
 
+// SetMessage sets the "message" field.
+func (rvc *RequestVerificationCreate) SetMessage(s string) *RequestVerificationCreate {
+	rvc.mutation.SetMessage(s)
+	return rvc
+}
+
+// SetNillableMessage sets the "message" field if the given value is not nil.
+func (rvc *RequestVerificationCreate) SetNillableMessage(s *string) *RequestVerificationCreate {
+	if s != nil {
+		rvc.SetMessage(*s)
+	}
+	return rvc
+}
+
 // SetLink sets the "link" field.
 func (rvc *RequestVerificationCreate) SetLink(s string) *RequestVerificationCreate {
 	rvc.mutation.SetLink(s)
@@ -310,6 +324,10 @@ func (rvc *RequestVerificationCreate) createSpec() (*RequestVerification, *sqlgr
 		_spec.SetField(requestverification.FieldProvider, field.TypeString, value)
 		_node.Provider = value
 	}
+	if value, ok := rvc.mutation.Message(); ok {
+		_spec.SetField(requestverification.FieldMessage, field.TypeString, value)
+		_node.Message = &value
+	}
 	if value, ok := rvc.mutation.Link(); ok {
 		_spec.SetField(requestverification.FieldLink, field.TypeString, value)
 		_node.Link = value
@@ -468,6 +486,24 @@ func (u *RequestVerificationUpsert) UpdateProvider() *RequestVerificationUpsert 
 	return u
 }
 
+// SetMessage sets the "message" field.
+func (u *RequestVerificationUpsert) SetMessage(v string) *RequestVerificationUpsert {
+	u.Set(requestverification.FieldMessage, v)
+	return u
+}
+
+// UpdateMessage sets the "message" field to the value that was provided on create.
+func (u *RequestVerificationUpsert) UpdateMessage() *RequestVerificationUpsert {
+	u.SetExcluded(requestverification.FieldMessage)
+	return u
+}
+
+// ClearMessage clears the value of the "message" field.
+func (u *RequestVerificationUpsert) ClearMessage() *RequestVerificationUpsert {
+	u.SetNull(requestverification.FieldMessage)
+	return u
+}
+
 // SetLink sets the "link" field.
 func (u *RequestVerificationUpsert) SetLink(v string) *RequestVerificationUpsert {
 	u.Set(requestverification.FieldLink, v)
@@ -617,6 +653,27 @@ func (u *RequestVerificationUpsertOne) SetProvider(v string) *RequestVerificatio
 func (u *RequestVerificationUpsertOne) UpdateProvider() *RequestVerificationUpsertOne {
 	return u.Update(func(s *RequestVerificationUpsert) {
 		s.UpdateProvider()
+	})
+}
+
+// SetMessage sets the "message" field.
+func (u *RequestVerificationUpsertOne) SetMessage(v string) *RequestVerificationUpsertOne {
+	return u.Update(func(s *RequestVerificationUpsert) {
+		s.SetMessage(v)
+	})
+}
+
+// UpdateMessage sets the "message" field to the value that was provided on create.
+func (u *RequestVerificationUpsertOne) UpdateMessage() *RequestVerificationUpsertOne {
+	return u.Update(func(s *RequestVerificationUpsert) {
+		s.UpdateMessage()
+	})
+}
+
+// ClearMessage clears the value of the "message" field.
+func (u *RequestVerificationUpsertOne) ClearMessage() *RequestVerificationUpsertOne {
+	return u.Update(func(s *RequestVerificationUpsert) {
+		s.ClearMessage()
 	})
 }
 
@@ -940,6 +997,27 @@ func (u *RequestVerificationUpsertBulk) SetProvider(v string) *RequestVerificati
 func (u *RequestVerificationUpsertBulk) UpdateProvider() *RequestVerificationUpsertBulk {
 	return u.Update(func(s *RequestVerificationUpsert) {
 		s.UpdateProvider()
+	})
+}
+
+// SetMessage sets the "message" field.
+func (u *RequestVerificationUpsertBulk) SetMessage(v string) *RequestVerificationUpsertBulk {
+	return u.Update(func(s *RequestVerificationUpsert) {
+		s.SetMessage(v)
+	})
+}
+
+// UpdateMessage sets the "message" field to the value that was provided on create.
+func (u *RequestVerificationUpsertBulk) UpdateMessage() *RequestVerificationUpsertBulk {
+	return u.Update(func(s *RequestVerificationUpsert) {
+		s.UpdateMessage()
+	})
+}
+
+// ClearMessage clears the value of the "message" field.
+func (u *RequestVerificationUpsertBulk) ClearMessage() *RequestVerificationUpsertBulk {
+	return u.Update(func(s *RequestVerificationUpsert) {
+		s.ClearMessage()
 	})
 }
 

@@ -17,22 +17,22 @@ type config struct {
 	CloudName string `env:"CLOUDINARY_CLOUD_NAME" required:"true"`
 }
 
-type cloud struct {
+type Cloud struct {
 	config config
 	cld    *c.Cloudinary
 }
 
 // DisplayName implements [provider.Impl].
-func (c *cloud) DisplayName() string {
+func (c *Cloud) DisplayName() string {
 	return constant.Cloudinary.ToString()
 }
 
 // Slug implements [provider.Impl].
-func (c *cloud) Slug() string {
+func (c *Cloud) Slug() string {
 	return strings.ToLower(constant.Cloudinary.ToString())
 }
 
-func New() *cloud {
+func New() *Cloud {
 	config := config{}
 	configuration.Load(&config)
 
@@ -42,10 +42,10 @@ func New() *cloud {
 		log.WithError(err).Error("Failed to initialize cloudinary client")
 	}
 
-	return &cloud{
+	return &Cloud{
 		config: config,
 		cld:    cld,
 	}
 }
 
-var _ provider.Impl = (*cloud)(nil)
+var _ provider.Impl = (*Cloud)(nil)

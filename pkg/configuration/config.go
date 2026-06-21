@@ -31,6 +31,7 @@ type baseConfig struct {
 	TOKENLIFESPAN uint        `env:"TOKEN_LIFE_SPAN"`
 	BasicUsername string      `env:"BASIC_USERNAME"`
 	BasicPassword string      `env:"BASIC_PASSWORD"`
+	DashboardUrl  string      `env:"DASHBOARD_URL"`
 }
 
 func LoadBaseConfiguration() {
