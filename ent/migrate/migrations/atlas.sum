@@ -1,4 +1,5 @@
 <<<<<<< HEAD
+<<<<<<< HEAD
 h1:+vcmKl5YCkIpf3C/Eg2Q031TZO7Q1E+C1ruskQ4fnjY=
 20260521172136_directory.sql h1:1ITpRlokTKd8M9M63oC2SDr0cMQIIlvOkQeyuwzJXHc=
 20260521183043_directory.sql h1:M/PDdZ7GH4ufXwDHLGqHknBwNmzSU6bseDBan93Mk+M=
@@ -14,10 +15,17 @@ h1:+vcmKl5YCkIpf3C/Eg2Q031TZO7Q1E+C1ruskQ4fnjY=
 20260711131332_directory.sql h1:OtdKOuoLK+sq5wX0CAhbuxs3cIuaNvytep3kzvrbZcg=
 =======
 h1:V+W/a9qCqOp4xKEvrcW+/p4LSXt+1KQYF8ML7XkFCoY=
+=======
+h1:dOcYgSkoooin0q7g5fuCvTUJLEaMgtjyAvPUyFhmvgI=
+>>>>>>> cbde155 (User Identity verification (#41))
 20260521172136_directory.sql h1:xjntP2JtUxu3/+0AEouqy26opWp+2ysuZkdhrVvyuRc=
 20260521183043_directory.sql h1:UxypfpsZIMurWATfmTXIRPS3nGNmwKzNFYWEJgmuz7M=
 20260603155857_directory.sql h1:z9B1pleujcTYH32nODCRJBfYAfSNUtAh9fSzATe+KFw=
 20260616093156_directory.sql h1:UikF1rMRkrZj7kCAsLTS5+wsob0aoW9lzRIb3YEgtOw=
 20260619093026_directory.sql h1:Jvd3OIZ3ZWZQCU54SsKtFUA2ULyQZ5DXi+IBhMVABYc=
 20260619115529_directory.sql h1:l9qJaqtkjJTWrUB2yp1tLyB0kahLVfCvHD55+pfrRIE=
+<<<<<<< HEAD
 >>>>>>> 92229ce (User identity verification (#39))
+=======
+20260620154039_directory.sql h1:CaPJoxEwlgYuspuU7oRcgekpViSc2tWdVLvJlAv+KO4=
+>>>>>>> cbde155 (User Identity verification (#41))
