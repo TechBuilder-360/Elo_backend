@@ -52,6 +52,7 @@ func NewServer(i do.Injector) (*Server, error) {
 	mux.HandleFunc(constant.TaskTypeWelcomeEmail, email.HandleWelcomeEmailTask)
 	mux.HandleFunc(constant.TaskTypeOTPEmail, email.HandleOTPEmailTask)
 	mux.HandleFunc(constant.TaskTypeIdentityVerification, verification.ProcessVerificationTask)
+	mux.HandleFunc(constant.TaskUserVerification, email.HandleVericationEmailTask)
 
 	return &Server{srv: srv, mux: mux}, nil
 }

@@ -24,6 +24,7 @@ func (RequestVerification) Fields() []ent.Field {
 		field.String("reference_id").Unique().NotEmpty(),
 		field.Enum("verification_type").Values("USER", "BUSINESS"),
 		field.String("provider").NotEmpty(),
+		field.String("message").Optional().Nillable(),
 		field.String("link").NotEmpty().Validate(func(s string) error {
 			return util.ValidateURL(s)
 		}),

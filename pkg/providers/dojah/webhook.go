@@ -8,6 +8,7 @@ import (
 
 	"github.com/Toflex/directory_v2/pkg/constant"
 	"github.com/Toflex/directory_v2/pkg/log"
+	"github.com/Toflex/directory_v2/pkg/types"
 	"github.com/Toflex/directory_v2/pkg/verification"
 	"github.com/gin-gonic/gin"
 )
@@ -51,20 +52,29 @@ func (d *dojah) handleDojahWebhook(ctx *gin.Context) {
 }
 
 func (d *dojah) processDojahWebhook(ctx context.Context, payload *WebhookPayload, logger log.Entry) error {
-	if payload.VerificationStatus != "Completed" {
+	var status types.VerificationStatus = constant.Pending
+
+	switch payload.VerificationStatus {
+	case "Completed":
+		status = constant.Success
+	case "Failed":
+		status = constant.Failed
+	default:
 		return nil
 	}
 
 	var (
 		identificationDetails = verification.VerificationResult{
-			Provider:       constant.Dojah,
-			ReferenceID:    payload.ReferenceID,
-			Metadata:       payload.Metadata,
-			NationalID:     &verification.NationalID{},
-			Passport:       &verification.Passport{},
-			BVN:            &verification.BVN{},
-			DriversLicense: &verification.DriversLicense{},
-			VoterID:        &verification.VoterID{},
+			Provider:    constant.Dojah,
+			ReferenceID: payload.ReferenceID,
+			Metadata:    payload.Metadata,
+			Status:      status,
+			Message:     payload.Message,
+			// NationalID:     verification.NationalID{},
+			// Passport:       verification.Passport{},
+			// BVN:            verification.BVN{},
+			// DriversLicense: verification.DriversLicense{},
+			// VoterID:        verification.VoterID{},
 		}
 		documentType = payload.Data.ID.Data.IDData.DocumentType
 		idData       = payload.Data.ID.Data.IDData
