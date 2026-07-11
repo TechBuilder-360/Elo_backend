@@ -38,18 +38,18 @@ type ResolverRoot interface {
 }
 
 type DirectiveRoot struct {
-	AuthUser func(ctx context.Context, obj any, next graphql.Resolver) (res any, err error)
+	AuthBusiness func(ctx context.Context, obj any, next graphql.Resolver) (res any, err error)
+	AuthUser     func(ctx context.Context, obj any, next graphql.Resolver) (res any, err error)
+	HasRole      func(ctx context.Context, obj any, next graphql.Resolver, role model.Role0) (res any, err error)
 }
 
 type ComplexityRoot struct {
 	Business struct {
-		About    func(childComplexity int) int
-		Email    func(childComplexity int) int
-		ID       func(childComplexity int) int
-		Logo     func(childComplexity int) int
-		Name     func(childComplexity int) int
-		Services func(childComplexity int) int
-		Socials  func(childComplexity int) int
+		About func(childComplexity int) int
+		Email func(childComplexity int) int
+		ID    func(childComplexity int) int
+		Logo  func(childComplexity int) int
+		Name  func(childComplexity int) int
 	}
 
 	LoginResponse struct {
@@ -59,12 +59,15 @@ type ComplexityRoot struct {
 	}
 
 	Mutation struct {
+		BusinessDetail          func(childComplexity int, input model.BusinessDetail) int
+		DeleteDocument          func(childComplexity int, input model.RemoveDocumentInput) int
 		Login                   func(childComplexity int, input model.Login) int
 		Logout                  func(childComplexity int) int
 		RegisterBusiness        func(childComplexity int, input model.RegisterBusinessInput) int
 		Registration            func(childComplexity int, input model.Registration) int
 		RequestOtp              func(childComplexity int, input *model.RequestOtp) int
 		RequestUserVerification func(childComplexity int, input model.VerificationPayload) int
+		UploadDocument          func(childComplexity int, input model.DocumentInput) int
 	}
 
 	OTPResponse struct {
@@ -72,18 +75,18 @@ type ComplexityRoot struct {
 	}
 
 	Query struct {
+		Business         func(childComplexity int, id string) int
 		FindBusiness     func(childComplexity int, name *string, service *string, limit *int32) int
-		GetBusiness      func(childComplexity int, id string) int
+		GetCategories    func(childComplexity int) int
+		GetDocuments     func(childComplexity int) int
+		GetKYBDocuments  func(childComplexity int) int
 		GetUserBusinsses func(childComplexity int) int
 		Me               func(childComplexity int) int
+		MyBusinesses     func(childComplexity int) int
 	}
 
 	RegistrationResponse struct {
 		UserID func(childComplexity int) int
-	}
-
-	Response struct {
-		Ok func(childComplexity int) int
 	}
 
 	SearchBusiness struct {
@@ -123,6 +126,26 @@ type ComplexityRoot struct {
 	VerificationSuccess struct {
 		Link   func(childComplexity int) int
 		Status func(childComplexity int) int
+	}
+
+	BusinessDocument struct {
+		Description func(childComplexity int) int
+		DocumentID  func(childComplexity int) int
+		ID          func(childComplexity int) int
+		URL         func(childComplexity int) int
+	}
+
+	KybDocument struct {
+		ID       func(childComplexity int) int
+		Name     func(childComplexity int) int
+		Required func(childComplexity int) int
+	}
+
+	MyBusiness struct {
+		ID   func(childComplexity int) int
+		Logo func(childComplexity int) int
+		Name func(childComplexity int) int
+		Role func(childComplexity int) int
 	}
 }
 
@@ -180,20 +203,6 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 
 		return e.complexity.Business.Name(childComplexity), true
 
-	case "Business.services":
-		if e.complexity.Business.Services == nil {
-			break
-		}
-
-		return e.complexity.Business.Services(childComplexity), true
-
-	case "Business.socials":
-		if e.complexity.Business.Socials == nil {
-			break
-		}
-
-		return e.complexity.Business.Socials(childComplexity), true
-
 	case "LoginResponse.access_token":
 		if e.complexity.LoginResponse.AccessToken == nil {
 			break
@@ -214,6 +223,30 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.complexity.LoginResponse.User(childComplexity), true
+
+	case "Mutation.businessDetail":
+		if e.complexity.Mutation.BusinessDetail == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_businessDetail_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.BusinessDetail(childComplexity, args["input"].(model.BusinessDetail)), true
+
+	case "Mutation.deleteDocument":
+		if e.complexity.Mutation.DeleteDocument == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_deleteDocument_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.DeleteDocument(childComplexity, args["input"].(model.RemoveDocumentInput)), true
 
 	case "Mutation.login":
 		if e.complexity.Mutation.Login == nil {
@@ -282,12 +315,36 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 
 		return e.complexity.Mutation.RequestUserVerification(childComplexity, args["input"].(model.VerificationPayload)), true
 
+	case "Mutation.uploadDocument":
+		if e.complexity.Mutation.UploadDocument == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_uploadDocument_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.UploadDocument(childComplexity, args["input"].(model.DocumentInput)), true
+
 	case "OTPResponse.Identifier":
 		if e.complexity.OTPResponse.Identifier == nil {
 			break
 		}
 
 		return e.complexity.OTPResponse.Identifier(childComplexity), true
+
+	case "Query.business":
+		if e.complexity.Query.Business == nil {
+			break
+		}
+
+		args, err := ec.field_Query_business_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.Business(childComplexity, args["id"].(string)), true
 
 	case "Query.findBusiness":
 		if e.complexity.Query.FindBusiness == nil {
@@ -301,17 +358,26 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 
 		return e.complexity.Query.FindBusiness(childComplexity, args["name"].(*string), args["service"].(*string), args["limit"].(*int32)), true
 
-	case "Query.getBusiness":
-		if e.complexity.Query.GetBusiness == nil {
+	case "Query.getCategories":
+		if e.complexity.Query.GetCategories == nil {
 			break
 		}
 
-		args, err := ec.field_Query_getBusiness_args(ctx, rawArgs)
-		if err != nil {
-			return 0, false
+		return e.complexity.Query.GetCategories(childComplexity), true
+
+	case "Query.getDocuments":
+		if e.complexity.Query.GetDocuments == nil {
+			break
 		}
 
-		return e.complexity.Query.GetBusiness(childComplexity, args["id"].(string)), true
+		return e.complexity.Query.GetDocuments(childComplexity), true
+
+	case "Query.getKYBDocuments":
+		if e.complexity.Query.GetKYBDocuments == nil {
+			break
+		}
+
+		return e.complexity.Query.GetKYBDocuments(childComplexity), true
 
 	case "Query.getUserBusinsses":
 		if e.complexity.Query.GetUserBusinsses == nil {
@@ -327,19 +393,19 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 
 		return e.complexity.Query.Me(childComplexity), true
 
+	case "Query.myBusinesses":
+		if e.complexity.Query.MyBusinesses == nil {
+			break
+		}
+
+		return e.complexity.Query.MyBusinesses(childComplexity), true
+
 	case "RegistrationResponse.user_id":
 		if e.complexity.RegistrationResponse.UserID == nil {
 			break
 		}
 
 		return e.complexity.RegistrationResponse.UserID(childComplexity), true
-
-	case "Response.ok":
-		if e.complexity.Response.Ok == nil {
-			break
-		}
-
-		return e.complexity.Response.Ok(childComplexity), true
 
 	case "SearchBusiness.id":
 		if e.complexity.SearchBusiness.ID == nil {
@@ -488,6 +554,83 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 
 		return e.complexity.VerificationSuccess.Status(childComplexity), true
 
+	case "businessDocument.description":
+		if e.complexity.BusinessDocument.Description == nil {
+			break
+		}
+
+		return e.complexity.BusinessDocument.Description(childComplexity), true
+
+	case "businessDocument.document_id":
+		if e.complexity.BusinessDocument.DocumentID == nil {
+			break
+		}
+
+		return e.complexity.BusinessDocument.DocumentID(childComplexity), true
+
+	case "businessDocument.id":
+		if e.complexity.BusinessDocument.ID == nil {
+			break
+		}
+
+		return e.complexity.BusinessDocument.ID(childComplexity), true
+
+	case "businessDocument.url":
+		if e.complexity.BusinessDocument.URL == nil {
+			break
+		}
+
+		return e.complexity.BusinessDocument.URL(childComplexity), true
+
+	case "kybDocument.id":
+		if e.complexity.KybDocument.ID == nil {
+			break
+		}
+
+		return e.complexity.KybDocument.ID(childComplexity), true
+
+	case "kybDocument.name":
+		if e.complexity.KybDocument.Name == nil {
+			break
+		}
+
+		return e.complexity.KybDocument.Name(childComplexity), true
+
+	case "kybDocument.required":
+		if e.complexity.KybDocument.Required == nil {
+			break
+		}
+
+		return e.complexity.KybDocument.Required(childComplexity), true
+
+	case "myBusiness.id":
+		if e.complexity.MyBusiness.ID == nil {
+			break
+		}
+
+		return e.complexity.MyBusiness.ID(childComplexity), true
+
+	case "myBusiness.logo":
+		if e.complexity.MyBusiness.Logo == nil {
+			break
+		}
+
+		return e.complexity.MyBusiness.Logo(childComplexity), true
+
+	case "myBusiness.name":
+		if e.complexity.MyBusiness.Name == nil {
+			break
+		}
+
+		return e.complexity.MyBusiness.Name(childComplexity), true
+
+	case "myBusiness.role":
+		if e.complexity.MyBusiness.Role == nil {
+			break
+		}
+
+		return e.complexity.MyBusiness.Role(childComplexity), true
+
 	}
 	return 0, false
 }
@@ -499,10 +642,14 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 		ec.unmarshalInputBusinessAddress,
 		ec.unmarshalInputBusinessRegistrationDetail,
 		ec.unmarshalInputDocument,
+		ec.unmarshalInputDocumentInput,
 		ec.unmarshalInputLogin,
 		ec.unmarshalInputRegisterBusinessInput,
 		ec.unmarshalInputRegistration,
+		ec.unmarshalInputRemoveDocumentInput,
 		ec.unmarshalInputRequestOTP,
+		ec.unmarshalInputbusinessDetail,
+		ec.unmarshalInputrole,
 		ec.unmarshalInputverificationPayload,
 	)
 	first := true
@@ -643,7 +790,16 @@ type Mutation {
   logout: Boolean! @authUser
 }
 `, BuiltIn: false},
-	{Name: "../schema/business.graphqls", Input: `scalar Upload
+	{Name: "../schema/business.graphqls", Input: `directive @authBusiness on FIELD_DEFINITION
+directive @hasRole(role: Role!) on FIELD_DEFINITION
+
+enum Role {
+  SUPERADMIN
+    ADMIN
+    MANAGER
+}
+
+scalar Upload
 
 type Business {
   id: ID!
@@ -651,8 +807,15 @@ type Business {
   logo: String
   email: String
   about: String
-  services: [String]!
-  socials: [Social]!
+  # services: [String!]!
+  # socials: [Social!]!
+}
+
+type myBusiness {
+  id: String!
+  name: String!
+  logo: String
+  role: String
 }
 
 type SearchBusiness {
@@ -673,10 +836,15 @@ input RegisterBusinessInput {
   email: String!
   on_site: Boolean!
   industry: String!
-  is_registered: Boolean!
-  address: BusinessAddress!
-  registration_detail: BusinessRegistrationDetail
-  other_document: [Document!]
+  # is_registered: Boolean!
+  address: BusinessAddress
+  # other_document: [Document!]
+  role: role!
+}
+
+input role {
+  authorized_representative: Boolean!
+  authorized_representative_email: String
 }
 
 input Document {
@@ -686,6 +854,7 @@ input Document {
 
 input BusinessAddress {
   number: String
+  city: String!
   street: String!
   state: String!
   country: String!
@@ -696,17 +865,46 @@ input BusinessRegistrationDetail {
   number: String!
   country_of_incorporation: String!
   date_of_incorporation: String!
-  certificate_of_incorporation: Upload!
-  articles_of_association: Upload!
-  status_certificate: Upload!
+  tax_identification_number: String!
 }
 
-type Response {
-  ok: Boolean
+input DocumentInput {
+  document_id: String!
+  description: String!
+  file: String!
+}
+
+input RemoveDocumentInput {
+  id: String!
+}
+
+type kybDocument {
+  id: String!
+  name: String!
+  required: Boolean!
+}
+
+type businessDocument {
+  id: String!
+  description: String!
+  url: String!
+  document_id: String!
+}
+
+input businessDetail {
+ registration_detail: BusinessRegistrationDetail
+  name: String
+  about: String
+  industry: String
+  website: String
 }
 
 extend type Query {
-  getBusiness(id: String!): Business
+  myBusinesses: [myBusiness!] @authUser
+  business(id: String!): Business @authUser
+  getKYBDocuments: [kybDocument!] @authUser
+  getDocuments: [businessDocument!] @hasRole (role: ADMIN)
+  getCategories: [String!]! @authUser
   findBusiness(
     name: String
     service: String
@@ -715,7 +913,10 @@ extend type Query {
 }
 
 extend type Mutation {
-  registerBusiness(input: RegisterBusinessInput!): Response!
+  registerBusiness(input: RegisterBusinessInput!): Boolean! @authUser
+  uploadDocument(input: DocumentInput!): Boolean! @hasRole (role: ADMIN)
+  deleteDocument(input: RemoveDocumentInput!): Boolean! @hasRole(role: ADMIN)
+  businessDetail(input: businessDetail!): Boolean! @hasRole(role: ADMIN)
 }
 `, BuiltIn: false},
 	{Name: "../schema/user.graphqls", Input: `directive @authUser on FIELD_DEFINITION

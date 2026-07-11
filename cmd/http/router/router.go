@@ -3,6 +3,7 @@ package router
 import (
 	"context"
 	"net/http"
+	"strings"
 
 	stderrors "errors"
 
@@ -14,11 +15,16 @@ import (
 	"github.com/99designs/gqlgen/graphql/playground"
 	"github.com/Toflex/directory_v2/cmd/http/runtime"
 	"github.com/Toflex/directory_v2/database/database"
+	biz "github.com/Toflex/directory_v2/ent/business"
+	"github.com/Toflex/directory_v2/ent/manager"
 	"github.com/Toflex/directory_v2/ent/user"
 	"github.com/Toflex/directory_v2/graph/generated"
+	"github.com/Toflex/directory_v2/graph/model"
 	resolver "github.com/Toflex/directory_v2/graph/resolvers"
 	"github.com/Toflex/directory_v2/internal/authentication"
+	"github.com/Toflex/directory_v2/internal/business"
 	"github.com/Toflex/directory_v2/middlewares"
+	rbac "github.com/Toflex/directory_v2/pkg/RBAC"
 	"github.com/Toflex/directory_v2/pkg/configuration"
 	"github.com/Toflex/directory_v2/pkg/errors"
 	apperrors "github.com/Toflex/directory_v2/pkg/errors"
@@ -42,7 +48,7 @@ type asynqMonitorConfig struct {
 func authUserDirective(a authentication.IService) func(ctx context.Context, obj any, next graphql.Resolver) (res any, err error) {
 	return func(ctx context.Context, obj any, next graphql.Resolver) (res any, err error) {
 		logger := log.LoggerInContext(ctx)
-		opCtx := graphql.GetRequestContext(ctx)
+		opCtx := graphql.GetOperationContext(ctx)
 		authHeader := opCtx.Headers.Get("Authorization")
 
 		token, err := middlewares.ExtractBearerToken(authHeader)
@@ -58,7 +64,7 @@ func authUserDirective(a authentication.IService) func(ctx context.Context, obj 
 		}
 
 		usr, err := database.DBInstance().User.Query().Where(user.IDEQ(userID)).First(ctx)
-		if err != nil {
+		if err != nil || usr == nil {
 			logger.WithError(err).WithField("user_id", userID).Error("failed to fetch user")
 			return nil, gqlerror.Errorf("unauthorized")
 		}
@@ -68,15 +74,142 @@ func authUserDirective(a authentication.IService) func(ctx context.Context, obj 
 	}
 }
 
+func authBusinessDirective(a authentication.IService) func(ctx context.Context, obj any, next graphql.Resolver) (res any, err error) {
+	return func(ctx context.Context, obj any, next graphql.Resolver) (res any, err error) {
+		logger := log.LoggerInContext(ctx)
+		opCtx := graphql.GetOperationContext(ctx)
+		authHeader := opCtx.Headers.Get("Authorization")
+		businessHeader := opCtx.Headers.Get("x-business-id")
+
+		if businessHeader == "" {
+			logger.Error("business ID missing in request header")
+			return false, errors.New(errors.ErrUnauthorized, string(errors.ErrUnauthorized))
+		}
+
+		token, err := middlewares.ExtractBearerToken(authHeader)
+		if err != nil {
+			logger.WithError(err).Error("failed to extract token from Authorization header")
+			return nil, gqlerror.Errorf("unauthorized")
+		}
+
+		userID, valid := a.VerifyJWT(ctx, token)
+		if !valid || userID == "" {
+			logger.Error("unable to validate jwt token")
+			return nil, gqlerror.Errorf("unauthorized")
+		}
+
+		usr, err := database.DBInstance().User.Query().Where(user.IDEQ(userID)).First(ctx)
+		if err != nil || usr == nil {
+			logger.WithError(err).WithField("user_id", userID).Error("failed to fetch user")
+			return nil, gqlerror.Errorf("unauthorized")
+		}
+
+		if !usr.Verified {
+			logger.WithError(err).WithFields(map[string]interface{}{"user_id": usr.ID, "is_verified": usr.Verified}).Error("user is not verified")
+			return false, errors.New(errors.ErrFailed, "user is not verified")
+		}
+
+		b, err := database.DBInstance().Business.Query().Where(biz.IDEQ(businessHeader), biz.HasManagesWith(manager.UserID(usr.ID))).First(ctx)
+		if err != nil || b == nil {
+			logger.WithError(err).WithField("business_id", businessHeader).Error("failed to fetch business")
+			return nil, gqlerror.Errorf("unauthorized")
+		}
+
+		ctx = context.WithValue(ctx, middlewares.UserContextKey, usr)
+		ctx = context.WithValue(ctx, middlewares.BusinessContextKey, b)
+
+		return next(ctx)
+	}
+}
+
+func hasRoleDirective(a authentication.IService) func(
+	ctx context.Context,
+	obj any,
+	next graphql.Resolver,
+	role model.Role0,
+) (res any, err error) {
+	return func(
+		ctx context.Context,
+		obj any,
+		next graphql.Resolver,
+		role model.Role0,
+	) (res any, err error) {
+		logger := log.LoggerInContext(ctx)
+		opCtx := graphql.GetOperationContext(ctx)
+		authHeader := opCtx.Headers.Get("Authorization")
+		businessHeader := opCtx.Headers.Get("x-business-id")
+
+		if businessHeader == "" {
+			logger.Error("business ID missing in request header")
+			return false, errors.New(errors.ErrUnauthorized, string(errors.ErrUnauthorized))
+		}
+
+		token, err := middlewares.ExtractBearerToken(authHeader)
+		if err != nil {
+			logger.WithError(err).Error("failed to extract token from Authorization header")
+			return false, gqlerror.Errorf("unauthorized")
+		}
+
+		userID, valid := a.VerifyJWT(ctx, token)
+		if !valid || userID == "" {
+			logger.Error("unable to validate jwt token")
+			return false, gqlerror.Errorf("unauthorized")
+		}
+
+		usr, err := database.DBInstance().User.Query().Where(user.IDEQ(userID)).First(ctx)
+		if err != nil || usr == nil {
+			logger.WithError(err).WithField("user_id", userID).Error("failed to fetch user")
+			return false, gqlerror.Errorf("unauthorized")
+		}
+
+		if !usr.Verified {
+			logger.WithError(err).WithFields(map[string]interface{}{"user_id": usr.ID, "is_verified": usr.Verified}).Error("user is not verified")
+			return false, errors.New(errors.ErrFailed, "user is not verified")
+		}
+
+		b, err := database.DBInstance().Business.Query().Where(biz.IDEQ(businessHeader), biz.HasManagesWith(manager.UserID(usr.ID))).First(ctx)
+		if err != nil || b == nil {
+			logger.WithError(err).WithField("business_id", businessHeader).Error("failed to fetch business")
+			return false, gqlerror.Errorf("unauthorized")
+		}
+
+		managerEntity, err := database.DBInstance().Manager.Query().
+			Where(manager.HasUserWith(user.IDEQ(usr.ID)), manager.HasBusinessWith(biz.IDEQ(b.ID))).WithRole().Only(ctx)
+		if err != nil {
+			logger.WithError(err).Error("failed to fetch manager from db")
+			return false, errors.New(errors.ErrFailed, "request failed")
+		}
+
+		if managerEntity == nil {
+			return false, errors.New(errors.ErrUnauthorized, "unauthorized")
+		}
+
+		userRole := managerEntity.Edges.Role.Name
+
+		if strings.EqualFold(userRole, rbac.SuperAdminRole.ToString()) ||
+			!strings.EqualFold(userRole, string(role)) {
+			return false, errors.New(errors.ErrUnauthorized, "unauthorized")
+		}
+
+		ctx = context.WithValue(ctx, middlewares.UserContextKey, usr)
+		ctx = context.WithValue(ctx, middlewares.BusinessContextKey, b)
+		ctx = context.WithValue(ctx, middlewares.RoleContextKey, userRole)
+		return next(ctx)
+	}
+}
+
 func initalizeGQLRoute(engine *gin.Engine, basicAuth gin.HandlerFunc) {
 	resolverStruct := resolver.Resolver{
 		AuthenticationService: do.MustInvoke[authentication.IService](runtime.Injector),
 		VerificationService:   verification.NewService(),
+		BusinessService:       do.MustInvoke[business.IService](runtime.Injector),
 	}
 
 	c := generated.Config{Resolvers: &resolverStruct}
 
 	c.Directives.AuthUser = authUserDirective(resolverStruct.AuthenticationService)
+	c.Directives.AuthBusiness = authBusinessDirective(resolverStruct.AuthenticationService)
+	c.Directives.HasRole = hasRoleDirective(resolverStruct.AuthenticationService)
 
 	gqlHandler := handler.New(generated.NewExecutableSchema(c))
 	playgroundHandler := playground.Handler("API GraphQL playground", "/api")

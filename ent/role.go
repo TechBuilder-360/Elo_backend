@@ -35,20 +35,31 @@ type Role struct {
 
 // RoleEdges holds the relations/edges for other nodes in the graph.
 type RoleEdges struct {
-	// Permissions holds the value of the permissions edge.
-	Permissions []*Permission `json:"permissions,omitempty"`
+	// RolePermissions holds the value of the role_permissions edge.
+	RolePermissions []*RolePermission `json:"role_permissions,omitempty"`
+	// Managers holds the value of the managers edge.
+	Managers []*Manager `json:"managers,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [1]bool
+	loadedTypes [2]bool
 }
 
-// PermissionsOrErr returns the Permissions value or an error if the edge
+// RolePermissionsOrErr returns the RolePermissions value or an error if the edge
 // was not loaded in eager-loading.
-func (e RoleEdges) PermissionsOrErr() ([]*Permission, error) {
+func (e RoleEdges) RolePermissionsOrErr() ([]*RolePermission, error) {
 	if e.loadedTypes[0] {
-		return e.Permissions, nil
+		return e.RolePermissions, nil
 	}
-	return nil, &NotLoadedError{edge: "permissions"}
+	return nil, &NotLoadedError{edge: "role_permissions"}
+}
+
+// ManagersOrErr returns the Managers value or an error if the edge
+// was not loaded in eager-loading.
+func (e RoleEdges) ManagersOrErr() ([]*Manager, error) {
+	if e.loadedTypes[1] {
+		return e.Managers, nil
+	}
+	return nil, &NotLoadedError{edge: "managers"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -125,9 +136,14 @@ func (r *Role) Value(name string) (ent.Value, error) {
 	return r.selectValues.Get(name)
 }
 
-// QueryPermissions queries the "permissions" edge of the Role entity.
-func (r *Role) QueryPermissions() *PermissionQuery {
-	return NewRoleClient(r.config).QueryPermissions(r)
+// QueryRolePermissions queries the "role_permissions" edge of the Role entity.
+func (r *Role) QueryRolePermissions() *RolePermissionQuery {
+	return NewRoleClient(r.config).QueryRolePermissions(r)
+}
+
+// QueryManagers queries the "managers" edge of the Role entity.
+func (r *Role) QueryManagers() *ManagerQuery {
+	return NewRoleClient(r.config).QueryManagers(r)
 }
 
 // Update returns a builder for updating this Role.

@@ -12,6 +12,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/Toflex/directory_v2/ent/business"
 	"github.com/Toflex/directory_v2/ent/manager"
 	"github.com/Toflex/directory_v2/ent/requestverification"
 	"github.com/Toflex/directory_v2/ent/user"
@@ -111,6 +112,20 @@ func (uc *UserCreate) SetDisplayName(s string) *UserCreate {
 func (uc *UserCreate) SetNillableDisplayName(s *string) *UserCreate {
 	if s != nil {
 		uc.SetDisplayName(*s)
+	}
+	return uc
+}
+
+// SetDateOfBirth sets the "date_of_birth" field.
+func (uc *UserCreate) SetDateOfBirth(t time.Time) *UserCreate {
+	uc.mutation.SetDateOfBirth(t)
+	return uc
+}
+
+// SetNillableDateOfBirth sets the "date_of_birth" field if the given value is not nil.
+func (uc *UserCreate) SetNillableDateOfBirth(t *time.Time) *UserCreate {
+	if t != nil {
+		uc.SetDateOfBirth(*t)
 	}
 	return uc
 }
@@ -261,6 +276,21 @@ func (uc *UserCreate) AddUserDocuments(u ...*UserDocument) *UserCreate {
 		ids[i] = u[i].ID
 	}
 	return uc.AddUserDocumentIDs(ids...)
+}
+
+// AddRegisteredBusinessIDs adds the "registered_businesses" edge to the Business entity by IDs.
+func (uc *UserCreate) AddRegisteredBusinessIDs(ids ...string) *UserCreate {
+	uc.mutation.AddRegisteredBusinessIDs(ids...)
+	return uc
+}
+
+// AddRegisteredBusinesses adds the "registered_businesses" edges to the Business entity.
+func (uc *UserCreate) AddRegisteredBusinesses(b ...*Business) *UserCreate {
+	ids := make([]string, len(b))
+	for i := range b {
+		ids[i] = b[i].ID
+	}
+	return uc.AddRegisteredBusinessIDs(ids...)
 }
 
 // AddVerificationIDs adds the "verifications" edge to the Verification entity by IDs.
@@ -476,6 +506,10 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 		_spec.SetField(user.FieldDisplayName, field.TypeString, value)
 		_node.DisplayName = value
 	}
+	if value, ok := uc.mutation.DateOfBirth(); ok {
+		_spec.SetField(user.FieldDateOfBirth, field.TypeTime, value)
+		_node.DateOfBirth = value
+	}
 	if value, ok := uc.mutation.EmailAddress(); ok {
 		_spec.SetField(user.FieldEmailAddress, field.TypeString, value)
 		_node.EmailAddress = value
@@ -533,6 +567,22 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(userdocument.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := uc.mutation.RegisteredBusinessesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.RegisteredBusinessesTable,
+			Columns: []string{user.RegisteredBusinessesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(business.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {
@@ -723,6 +773,24 @@ func (u *UserUpsert) UpdateDisplayName() *UserUpsert {
 // ClearDisplayName clears the value of the "display_name" field.
 func (u *UserUpsert) ClearDisplayName() *UserUpsert {
 	u.SetNull(user.FieldDisplayName)
+	return u
+}
+
+// SetDateOfBirth sets the "date_of_birth" field.
+func (u *UserUpsert) SetDateOfBirth(v time.Time) *UserUpsert {
+	u.Set(user.FieldDateOfBirth, v)
+	return u
+}
+
+// UpdateDateOfBirth sets the "date_of_birth" field to the value that was provided on create.
+func (u *UserUpsert) UpdateDateOfBirth() *UserUpsert {
+	u.SetExcluded(user.FieldDateOfBirth)
+	return u
+}
+
+// ClearDateOfBirth clears the value of the "date_of_birth" field.
+func (u *UserUpsert) ClearDateOfBirth() *UserUpsert {
+	u.SetNull(user.FieldDateOfBirth)
 	return u
 }
 
@@ -1013,6 +1081,27 @@ func (u *UserUpsertOne) UpdateDisplayName() *UserUpsertOne {
 func (u *UserUpsertOne) ClearDisplayName() *UserUpsertOne {
 	return u.Update(func(s *UserUpsert) {
 		s.ClearDisplayName()
+	})
+}
+
+// SetDateOfBirth sets the "date_of_birth" field.
+func (u *UserUpsertOne) SetDateOfBirth(v time.Time) *UserUpsertOne {
+	return u.Update(func(s *UserUpsert) {
+		s.SetDateOfBirth(v)
+	})
+}
+
+// UpdateDateOfBirth sets the "date_of_birth" field to the value that was provided on create.
+func (u *UserUpsertOne) UpdateDateOfBirth() *UserUpsertOne {
+	return u.Update(func(s *UserUpsert) {
+		s.UpdateDateOfBirth()
+	})
+}
+
+// ClearDateOfBirth clears the value of the "date_of_birth" field.
+func (u *UserUpsertOne) ClearDateOfBirth() *UserUpsertOne {
+	return u.Update(func(s *UserUpsert) {
+		s.ClearDateOfBirth()
 	})
 }
 
@@ -1490,6 +1579,27 @@ func (u *UserUpsertBulk) UpdateDisplayName() *UserUpsertBulk {
 func (u *UserUpsertBulk) ClearDisplayName() *UserUpsertBulk {
 	return u.Update(func(s *UserUpsert) {
 		s.ClearDisplayName()
+	})
+}
+
+// SetDateOfBirth sets the "date_of_birth" field.
+func (u *UserUpsertBulk) SetDateOfBirth(v time.Time) *UserUpsertBulk {
+	return u.Update(func(s *UserUpsert) {
+		s.SetDateOfBirth(v)
+	})
+}
+
+// UpdateDateOfBirth sets the "date_of_birth" field to the value that was provided on create.
+func (u *UserUpsertBulk) UpdateDateOfBirth() *UserUpsertBulk {
+	return u.Update(func(s *UserUpsert) {
+		s.UpdateDateOfBirth()
+	})
+}
+
+// ClearDateOfBirth clears the value of the "date_of_birth" field.
+func (u *UserUpsertBulk) ClearDateOfBirth() *UserUpsertBulk {
+	return u.Update(func(s *UserUpsert) {
+		s.ClearDateOfBirth()
 	})
 }
 

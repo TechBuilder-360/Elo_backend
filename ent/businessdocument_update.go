@@ -6,12 +6,14 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"time"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/Toflex/directory_v2/ent/business"
 	"github.com/Toflex/directory_v2/ent/businessdocument"
+	"github.com/Toflex/directory_v2/ent/kybdocument"
 	"github.com/Toflex/directory_v2/ent/predicate"
 )
 
@@ -25,6 +27,32 @@ type BusinessDocumentUpdate struct {
 // Where appends a list predicates to the BusinessDocumentUpdate builder.
 func (bdu *BusinessDocumentUpdate) Where(ps ...predicate.BusinessDocument) *BusinessDocumentUpdate {
 	bdu.mutation.Where(ps...)
+	return bdu
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (bdu *BusinessDocumentUpdate) SetUpdatedAt(t time.Time) *BusinessDocumentUpdate {
+	bdu.mutation.SetUpdatedAt(t)
+	return bdu
+}
+
+// SetDeletedAt sets the "deleted_at" field.
+func (bdu *BusinessDocumentUpdate) SetDeletedAt(t time.Time) *BusinessDocumentUpdate {
+	bdu.mutation.SetDeletedAt(t)
+	return bdu
+}
+
+// SetNillableDeletedAt sets the "deleted_at" field if the given value is not nil.
+func (bdu *BusinessDocumentUpdate) SetNillableDeletedAt(t *time.Time) *BusinessDocumentUpdate {
+	if t != nil {
+		bdu.SetDeletedAt(*t)
+	}
+	return bdu
+}
+
+// ClearDeletedAt clears the value of the "deleted_at" field.
+func (bdu *BusinessDocumentUpdate) ClearDeletedAt() *BusinessDocumentUpdate {
+	bdu.mutation.ClearDeletedAt()
 	return bdu
 }
 
@@ -98,15 +126,30 @@ func (bdu *BusinessDocumentUpdate) SetNillableType(b *businessdocument.Type) *Bu
 	return bdu
 }
 
-// SetBusinessDocumentID sets the "business_document" edge to the Business entity by ID.
-func (bdu *BusinessDocumentUpdate) SetBusinessDocumentID(id string) *BusinessDocumentUpdate {
-	bdu.mutation.SetBusinessDocumentID(id)
+// SetBusinessID sets the "business" edge to the Business entity by ID.
+func (bdu *BusinessDocumentUpdate) SetBusinessID(id string) *BusinessDocumentUpdate {
+	bdu.mutation.SetBusinessID(id)
 	return bdu
 }
 
-// SetBusinessDocument sets the "business_document" edge to the Business entity.
-func (bdu *BusinessDocumentUpdate) SetBusinessDocument(b *Business) *BusinessDocumentUpdate {
-	return bdu.SetBusinessDocumentID(b.ID)
+// SetBusiness sets the "business" edge to the Business entity.
+func (bdu *BusinessDocumentUpdate) SetBusiness(b *Business) *BusinessDocumentUpdate {
+	return bdu.SetBusinessID(b.ID)
+}
+
+// AddKybDocumentIDs adds the "kyb_document" edge to the KYBDocument entity by IDs.
+func (bdu *BusinessDocumentUpdate) AddKybDocumentIDs(ids ...string) *BusinessDocumentUpdate {
+	bdu.mutation.AddKybDocumentIDs(ids...)
+	return bdu
+}
+
+// AddKybDocument adds the "kyb_document" edges to the KYBDocument entity.
+func (bdu *BusinessDocumentUpdate) AddKybDocument(k ...*KYBDocument) *BusinessDocumentUpdate {
+	ids := make([]string, len(k))
+	for i := range k {
+		ids[i] = k[i].ID
+	}
+	return bdu.AddKybDocumentIDs(ids...)
 }
 
 // Mutation returns the BusinessDocumentMutation object of the builder.
@@ -114,14 +157,36 @@ func (bdu *BusinessDocumentUpdate) Mutation() *BusinessDocumentMutation {
 	return bdu.mutation
 }
 
-// ClearBusinessDocument clears the "business_document" edge to the Business entity.
-func (bdu *BusinessDocumentUpdate) ClearBusinessDocument() *BusinessDocumentUpdate {
-	bdu.mutation.ClearBusinessDocument()
+// ClearBusiness clears the "business" edge to the Business entity.
+func (bdu *BusinessDocumentUpdate) ClearBusiness() *BusinessDocumentUpdate {
+	bdu.mutation.ClearBusiness()
 	return bdu
+}
+
+// ClearKybDocument clears all "kyb_document" edges to the KYBDocument entity.
+func (bdu *BusinessDocumentUpdate) ClearKybDocument() *BusinessDocumentUpdate {
+	bdu.mutation.ClearKybDocument()
+	return bdu
+}
+
+// RemoveKybDocumentIDs removes the "kyb_document" edge to KYBDocument entities by IDs.
+func (bdu *BusinessDocumentUpdate) RemoveKybDocumentIDs(ids ...string) *BusinessDocumentUpdate {
+	bdu.mutation.RemoveKybDocumentIDs(ids...)
+	return bdu
+}
+
+// RemoveKybDocument removes "kyb_document" edges to KYBDocument entities.
+func (bdu *BusinessDocumentUpdate) RemoveKybDocument(k ...*KYBDocument) *BusinessDocumentUpdate {
+	ids := make([]string, len(k))
+	for i := range k {
+		ids[i] = k[i].ID
+	}
+	return bdu.RemoveKybDocumentIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (bdu *BusinessDocumentUpdate) Save(ctx context.Context) (int, error) {
+	bdu.defaults()
 	return withHooks(ctx, bdu.sqlSave, bdu.mutation, bdu.hooks)
 }
 
@@ -147,6 +212,14 @@ func (bdu *BusinessDocumentUpdate) ExecX(ctx context.Context) {
 	}
 }
 
+// defaults sets the default values of the builder before save.
+func (bdu *BusinessDocumentUpdate) defaults() {
+	if _, ok := bdu.mutation.UpdatedAt(); !ok {
+		v := businessdocument.UpdateDefaultUpdatedAt()
+		bdu.mutation.SetUpdatedAt(v)
+	}
+}
+
 // check runs all checks and user-defined validators on the builder.
 func (bdu *BusinessDocumentUpdate) check() error {
 	if v, ok := bdu.mutation.Title(); ok {
@@ -169,8 +242,8 @@ func (bdu *BusinessDocumentUpdate) check() error {
 			return &ValidationError{Name: "type", err: fmt.Errorf(`ent: validator failed for field "BusinessDocument.type": %w`, err)}
 		}
 	}
-	if bdu.mutation.BusinessDocumentCleared() && len(bdu.mutation.BusinessDocumentIDs()) > 0 {
-		return errors.New(`ent: clearing a required unique edge "BusinessDocument.business_document"`)
+	if bdu.mutation.BusinessCleared() && len(bdu.mutation.BusinessIDs()) > 0 {
+		return errors.New(`ent: clearing a required unique edge "BusinessDocument.business"`)
 	}
 	return nil
 }
@@ -179,13 +252,22 @@ func (bdu *BusinessDocumentUpdate) sqlSave(ctx context.Context) (n int, err erro
 	if err := bdu.check(); err != nil {
 		return n, err
 	}
-	_spec := sqlgraph.NewUpdateSpec(businessdocument.Table, businessdocument.Columns, sqlgraph.NewFieldSpec(businessdocument.FieldID, field.TypeInt))
+	_spec := sqlgraph.NewUpdateSpec(businessdocument.Table, businessdocument.Columns, sqlgraph.NewFieldSpec(businessdocument.FieldID, field.TypeString))
 	if ps := bdu.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
+	}
+	if value, ok := bdu.mutation.UpdatedAt(); ok {
+		_spec.SetField(businessdocument.FieldUpdatedAt, field.TypeTime, value)
+	}
+	if value, ok := bdu.mutation.DeletedAt(); ok {
+		_spec.SetField(businessdocument.FieldDeletedAt, field.TypeTime, value)
+	}
+	if bdu.mutation.DeletedAtCleared() {
+		_spec.ClearField(businessdocument.FieldDeletedAt, field.TypeTime)
 	}
 	if value, ok := bdu.mutation.Title(); ok {
 		_spec.SetField(businessdocument.FieldTitle, field.TypeString, value)
@@ -202,12 +284,12 @@ func (bdu *BusinessDocumentUpdate) sqlSave(ctx context.Context) (n int, err erro
 	if value, ok := bdu.mutation.GetType(); ok {
 		_spec.SetField(businessdocument.FieldType, field.TypeEnum, value)
 	}
-	if bdu.mutation.BusinessDocumentCleared() {
+	if bdu.mutation.BusinessCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   businessdocument.BusinessDocumentTable,
-			Columns: []string{businessdocument.BusinessDocumentColumn},
+			Table:   businessdocument.BusinessTable,
+			Columns: []string{businessdocument.BusinessColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(business.FieldID, field.TypeString),
@@ -215,15 +297,60 @@ func (bdu *BusinessDocumentUpdate) sqlSave(ctx context.Context) (n int, err erro
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := bdu.mutation.BusinessDocumentIDs(); len(nodes) > 0 {
+	if nodes := bdu.mutation.BusinessIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   businessdocument.BusinessDocumentTable,
-			Columns: []string{businessdocument.BusinessDocumentColumn},
+			Table:   businessdocument.BusinessTable,
+			Columns: []string{businessdocument.BusinessColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(business.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if bdu.mutation.KybDocumentCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   businessdocument.KybDocumentTable,
+			Columns: businessdocument.KybDocumentPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(kybdocument.FieldID, field.TypeString),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := bdu.mutation.RemovedKybDocumentIDs(); len(nodes) > 0 && !bdu.mutation.KybDocumentCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   businessdocument.KybDocumentTable,
+			Columns: businessdocument.KybDocumentPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(kybdocument.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := bdu.mutation.KybDocumentIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   businessdocument.KybDocumentTable,
+			Columns: businessdocument.KybDocumentPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(kybdocument.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {
@@ -249,6 +376,32 @@ type BusinessDocumentUpdateOne struct {
 	fields   []string
 	hooks    []Hook
 	mutation *BusinessDocumentMutation
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (bduo *BusinessDocumentUpdateOne) SetUpdatedAt(t time.Time) *BusinessDocumentUpdateOne {
+	bduo.mutation.SetUpdatedAt(t)
+	return bduo
+}
+
+// SetDeletedAt sets the "deleted_at" field.
+func (bduo *BusinessDocumentUpdateOne) SetDeletedAt(t time.Time) *BusinessDocumentUpdateOne {
+	bduo.mutation.SetDeletedAt(t)
+	return bduo
+}
+
+// SetNillableDeletedAt sets the "deleted_at" field if the given value is not nil.
+func (bduo *BusinessDocumentUpdateOne) SetNillableDeletedAt(t *time.Time) *BusinessDocumentUpdateOne {
+	if t != nil {
+		bduo.SetDeletedAt(*t)
+	}
+	return bduo
+}
+
+// ClearDeletedAt clears the value of the "deleted_at" field.
+func (bduo *BusinessDocumentUpdateOne) ClearDeletedAt() *BusinessDocumentUpdateOne {
+	bduo.mutation.ClearDeletedAt()
+	return bduo
 }
 
 // SetTitle sets the "title" field.
@@ -321,15 +474,30 @@ func (bduo *BusinessDocumentUpdateOne) SetNillableType(b *businessdocument.Type)
 	return bduo
 }
 
-// SetBusinessDocumentID sets the "business_document" edge to the Business entity by ID.
-func (bduo *BusinessDocumentUpdateOne) SetBusinessDocumentID(id string) *BusinessDocumentUpdateOne {
-	bduo.mutation.SetBusinessDocumentID(id)
+// SetBusinessID sets the "business" edge to the Business entity by ID.
+func (bduo *BusinessDocumentUpdateOne) SetBusinessID(id string) *BusinessDocumentUpdateOne {
+	bduo.mutation.SetBusinessID(id)
 	return bduo
 }
 
-// SetBusinessDocument sets the "business_document" edge to the Business entity.
-func (bduo *BusinessDocumentUpdateOne) SetBusinessDocument(b *Business) *BusinessDocumentUpdateOne {
-	return bduo.SetBusinessDocumentID(b.ID)
+// SetBusiness sets the "business" edge to the Business entity.
+func (bduo *BusinessDocumentUpdateOne) SetBusiness(b *Business) *BusinessDocumentUpdateOne {
+	return bduo.SetBusinessID(b.ID)
+}
+
+// AddKybDocumentIDs adds the "kyb_document" edge to the KYBDocument entity by IDs.
+func (bduo *BusinessDocumentUpdateOne) AddKybDocumentIDs(ids ...string) *BusinessDocumentUpdateOne {
+	bduo.mutation.AddKybDocumentIDs(ids...)
+	return bduo
+}
+
+// AddKybDocument adds the "kyb_document" edges to the KYBDocument entity.
+func (bduo *BusinessDocumentUpdateOne) AddKybDocument(k ...*KYBDocument) *BusinessDocumentUpdateOne {
+	ids := make([]string, len(k))
+	for i := range k {
+		ids[i] = k[i].ID
+	}
+	return bduo.AddKybDocumentIDs(ids...)
 }
 
 // Mutation returns the BusinessDocumentMutation object of the builder.
@@ -337,10 +505,31 @@ func (bduo *BusinessDocumentUpdateOne) Mutation() *BusinessDocumentMutation {
 	return bduo.mutation
 }
 
-// ClearBusinessDocument clears the "business_document" edge to the Business entity.
-func (bduo *BusinessDocumentUpdateOne) ClearBusinessDocument() *BusinessDocumentUpdateOne {
-	bduo.mutation.ClearBusinessDocument()
+// ClearBusiness clears the "business" edge to the Business entity.
+func (bduo *BusinessDocumentUpdateOne) ClearBusiness() *BusinessDocumentUpdateOne {
+	bduo.mutation.ClearBusiness()
 	return bduo
+}
+
+// ClearKybDocument clears all "kyb_document" edges to the KYBDocument entity.
+func (bduo *BusinessDocumentUpdateOne) ClearKybDocument() *BusinessDocumentUpdateOne {
+	bduo.mutation.ClearKybDocument()
+	return bduo
+}
+
+// RemoveKybDocumentIDs removes the "kyb_document" edge to KYBDocument entities by IDs.
+func (bduo *BusinessDocumentUpdateOne) RemoveKybDocumentIDs(ids ...string) *BusinessDocumentUpdateOne {
+	bduo.mutation.RemoveKybDocumentIDs(ids...)
+	return bduo
+}
+
+// RemoveKybDocument removes "kyb_document" edges to KYBDocument entities.
+func (bduo *BusinessDocumentUpdateOne) RemoveKybDocument(k ...*KYBDocument) *BusinessDocumentUpdateOne {
+	ids := make([]string, len(k))
+	for i := range k {
+		ids[i] = k[i].ID
+	}
+	return bduo.RemoveKybDocumentIDs(ids...)
 }
 
 // Where appends a list predicates to the BusinessDocumentUpdate builder.
@@ -358,6 +547,7 @@ func (bduo *BusinessDocumentUpdateOne) Select(field string, fields ...string) *B
 
 // Save executes the query and returns the updated BusinessDocument entity.
 func (bduo *BusinessDocumentUpdateOne) Save(ctx context.Context) (*BusinessDocument, error) {
+	bduo.defaults()
 	return withHooks(ctx, bduo.sqlSave, bduo.mutation, bduo.hooks)
 }
 
@@ -383,6 +573,14 @@ func (bduo *BusinessDocumentUpdateOne) ExecX(ctx context.Context) {
 	}
 }
 
+// defaults sets the default values of the builder before save.
+func (bduo *BusinessDocumentUpdateOne) defaults() {
+	if _, ok := bduo.mutation.UpdatedAt(); !ok {
+		v := businessdocument.UpdateDefaultUpdatedAt()
+		bduo.mutation.SetUpdatedAt(v)
+	}
+}
+
 // check runs all checks and user-defined validators on the builder.
 func (bduo *BusinessDocumentUpdateOne) check() error {
 	if v, ok := bduo.mutation.Title(); ok {
@@ -405,8 +603,8 @@ func (bduo *BusinessDocumentUpdateOne) check() error {
 			return &ValidationError{Name: "type", err: fmt.Errorf(`ent: validator failed for field "BusinessDocument.type": %w`, err)}
 		}
 	}
-	if bduo.mutation.BusinessDocumentCleared() && len(bduo.mutation.BusinessDocumentIDs()) > 0 {
-		return errors.New(`ent: clearing a required unique edge "BusinessDocument.business_document"`)
+	if bduo.mutation.BusinessCleared() && len(bduo.mutation.BusinessIDs()) > 0 {
+		return errors.New(`ent: clearing a required unique edge "BusinessDocument.business"`)
 	}
 	return nil
 }
@@ -415,7 +613,7 @@ func (bduo *BusinessDocumentUpdateOne) sqlSave(ctx context.Context) (_node *Busi
 	if err := bduo.check(); err != nil {
 		return _node, err
 	}
-	_spec := sqlgraph.NewUpdateSpec(businessdocument.Table, businessdocument.Columns, sqlgraph.NewFieldSpec(businessdocument.FieldID, field.TypeInt))
+	_spec := sqlgraph.NewUpdateSpec(businessdocument.Table, businessdocument.Columns, sqlgraph.NewFieldSpec(businessdocument.FieldID, field.TypeString))
 	id, ok := bduo.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "BusinessDocument.id" for update`)}
@@ -440,6 +638,15 @@ func (bduo *BusinessDocumentUpdateOne) sqlSave(ctx context.Context) (_node *Busi
 			}
 		}
 	}
+	if value, ok := bduo.mutation.UpdatedAt(); ok {
+		_spec.SetField(businessdocument.FieldUpdatedAt, field.TypeTime, value)
+	}
+	if value, ok := bduo.mutation.DeletedAt(); ok {
+		_spec.SetField(businessdocument.FieldDeletedAt, field.TypeTime, value)
+	}
+	if bduo.mutation.DeletedAtCleared() {
+		_spec.ClearField(businessdocument.FieldDeletedAt, field.TypeTime)
+	}
 	if value, ok := bduo.mutation.Title(); ok {
 		_spec.SetField(businessdocument.FieldTitle, field.TypeString, value)
 	}
@@ -455,12 +662,12 @@ func (bduo *BusinessDocumentUpdateOne) sqlSave(ctx context.Context) (_node *Busi
 	if value, ok := bduo.mutation.GetType(); ok {
 		_spec.SetField(businessdocument.FieldType, field.TypeEnum, value)
 	}
-	if bduo.mutation.BusinessDocumentCleared() {
+	if bduo.mutation.BusinessCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   businessdocument.BusinessDocumentTable,
-			Columns: []string{businessdocument.BusinessDocumentColumn},
+			Table:   businessdocument.BusinessTable,
+			Columns: []string{businessdocument.BusinessColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(business.FieldID, field.TypeString),
@@ -468,15 +675,60 @@ func (bduo *BusinessDocumentUpdateOne) sqlSave(ctx context.Context) (_node *Busi
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := bduo.mutation.BusinessDocumentIDs(); len(nodes) > 0 {
+	if nodes := bduo.mutation.BusinessIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   businessdocument.BusinessDocumentTable,
-			Columns: []string{businessdocument.BusinessDocumentColumn},
+			Table:   businessdocument.BusinessTable,
+			Columns: []string{businessdocument.BusinessColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(business.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if bduo.mutation.KybDocumentCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   businessdocument.KybDocumentTable,
+			Columns: businessdocument.KybDocumentPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(kybdocument.FieldID, field.TypeString),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := bduo.mutation.RemovedKybDocumentIDs(); len(nodes) > 0 && !bduo.mutation.KybDocumentCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   businessdocument.KybDocumentTable,
+			Columns: businessdocument.KybDocumentPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(kybdocument.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := bduo.mutation.KybDocumentIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   businessdocument.KybDocumentTable,
+			Columns: businessdocument.KybDocumentPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(kybdocument.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {

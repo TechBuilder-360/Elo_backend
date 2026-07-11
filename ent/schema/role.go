@@ -20,7 +20,7 @@ func (Role) Mixin() []ent.Mixin {
 // Fields of the Role.
 func (Role) Fields() []ent.Field {
 	return []ent.Field{
-		field.String("name").NotEmpty(),
+		field.String("name").NotEmpty().Unique(),
 		field.String("description").NotEmpty(),
 	}
 }
@@ -28,6 +28,7 @@ func (Role) Fields() []ent.Field {
 // Edges of the Role.
 func (Role) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.To("permissions", Permission.Type),
+		edge.To("role_permissions", RolePermission.Type),
+		edge.To("managers", Manager.Type),
 	}
 }

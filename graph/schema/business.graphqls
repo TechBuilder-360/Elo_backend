@@ -1,3 +1,12 @@
+directive @authBusiness on FIELD_DEFINITION
+directive @hasRole(role: Role!) on FIELD_DEFINITION
+
+enum Role {
+  SUPERADMIN
+    ADMIN
+    MANAGER
+}
+
 scalar Upload
 
 type Business {
@@ -6,8 +15,15 @@ type Business {
   logo: String
   email: String
   about: String
-  services: [String]!
-  socials: [Social]!
+  # services: [String!]!
+  # socials: [Social!]!
+}
+
+type myBusiness {
+  id: String!
+  name: String!
+  logo: String
+  role: String
 }
 
 type SearchBusiness {
@@ -28,10 +44,15 @@ input RegisterBusinessInput {
   email: String!
   on_site: Boolean!
   industry: String!
-  is_registered: Boolean!
-  address: BusinessAddress!
-  registration_detail: BusinessRegistrationDetail
-  other_document: [Document!]
+  # is_registered: Boolean!
+  address: BusinessAddress
+  # other_document: [Document!]
+  role: role!
+}
+
+input role {
+  authorized_representative: Boolean!
+  authorized_representative_email: String
 }
 
 input Document {
@@ -41,6 +62,7 @@ input Document {
 
 input BusinessAddress {
   number: String
+  city: String!
   street: String!
   state: String!
   country: String!
@@ -51,17 +73,46 @@ input BusinessRegistrationDetail {
   number: String!
   country_of_incorporation: String!
   date_of_incorporation: String!
-  certificate_of_incorporation: Upload!
-  articles_of_association: Upload!
-  status_certificate: Upload!
+  tax_identification_number: String!
 }
 
-type Response {
-  ok: Boolean
+input DocumentInput {
+  document_id: String!
+  description: String!
+  file: String!
+}
+
+input RemoveDocumentInput {
+  id: String!
+}
+
+type kybDocument {
+  id: String!
+  name: String!
+  required: Boolean!
+}
+
+type businessDocument {
+  id: String!
+  description: String!
+  url: String!
+  document_id: String!
+}
+
+input businessDetail {
+ registration_detail: BusinessRegistrationDetail
+  name: String
+  about: String
+  industry: String
+  website: String
 }
 
 extend type Query {
-  getBusiness(id: String!): Business
+  myBusinesses: [myBusiness!] @authUser
+  business(id: String!): Business @authUser
+  getKYBDocuments: [kybDocument!] @authUser
+  getDocuments: [businessDocument!] @hasRole (role: ADMIN)
+  getCategories: [String!]! @authUser
   findBusiness(
     name: String
     service: String
@@ -70,5 +121,8 @@ extend type Query {
 }
 
 extend type Mutation {
-  registerBusiness(input: RegisterBusinessInput!): Response!
+  registerBusiness(input: RegisterBusinessInput!): Boolean! @authUser
+  uploadDocument(input: DocumentInput!): Boolean! @hasRole (role: ADMIN)
+  deleteDocument(input: RemoveDocumentInput!): Boolean! @hasRole(role: ADMIN)
+  businessDetail(input: businessDetail!): Boolean! @hasRole(role: ADMIN)
 }

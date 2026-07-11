@@ -188,7 +188,7 @@ func (l *logger) SetLevel(logLevel Level) {
 		l.l.SetLevel(level)
 		return
 	}
-	l.Panic(err.Error())
+	l.Panic("%s", err.Error())
 }
 
 func (l *logger) AddHook(h Hook) {

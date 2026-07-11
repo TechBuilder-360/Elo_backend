@@ -16,17 +16,16 @@ type VerificationResponse interface {
 }
 
 type Business struct {
-	ID       string    `json:"id"`
-	Name     string    `json:"name"`
-	Logo     *string   `json:"logo,omitempty"`
-	Email    *string   `json:"email,omitempty"`
-	About    *string   `json:"about,omitempty"`
-	Services []*string `json:"services"`
-	Socials  []*Social `json:"socials"`
+	ID    string  `json:"id"`
+	Name  string  `json:"name"`
+	Logo  *string `json:"logo,omitempty"`
+	Email *string `json:"email,omitempty"`
+	About *string `json:"about,omitempty"`
 }
 
 type BusinessAddress struct {
 	Number  *string `json:"number,omitempty"`
+	City    string  `json:"city"`
 	Street  string  `json:"street"`
 	State   string  `json:"state"`
 	Country string  `json:"country"`
@@ -34,17 +33,21 @@ type BusinessAddress struct {
 }
 
 type BusinessRegistrationDetail struct {
-	Number                     string         `json:"number"`
-	CountryOfIncorporation     string         `json:"country_of_incorporation"`
-	DateOfIncorporation        string         `json:"date_of_incorporation"`
-	CertificateOfIncorporation graphql.Upload `json:"certificate_of_incorporation"`
-	ArticlesOfAssociation      graphql.Upload `json:"articles_of_association"`
-	StatusCertificate          graphql.Upload `json:"status_certificate"`
+	Number                  string `json:"number"`
+	CountryOfIncorporation  string `json:"country_of_incorporation"`
+	DateOfIncorporation     string `json:"date_of_incorporation"`
+	TaxIdentificationNumber string `json:"tax_identification_number"`
 }
 
 type Document struct {
 	Description string         `json:"description"`
 	File        graphql.Upload `json:"file"`
+}
+
+type DocumentInput struct {
+	DocumentID  string `json:"document_id"`
+	Description string `json:"description"`
+	File        string `json:"file"`
 }
 
 type Login struct {
@@ -69,15 +72,13 @@ type Query struct {
 }
 
 type RegisterBusinessInput struct {
-	Name               string                      `json:"name"`
-	About              string                      `json:"about"`
-	Email              string                      `json:"email"`
-	OnSite             bool                        `json:"on_site"`
-	Industry           string                      `json:"industry"`
-	IsRegistered       bool                        `json:"is_registered"`
-	Address            *BusinessAddress            `json:"address"`
-	RegistrationDetail *BusinessRegistrationDetail `json:"registration_detail,omitempty"`
-	OtherDocument      []*Document                 `json:"other_document,omitempty"`
+	Name     string           `json:"name"`
+	About    string           `json:"about"`
+	Email    string           `json:"email"`
+	OnSite   bool             `json:"on_site"`
+	Industry string           `json:"industry"`
+	Address  *BusinessAddress `json:"address,omitempty"`
+	Role     *Role            `json:"role"`
 }
 
 type Registration struct {
@@ -91,13 +92,13 @@ type RegistrationResponse struct {
 	UserID string `json:"user_id"`
 }
 
+type RemoveDocumentInput struct {
+	ID string `json:"id"`
+}
+
 type RequestOtp struct {
 	EmailAddress string `json:"email_address"`
 	Password     string `json:"password"`
-}
-
-type Response struct {
-	Ok *bool `json:"ok,omitempty"`
 }
 
 type SearchBusiness struct {
@@ -142,6 +143,39 @@ type VerificationSuccess struct {
 }
 
 func (VerificationSuccess) IsVerificationResponse() {}
+
+type BusinessDetail struct {
+	RegistrationDetail *BusinessRegistrationDetail `json:"registration_detail,omitempty"`
+	Name               *string                     `json:"name,omitempty"`
+	About              *string                     `json:"about,omitempty"`
+	Industry           *string                     `json:"industry,omitempty"`
+	Website            *string                     `json:"website,omitempty"`
+}
+
+type BusinessDocument struct {
+	ID          string `json:"id"`
+	Description string `json:"description"`
+	URL         string `json:"url"`
+	DocumentID  string `json:"document_id"`
+}
+
+type KybDocument struct {
+	ID       string `json:"id"`
+	Name     string `json:"name"`
+	Required bool   `json:"required"`
+}
+
+type MyBusiness struct {
+	ID   string  `json:"id"`
+	Name string  `json:"name"`
+	Logo *string `json:"logo,omitempty"`
+	Role *string `json:"role,omitempty"`
+}
+
+type Role struct {
+	AuthorizedRepresentative      bool    `json:"authorized_representative"`
+	AuthorizedRepresentativeEmail *string `json:"authorized_representative_email,omitempty"`
+}
 
 type VerificationPayload struct {
 	Entity *Entity `json:"entity,omitempty"`
@@ -197,6 +231,63 @@ func (e *Entity) UnmarshalJSON(b []byte) error {
 }
 
 func (e Entity) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
+}
+
+type Role0 string
+
+const (
+	RoleSuperadmin Role0 = "SUPERADMIN"
+	RoleAdmin      Role0 = "ADMIN"
+	RoleManager    Role0 = "MANAGER"
+)
+
+var AllRole0 = []Role0{
+	RoleSuperadmin,
+	RoleAdmin,
+	RoleManager,
+}
+
+func (e Role0) IsValid() bool {
+	switch e {
+	case RoleSuperadmin, RoleAdmin, RoleManager:
+		return true
+	}
+	return false
+}
+
+func (e Role0) String() string {
+	return string(e)
+}
+
+func (e *Role0) UnmarshalGQL(v any) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = Role0(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid Role", str)
+	}
+	return nil
+}
+
+func (e Role0) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *Role0) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e Role0) MarshalJSON() ([]byte, error) {
 	var buf bytes.Buffer
 	e.MarshalGQL(&buf)
 	return buf.Bytes(), nil

@@ -8,12 +8,14 @@ import (
 	"fmt"
 	"io"
 	"math/big"
+	r "math/rand/v2"
 	"net/http"
 	"net/url"
 	"regexp"
 	"strconv"
 	"strings"
 
+	"github.com/99designs/gqlgen/graphql"
 	"github.com/google/uuid"
 	"github.com/lucsky/cuid"
 	"golang.org/x/crypto/bcrypt"
@@ -28,7 +30,12 @@ func GenerateUUID() string {
 	return uniqueID.String()
 }
 
+func RandomInt() int {
+	return r.IntN(193857-10+1) + 667
+}
+
 func ValidateEmail(email string) error {
+	email = strings.Trim(email, " ")
 	emailRegex := `^[a-zA-Z0-9.!#$%&'*+/=?^_` + "`" + `{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$`
 	// Compile the regex
 	re := regexp.MustCompile(emailRegex)
@@ -195,4 +202,56 @@ func URLToBase64(url string) (string, error) {
 	}
 
 	return base64.RawStdEncoding.EncodeToString(data), nil
+}
+
+func UploadToBase64(upload graphql.Upload) (string, error) {
+	data, err := io.ReadAll(upload.File)
+	if err != nil {
+		return "", err
+	}
+
+	return base64.StdEncoding.EncodeToString(data), nil
+}
+
+func ValidateDataURI(value string, extension []string) error {
+	var dataURLRegex = regexp.MustCompile(
+		`^data:([a-zA-Z0-9!#$&^_.+-]+/[a-zA-Z0-9!#$&^_.+-]+);base64,[A-Za-z0-9+/]+={0,2}$`,
+	)
+
+	if !dataURLRegex.MatchString(value) {
+		return errors.New("invalid data URI")
+	}
+
+	return VerifyDocumentType(value, extension)
+}
+
+func VerifyDocumentType(data string, extension []string) error {
+	ext, err := ExtensionFromDataURI(data)
+	if err != nil {
+		return err
+	}
+
+	if Contains(extension, ext) {
+		return nil
+	}
+
+	return errors.New("unsupprted file type")
+}
+
+func ExtensionFromDataURI(dataURI string) (string, error) {
+	if !strings.HasPrefix(dataURI, "data:") {
+		return "", fmt.Errorf("invalid data URI")
+	}
+
+	header, _, found := strings.Cut(dataURI, ",")
+	if !found {
+		return "", fmt.Errorf("invalid data URI")
+	}
+
+	mimeType := strings.TrimPrefix(header, "data:")
+	mimeType = strings.TrimSuffix(mimeType, ";base64")
+
+	idx := strings.Index(mimeType, "/")
+
+	return mimeType[idx+1:], nil
 }

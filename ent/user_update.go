@@ -11,6 +11,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/Toflex/directory_v2/ent/business"
 	"github.com/Toflex/directory_v2/ent/manager"
 	"github.com/Toflex/directory_v2/ent/predicate"
 	"github.com/Toflex/directory_v2/ent/requestverification"
@@ -137,6 +138,26 @@ func (uu *UserUpdate) SetNillableDisplayName(s *string) *UserUpdate {
 // ClearDisplayName clears the value of the "display_name" field.
 func (uu *UserUpdate) ClearDisplayName() *UserUpdate {
 	uu.mutation.ClearDisplayName()
+	return uu
+}
+
+// SetDateOfBirth sets the "date_of_birth" field.
+func (uu *UserUpdate) SetDateOfBirth(t time.Time) *UserUpdate {
+	uu.mutation.SetDateOfBirth(t)
+	return uu
+}
+
+// SetNillableDateOfBirth sets the "date_of_birth" field if the given value is not nil.
+func (uu *UserUpdate) SetNillableDateOfBirth(t *time.Time) *UserUpdate {
+	if t != nil {
+		uu.SetDateOfBirth(*t)
+	}
+	return uu
+}
+
+// ClearDateOfBirth clears the value of the "date_of_birth" field.
+func (uu *UserUpdate) ClearDateOfBirth() *UserUpdate {
+	uu.mutation.ClearDateOfBirth()
 	return uu
 }
 
@@ -306,6 +327,21 @@ func (uu *UserUpdate) AddUserDocuments(u ...*UserDocument) *UserUpdate {
 	return uu.AddUserDocumentIDs(ids...)
 }
 
+// AddRegisteredBusinessIDs adds the "registered_businesses" edge to the Business entity by IDs.
+func (uu *UserUpdate) AddRegisteredBusinessIDs(ids ...string) *UserUpdate {
+	uu.mutation.AddRegisteredBusinessIDs(ids...)
+	return uu
+}
+
+// AddRegisteredBusinesses adds the "registered_businesses" edges to the Business entity.
+func (uu *UserUpdate) AddRegisteredBusinesses(b ...*Business) *UserUpdate {
+	ids := make([]string, len(b))
+	for i := range b {
+		ids[i] = b[i].ID
+	}
+	return uu.AddRegisteredBusinessIDs(ids...)
+}
+
 // AddVerificationIDs adds the "verifications" edge to the Verification entity by IDs.
 func (uu *UserUpdate) AddVerificationIDs(ids ...string) *UserUpdate {
 	uu.mutation.AddVerificationIDs(ids...)
@@ -381,6 +417,27 @@ func (uu *UserUpdate) RemoveUserDocuments(u ...*UserDocument) *UserUpdate {
 		ids[i] = u[i].ID
 	}
 	return uu.RemoveUserDocumentIDs(ids...)
+}
+
+// ClearRegisteredBusinesses clears all "registered_businesses" edges to the Business entity.
+func (uu *UserUpdate) ClearRegisteredBusinesses() *UserUpdate {
+	uu.mutation.ClearRegisteredBusinesses()
+	return uu
+}
+
+// RemoveRegisteredBusinessIDs removes the "registered_businesses" edge to Business entities by IDs.
+func (uu *UserUpdate) RemoveRegisteredBusinessIDs(ids ...string) *UserUpdate {
+	uu.mutation.RemoveRegisteredBusinessIDs(ids...)
+	return uu
+}
+
+// RemoveRegisteredBusinesses removes "registered_businesses" edges to Business entities.
+func (uu *UserUpdate) RemoveRegisteredBusinesses(b ...*Business) *UserUpdate {
+	ids := make([]string, len(b))
+	for i := range b {
+		ids[i] = b[i].ID
+	}
+	return uu.RemoveRegisteredBusinessIDs(ids...)
 }
 
 // ClearVerifications clears all "verifications" edges to the Verification entity.
@@ -533,6 +590,12 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if uu.mutation.DisplayNameCleared() {
 		_spec.ClearField(user.FieldDisplayName, field.TypeString)
 	}
+	if value, ok := uu.mutation.DateOfBirth(); ok {
+		_spec.SetField(user.FieldDateOfBirth, field.TypeTime, value)
+	}
+	if uu.mutation.DateOfBirthCleared() {
+		_spec.ClearField(user.FieldDateOfBirth, field.TypeTime)
+	}
 	if value, ok := uu.mutation.EmailAddress(); ok {
 		_spec.SetField(user.FieldEmailAddress, field.TypeString, value)
 	}
@@ -652,6 +715,51 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(userdocument.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if uu.mutation.RegisteredBusinessesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.RegisteredBusinessesTable,
+			Columns: []string{user.RegisteredBusinessesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(business.FieldID, field.TypeString),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := uu.mutation.RemovedRegisteredBusinessesIDs(); len(nodes) > 0 && !uu.mutation.RegisteredBusinessesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.RegisteredBusinessesTable,
+			Columns: []string{user.RegisteredBusinessesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(business.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := uu.mutation.RegisteredBusinessesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.RegisteredBusinessesTable,
+			Columns: []string{user.RegisteredBusinessesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(business.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {
@@ -877,6 +985,26 @@ func (uuo *UserUpdateOne) ClearDisplayName() *UserUpdateOne {
 	return uuo
 }
 
+// SetDateOfBirth sets the "date_of_birth" field.
+func (uuo *UserUpdateOne) SetDateOfBirth(t time.Time) *UserUpdateOne {
+	uuo.mutation.SetDateOfBirth(t)
+	return uuo
+}
+
+// SetNillableDateOfBirth sets the "date_of_birth" field if the given value is not nil.
+func (uuo *UserUpdateOne) SetNillableDateOfBirth(t *time.Time) *UserUpdateOne {
+	if t != nil {
+		uuo.SetDateOfBirth(*t)
+	}
+	return uuo
+}
+
+// ClearDateOfBirth clears the value of the "date_of_birth" field.
+func (uuo *UserUpdateOne) ClearDateOfBirth() *UserUpdateOne {
+	uuo.mutation.ClearDateOfBirth()
+	return uuo
+}
+
 // SetEmailAddress sets the "email_address" field.
 func (uuo *UserUpdateOne) SetEmailAddress(s string) *UserUpdateOne {
 	uuo.mutation.SetEmailAddress(s)
@@ -1043,6 +1171,21 @@ func (uuo *UserUpdateOne) AddUserDocuments(u ...*UserDocument) *UserUpdateOne {
 	return uuo.AddUserDocumentIDs(ids...)
 }
 
+// AddRegisteredBusinessIDs adds the "registered_businesses" edge to the Business entity by IDs.
+func (uuo *UserUpdateOne) AddRegisteredBusinessIDs(ids ...string) *UserUpdateOne {
+	uuo.mutation.AddRegisteredBusinessIDs(ids...)
+	return uuo
+}
+
+// AddRegisteredBusinesses adds the "registered_businesses" edges to the Business entity.
+func (uuo *UserUpdateOne) AddRegisteredBusinesses(b ...*Business) *UserUpdateOne {
+	ids := make([]string, len(b))
+	for i := range b {
+		ids[i] = b[i].ID
+	}
+	return uuo.AddRegisteredBusinessIDs(ids...)
+}
+
 // AddVerificationIDs adds the "verifications" edge to the Verification entity by IDs.
 func (uuo *UserUpdateOne) AddVerificationIDs(ids ...string) *UserUpdateOne {
 	uuo.mutation.AddVerificationIDs(ids...)
@@ -1118,6 +1261,27 @@ func (uuo *UserUpdateOne) RemoveUserDocuments(u ...*UserDocument) *UserUpdateOne
 		ids[i] = u[i].ID
 	}
 	return uuo.RemoveUserDocumentIDs(ids...)
+}
+
+// ClearRegisteredBusinesses clears all "registered_businesses" edges to the Business entity.
+func (uuo *UserUpdateOne) ClearRegisteredBusinesses() *UserUpdateOne {
+	uuo.mutation.ClearRegisteredBusinesses()
+	return uuo
+}
+
+// RemoveRegisteredBusinessIDs removes the "registered_businesses" edge to Business entities by IDs.
+func (uuo *UserUpdateOne) RemoveRegisteredBusinessIDs(ids ...string) *UserUpdateOne {
+	uuo.mutation.RemoveRegisteredBusinessIDs(ids...)
+	return uuo
+}
+
+// RemoveRegisteredBusinesses removes "registered_businesses" edges to Business entities.
+func (uuo *UserUpdateOne) RemoveRegisteredBusinesses(b ...*Business) *UserUpdateOne {
+	ids := make([]string, len(b))
+	for i := range b {
+		ids[i] = b[i].ID
+	}
+	return uuo.RemoveRegisteredBusinessIDs(ids...)
 }
 
 // ClearVerifications clears all "verifications" edges to the Verification entity.
@@ -1300,6 +1464,12 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 	if uuo.mutation.DisplayNameCleared() {
 		_spec.ClearField(user.FieldDisplayName, field.TypeString)
 	}
+	if value, ok := uuo.mutation.DateOfBirth(); ok {
+		_spec.SetField(user.FieldDateOfBirth, field.TypeTime, value)
+	}
+	if uuo.mutation.DateOfBirthCleared() {
+		_spec.ClearField(user.FieldDateOfBirth, field.TypeTime)
+	}
 	if value, ok := uuo.mutation.EmailAddress(); ok {
 		_spec.SetField(user.FieldEmailAddress, field.TypeString, value)
 	}
@@ -1419,6 +1589,51 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(userdocument.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if uuo.mutation.RegisteredBusinessesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.RegisteredBusinessesTable,
+			Columns: []string{user.RegisteredBusinessesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(business.FieldID, field.TypeString),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := uuo.mutation.RemovedRegisteredBusinessesIDs(); len(nodes) > 0 && !uuo.mutation.RegisteredBusinessesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.RegisteredBusinessesTable,
+			Columns: []string{user.RegisteredBusinessesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(business.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := uuo.mutation.RegisteredBusinessesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.RegisteredBusinessesTable,
+			Columns: []string{user.RegisteredBusinessesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(business.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {

@@ -3,54 +3,81 @@
 package businessdocument
 
 import (
+	"time"
+
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"github.com/Toflex/directory_v2/ent/predicate"
 )
 
 // ID filters vertices based on their ID field.
-func ID(id int) predicate.BusinessDocument {
+func ID(id string) predicate.BusinessDocument {
 	return predicate.BusinessDocument(sql.FieldEQ(FieldID, id))
 }
 
 // IDEQ applies the EQ predicate on the ID field.
-func IDEQ(id int) predicate.BusinessDocument {
+func IDEQ(id string) predicate.BusinessDocument {
 	return predicate.BusinessDocument(sql.FieldEQ(FieldID, id))
 }
 
 // IDNEQ applies the NEQ predicate on the ID field.
-func IDNEQ(id int) predicate.BusinessDocument {
+func IDNEQ(id string) predicate.BusinessDocument {
 	return predicate.BusinessDocument(sql.FieldNEQ(FieldID, id))
 }
 
 // IDIn applies the In predicate on the ID field.
-func IDIn(ids ...int) predicate.BusinessDocument {
+func IDIn(ids ...string) predicate.BusinessDocument {
 	return predicate.BusinessDocument(sql.FieldIn(FieldID, ids...))
 }
 
 // IDNotIn applies the NotIn predicate on the ID field.
-func IDNotIn(ids ...int) predicate.BusinessDocument {
+func IDNotIn(ids ...string) predicate.BusinessDocument {
 	return predicate.BusinessDocument(sql.FieldNotIn(FieldID, ids...))
 }
 
 // IDGT applies the GT predicate on the ID field.
-func IDGT(id int) predicate.BusinessDocument {
+func IDGT(id string) predicate.BusinessDocument {
 	return predicate.BusinessDocument(sql.FieldGT(FieldID, id))
 }
 
 // IDGTE applies the GTE predicate on the ID field.
-func IDGTE(id int) predicate.BusinessDocument {
+func IDGTE(id string) predicate.BusinessDocument {
 	return predicate.BusinessDocument(sql.FieldGTE(FieldID, id))
 }
 
 // IDLT applies the LT predicate on the ID field.
-func IDLT(id int) predicate.BusinessDocument {
+func IDLT(id string) predicate.BusinessDocument {
 	return predicate.BusinessDocument(sql.FieldLT(FieldID, id))
 }
 
 // IDLTE applies the LTE predicate on the ID field.
-func IDLTE(id int) predicate.BusinessDocument {
+func IDLTE(id string) predicate.BusinessDocument {
 	return predicate.BusinessDocument(sql.FieldLTE(FieldID, id))
+}
+
+// IDEqualFold applies the EqualFold predicate on the ID field.
+func IDEqualFold(id string) predicate.BusinessDocument {
+	return predicate.BusinessDocument(sql.FieldEqualFold(FieldID, id))
+}
+
+// IDContainsFold applies the ContainsFold predicate on the ID field.
+func IDContainsFold(id string) predicate.BusinessDocument {
+	return predicate.BusinessDocument(sql.FieldContainsFold(FieldID, id))
+}
+
+// CreatedAt applies equality check predicate on the "created_at" field. It's identical to CreatedAtEQ.
+func CreatedAt(v time.Time) predicate.BusinessDocument {
+	return predicate.BusinessDocument(sql.FieldEQ(FieldCreatedAt, v))
+}
+
+// UpdatedAt applies equality check predicate on the "updated_at" field. It's identical to UpdatedAtEQ.
+func UpdatedAt(v time.Time) predicate.BusinessDocument {
+	return predicate.BusinessDocument(sql.FieldEQ(FieldUpdatedAt, v))
+}
+
+// DeletedAt applies equality check predicate on the "deleted_at" field. It's identical to DeletedAtEQ.
+func DeletedAt(v time.Time) predicate.BusinessDocument {
+	return predicate.BusinessDocument(sql.FieldEQ(FieldDeletedAt, v))
 }
 
 // Title applies equality check predicate on the "title" field. It's identical to TitleEQ.
@@ -71,6 +98,136 @@ func URL(v string) predicate.BusinessDocument {
 // Verified applies equality check predicate on the "verified" field. It's identical to VerifiedEQ.
 func Verified(v bool) predicate.BusinessDocument {
 	return predicate.BusinessDocument(sql.FieldEQ(FieldVerified, v))
+}
+
+// CreatedAtEQ applies the EQ predicate on the "created_at" field.
+func CreatedAtEQ(v time.Time) predicate.BusinessDocument {
+	return predicate.BusinessDocument(sql.FieldEQ(FieldCreatedAt, v))
+}
+
+// CreatedAtNEQ applies the NEQ predicate on the "created_at" field.
+func CreatedAtNEQ(v time.Time) predicate.BusinessDocument {
+	return predicate.BusinessDocument(sql.FieldNEQ(FieldCreatedAt, v))
+}
+
+// CreatedAtIn applies the In predicate on the "created_at" field.
+func CreatedAtIn(vs ...time.Time) predicate.BusinessDocument {
+	return predicate.BusinessDocument(sql.FieldIn(FieldCreatedAt, vs...))
+}
+
+// CreatedAtNotIn applies the NotIn predicate on the "created_at" field.
+func CreatedAtNotIn(vs ...time.Time) predicate.BusinessDocument {
+	return predicate.BusinessDocument(sql.FieldNotIn(FieldCreatedAt, vs...))
+}
+
+// CreatedAtGT applies the GT predicate on the "created_at" field.
+func CreatedAtGT(v time.Time) predicate.BusinessDocument {
+	return predicate.BusinessDocument(sql.FieldGT(FieldCreatedAt, v))
+}
+
+// CreatedAtGTE applies the GTE predicate on the "created_at" field.
+func CreatedAtGTE(v time.Time) predicate.BusinessDocument {
+	return predicate.BusinessDocument(sql.FieldGTE(FieldCreatedAt, v))
+}
+
+// CreatedAtLT applies the LT predicate on the "created_at" field.
+func CreatedAtLT(v time.Time) predicate.BusinessDocument {
+	return predicate.BusinessDocument(sql.FieldLT(FieldCreatedAt, v))
+}
+
+// CreatedAtLTE applies the LTE predicate on the "created_at" field.
+func CreatedAtLTE(v time.Time) predicate.BusinessDocument {
+	return predicate.BusinessDocument(sql.FieldLTE(FieldCreatedAt, v))
+}
+
+// UpdatedAtEQ applies the EQ predicate on the "updated_at" field.
+func UpdatedAtEQ(v time.Time) predicate.BusinessDocument {
+	return predicate.BusinessDocument(sql.FieldEQ(FieldUpdatedAt, v))
+}
+
+// UpdatedAtNEQ applies the NEQ predicate on the "updated_at" field.
+func UpdatedAtNEQ(v time.Time) predicate.BusinessDocument {
+	return predicate.BusinessDocument(sql.FieldNEQ(FieldUpdatedAt, v))
+}
+
+// UpdatedAtIn applies the In predicate on the "updated_at" field.
+func UpdatedAtIn(vs ...time.Time) predicate.BusinessDocument {
+	return predicate.BusinessDocument(sql.FieldIn(FieldUpdatedAt, vs...))
+}
+
+// UpdatedAtNotIn applies the NotIn predicate on the "updated_at" field.
+func UpdatedAtNotIn(vs ...time.Time) predicate.BusinessDocument {
+	return predicate.BusinessDocument(sql.FieldNotIn(FieldUpdatedAt, vs...))
+}
+
+// UpdatedAtGT applies the GT predicate on the "updated_at" field.
+func UpdatedAtGT(v time.Time) predicate.BusinessDocument {
+	return predicate.BusinessDocument(sql.FieldGT(FieldUpdatedAt, v))
+}
+
+// UpdatedAtGTE applies the GTE predicate on the "updated_at" field.
+func UpdatedAtGTE(v time.Time) predicate.BusinessDocument {
+	return predicate.BusinessDocument(sql.FieldGTE(FieldUpdatedAt, v))
+}
+
+// UpdatedAtLT applies the LT predicate on the "updated_at" field.
+func UpdatedAtLT(v time.Time) predicate.BusinessDocument {
+	return predicate.BusinessDocument(sql.FieldLT(FieldUpdatedAt, v))
+}
+
+// UpdatedAtLTE applies the LTE predicate on the "updated_at" field.
+func UpdatedAtLTE(v time.Time) predicate.BusinessDocument {
+	return predicate.BusinessDocument(sql.FieldLTE(FieldUpdatedAt, v))
+}
+
+// DeletedAtEQ applies the EQ predicate on the "deleted_at" field.
+func DeletedAtEQ(v time.Time) predicate.BusinessDocument {
+	return predicate.BusinessDocument(sql.FieldEQ(FieldDeletedAt, v))
+}
+
+// DeletedAtNEQ applies the NEQ predicate on the "deleted_at" field.
+func DeletedAtNEQ(v time.Time) predicate.BusinessDocument {
+	return predicate.BusinessDocument(sql.FieldNEQ(FieldDeletedAt, v))
+}
+
+// DeletedAtIn applies the In predicate on the "deleted_at" field.
+func DeletedAtIn(vs ...time.Time) predicate.BusinessDocument {
+	return predicate.BusinessDocument(sql.FieldIn(FieldDeletedAt, vs...))
+}
+
+// DeletedAtNotIn applies the NotIn predicate on the "deleted_at" field.
+func DeletedAtNotIn(vs ...time.Time) predicate.BusinessDocument {
+	return predicate.BusinessDocument(sql.FieldNotIn(FieldDeletedAt, vs...))
+}
+
+// DeletedAtGT applies the GT predicate on the "deleted_at" field.
+func DeletedAtGT(v time.Time) predicate.BusinessDocument {
+	return predicate.BusinessDocument(sql.FieldGT(FieldDeletedAt, v))
+}
+
+// DeletedAtGTE applies the GTE predicate on the "deleted_at" field.
+func DeletedAtGTE(v time.Time) predicate.BusinessDocument {
+	return predicate.BusinessDocument(sql.FieldGTE(FieldDeletedAt, v))
+}
+
+// DeletedAtLT applies the LT predicate on the "deleted_at" field.
+func DeletedAtLT(v time.Time) predicate.BusinessDocument {
+	return predicate.BusinessDocument(sql.FieldLT(FieldDeletedAt, v))
+}
+
+// DeletedAtLTE applies the LTE predicate on the "deleted_at" field.
+func DeletedAtLTE(v time.Time) predicate.BusinessDocument {
+	return predicate.BusinessDocument(sql.FieldLTE(FieldDeletedAt, v))
+}
+
+// DeletedAtIsNil applies the IsNil predicate on the "deleted_at" field.
+func DeletedAtIsNil() predicate.BusinessDocument {
+	return predicate.BusinessDocument(sql.FieldIsNull(FieldDeletedAt))
+}
+
+// DeletedAtNotNil applies the NotNil predicate on the "deleted_at" field.
+func DeletedAtNotNil() predicate.BusinessDocument {
+	return predicate.BusinessDocument(sql.FieldNotNull(FieldDeletedAt))
 }
 
 // TitleEQ applies the EQ predicate on the "title" field.
@@ -298,21 +455,44 @@ func TypeNotIn(vs ...Type) predicate.BusinessDocument {
 	return predicate.BusinessDocument(sql.FieldNotIn(FieldType, vs...))
 }
 
-// HasBusinessDocument applies the HasEdge predicate on the "business_document" edge.
-func HasBusinessDocument() predicate.BusinessDocument {
+// HasBusiness applies the HasEdge predicate on the "business" edge.
+func HasBusiness() predicate.BusinessDocument {
 	return predicate.BusinessDocument(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, BusinessDocumentTable, BusinessDocumentColumn),
+			sqlgraph.Edge(sqlgraph.M2O, true, BusinessTable, BusinessColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})
 }
 
-// HasBusinessDocumentWith applies the HasEdge predicate on the "business_document" edge with a given conditions (other predicates).
-func HasBusinessDocumentWith(preds ...predicate.Business) predicate.BusinessDocument {
+// HasBusinessWith applies the HasEdge predicate on the "business" edge with a given conditions (other predicates).
+func HasBusinessWith(preds ...predicate.Business) predicate.BusinessDocument {
 	return predicate.BusinessDocument(func(s *sql.Selector) {
-		step := newBusinessDocumentStep()
+		step := newBusinessStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasKybDocument applies the HasEdge predicate on the "kyb_document" edge.
+func HasKybDocument() predicate.BusinessDocument {
+	return predicate.BusinessDocument(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, true, KybDocumentTable, KybDocumentPrimaryKey...),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasKybDocumentWith applies the HasEdge predicate on the "kyb_document" edge with a given conditions (other predicates).
+func HasKybDocumentWith(preds ...predicate.KYBDocument) predicate.BusinessDocument {
+	return predicate.BusinessDocument(func(s *sql.Selector) {
+		step := newKybDocumentStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)

@@ -15,8 +15,17 @@ type BusinessDocument func(*sql.Selector)
 // BusinessFeature is the predicate function for businessfeature builders.
 type BusinessFeature func(*sql.Selector)
 
+// BusinessLocation is the predicate function for businesslocation builders.
+type BusinessLocation func(*sql.Selector)
+
 // BusinessServices is the predicate function for businessservices builders.
 type BusinessServices func(*sql.Selector)
+
+// KYBDocument is the predicate function for kybdocument builders.
+type KYBDocument func(*sql.Selector)
+
+// KYBMessage is the predicate function for kybmessage builders.
+type KYBMessage func(*sql.Selector)
 
 // Manager is the predicate function for manager builders.
 type Manager func(*sql.Selector)
@@ -32,6 +41,9 @@ type RequestVerification func(*sql.Selector)
 
 // Role is the predicate function for role builders.
 type Role func(*sql.Selector)
+
+// RolePermission is the predicate function for rolepermission builders.
+type RolePermission func(*sql.Selector)
 
 // Service is the predicate function for service builders.
 type Service func(*sql.Selector)

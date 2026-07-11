@@ -27,6 +27,8 @@ const (
 	FieldVerificationType = "verification_type"
 	// FieldStatus holds the string denoting the status field in the database.
 	FieldStatus = "status"
+	// FieldNumber holds the string denoting the number field in the database.
+	FieldNumber = "number"
 	// FieldReferenceID holds the string denoting the reference_id field in the database.
 	FieldReferenceID = "reference_id"
 	// FieldProviderReference holds the string denoting the provider_reference field in the database.
@@ -66,6 +68,7 @@ var Columns = []string{
 	FieldProvider,
 	FieldVerificationType,
 	FieldStatus,
+	FieldNumber,
 	FieldReferenceID,
 	FieldProviderReference,
 	FieldMetadata,
@@ -206,6 +209,11 @@ func ByVerificationType(opts ...sql.OrderTermOption) OrderOption {
 // ByStatus orders the results by the status field.
 func ByStatus(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldStatus, opts...).ToFunc()
+}
+
+// ByNumber orders the results by the number field.
+func ByNumber(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldNumber, opts...).ToFunc()
 }
 
 // ByReferenceID orders the results by the reference_id field.

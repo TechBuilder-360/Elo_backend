@@ -18,12 +18,16 @@ import (
 	"github.com/Toflex/directory_v2/ent/business"
 	"github.com/Toflex/directory_v2/ent/businessdocument"
 	"github.com/Toflex/directory_v2/ent/businessfeature"
+	"github.com/Toflex/directory_v2/ent/businesslocation"
 	"github.com/Toflex/directory_v2/ent/businessservices"
+	"github.com/Toflex/directory_v2/ent/kybdocument"
+	"github.com/Toflex/directory_v2/ent/kybmessage"
 	"github.com/Toflex/directory_v2/ent/manager"
 	"github.com/Toflex/directory_v2/ent/permission"
 	"github.com/Toflex/directory_v2/ent/provider"
 	"github.com/Toflex/directory_v2/ent/requestverification"
 	"github.com/Toflex/directory_v2/ent/role"
+	"github.com/Toflex/directory_v2/ent/rolepermission"
 	"github.com/Toflex/directory_v2/ent/service"
 	"github.com/Toflex/directory_v2/ent/social"
 	"github.com/Toflex/directory_v2/ent/user"
@@ -42,8 +46,14 @@ type Client struct {
 	BusinessDocument *BusinessDocumentClient
 	// BusinessFeature is the client for interacting with the BusinessFeature builders.
 	BusinessFeature *BusinessFeatureClient
+	// BusinessLocation is the client for interacting with the BusinessLocation builders.
+	BusinessLocation *BusinessLocationClient
 	// BusinessServices is the client for interacting with the BusinessServices builders.
 	BusinessServices *BusinessServicesClient
+	// KYBDocument is the client for interacting with the KYBDocument builders.
+	KYBDocument *KYBDocumentClient
+	// KYBMessage is the client for interacting with the KYBMessage builders.
+	KYBMessage *KYBMessageClient
 	// Manager is the client for interacting with the Manager builders.
 	Manager *ManagerClient
 	// Permission is the client for interacting with the Permission builders.
@@ -54,6 +64,8 @@ type Client struct {
 	RequestVerification *RequestVerificationClient
 	// Role is the client for interacting with the Role builders.
 	Role *RoleClient
+	// RolePermission is the client for interacting with the RolePermission builders.
+	RolePermission *RolePermissionClient
 	// Service is the client for interacting with the Service builders.
 	Service *ServiceClient
 	// Social is the client for interacting with the Social builders.
@@ -78,12 +90,16 @@ func (c *Client) init() {
 	c.Business = NewBusinessClient(c.config)
 	c.BusinessDocument = NewBusinessDocumentClient(c.config)
 	c.BusinessFeature = NewBusinessFeatureClient(c.config)
+	c.BusinessLocation = NewBusinessLocationClient(c.config)
 	c.BusinessServices = NewBusinessServicesClient(c.config)
+	c.KYBDocument = NewKYBDocumentClient(c.config)
+	c.KYBMessage = NewKYBMessageClient(c.config)
 	c.Manager = NewManagerClient(c.config)
 	c.Permission = NewPermissionClient(c.config)
 	c.Provider = NewProviderClient(c.config)
 	c.RequestVerification = NewRequestVerificationClient(c.config)
 	c.Role = NewRoleClient(c.config)
+	c.RolePermission = NewRolePermissionClient(c.config)
 	c.Service = NewServiceClient(c.config)
 	c.Social = NewSocialClient(c.config)
 	c.User = NewUserClient(c.config)
@@ -184,12 +200,16 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		Business:            NewBusinessClient(cfg),
 		BusinessDocument:    NewBusinessDocumentClient(cfg),
 		BusinessFeature:     NewBusinessFeatureClient(cfg),
+		BusinessLocation:    NewBusinessLocationClient(cfg),
 		BusinessServices:    NewBusinessServicesClient(cfg),
+		KYBDocument:         NewKYBDocumentClient(cfg),
+		KYBMessage:          NewKYBMessageClient(cfg),
 		Manager:             NewManagerClient(cfg),
 		Permission:          NewPermissionClient(cfg),
 		Provider:            NewProviderClient(cfg),
 		RequestVerification: NewRequestVerificationClient(cfg),
 		Role:                NewRoleClient(cfg),
+		RolePermission:      NewRolePermissionClient(cfg),
 		Service:             NewServiceClient(cfg),
 		Social:              NewSocialClient(cfg),
 		User:                NewUserClient(cfg),
@@ -217,12 +237,16 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		Business:            NewBusinessClient(cfg),
 		BusinessDocument:    NewBusinessDocumentClient(cfg),
 		BusinessFeature:     NewBusinessFeatureClient(cfg),
+		BusinessLocation:    NewBusinessLocationClient(cfg),
 		BusinessServices:    NewBusinessServicesClient(cfg),
+		KYBDocument:         NewKYBDocumentClient(cfg),
+		KYBMessage:          NewKYBMessageClient(cfg),
 		Manager:             NewManagerClient(cfg),
 		Permission:          NewPermissionClient(cfg),
 		Provider:            NewProviderClient(cfg),
 		RequestVerification: NewRequestVerificationClient(cfg),
 		Role:                NewRoleClient(cfg),
+		RolePermission:      NewRolePermissionClient(cfg),
 		Service:             NewServiceClient(cfg),
 		Social:              NewSocialClient(cfg),
 		User:                NewUserClient(cfg),
@@ -257,8 +281,9 @@ func (c *Client) Close() error {
 // In order to add hooks to a specific client, call: `client.Node.Use(...)`.
 func (c *Client) Use(hooks ...Hook) {
 	for _, n := range []interface{ Use(...Hook) }{
-		c.Business, c.BusinessDocument, c.BusinessFeature, c.BusinessServices,
-		c.Manager, c.Permission, c.Provider, c.RequestVerification, c.Role, c.Service,
+		c.Business, c.BusinessDocument, c.BusinessFeature, c.BusinessLocation,
+		c.BusinessServices, c.KYBDocument, c.KYBMessage, c.Manager, c.Permission,
+		c.Provider, c.RequestVerification, c.Role, c.RolePermission, c.Service,
 		c.Social, c.User, c.UserDocument, c.Verification,
 	} {
 		n.Use(hooks...)
@@ -269,8 +294,9 @@ func (c *Client) Use(hooks ...Hook) {
 // In order to add interceptors to a specific client, call: `client.Node.Intercept(...)`.
 func (c *Client) Intercept(interceptors ...Interceptor) {
 	for _, n := range []interface{ Intercept(...Interceptor) }{
-		c.Business, c.BusinessDocument, c.BusinessFeature, c.BusinessServices,
-		c.Manager, c.Permission, c.Provider, c.RequestVerification, c.Role, c.Service,
+		c.Business, c.BusinessDocument, c.BusinessFeature, c.BusinessLocation,
+		c.BusinessServices, c.KYBDocument, c.KYBMessage, c.Manager, c.Permission,
+		c.Provider, c.RequestVerification, c.Role, c.RolePermission, c.Service,
 		c.Social, c.User, c.UserDocument, c.Verification,
 	} {
 		n.Intercept(interceptors...)
@@ -286,8 +312,14 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.BusinessDocument.mutate(ctx, m)
 	case *BusinessFeatureMutation:
 		return c.BusinessFeature.mutate(ctx, m)
+	case *BusinessLocationMutation:
+		return c.BusinessLocation.mutate(ctx, m)
 	case *BusinessServicesMutation:
 		return c.BusinessServices.mutate(ctx, m)
+	case *KYBDocumentMutation:
+		return c.KYBDocument.mutate(ctx, m)
+	case *KYBMessageMutation:
+		return c.KYBMessage.mutate(ctx, m)
 	case *ManagerMutation:
 		return c.Manager.mutate(ctx, m)
 	case *PermissionMutation:
@@ -298,6 +330,8 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.RequestVerification.mutate(ctx, m)
 	case *RoleMutation:
 		return c.Role.mutate(ctx, m)
+	case *RolePermissionMutation:
+		return c.RolePermission.mutate(ctx, m)
 	case *ServiceMutation:
 		return c.Service.mutate(ctx, m)
 	case *SocialMutation:
@@ -469,6 +503,22 @@ func (c *BusinessClient) QueryManages(b *Business) *ManagerQuery {
 	return query
 }
 
+// QueryRegisteredByUser queries the registered_by_user edge of a Business.
+func (c *BusinessClient) QueryRegisteredByUser(b *Business) *UserQuery {
+	query := (&UserClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := b.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(business.Table, business.FieldID, id),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, business.RegisteredByUserTable, business.RegisteredByUserColumn),
+		)
+		fromV = sqlgraph.Neighbors(b.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // QueryVerifications queries the verifications edge of a Business.
 func (c *BusinessClient) QueryVerifications(b *Business) *VerificationQuery {
 	query := (&VerificationClient{config: c.config}).Query()
@@ -510,6 +560,38 @@ func (c *BusinessClient) QueryBusinessDocuments(b *Business) *BusinessDocumentQu
 			sqlgraph.From(business.Table, business.FieldID, id),
 			sqlgraph.To(businessdocument.Table, businessdocument.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, business.BusinessDocumentsTable, business.BusinessDocumentsColumn),
+		)
+		fromV = sqlgraph.Neighbors(b.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryLocations queries the locations edge of a Business.
+func (c *BusinessClient) QueryLocations(b *Business) *BusinessLocationQuery {
+	query := (&BusinessLocationClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := b.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(business.Table, business.FieldID, id),
+			sqlgraph.To(businesslocation.Table, businesslocation.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, business.LocationsTable, business.LocationsColumn),
+		)
+		fromV = sqlgraph.Neighbors(b.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryKybMessages queries the kyb_messages edge of a Business.
+func (c *BusinessClient) QueryKybMessages(b *Business) *KYBMessageQuery {
+	query := (&KYBMessageClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := b.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(business.Table, business.FieldID, id),
+			sqlgraph.To(kybmessage.Table, kybmessage.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, business.KybMessagesTable, business.KybMessagesColumn),
 		)
 		fromV = sqlgraph.Neighbors(b.driver.Dialect(), step)
 		return fromV, nil
@@ -603,7 +685,7 @@ func (c *BusinessDocumentClient) UpdateOne(bd *BusinessDocument) *BusinessDocume
 }
 
 // UpdateOneID returns an update builder for the given id.
-func (c *BusinessDocumentClient) UpdateOneID(id int) *BusinessDocumentUpdateOne {
+func (c *BusinessDocumentClient) UpdateOneID(id string) *BusinessDocumentUpdateOne {
 	mutation := newBusinessDocumentMutation(c.config, OpUpdateOne, withBusinessDocumentID(id))
 	return &BusinessDocumentUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
@@ -620,7 +702,7 @@ func (c *BusinessDocumentClient) DeleteOne(bd *BusinessDocument) *BusinessDocume
 }
 
 // DeleteOneID returns a builder for deleting the given entity by its id.
-func (c *BusinessDocumentClient) DeleteOneID(id int) *BusinessDocumentDeleteOne {
+func (c *BusinessDocumentClient) DeleteOneID(id string) *BusinessDocumentDeleteOne {
 	builder := c.Delete().Where(businessdocument.ID(id))
 	builder.mutation.id = &id
 	builder.mutation.op = OpDeleteOne
@@ -637,12 +719,12 @@ func (c *BusinessDocumentClient) Query() *BusinessDocumentQuery {
 }
 
 // Get returns a BusinessDocument entity by its id.
-func (c *BusinessDocumentClient) Get(ctx context.Context, id int) (*BusinessDocument, error) {
+func (c *BusinessDocumentClient) Get(ctx context.Context, id string) (*BusinessDocument, error) {
 	return c.Query().Where(businessdocument.ID(id)).Only(ctx)
 }
 
 // GetX is like Get, but panics if an error occurs.
-func (c *BusinessDocumentClient) GetX(ctx context.Context, id int) *BusinessDocument {
+func (c *BusinessDocumentClient) GetX(ctx context.Context, id string) *BusinessDocument {
 	obj, err := c.Get(ctx, id)
 	if err != nil {
 		panic(err)
@@ -650,15 +732,31 @@ func (c *BusinessDocumentClient) GetX(ctx context.Context, id int) *BusinessDocu
 	return obj
 }
 
-// QueryBusinessDocument queries the business_document edge of a BusinessDocument.
-func (c *BusinessDocumentClient) QueryBusinessDocument(bd *BusinessDocument) *BusinessQuery {
+// QueryBusiness queries the business edge of a BusinessDocument.
+func (c *BusinessDocumentClient) QueryBusiness(bd *BusinessDocument) *BusinessQuery {
 	query := (&BusinessClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := bd.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(businessdocument.Table, businessdocument.FieldID, id),
 			sqlgraph.To(business.Table, business.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, businessdocument.BusinessDocumentTable, businessdocument.BusinessDocumentColumn),
+			sqlgraph.Edge(sqlgraph.M2O, true, businessdocument.BusinessTable, businessdocument.BusinessColumn),
+		)
+		fromV = sqlgraph.Neighbors(bd.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryKybDocument queries the kyb_document edge of a BusinessDocument.
+func (c *BusinessDocumentClient) QueryKybDocument(bd *BusinessDocument) *KYBDocumentQuery {
+	query := (&KYBDocumentClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := bd.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(businessdocument.Table, businessdocument.FieldID, id),
+			sqlgraph.To(kybdocument.Table, kybdocument.FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, true, businessdocument.KybDocumentTable, businessdocument.KybDocumentPrimaryKey...),
 		)
 		fromV = sqlgraph.Neighbors(bd.driver.Dialect(), step)
 		return fromV, nil
@@ -824,6 +922,155 @@ func (c *BusinessFeatureClient) mutate(ctx context.Context, m *BusinessFeatureMu
 	}
 }
 
+// BusinessLocationClient is a client for the BusinessLocation schema.
+type BusinessLocationClient struct {
+	config
+}
+
+// NewBusinessLocationClient returns a client for the BusinessLocation from the given config.
+func NewBusinessLocationClient(c config) *BusinessLocationClient {
+	return &BusinessLocationClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `businesslocation.Hooks(f(g(h())))`.
+func (c *BusinessLocationClient) Use(hooks ...Hook) {
+	c.hooks.BusinessLocation = append(c.hooks.BusinessLocation, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `businesslocation.Intercept(f(g(h())))`.
+func (c *BusinessLocationClient) Intercept(interceptors ...Interceptor) {
+	c.inters.BusinessLocation = append(c.inters.BusinessLocation, interceptors...)
+}
+
+// Create returns a builder for creating a BusinessLocation entity.
+func (c *BusinessLocationClient) Create() *BusinessLocationCreate {
+	mutation := newBusinessLocationMutation(c.config, OpCreate)
+	return &BusinessLocationCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of BusinessLocation entities.
+func (c *BusinessLocationClient) CreateBulk(builders ...*BusinessLocationCreate) *BusinessLocationCreateBulk {
+	return &BusinessLocationCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *BusinessLocationClient) MapCreateBulk(slice any, setFunc func(*BusinessLocationCreate, int)) *BusinessLocationCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &BusinessLocationCreateBulk{err: fmt.Errorf("calling to BusinessLocationClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*BusinessLocationCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &BusinessLocationCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for BusinessLocation.
+func (c *BusinessLocationClient) Update() *BusinessLocationUpdate {
+	mutation := newBusinessLocationMutation(c.config, OpUpdate)
+	return &BusinessLocationUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *BusinessLocationClient) UpdateOne(bl *BusinessLocation) *BusinessLocationUpdateOne {
+	mutation := newBusinessLocationMutation(c.config, OpUpdateOne, withBusinessLocation(bl))
+	return &BusinessLocationUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *BusinessLocationClient) UpdateOneID(id string) *BusinessLocationUpdateOne {
+	mutation := newBusinessLocationMutation(c.config, OpUpdateOne, withBusinessLocationID(id))
+	return &BusinessLocationUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for BusinessLocation.
+func (c *BusinessLocationClient) Delete() *BusinessLocationDelete {
+	mutation := newBusinessLocationMutation(c.config, OpDelete)
+	return &BusinessLocationDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *BusinessLocationClient) DeleteOne(bl *BusinessLocation) *BusinessLocationDeleteOne {
+	return c.DeleteOneID(bl.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *BusinessLocationClient) DeleteOneID(id string) *BusinessLocationDeleteOne {
+	builder := c.Delete().Where(businesslocation.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &BusinessLocationDeleteOne{builder}
+}
+
+// Query returns a query builder for BusinessLocation.
+func (c *BusinessLocationClient) Query() *BusinessLocationQuery {
+	return &BusinessLocationQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeBusinessLocation},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a BusinessLocation entity by its id.
+func (c *BusinessLocationClient) Get(ctx context.Context, id string) (*BusinessLocation, error) {
+	return c.Query().Where(businesslocation.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *BusinessLocationClient) GetX(ctx context.Context, id string) *BusinessLocation {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryBusiness queries the business edge of a BusinessLocation.
+func (c *BusinessLocationClient) QueryBusiness(bl *BusinessLocation) *BusinessQuery {
+	query := (&BusinessClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := bl.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(businesslocation.Table, businesslocation.FieldID, id),
+			sqlgraph.To(business.Table, business.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, businesslocation.BusinessTable, businesslocation.BusinessColumn),
+		)
+		fromV = sqlgraph.Neighbors(bl.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *BusinessLocationClient) Hooks() []Hook {
+	return c.hooks.BusinessLocation
+}
+
+// Interceptors returns the client interceptors.
+func (c *BusinessLocationClient) Interceptors() []Interceptor {
+	return c.inters.BusinessLocation
+}
+
+func (c *BusinessLocationClient) mutate(ctx context.Context, m *BusinessLocationMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&BusinessLocationCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&BusinessLocationUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&BusinessLocationUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&BusinessLocationDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown BusinessLocation mutation op: %q", m.Op())
+	}
+}
+
 // BusinessServicesClient is a client for the BusinessServices schema.
 type BusinessServicesClient struct {
 	config
@@ -973,6 +1220,304 @@ func (c *BusinessServicesClient) mutate(ctx context.Context, m *BusinessServices
 	}
 }
 
+// KYBDocumentClient is a client for the KYBDocument schema.
+type KYBDocumentClient struct {
+	config
+}
+
+// NewKYBDocumentClient returns a client for the KYBDocument from the given config.
+func NewKYBDocumentClient(c config) *KYBDocumentClient {
+	return &KYBDocumentClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `kybdocument.Hooks(f(g(h())))`.
+func (c *KYBDocumentClient) Use(hooks ...Hook) {
+	c.hooks.KYBDocument = append(c.hooks.KYBDocument, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `kybdocument.Intercept(f(g(h())))`.
+func (c *KYBDocumentClient) Intercept(interceptors ...Interceptor) {
+	c.inters.KYBDocument = append(c.inters.KYBDocument, interceptors...)
+}
+
+// Create returns a builder for creating a KYBDocument entity.
+func (c *KYBDocumentClient) Create() *KYBDocumentCreate {
+	mutation := newKYBDocumentMutation(c.config, OpCreate)
+	return &KYBDocumentCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of KYBDocument entities.
+func (c *KYBDocumentClient) CreateBulk(builders ...*KYBDocumentCreate) *KYBDocumentCreateBulk {
+	return &KYBDocumentCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *KYBDocumentClient) MapCreateBulk(slice any, setFunc func(*KYBDocumentCreate, int)) *KYBDocumentCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &KYBDocumentCreateBulk{err: fmt.Errorf("calling to KYBDocumentClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*KYBDocumentCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &KYBDocumentCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for KYBDocument.
+func (c *KYBDocumentClient) Update() *KYBDocumentUpdate {
+	mutation := newKYBDocumentMutation(c.config, OpUpdate)
+	return &KYBDocumentUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *KYBDocumentClient) UpdateOne(kd *KYBDocument) *KYBDocumentUpdateOne {
+	mutation := newKYBDocumentMutation(c.config, OpUpdateOne, withKYBDocument(kd))
+	return &KYBDocumentUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *KYBDocumentClient) UpdateOneID(id string) *KYBDocumentUpdateOne {
+	mutation := newKYBDocumentMutation(c.config, OpUpdateOne, withKYBDocumentID(id))
+	return &KYBDocumentUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for KYBDocument.
+func (c *KYBDocumentClient) Delete() *KYBDocumentDelete {
+	mutation := newKYBDocumentMutation(c.config, OpDelete)
+	return &KYBDocumentDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *KYBDocumentClient) DeleteOne(kd *KYBDocument) *KYBDocumentDeleteOne {
+	return c.DeleteOneID(kd.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *KYBDocumentClient) DeleteOneID(id string) *KYBDocumentDeleteOne {
+	builder := c.Delete().Where(kybdocument.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &KYBDocumentDeleteOne{builder}
+}
+
+// Query returns a query builder for KYBDocument.
+func (c *KYBDocumentClient) Query() *KYBDocumentQuery {
+	return &KYBDocumentQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeKYBDocument},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a KYBDocument entity by its id.
+func (c *KYBDocumentClient) Get(ctx context.Context, id string) (*KYBDocument, error) {
+	return c.Query().Where(kybdocument.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *KYBDocumentClient) GetX(ctx context.Context, id string) *KYBDocument {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryKybDocuments queries the kyb_documents edge of a KYBDocument.
+func (c *KYBDocumentClient) QueryKybDocuments(kd *KYBDocument) *BusinessDocumentQuery {
+	query := (&BusinessDocumentClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := kd.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(kybdocument.Table, kybdocument.FieldID, id),
+			sqlgraph.To(businessdocument.Table, businessdocument.FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, false, kybdocument.KybDocumentsTable, kybdocument.KybDocumentsPrimaryKey...),
+		)
+		fromV = sqlgraph.Neighbors(kd.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *KYBDocumentClient) Hooks() []Hook {
+	return c.hooks.KYBDocument
+}
+
+// Interceptors returns the client interceptors.
+func (c *KYBDocumentClient) Interceptors() []Interceptor {
+	return c.inters.KYBDocument
+}
+
+func (c *KYBDocumentClient) mutate(ctx context.Context, m *KYBDocumentMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&KYBDocumentCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&KYBDocumentUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&KYBDocumentUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&KYBDocumentDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown KYBDocument mutation op: %q", m.Op())
+	}
+}
+
+// KYBMessageClient is a client for the KYBMessage schema.
+type KYBMessageClient struct {
+	config
+}
+
+// NewKYBMessageClient returns a client for the KYBMessage from the given config.
+func NewKYBMessageClient(c config) *KYBMessageClient {
+	return &KYBMessageClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `kybmessage.Hooks(f(g(h())))`.
+func (c *KYBMessageClient) Use(hooks ...Hook) {
+	c.hooks.KYBMessage = append(c.hooks.KYBMessage, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `kybmessage.Intercept(f(g(h())))`.
+func (c *KYBMessageClient) Intercept(interceptors ...Interceptor) {
+	c.inters.KYBMessage = append(c.inters.KYBMessage, interceptors...)
+}
+
+// Create returns a builder for creating a KYBMessage entity.
+func (c *KYBMessageClient) Create() *KYBMessageCreate {
+	mutation := newKYBMessageMutation(c.config, OpCreate)
+	return &KYBMessageCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of KYBMessage entities.
+func (c *KYBMessageClient) CreateBulk(builders ...*KYBMessageCreate) *KYBMessageCreateBulk {
+	return &KYBMessageCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *KYBMessageClient) MapCreateBulk(slice any, setFunc func(*KYBMessageCreate, int)) *KYBMessageCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &KYBMessageCreateBulk{err: fmt.Errorf("calling to KYBMessageClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*KYBMessageCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &KYBMessageCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for KYBMessage.
+func (c *KYBMessageClient) Update() *KYBMessageUpdate {
+	mutation := newKYBMessageMutation(c.config, OpUpdate)
+	return &KYBMessageUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *KYBMessageClient) UpdateOne(km *KYBMessage) *KYBMessageUpdateOne {
+	mutation := newKYBMessageMutation(c.config, OpUpdateOne, withKYBMessage(km))
+	return &KYBMessageUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *KYBMessageClient) UpdateOneID(id string) *KYBMessageUpdateOne {
+	mutation := newKYBMessageMutation(c.config, OpUpdateOne, withKYBMessageID(id))
+	return &KYBMessageUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for KYBMessage.
+func (c *KYBMessageClient) Delete() *KYBMessageDelete {
+	mutation := newKYBMessageMutation(c.config, OpDelete)
+	return &KYBMessageDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *KYBMessageClient) DeleteOne(km *KYBMessage) *KYBMessageDeleteOne {
+	return c.DeleteOneID(km.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *KYBMessageClient) DeleteOneID(id string) *KYBMessageDeleteOne {
+	builder := c.Delete().Where(kybmessage.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &KYBMessageDeleteOne{builder}
+}
+
+// Query returns a query builder for KYBMessage.
+func (c *KYBMessageClient) Query() *KYBMessageQuery {
+	return &KYBMessageQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeKYBMessage},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a KYBMessage entity by its id.
+func (c *KYBMessageClient) Get(ctx context.Context, id string) (*KYBMessage, error) {
+	return c.Query().Where(kybmessage.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *KYBMessageClient) GetX(ctx context.Context, id string) *KYBMessage {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryBusiness queries the business edge of a KYBMessage.
+func (c *KYBMessageClient) QueryBusiness(km *KYBMessage) *BusinessQuery {
+	query := (&BusinessClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := km.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(kybmessage.Table, kybmessage.FieldID, id),
+			sqlgraph.To(business.Table, business.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, kybmessage.BusinessTable, kybmessage.BusinessColumn),
+		)
+		fromV = sqlgraph.Neighbors(km.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *KYBMessageClient) Hooks() []Hook {
+	return c.hooks.KYBMessage
+}
+
+// Interceptors returns the client interceptors.
+func (c *KYBMessageClient) Interceptors() []Interceptor {
+	return c.inters.KYBMessage
+}
+
+func (c *KYBMessageClient) mutate(ctx context.Context, m *KYBMessageMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&KYBMessageCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&KYBMessageUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&KYBMessageUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&KYBMessageDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown KYBMessage mutation op: %q", m.Op())
+	}
+}
+
 // ManagerClient is a client for the Manager schema.
 type ManagerClient struct {
 	config
@@ -1113,6 +1658,22 @@ func (c *ManagerClient) QueryUser(m *Manager) *UserQuery {
 	return query
 }
 
+// QueryRole queries the role edge of a Manager.
+func (c *ManagerClient) QueryRole(m *Manager) *RoleQuery {
+	query := (&RoleClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(manager.Table, manager.FieldID, id),
+			sqlgraph.To(role.Table, role.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, manager.RoleTable, manager.RoleColumn),
+		)
+		fromV = sqlgraph.Neighbors(m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // Hooks returns the client hooks.
 func (c *ManagerClient) Hooks() []Hook {
 	return c.hooks.Manager
@@ -1246,15 +1807,15 @@ func (c *PermissionClient) GetX(ctx context.Context, id string) *Permission {
 	return obj
 }
 
-// QueryRoles queries the roles edge of a Permission.
-func (c *PermissionClient) QueryRoles(pe *Permission) *RoleQuery {
-	query := (&RoleClient{config: c.config}).Query()
+// QueryRolePermissions queries the role_permissions edge of a Permission.
+func (c *PermissionClient) QueryRolePermissions(pe *Permission) *RolePermissionQuery {
+	query := (&RolePermissionClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := pe.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(permission.Table, permission.FieldID, id),
-			sqlgraph.To(role.Table, role.FieldID),
-			sqlgraph.Edge(sqlgraph.M2M, true, permission.RolesTable, permission.RolesPrimaryKey...),
+			sqlgraph.To(rolepermission.Table, rolepermission.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, permission.RolePermissionsTable, permission.RolePermissionsColumn),
 		)
 		fromV = sqlgraph.Neighbors(pe.driver.Dialect(), step)
 		return fromV, nil
@@ -1693,15 +2254,31 @@ func (c *RoleClient) GetX(ctx context.Context, id string) *Role {
 	return obj
 }
 
-// QueryPermissions queries the permissions edge of a Role.
-func (c *RoleClient) QueryPermissions(r *Role) *PermissionQuery {
-	query := (&PermissionClient{config: c.config}).Query()
+// QueryRolePermissions queries the role_permissions edge of a Role.
+func (c *RoleClient) QueryRolePermissions(r *Role) *RolePermissionQuery {
+	query := (&RolePermissionClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := r.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(role.Table, role.FieldID, id),
-			sqlgraph.To(permission.Table, permission.FieldID),
-			sqlgraph.Edge(sqlgraph.M2M, false, role.PermissionsTable, role.PermissionsPrimaryKey...),
+			sqlgraph.To(rolepermission.Table, rolepermission.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, role.RolePermissionsTable, role.RolePermissionsColumn),
+		)
+		fromV = sqlgraph.Neighbors(r.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryManagers queries the managers edge of a Role.
+func (c *RoleClient) QueryManagers(r *Role) *ManagerQuery {
+	query := (&ManagerClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := r.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(role.Table, role.FieldID, id),
+			sqlgraph.To(manager.Table, manager.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, role.ManagersTable, role.ManagersColumn),
 		)
 		fromV = sqlgraph.Neighbors(r.driver.Dialect(), step)
 		return fromV, nil
@@ -1731,6 +2308,171 @@ func (c *RoleClient) mutate(ctx context.Context, m *RoleMutation) (Value, error)
 		return (&RoleDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
 	default:
 		return nil, fmt.Errorf("ent: unknown Role mutation op: %q", m.Op())
+	}
+}
+
+// RolePermissionClient is a client for the RolePermission schema.
+type RolePermissionClient struct {
+	config
+}
+
+// NewRolePermissionClient returns a client for the RolePermission from the given config.
+func NewRolePermissionClient(c config) *RolePermissionClient {
+	return &RolePermissionClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `rolepermission.Hooks(f(g(h())))`.
+func (c *RolePermissionClient) Use(hooks ...Hook) {
+	c.hooks.RolePermission = append(c.hooks.RolePermission, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `rolepermission.Intercept(f(g(h())))`.
+func (c *RolePermissionClient) Intercept(interceptors ...Interceptor) {
+	c.inters.RolePermission = append(c.inters.RolePermission, interceptors...)
+}
+
+// Create returns a builder for creating a RolePermission entity.
+func (c *RolePermissionClient) Create() *RolePermissionCreate {
+	mutation := newRolePermissionMutation(c.config, OpCreate)
+	return &RolePermissionCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of RolePermission entities.
+func (c *RolePermissionClient) CreateBulk(builders ...*RolePermissionCreate) *RolePermissionCreateBulk {
+	return &RolePermissionCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *RolePermissionClient) MapCreateBulk(slice any, setFunc func(*RolePermissionCreate, int)) *RolePermissionCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &RolePermissionCreateBulk{err: fmt.Errorf("calling to RolePermissionClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*RolePermissionCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &RolePermissionCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for RolePermission.
+func (c *RolePermissionClient) Update() *RolePermissionUpdate {
+	mutation := newRolePermissionMutation(c.config, OpUpdate)
+	return &RolePermissionUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *RolePermissionClient) UpdateOne(rp *RolePermission) *RolePermissionUpdateOne {
+	mutation := newRolePermissionMutation(c.config, OpUpdateOne, withRolePermission(rp))
+	return &RolePermissionUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *RolePermissionClient) UpdateOneID(id string) *RolePermissionUpdateOne {
+	mutation := newRolePermissionMutation(c.config, OpUpdateOne, withRolePermissionID(id))
+	return &RolePermissionUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for RolePermission.
+func (c *RolePermissionClient) Delete() *RolePermissionDelete {
+	mutation := newRolePermissionMutation(c.config, OpDelete)
+	return &RolePermissionDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *RolePermissionClient) DeleteOne(rp *RolePermission) *RolePermissionDeleteOne {
+	return c.DeleteOneID(rp.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *RolePermissionClient) DeleteOneID(id string) *RolePermissionDeleteOne {
+	builder := c.Delete().Where(rolepermission.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &RolePermissionDeleteOne{builder}
+}
+
+// Query returns a query builder for RolePermission.
+func (c *RolePermissionClient) Query() *RolePermissionQuery {
+	return &RolePermissionQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeRolePermission},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a RolePermission entity by its id.
+func (c *RolePermissionClient) Get(ctx context.Context, id string) (*RolePermission, error) {
+	return c.Query().Where(rolepermission.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *RolePermissionClient) GetX(ctx context.Context, id string) *RolePermission {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryRole queries the role edge of a RolePermission.
+func (c *RolePermissionClient) QueryRole(rp *RolePermission) *RoleQuery {
+	query := (&RoleClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := rp.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(rolepermission.Table, rolepermission.FieldID, id),
+			sqlgraph.To(role.Table, role.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, rolepermission.RoleTable, rolepermission.RoleColumn),
+		)
+		fromV = sqlgraph.Neighbors(rp.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryPermission queries the permission edge of a RolePermission.
+func (c *RolePermissionClient) QueryPermission(rp *RolePermission) *PermissionQuery {
+	query := (&PermissionClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := rp.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(rolepermission.Table, rolepermission.FieldID, id),
+			sqlgraph.To(permission.Table, permission.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, rolepermission.PermissionTable, rolepermission.PermissionColumn),
+		)
+		fromV = sqlgraph.Neighbors(rp.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *RolePermissionClient) Hooks() []Hook {
+	return c.hooks.RolePermission
+}
+
+// Interceptors returns the client interceptors.
+func (c *RolePermissionClient) Interceptors() []Interceptor {
+	return c.inters.RolePermission
+}
+
+func (c *RolePermissionClient) mutate(ctx context.Context, m *RolePermissionMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&RolePermissionCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&RolePermissionUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&RolePermissionUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&RolePermissionDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown RolePermission mutation op: %q", m.Op())
 	}
 }
 
@@ -2156,6 +2898,22 @@ func (c *UserClient) QueryUserDocuments(u *User) *UserDocumentQuery {
 	return query
 }
 
+// QueryRegisteredBusinesses queries the registered_businesses edge of a User.
+func (c *UserClient) QueryRegisteredBusinesses(u *User) *BusinessQuery {
+	query := (&BusinessClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := u.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, id),
+			sqlgraph.To(business.Table, business.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, user.RegisteredBusinessesTable, user.RegisteredBusinessesColumn),
+		)
+		fromV = sqlgraph.Neighbors(u.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // QueryVerifications queries the verifications edge of a User.
 func (c *UserClient) QueryVerifications(u *User) *VerificationQuery {
 	query := (&VerificationClient{config: c.config}).Query()
@@ -2530,13 +3288,15 @@ func (c *VerificationClient) mutate(ctx context.Context, m *VerificationMutation
 // hooks and interceptors per client, for fast access.
 type (
 	hooks struct {
-		Business, BusinessDocument, BusinessFeature, BusinessServices, Manager,
-		Permission, Provider, RequestVerification, Role, Service, Social, User,
-		UserDocument, Verification []ent.Hook
+		Business, BusinessDocument, BusinessFeature, BusinessLocation, BusinessServices,
+		KYBDocument, KYBMessage, Manager, Permission, Provider, RequestVerification,
+		Role, RolePermission, Service, Social, User, UserDocument,
+		Verification []ent.Hook
 	}
 	inters struct {
-		Business, BusinessDocument, BusinessFeature, BusinessServices, Manager,
-		Permission, Provider, RequestVerification, Role, Service, Social, User,
-		UserDocument, Verification []ent.Interceptor
+		Business, BusinessDocument, BusinessFeature, BusinessLocation, BusinessServices,
+		KYBDocument, KYBMessage, Manager, Permission, Provider, RequestVerification,
+		Role, RolePermission, Service, Social, User, UserDocument,
+		Verification []ent.Interceptor
 	}
 )

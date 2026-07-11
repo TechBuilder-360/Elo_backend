@@ -90,6 +90,16 @@ func BusinessID(v string) predicate.Manager {
 	return predicate.Manager(sql.FieldEQ(FieldBusinessID, v))
 }
 
+// IsOwner applies equality check predicate on the "is_owner" field. It's identical to IsOwnerEQ.
+func IsOwner(v bool) predicate.Manager {
+	return predicate.Manager(sql.FieldEQ(FieldIsOwner, v))
+}
+
+// RoleID applies equality check predicate on the "role_id" field. It's identical to RoleIDEQ.
+func RoleID(v string) predicate.Manager {
+	return predicate.Manager(sql.FieldEQ(FieldRoleID, v))
+}
+
 // Disabled applies equality check predicate on the "disabled" field. It's identical to DisabledEQ.
 func Disabled(v bool) predicate.Manager {
 	return predicate.Manager(sql.FieldEQ(FieldDisabled, v))
@@ -365,6 +375,81 @@ func BusinessIDContainsFold(v string) predicate.Manager {
 	return predicate.Manager(sql.FieldContainsFold(FieldBusinessID, v))
 }
 
+// IsOwnerEQ applies the EQ predicate on the "is_owner" field.
+func IsOwnerEQ(v bool) predicate.Manager {
+	return predicate.Manager(sql.FieldEQ(FieldIsOwner, v))
+}
+
+// IsOwnerNEQ applies the NEQ predicate on the "is_owner" field.
+func IsOwnerNEQ(v bool) predicate.Manager {
+	return predicate.Manager(sql.FieldNEQ(FieldIsOwner, v))
+}
+
+// RoleIDEQ applies the EQ predicate on the "role_id" field.
+func RoleIDEQ(v string) predicate.Manager {
+	return predicate.Manager(sql.FieldEQ(FieldRoleID, v))
+}
+
+// RoleIDNEQ applies the NEQ predicate on the "role_id" field.
+func RoleIDNEQ(v string) predicate.Manager {
+	return predicate.Manager(sql.FieldNEQ(FieldRoleID, v))
+}
+
+// RoleIDIn applies the In predicate on the "role_id" field.
+func RoleIDIn(vs ...string) predicate.Manager {
+	return predicate.Manager(sql.FieldIn(FieldRoleID, vs...))
+}
+
+// RoleIDNotIn applies the NotIn predicate on the "role_id" field.
+func RoleIDNotIn(vs ...string) predicate.Manager {
+	return predicate.Manager(sql.FieldNotIn(FieldRoleID, vs...))
+}
+
+// RoleIDGT applies the GT predicate on the "role_id" field.
+func RoleIDGT(v string) predicate.Manager {
+	return predicate.Manager(sql.FieldGT(FieldRoleID, v))
+}
+
+// RoleIDGTE applies the GTE predicate on the "role_id" field.
+func RoleIDGTE(v string) predicate.Manager {
+	return predicate.Manager(sql.FieldGTE(FieldRoleID, v))
+}
+
+// RoleIDLT applies the LT predicate on the "role_id" field.
+func RoleIDLT(v string) predicate.Manager {
+	return predicate.Manager(sql.FieldLT(FieldRoleID, v))
+}
+
+// RoleIDLTE applies the LTE predicate on the "role_id" field.
+func RoleIDLTE(v string) predicate.Manager {
+	return predicate.Manager(sql.FieldLTE(FieldRoleID, v))
+}
+
+// RoleIDContains applies the Contains predicate on the "role_id" field.
+func RoleIDContains(v string) predicate.Manager {
+	return predicate.Manager(sql.FieldContains(FieldRoleID, v))
+}
+
+// RoleIDHasPrefix applies the HasPrefix predicate on the "role_id" field.
+func RoleIDHasPrefix(v string) predicate.Manager {
+	return predicate.Manager(sql.FieldHasPrefix(FieldRoleID, v))
+}
+
+// RoleIDHasSuffix applies the HasSuffix predicate on the "role_id" field.
+func RoleIDHasSuffix(v string) predicate.Manager {
+	return predicate.Manager(sql.FieldHasSuffix(FieldRoleID, v))
+}
+
+// RoleIDEqualFold applies the EqualFold predicate on the "role_id" field.
+func RoleIDEqualFold(v string) predicate.Manager {
+	return predicate.Manager(sql.FieldEqualFold(FieldRoleID, v))
+}
+
+// RoleIDContainsFold applies the ContainsFold predicate on the "role_id" field.
+func RoleIDContainsFold(v string) predicate.Manager {
+	return predicate.Manager(sql.FieldContainsFold(FieldRoleID, v))
+}
+
 // DisabledEQ applies the EQ predicate on the "disabled" field.
 func DisabledEQ(v bool) predicate.Manager {
 	return predicate.Manager(sql.FieldEQ(FieldDisabled, v))
@@ -538,6 +623,29 @@ func HasUser() predicate.Manager {
 func HasUserWith(preds ...predicate.User) predicate.Manager {
 	return predicate.Manager(func(s *sql.Selector) {
 		step := newUserStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasRole applies the HasEdge predicate on the "role" edge.
+func HasRole() predicate.Manager {
+	return predicate.Manager(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, RoleTable, RoleColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasRoleWith applies the HasEdge predicate on the "role" edge with a given conditions (other predicates).
+func HasRoleWith(preds ...predicate.Role) predicate.Manager {
+	return predicate.Manager(func(s *sql.Selector) {
+		step := newRoleStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)
