@@ -14,11 +14,14 @@ import (
 	"entgo.io/ent/schema/field"
 	"github.com/Toflex/directory_v2/ent/business"
 	"github.com/Toflex/directory_v2/ent/businessdocument"
+	"github.com/Toflex/directory_v2/ent/businesslocation"
 	"github.com/Toflex/directory_v2/ent/businessservices"
+	"github.com/Toflex/directory_v2/ent/kybmessage"
 	"github.com/Toflex/directory_v2/ent/manager"
 	"github.com/Toflex/directory_v2/ent/predicate"
 	"github.com/Toflex/directory_v2/ent/requestverification"
 	"github.com/Toflex/directory_v2/ent/social"
+	"github.com/Toflex/directory_v2/ent/user"
 	"github.com/Toflex/directory_v2/ent/verification"
 )
 
@@ -32,9 +35,12 @@ type BusinessQuery struct {
 	withSocials              *SocialQuery
 	withServices             *BusinessServicesQuery
 	withManages              *ManagerQuery
+	withRegisteredByUser     *UserQuery
 	withVerifications        *VerificationQuery
 	withRequestVerifications *RequestVerificationQuery
 	withBusinessDocuments    *BusinessDocumentQuery
+	withLocations            *BusinessLocationQuery
+	withKybMessages          *KYBMessageQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -137,6 +143,28 @@ func (bq *BusinessQuery) QueryManages() *ManagerQuery {
 	return query
 }
 
+// QueryRegisteredByUser chains the current query on the "registered_by_user" edge.
+func (bq *BusinessQuery) QueryRegisteredByUser() *UserQuery {
+	query := (&UserClient{config: bq.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := bq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := bq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(business.Table, business.FieldID, selector),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, business.RegisteredByUserTable, business.RegisteredByUserColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(bq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
 // QueryVerifications chains the current query on the "verifications" edge.
 func (bq *BusinessQuery) QueryVerifications() *VerificationQuery {
 	query := (&VerificationClient{config: bq.config}).Query()
@@ -196,6 +224,50 @@ func (bq *BusinessQuery) QueryBusinessDocuments() *BusinessDocumentQuery {
 			sqlgraph.From(business.Table, business.FieldID, selector),
 			sqlgraph.To(businessdocument.Table, businessdocument.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, business.BusinessDocumentsTable, business.BusinessDocumentsColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(bq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryLocations chains the current query on the "locations" edge.
+func (bq *BusinessQuery) QueryLocations() *BusinessLocationQuery {
+	query := (&BusinessLocationClient{config: bq.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := bq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := bq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(business.Table, business.FieldID, selector),
+			sqlgraph.To(businesslocation.Table, businesslocation.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, business.LocationsTable, business.LocationsColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(bq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryKybMessages chains the current query on the "kyb_messages" edge.
+func (bq *BusinessQuery) QueryKybMessages() *KYBMessageQuery {
+	query := (&KYBMessageClient{config: bq.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := bq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := bq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(business.Table, business.FieldID, selector),
+			sqlgraph.To(kybmessage.Table, kybmessage.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, business.KybMessagesTable, business.KybMessagesColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(bq.driver.Dialect(), step)
 		return fromU, nil
@@ -398,9 +470,12 @@ func (bq *BusinessQuery) Clone() *BusinessQuery {
 		withSocials:              bq.withSocials.Clone(),
 		withServices:             bq.withServices.Clone(),
 		withManages:              bq.withManages.Clone(),
+		withRegisteredByUser:     bq.withRegisteredByUser.Clone(),
 		withVerifications:        bq.withVerifications.Clone(),
 		withRequestVerifications: bq.withRequestVerifications.Clone(),
 		withBusinessDocuments:    bq.withBusinessDocuments.Clone(),
+		withLocations:            bq.withLocations.Clone(),
+		withKybMessages:          bq.withKybMessages.Clone(),
 		// clone intermediate query.
 		sql:  bq.sql.Clone(),
 		path: bq.path,
@@ -440,6 +515,17 @@ func (bq *BusinessQuery) WithManages(opts ...func(*ManagerQuery)) *BusinessQuery
 	return bq
 }
 
+// WithRegisteredByUser tells the query-builder to eager-load the nodes that are connected to
+// the "registered_by_user" edge. The optional arguments are used to configure the query builder of the edge.
+func (bq *BusinessQuery) WithRegisteredByUser(opts ...func(*UserQuery)) *BusinessQuery {
+	query := (&UserClient{config: bq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	bq.withRegisteredByUser = query
+	return bq
+}
+
 // WithVerifications tells the query-builder to eager-load the nodes that are connected to
 // the "verifications" edge. The optional arguments are used to configure the query builder of the edge.
 func (bq *BusinessQuery) WithVerifications(opts ...func(*VerificationQuery)) *BusinessQuery {
@@ -470,6 +556,28 @@ func (bq *BusinessQuery) WithBusinessDocuments(opts ...func(*BusinessDocumentQue
 		opt(query)
 	}
 	bq.withBusinessDocuments = query
+	return bq
+}
+
+// WithLocations tells the query-builder to eager-load the nodes that are connected to
+// the "locations" edge. The optional arguments are used to configure the query builder of the edge.
+func (bq *BusinessQuery) WithLocations(opts ...func(*BusinessLocationQuery)) *BusinessQuery {
+	query := (&BusinessLocationClient{config: bq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	bq.withLocations = query
+	return bq
+}
+
+// WithKybMessages tells the query-builder to eager-load the nodes that are connected to
+// the "kyb_messages" edge. The optional arguments are used to configure the query builder of the edge.
+func (bq *BusinessQuery) WithKybMessages(opts ...func(*KYBMessageQuery)) *BusinessQuery {
+	query := (&KYBMessageClient{config: bq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	bq.withKybMessages = query
 	return bq
 }
 
@@ -551,13 +659,16 @@ func (bq *BusinessQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Bus
 	var (
 		nodes       = []*Business{}
 		_spec       = bq.querySpec()
-		loadedTypes = [6]bool{
+		loadedTypes = [9]bool{
 			bq.withSocials != nil,
 			bq.withServices != nil,
 			bq.withManages != nil,
+			bq.withRegisteredByUser != nil,
 			bq.withVerifications != nil,
 			bq.withRequestVerifications != nil,
 			bq.withBusinessDocuments != nil,
+			bq.withLocations != nil,
+			bq.withKybMessages != nil,
 		}
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
@@ -599,6 +710,12 @@ func (bq *BusinessQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Bus
 			return nil, err
 		}
 	}
+	if query := bq.withRegisteredByUser; query != nil {
+		if err := bq.loadRegisteredByUser(ctx, query, nodes, nil,
+			func(n *Business, e *User) { n.Edges.RegisteredByUser = e }); err != nil {
+			return nil, err
+		}
+	}
 	if query := bq.withVerifications; query != nil {
 		if err := bq.loadVerifications(ctx, query, nodes,
 			func(n *Business) { n.Edges.Verifications = []*Verification{} },
@@ -621,6 +738,20 @@ func (bq *BusinessQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Bus
 			func(n *Business, e *BusinessDocument) {
 				n.Edges.BusinessDocuments = append(n.Edges.BusinessDocuments, e)
 			}); err != nil {
+			return nil, err
+		}
+	}
+	if query := bq.withLocations; query != nil {
+		if err := bq.loadLocations(ctx, query, nodes,
+			func(n *Business) { n.Edges.Locations = []*BusinessLocation{} },
+			func(n *Business, e *BusinessLocation) { n.Edges.Locations = append(n.Edges.Locations, e) }); err != nil {
+			return nil, err
+		}
+	}
+	if query := bq.withKybMessages; query != nil {
+		if err := bq.loadKybMessages(ctx, query, nodes,
+			func(n *Business) { n.Edges.KybMessages = []*KYBMessage{} },
+			func(n *Business, e *KYBMessage) { n.Edges.KybMessages = append(n.Edges.KybMessages, e) }); err != nil {
 			return nil, err
 		}
 	}
@@ -714,6 +845,38 @@ func (bq *BusinessQuery) loadManages(ctx context.Context, query *ManagerQuery, n
 			return fmt.Errorf(`unexpected referenced foreign-key "business_id" returned %v for node %v`, fk, n.ID)
 		}
 		assign(node, n)
+	}
+	return nil
+}
+func (bq *BusinessQuery) loadRegisteredByUser(ctx context.Context, query *UserQuery, nodes []*Business, init func(*Business), assign func(*Business, *User)) error {
+	ids := make([]string, 0, len(nodes))
+	nodeids := make(map[string][]*Business)
+	for i := range nodes {
+		if nodes[i].RegisteredBy == nil {
+			continue
+		}
+		fk := *nodes[i].RegisteredBy
+		if _, ok := nodeids[fk]; !ok {
+			ids = append(ids, fk)
+		}
+		nodeids[fk] = append(nodeids[fk], nodes[i])
+	}
+	if len(ids) == 0 {
+		return nil
+	}
+	query.Where(user.IDIn(ids...))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		nodes, ok := nodeids[n.ID]
+		if !ok {
+			return fmt.Errorf(`unexpected foreign-key "registered_by" returned %v`, n.ID)
+		}
+		for i := range nodes {
+			assign(nodes[i], n)
+		}
 	}
 	return nil
 }
@@ -870,6 +1033,68 @@ func (bq *BusinessQuery) loadBusinessDocuments(ctx context.Context, query *Busin
 	}
 	return nil
 }
+func (bq *BusinessQuery) loadLocations(ctx context.Context, query *BusinessLocationQuery, nodes []*Business, init func(*Business), assign func(*Business, *BusinessLocation)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[string]*Business)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	query.withFKs = true
+	query.Where(predicate.BusinessLocation(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(business.LocationsColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.business_locations
+		if fk == nil {
+			return fmt.Errorf(`foreign-key "business_locations" is nil for node %v`, n.ID)
+		}
+		node, ok := nodeids[*fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "business_locations" returned %v for node %v`, *fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (bq *BusinessQuery) loadKybMessages(ctx context.Context, query *KYBMessageQuery, nodes []*Business, init func(*Business), assign func(*Business, *KYBMessage)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[string]*Business)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	query.withFKs = true
+	query.Where(predicate.KYBMessage(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(business.KybMessagesColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.business_kyb_messages
+		if fk == nil {
+			return fmt.Errorf(`foreign-key "business_kyb_messages" is nil for node %v`, n.ID)
+		}
+		node, ok := nodeids[*fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "business_kyb_messages" returned %v for node %v`, *fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
 
 func (bq *BusinessQuery) sqlCount(ctx context.Context) (int, error) {
 	_spec := bq.querySpec()
@@ -895,6 +1120,9 @@ func (bq *BusinessQuery) querySpec() *sqlgraph.QuerySpec {
 			if fields[i] != business.FieldID {
 				_spec.Node.Columns = append(_spec.Node.Columns, fields[i])
 			}
+		}
+		if bq.withRegisteredByUser != nil {
+			_spec.Node.AddColumnOnce(business.FieldRegisteredBy)
 		}
 	}
 	if ps := bq.predicates; len(ps) > 0 {

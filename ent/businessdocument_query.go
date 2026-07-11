@@ -4,6 +4,7 @@ package ent
 
 import (
 	"context"
+	"database/sql/driver"
 	"fmt"
 	"math"
 
@@ -13,18 +14,20 @@ import (
 	"entgo.io/ent/schema/field"
 	"github.com/Toflex/directory_v2/ent/business"
 	"github.com/Toflex/directory_v2/ent/businessdocument"
+	"github.com/Toflex/directory_v2/ent/kybdocument"
 	"github.com/Toflex/directory_v2/ent/predicate"
 )
 
 // BusinessDocumentQuery is the builder for querying BusinessDocument entities.
 type BusinessDocumentQuery struct {
 	config
-	ctx                  *QueryContext
-	order                []businessdocument.OrderOption
-	inters               []Interceptor
-	predicates           []predicate.BusinessDocument
-	withBusinessDocument *BusinessQuery
-	withFKs              bool
+	ctx             *QueryContext
+	order           []businessdocument.OrderOption
+	inters          []Interceptor
+	predicates      []predicate.BusinessDocument
+	withBusiness    *BusinessQuery
+	withKybDocument *KYBDocumentQuery
+	withFKs         bool
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -61,8 +64,8 @@ func (bdq *BusinessDocumentQuery) Order(o ...businessdocument.OrderOption) *Busi
 	return bdq
 }
 
-// QueryBusinessDocument chains the current query on the "business_document" edge.
-func (bdq *BusinessDocumentQuery) QueryBusinessDocument() *BusinessQuery {
+// QueryBusiness chains the current query on the "business" edge.
+func (bdq *BusinessDocumentQuery) QueryBusiness() *BusinessQuery {
 	query := (&BusinessClient{config: bdq.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := bdq.prepareQuery(ctx); err != nil {
@@ -75,7 +78,29 @@ func (bdq *BusinessDocumentQuery) QueryBusinessDocument() *BusinessQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(businessdocument.Table, businessdocument.FieldID, selector),
 			sqlgraph.To(business.Table, business.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, businessdocument.BusinessDocumentTable, businessdocument.BusinessDocumentColumn),
+			sqlgraph.Edge(sqlgraph.M2O, true, businessdocument.BusinessTable, businessdocument.BusinessColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(bdq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryKybDocument chains the current query on the "kyb_document" edge.
+func (bdq *BusinessDocumentQuery) QueryKybDocument() *KYBDocumentQuery {
+	query := (&KYBDocumentClient{config: bdq.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := bdq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := bdq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(businessdocument.Table, businessdocument.FieldID, selector),
+			sqlgraph.To(kybdocument.Table, kybdocument.FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, true, businessdocument.KybDocumentTable, businessdocument.KybDocumentPrimaryKey...),
 		)
 		fromU = sqlgraph.SetNeighbors(bdq.driver.Dialect(), step)
 		return fromU, nil
@@ -107,8 +132,8 @@ func (bdq *BusinessDocumentQuery) FirstX(ctx context.Context) *BusinessDocument 
 
 // FirstID returns the first BusinessDocument ID from the query.
 // Returns a *NotFoundError when no BusinessDocument ID was found.
-func (bdq *BusinessDocumentQuery) FirstID(ctx context.Context) (id int, err error) {
-	var ids []int
+func (bdq *BusinessDocumentQuery) FirstID(ctx context.Context) (id string, err error) {
+	var ids []string
 	if ids, err = bdq.Limit(1).IDs(setContextOp(ctx, bdq.ctx, ent.OpQueryFirstID)); err != nil {
 		return
 	}
@@ -120,7 +145,7 @@ func (bdq *BusinessDocumentQuery) FirstID(ctx context.Context) (id int, err erro
 }
 
 // FirstIDX is like FirstID, but panics if an error occurs.
-func (bdq *BusinessDocumentQuery) FirstIDX(ctx context.Context) int {
+func (bdq *BusinessDocumentQuery) FirstIDX(ctx context.Context) string {
 	id, err := bdq.FirstID(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
@@ -158,8 +183,8 @@ func (bdq *BusinessDocumentQuery) OnlyX(ctx context.Context) *BusinessDocument {
 // OnlyID is like Only, but returns the only BusinessDocument ID in the query.
 // Returns a *NotSingularError when more than one BusinessDocument ID is found.
 // Returns a *NotFoundError when no entities are found.
-func (bdq *BusinessDocumentQuery) OnlyID(ctx context.Context) (id int, err error) {
-	var ids []int
+func (bdq *BusinessDocumentQuery) OnlyID(ctx context.Context) (id string, err error) {
+	var ids []string
 	if ids, err = bdq.Limit(2).IDs(setContextOp(ctx, bdq.ctx, ent.OpQueryOnlyID)); err != nil {
 		return
 	}
@@ -175,7 +200,7 @@ func (bdq *BusinessDocumentQuery) OnlyID(ctx context.Context) (id int, err error
 }
 
 // OnlyIDX is like OnlyID, but panics if an error occurs.
-func (bdq *BusinessDocumentQuery) OnlyIDX(ctx context.Context) int {
+func (bdq *BusinessDocumentQuery) OnlyIDX(ctx context.Context) string {
 	id, err := bdq.OnlyID(ctx)
 	if err != nil {
 		panic(err)
@@ -203,7 +228,7 @@ func (bdq *BusinessDocumentQuery) AllX(ctx context.Context) []*BusinessDocument 
 }
 
 // IDs executes the query and returns a list of BusinessDocument IDs.
-func (bdq *BusinessDocumentQuery) IDs(ctx context.Context) (ids []int, err error) {
+func (bdq *BusinessDocumentQuery) IDs(ctx context.Context) (ids []string, err error) {
 	if bdq.ctx.Unique == nil && bdq.path != nil {
 		bdq.Unique(true)
 	}
@@ -215,7 +240,7 @@ func (bdq *BusinessDocumentQuery) IDs(ctx context.Context) (ids []int, err error
 }
 
 // IDsX is like IDs, but panics if an error occurs.
-func (bdq *BusinessDocumentQuery) IDsX(ctx context.Context) []int {
+func (bdq *BusinessDocumentQuery) IDsX(ctx context.Context) []string {
 	ids, err := bdq.IDs(ctx)
 	if err != nil {
 		panic(err)
@@ -270,26 +295,38 @@ func (bdq *BusinessDocumentQuery) Clone() *BusinessDocumentQuery {
 		return nil
 	}
 	return &BusinessDocumentQuery{
-		config:               bdq.config,
-		ctx:                  bdq.ctx.Clone(),
-		order:                append([]businessdocument.OrderOption{}, bdq.order...),
-		inters:               append([]Interceptor{}, bdq.inters...),
-		predicates:           append([]predicate.BusinessDocument{}, bdq.predicates...),
-		withBusinessDocument: bdq.withBusinessDocument.Clone(),
+		config:          bdq.config,
+		ctx:             bdq.ctx.Clone(),
+		order:           append([]businessdocument.OrderOption{}, bdq.order...),
+		inters:          append([]Interceptor{}, bdq.inters...),
+		predicates:      append([]predicate.BusinessDocument{}, bdq.predicates...),
+		withBusiness:    bdq.withBusiness.Clone(),
+		withKybDocument: bdq.withKybDocument.Clone(),
 		// clone intermediate query.
 		sql:  bdq.sql.Clone(),
 		path: bdq.path,
 	}
 }
 
-// WithBusinessDocument tells the query-builder to eager-load the nodes that are connected to
-// the "business_document" edge. The optional arguments are used to configure the query builder of the edge.
-func (bdq *BusinessDocumentQuery) WithBusinessDocument(opts ...func(*BusinessQuery)) *BusinessDocumentQuery {
+// WithBusiness tells the query-builder to eager-load the nodes that are connected to
+// the "business" edge. The optional arguments are used to configure the query builder of the edge.
+func (bdq *BusinessDocumentQuery) WithBusiness(opts ...func(*BusinessQuery)) *BusinessDocumentQuery {
 	query := (&BusinessClient{config: bdq.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
-	bdq.withBusinessDocument = query
+	bdq.withBusiness = query
+	return bdq
+}
+
+// WithKybDocument tells the query-builder to eager-load the nodes that are connected to
+// the "kyb_document" edge. The optional arguments are used to configure the query builder of the edge.
+func (bdq *BusinessDocumentQuery) WithKybDocument(opts ...func(*KYBDocumentQuery)) *BusinessDocumentQuery {
+	query := (&KYBDocumentClient{config: bdq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	bdq.withKybDocument = query
 	return bdq
 }
 
@@ -299,12 +336,12 @@ func (bdq *BusinessDocumentQuery) WithBusinessDocument(opts ...func(*BusinessQue
 // Example:
 //
 //	var v []struct {
-//		Title string `json:"title,omitempty"`
+//		CreatedAt time.Time `json:"created_at,omitempty"`
 //		Count int `json:"count,omitempty"`
 //	}
 //
 //	client.BusinessDocument.Query().
-//		GroupBy(businessdocument.FieldTitle).
+//		GroupBy(businessdocument.FieldCreatedAt).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
 func (bdq *BusinessDocumentQuery) GroupBy(field string, fields ...string) *BusinessDocumentGroupBy {
@@ -322,11 +359,11 @@ func (bdq *BusinessDocumentQuery) GroupBy(field string, fields ...string) *Busin
 // Example:
 //
 //	var v []struct {
-//		Title string `json:"title,omitempty"`
+//		CreatedAt time.Time `json:"created_at,omitempty"`
 //	}
 //
 //	client.BusinessDocument.Query().
-//		Select(businessdocument.FieldTitle).
+//		Select(businessdocument.FieldCreatedAt).
 //		Scan(ctx, &v)
 func (bdq *BusinessDocumentQuery) Select(fields ...string) *BusinessDocumentSelect {
 	bdq.ctx.Fields = append(bdq.ctx.Fields, fields...)
@@ -372,11 +409,12 @@ func (bdq *BusinessDocumentQuery) sqlAll(ctx context.Context, hooks ...queryHook
 		nodes       = []*BusinessDocument{}
 		withFKs     = bdq.withFKs
 		_spec       = bdq.querySpec()
-		loadedTypes = [1]bool{
-			bdq.withBusinessDocument != nil,
+		loadedTypes = [2]bool{
+			bdq.withBusiness != nil,
+			bdq.withKybDocument != nil,
 		}
 	)
-	if bdq.withBusinessDocument != nil {
+	if bdq.withBusiness != nil {
 		withFKs = true
 	}
 	if withFKs {
@@ -400,16 +438,23 @@ func (bdq *BusinessDocumentQuery) sqlAll(ctx context.Context, hooks ...queryHook
 	if len(nodes) == 0 {
 		return nodes, nil
 	}
-	if query := bdq.withBusinessDocument; query != nil {
-		if err := bdq.loadBusinessDocument(ctx, query, nodes, nil,
-			func(n *BusinessDocument, e *Business) { n.Edges.BusinessDocument = e }); err != nil {
+	if query := bdq.withBusiness; query != nil {
+		if err := bdq.loadBusiness(ctx, query, nodes, nil,
+			func(n *BusinessDocument, e *Business) { n.Edges.Business = e }); err != nil {
+			return nil, err
+		}
+	}
+	if query := bdq.withKybDocument; query != nil {
+		if err := bdq.loadKybDocument(ctx, query, nodes,
+			func(n *BusinessDocument) { n.Edges.KybDocument = []*KYBDocument{} },
+			func(n *BusinessDocument, e *KYBDocument) { n.Edges.KybDocument = append(n.Edges.KybDocument, e) }); err != nil {
 			return nil, err
 		}
 	}
 	return nodes, nil
 }
 
-func (bdq *BusinessDocumentQuery) loadBusinessDocument(ctx context.Context, query *BusinessQuery, nodes []*BusinessDocument, init func(*BusinessDocument), assign func(*BusinessDocument, *Business)) error {
+func (bdq *BusinessDocumentQuery) loadBusiness(ctx context.Context, query *BusinessQuery, nodes []*BusinessDocument, init func(*BusinessDocument), assign func(*BusinessDocument, *Business)) error {
 	ids := make([]string, 0, len(nodes))
 	nodeids := make(map[string][]*BusinessDocument)
 	for i := range nodes {
@@ -441,6 +486,67 @@ func (bdq *BusinessDocumentQuery) loadBusinessDocument(ctx context.Context, quer
 	}
 	return nil
 }
+func (bdq *BusinessDocumentQuery) loadKybDocument(ctx context.Context, query *KYBDocumentQuery, nodes []*BusinessDocument, init func(*BusinessDocument), assign func(*BusinessDocument, *KYBDocument)) error {
+	edgeIDs := make([]driver.Value, len(nodes))
+	byID := make(map[string]*BusinessDocument)
+	nids := make(map[string]map[*BusinessDocument]struct{})
+	for i, node := range nodes {
+		edgeIDs[i] = node.ID
+		byID[node.ID] = node
+		if init != nil {
+			init(node)
+		}
+	}
+	query.Where(func(s *sql.Selector) {
+		joinT := sql.Table(businessdocument.KybDocumentTable)
+		s.Join(joinT).On(s.C(kybdocument.FieldID), joinT.C(businessdocument.KybDocumentPrimaryKey[0]))
+		s.Where(sql.InValues(joinT.C(businessdocument.KybDocumentPrimaryKey[1]), edgeIDs...))
+		columns := s.SelectedColumns()
+		s.Select(joinT.C(businessdocument.KybDocumentPrimaryKey[1]))
+		s.AppendSelect(columns...)
+		s.SetDistinct(false)
+	})
+	if err := query.prepareQuery(ctx); err != nil {
+		return err
+	}
+	qr := QuerierFunc(func(ctx context.Context, q Query) (Value, error) {
+		return query.sqlAll(ctx, func(_ context.Context, spec *sqlgraph.QuerySpec) {
+			assign := spec.Assign
+			values := spec.ScanValues
+			spec.ScanValues = func(columns []string) ([]any, error) {
+				values, err := values(columns[1:])
+				if err != nil {
+					return nil, err
+				}
+				return append([]any{new(sql.NullString)}, values...), nil
+			}
+			spec.Assign = func(columns []string, values []any) error {
+				outValue := values[0].(*sql.NullString).String
+				inValue := values[1].(*sql.NullString).String
+				if nids[inValue] == nil {
+					nids[inValue] = map[*BusinessDocument]struct{}{byID[outValue]: {}}
+					return assign(columns[1:], values[1:])
+				}
+				nids[inValue][byID[outValue]] = struct{}{}
+				return nil
+			}
+		})
+	})
+	neighbors, err := withInterceptors[[]*KYBDocument](ctx, query, qr, query.inters)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		nodes, ok := nids[n.ID]
+		if !ok {
+			return fmt.Errorf(`unexpected "kyb_document" node returned %v`, n.ID)
+		}
+		for kn := range nodes {
+			assign(kn, n)
+		}
+	}
+	return nil
+}
 
 func (bdq *BusinessDocumentQuery) sqlCount(ctx context.Context) (int, error) {
 	_spec := bdq.querySpec()
@@ -452,7 +558,7 @@ func (bdq *BusinessDocumentQuery) sqlCount(ctx context.Context) (int, error) {
 }
 
 func (bdq *BusinessDocumentQuery) querySpec() *sqlgraph.QuerySpec {
-	_spec := sqlgraph.NewQuerySpec(businessdocument.Table, businessdocument.Columns, sqlgraph.NewFieldSpec(businessdocument.FieldID, field.TypeInt))
+	_spec := sqlgraph.NewQuerySpec(businessdocument.Table, businessdocument.Columns, sqlgraph.NewFieldSpec(businessdocument.FieldID, field.TypeString))
 	_spec.From = bdq.sql
 	if unique := bdq.ctx.Unique; unique != nil {
 		_spec.Unique = *unique

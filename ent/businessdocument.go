@@ -5,6 +5,7 @@ package ent
 import (
 	"fmt"
 	"strings"
+	"time"
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
@@ -16,14 +17,20 @@ import (
 type BusinessDocument struct {
 	config `json:"-"`
 	// ID of the ent.
-	ID int `json:"id,omitempty"`
+	ID string `json:"id,omitempty"`
+	// CreatedAt holds the value of the "created_at" field.
+	CreatedAt time.Time `json:"created_at,omitempty"`
+	// UpdatedAt holds the value of the "updated_at" field.
+	UpdatedAt time.Time `json:"updated_at,omitempty"`
+	// DeletedAt holds the value of the "deleted_at" field.
+	DeletedAt *time.Time `json:"deleted_at,omitempty"`
 	// Title holds the value of the "title" field.
 	Title string `json:"title,omitempty"`
 	// Description holds the value of the "description" field.
 	Description string `json:"description,omitempty"`
 	// URL holds the value of the "url" field.
 	URL string `json:"url,omitempty"`
-	// Verified holds the value of the "verified" field.
+	// this field only applies to document_type KYB
 	Verified bool `json:"verified,omitempty"`
 	// Type holds the value of the "type" field.
 	Type businessdocument.Type `json:"type,omitempty"`
@@ -36,22 +43,33 @@ type BusinessDocument struct {
 
 // BusinessDocumentEdges holds the relations/edges for other nodes in the graph.
 type BusinessDocumentEdges struct {
-	// BusinessDocument holds the value of the business_document edge.
-	BusinessDocument *Business `json:"business_document,omitempty"`
+	// Business holds the value of the business edge.
+	Business *Business `json:"business,omitempty"`
+	// KybDocument holds the value of the kyb_document edge.
+	KybDocument []*KYBDocument `json:"kyb_document,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [1]bool
+	loadedTypes [2]bool
 }
 
-// BusinessDocumentOrErr returns the BusinessDocument value or an error if the edge
+// BusinessOrErr returns the Business value or an error if the edge
 // was not loaded in eager-loading, or loaded but was not found.
-func (e BusinessDocumentEdges) BusinessDocumentOrErr() (*Business, error) {
-	if e.BusinessDocument != nil {
-		return e.BusinessDocument, nil
+func (e BusinessDocumentEdges) BusinessOrErr() (*Business, error) {
+	if e.Business != nil {
+		return e.Business, nil
 	} else if e.loadedTypes[0] {
 		return nil, &NotFoundError{label: business.Label}
 	}
-	return nil, &NotLoadedError{edge: "business_document"}
+	return nil, &NotLoadedError{edge: "business"}
+}
+
+// KybDocumentOrErr returns the KybDocument value or an error if the edge
+// was not loaded in eager-loading.
+func (e BusinessDocumentEdges) KybDocumentOrErr() ([]*KYBDocument, error) {
+	if e.loadedTypes[1] {
+		return e.KybDocument, nil
+	}
+	return nil, &NotLoadedError{edge: "kyb_document"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -61,10 +79,10 @@ func (*BusinessDocument) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case businessdocument.FieldVerified:
 			values[i] = new(sql.NullBool)
-		case businessdocument.FieldID:
-			values[i] = new(sql.NullInt64)
-		case businessdocument.FieldTitle, businessdocument.FieldDescription, businessdocument.FieldURL, businessdocument.FieldType:
+		case businessdocument.FieldID, businessdocument.FieldTitle, businessdocument.FieldDescription, businessdocument.FieldURL, businessdocument.FieldType:
 			values[i] = new(sql.NullString)
+		case businessdocument.FieldCreatedAt, businessdocument.FieldUpdatedAt, businessdocument.FieldDeletedAt:
+			values[i] = new(sql.NullTime)
 		case businessdocument.ForeignKeys[0]: // business_business_documents
 			values[i] = new(sql.NullString)
 		default:
@@ -83,11 +101,30 @@ func (bd *BusinessDocument) assignValues(columns []string, values []any) error {
 	for i := range columns {
 		switch columns[i] {
 		case businessdocument.FieldID:
-			value, ok := values[i].(*sql.NullInt64)
-			if !ok {
-				return fmt.Errorf("unexpected type %T for field id", value)
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field id", values[i])
+			} else if value.Valid {
+				bd.ID = value.String
 			}
-			bd.ID = int(value.Int64)
+		case businessdocument.FieldCreatedAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field created_at", values[i])
+			} else if value.Valid {
+				bd.CreatedAt = value.Time
+			}
+		case businessdocument.FieldUpdatedAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field updated_at", values[i])
+			} else if value.Valid {
+				bd.UpdatedAt = value.Time
+			}
+		case businessdocument.FieldDeletedAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field deleted_at", values[i])
+			} else if value.Valid {
+				bd.DeletedAt = new(time.Time)
+				*bd.DeletedAt = value.Time
+			}
 		case businessdocument.FieldTitle:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field title", values[i])
@@ -138,9 +175,14 @@ func (bd *BusinessDocument) Value(name string) (ent.Value, error) {
 	return bd.selectValues.Get(name)
 }
 
-// QueryBusinessDocument queries the "business_document" edge of the BusinessDocument entity.
-func (bd *BusinessDocument) QueryBusinessDocument() *BusinessQuery {
-	return NewBusinessDocumentClient(bd.config).QueryBusinessDocument(bd)
+// QueryBusiness queries the "business" edge of the BusinessDocument entity.
+func (bd *BusinessDocument) QueryBusiness() *BusinessQuery {
+	return NewBusinessDocumentClient(bd.config).QueryBusiness(bd)
+}
+
+// QueryKybDocument queries the "kyb_document" edge of the BusinessDocument entity.
+func (bd *BusinessDocument) QueryKybDocument() *KYBDocumentQuery {
+	return NewBusinessDocumentClient(bd.config).QueryKybDocument(bd)
 }
 
 // Update returns a builder for updating this BusinessDocument.
@@ -166,6 +208,17 @@ func (bd *BusinessDocument) String() string {
 	var builder strings.Builder
 	builder.WriteString("BusinessDocument(")
 	builder.WriteString(fmt.Sprintf("id=%v, ", bd.ID))
+	builder.WriteString("created_at=")
+	builder.WriteString(bd.CreatedAt.Format(time.ANSIC))
+	builder.WriteString(", ")
+	builder.WriteString("updated_at=")
+	builder.WriteString(bd.UpdatedAt.Format(time.ANSIC))
+	builder.WriteString(", ")
+	if v := bd.DeletedAt; v != nil {
+		builder.WriteString("deleted_at=")
+		builder.WriteString(v.Format(time.ANSIC))
+	}
+	builder.WriteString(", ")
 	builder.WriteString("title=")
 	builder.WriteString(bd.Title)
 	builder.WriteString(", ")

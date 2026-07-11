@@ -105,6 +105,11 @@ func DisplayName(v string) predicate.User {
 	return predicate.User(sql.FieldEQ(FieldDisplayName, v))
 }
 
+// DateOfBirth applies equality check predicate on the "date_of_birth" field. It's identical to DateOfBirthEQ.
+func DateOfBirth(v time.Time) predicate.User {
+	return predicate.User(sql.FieldEQ(FieldDateOfBirth, v))
+}
+
 // EmailAddress applies equality check predicate on the "email_address" field. It's identical to EmailAddressEQ.
 func EmailAddress(v string) predicate.User {
 	return predicate.User(sql.FieldEQ(FieldEmailAddress, v))
@@ -620,6 +625,56 @@ func DisplayNameContainsFold(v string) predicate.User {
 	return predicate.User(sql.FieldContainsFold(FieldDisplayName, v))
 }
 
+// DateOfBirthEQ applies the EQ predicate on the "date_of_birth" field.
+func DateOfBirthEQ(v time.Time) predicate.User {
+	return predicate.User(sql.FieldEQ(FieldDateOfBirth, v))
+}
+
+// DateOfBirthNEQ applies the NEQ predicate on the "date_of_birth" field.
+func DateOfBirthNEQ(v time.Time) predicate.User {
+	return predicate.User(sql.FieldNEQ(FieldDateOfBirth, v))
+}
+
+// DateOfBirthIn applies the In predicate on the "date_of_birth" field.
+func DateOfBirthIn(vs ...time.Time) predicate.User {
+	return predicate.User(sql.FieldIn(FieldDateOfBirth, vs...))
+}
+
+// DateOfBirthNotIn applies the NotIn predicate on the "date_of_birth" field.
+func DateOfBirthNotIn(vs ...time.Time) predicate.User {
+	return predicate.User(sql.FieldNotIn(FieldDateOfBirth, vs...))
+}
+
+// DateOfBirthGT applies the GT predicate on the "date_of_birth" field.
+func DateOfBirthGT(v time.Time) predicate.User {
+	return predicate.User(sql.FieldGT(FieldDateOfBirth, v))
+}
+
+// DateOfBirthGTE applies the GTE predicate on the "date_of_birth" field.
+func DateOfBirthGTE(v time.Time) predicate.User {
+	return predicate.User(sql.FieldGTE(FieldDateOfBirth, v))
+}
+
+// DateOfBirthLT applies the LT predicate on the "date_of_birth" field.
+func DateOfBirthLT(v time.Time) predicate.User {
+	return predicate.User(sql.FieldLT(FieldDateOfBirth, v))
+}
+
+// DateOfBirthLTE applies the LTE predicate on the "date_of_birth" field.
+func DateOfBirthLTE(v time.Time) predicate.User {
+	return predicate.User(sql.FieldLTE(FieldDateOfBirth, v))
+}
+
+// DateOfBirthIsNil applies the IsNil predicate on the "date_of_birth" field.
+func DateOfBirthIsNil() predicate.User {
+	return predicate.User(sql.FieldIsNull(FieldDateOfBirth))
+}
+
+// DateOfBirthNotNil applies the NotNil predicate on the "date_of_birth" field.
+func DateOfBirthNotNil() predicate.User {
+	return predicate.User(sql.FieldNotNull(FieldDateOfBirth))
+}
+
 // EmailAddressEQ applies the EQ predicate on the "email_address" field.
 func EmailAddressEQ(v string) predicate.User {
 	return predicate.User(sql.FieldEQ(FieldEmailAddress, v))
@@ -1028,6 +1083,29 @@ func HasUserDocuments() predicate.User {
 func HasUserDocumentsWith(preds ...predicate.UserDocument) predicate.User {
 	return predicate.User(func(s *sql.Selector) {
 		step := newUserDocumentsStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasRegisteredBusinesses applies the HasEdge predicate on the "registered_businesses" edge.
+func HasRegisteredBusinesses() predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, RegisteredBusinessesTable, RegisteredBusinessesColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasRegisteredBusinessesWith applies the HasEdge predicate on the "registered_businesses" edge with a given conditions (other predicates).
+func HasRegisteredBusinessesWith(preds ...predicate.Business) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		step := newRegisteredBusinessesStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)

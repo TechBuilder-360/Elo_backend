@@ -24,6 +24,10 @@ const (
 	FieldUserID = "user_id"
 	// FieldBusinessID holds the string denoting the business_id field in the database.
 	FieldBusinessID = "business_id"
+	// FieldIsOwner holds the string denoting the is_owner field in the database.
+	FieldIsOwner = "is_owner"
+	// FieldRoleID holds the string denoting the role_id field in the database.
+	FieldRoleID = "role_id"
 	// FieldDisabled holds the string denoting the disabled field in the database.
 	FieldDisabled = "disabled"
 	// FieldDisableReason holds the string denoting the disable_reason field in the database.
@@ -34,6 +38,8 @@ const (
 	EdgeBusiness = "business"
 	// EdgeUser holds the string denoting the user edge name in mutations.
 	EdgeUser = "user"
+	// EdgeRole holds the string denoting the role edge name in mutations.
+	EdgeRole = "role"
 	// Table holds the table name of the manager in the database.
 	Table = "managers"
 	// BusinessTable is the table that holds the business relation/edge.
@@ -50,6 +56,13 @@ const (
 	UserInverseTable = "users"
 	// UserColumn is the table column denoting the user relation/edge.
 	UserColumn = "user_id"
+	// RoleTable is the table that holds the role relation/edge.
+	RoleTable = "managers"
+	// RoleInverseTable is the table name for the Role entity.
+	// It exists in this package in order to avoid circular dependency with the "role" package.
+	RoleInverseTable = "roles"
+	// RoleColumn is the table column denoting the role relation/edge.
+	RoleColumn = "role_id"
 )
 
 // Columns holds all SQL columns for manager fields.
@@ -60,6 +73,8 @@ var Columns = []string{
 	FieldDeletedAt,
 	FieldUserID,
 	FieldBusinessID,
+	FieldIsOwner,
+	FieldRoleID,
 	FieldDisabled,
 	FieldDisableReason,
 	FieldDisabledAt,
@@ -82,6 +97,10 @@ var (
 	DefaultUpdatedAt func() time.Time
 	// UpdateDefaultUpdatedAt holds the default value on update for the "updated_at" field.
 	UpdateDefaultUpdatedAt func() time.Time
+	// DefaultIsOwner holds the default value on creation for the "is_owner" field.
+	DefaultIsOwner bool
+	// RoleIDValidator is a validator for the "role_id" field. It is called by the builders before save.
+	RoleIDValidator func(string) error
 	// DefaultDisabled holds the default value on creation for the "disabled" field.
 	DefaultDisabled bool
 	// DefaultID holds the default value on creation for the "id" field.
@@ -121,6 +140,16 @@ func ByBusinessID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldBusinessID, opts...).ToFunc()
 }
 
+// ByIsOwner orders the results by the is_owner field.
+func ByIsOwner(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldIsOwner, opts...).ToFunc()
+}
+
+// ByRoleID orders the results by the role_id field.
+func ByRoleID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldRoleID, opts...).ToFunc()
+}
+
 // ByDisabled orders the results by the disabled field.
 func ByDisabled(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldDisabled, opts...).ToFunc()
@@ -149,6 +178,13 @@ func ByUserField(field string, opts ...sql.OrderTermOption) OrderOption {
 		sqlgraph.OrderByNeighborTerms(s, newUserStep(), sql.OrderByField(field, opts...))
 	}
 }
+
+// ByRoleField orders the results by role field.
+func ByRoleField(field string, opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newRoleStep(), sql.OrderByField(field, opts...))
+	}
+}
 func newBusinessStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
@@ -161,5 +197,12 @@ func newUserStep() *sqlgraph.Step {
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(UserInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.M2O, true, UserTable, UserColumn),
+	)
+}
+func newRoleStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(RoleInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.M2O, true, RoleTable, RoleColumn),
 	)
 }

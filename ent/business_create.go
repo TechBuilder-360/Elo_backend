@@ -14,10 +14,13 @@ import (
 	"entgo.io/ent/schema/field"
 	"github.com/Toflex/directory_v2/ent/business"
 	"github.com/Toflex/directory_v2/ent/businessdocument"
+	"github.com/Toflex/directory_v2/ent/businesslocation"
 	"github.com/Toflex/directory_v2/ent/businessservices"
+	"github.com/Toflex/directory_v2/ent/kybmessage"
 	"github.com/Toflex/directory_v2/ent/manager"
 	"github.com/Toflex/directory_v2/ent/requestverification"
 	"github.com/Toflex/directory_v2/ent/social"
+	"github.com/Toflex/directory_v2/ent/user"
 	"github.com/Toflex/directory_v2/ent/verification"
 )
 
@@ -97,14 +100,6 @@ func (bc *BusinessCreate) SetAbout(s string) *BusinessCreate {
 	return bc
 }
 
-// SetNillableAbout sets the "about" field if the given value is not nil.
-func (bc *BusinessCreate) SetNillableAbout(s *string) *BusinessCreate {
-	if s != nil {
-		bc.SetAbout(*s)
-	}
-	return bc
-}
-
 // SetLogo sets the "logo" field.
 func (bc *BusinessCreate) SetLogo(s string) *BusinessCreate {
 	bc.mutation.SetLogo(s)
@@ -115,6 +110,76 @@ func (bc *BusinessCreate) SetLogo(s string) *BusinessCreate {
 func (bc *BusinessCreate) SetNillableLogo(s *string) *BusinessCreate {
 	if s != nil {
 		bc.SetLogo(*s)
+	}
+	return bc
+}
+
+// SetCoverImage sets the "cover_image" field.
+func (bc *BusinessCreate) SetCoverImage(s string) *BusinessCreate {
+	bc.mutation.SetCoverImage(s)
+	return bc
+}
+
+// SetNillableCoverImage sets the "cover_image" field if the given value is not nil.
+func (bc *BusinessCreate) SetNillableCoverImage(s *string) *BusinessCreate {
+	if s != nil {
+		bc.SetCoverImage(*s)
+	}
+	return bc
+}
+
+// SetRegisteredBy sets the "registered_by" field.
+func (bc *BusinessCreate) SetRegisteredBy(s string) *BusinessCreate {
+	bc.mutation.SetRegisteredBy(s)
+	return bc
+}
+
+// SetNillableRegisteredBy sets the "registered_by" field if the given value is not nil.
+func (bc *BusinessCreate) SetNillableRegisteredBy(s *string) *BusinessCreate {
+	if s != nil {
+		bc.SetRegisteredBy(*s)
+	}
+	return bc
+}
+
+// SetCountryOfIncorporation sets the "country_of_incorporation" field.
+func (bc *BusinessCreate) SetCountryOfIncorporation(s string) *BusinessCreate {
+	bc.mutation.SetCountryOfIncorporation(s)
+	return bc
+}
+
+// SetNillableCountryOfIncorporation sets the "country_of_incorporation" field if the given value is not nil.
+func (bc *BusinessCreate) SetNillableCountryOfIncorporation(s *string) *BusinessCreate {
+	if s != nil {
+		bc.SetCountryOfIncorporation(*s)
+	}
+	return bc
+}
+
+// SetDateOfIncorporation sets the "date_of_incorporation" field.
+func (bc *BusinessCreate) SetDateOfIncorporation(s string) *BusinessCreate {
+	bc.mutation.SetDateOfIncorporation(s)
+	return bc
+}
+
+// SetNillableDateOfIncorporation sets the "date_of_incorporation" field if the given value is not nil.
+func (bc *BusinessCreate) SetNillableDateOfIncorporation(s *string) *BusinessCreate {
+	if s != nil {
+		bc.SetDateOfIncorporation(*s)
+	}
+	return bc
+}
+
+// SetRegistrationNumber sets the "registration_number" field.
+func (bc *BusinessCreate) SetRegistrationNumber(s string) *BusinessCreate {
+	bc.mutation.SetRegistrationNumber(s)
+	return bc
+}
+
+// SetNillableRegistrationNumber sets the "registration_number" field if the given value is not nil.
+func (bc *BusinessCreate) SetNillableRegistrationNumber(s *string) *BusinessCreate {
+	if s != nil {
+		bc.SetRegistrationNumber(*s)
 	}
 	return bc
 }
@@ -139,6 +204,20 @@ func (bc *BusinessCreate) SetNillableWebsite(s *string) *BusinessCreate {
 	return bc
 }
 
+// SetOnSite sets the "on_site" field.
+func (bc *BusinessCreate) SetOnSite(b bool) *BusinessCreate {
+	bc.mutation.SetOnSite(b)
+	return bc
+}
+
+// SetNillableOnSite sets the "on_site" field if the given value is not nil.
+func (bc *BusinessCreate) SetNillableOnSite(b *bool) *BusinessCreate {
+	if b != nil {
+		bc.SetOnSite(*b)
+	}
+	return bc
+}
+
 // SetActive sets the "active" field.
 func (bc *BusinessCreate) SetActive(b bool) *BusinessCreate {
 	bc.mutation.SetActive(b)
@@ -149,6 +228,20 @@ func (bc *BusinessCreate) SetActive(b bool) *BusinessCreate {
 func (bc *BusinessCreate) SetNillableActive(b *bool) *BusinessCreate {
 	if b != nil {
 		bc.SetActive(*b)
+	}
+	return bc
+}
+
+// SetLive sets the "live" field.
+func (bc *BusinessCreate) SetLive(b bool) *BusinessCreate {
+	bc.mutation.SetLive(b)
+	return bc
+}
+
+// SetNillableLive sets the "live" field if the given value is not nil.
+func (bc *BusinessCreate) SetNillableLive(b *bool) *BusinessCreate {
+	if b != nil {
+		bc.SetLive(*b)
 	}
 	return bc
 }
@@ -191,6 +284,20 @@ func (bc *BusinessCreate) SetDisableReason(s string) *BusinessCreate {
 func (bc *BusinessCreate) SetNillableDisableReason(s *string) *BusinessCreate {
 	if s != nil {
 		bc.SetDisableReason(*s)
+	}
+	return bc
+}
+
+// SetVerificationStatus sets the "verification_status" field.
+func (bc *BusinessCreate) SetVerificationStatus(bs business.VerificationStatus) *BusinessCreate {
+	bc.mutation.SetVerificationStatus(bs)
+	return bc
+}
+
+// SetNillableVerificationStatus sets the "verification_status" field if the given value is not nil.
+func (bc *BusinessCreate) SetNillableVerificationStatus(bs *business.VerificationStatus) *BusinessCreate {
+	if bs != nil {
+		bc.SetVerificationStatus(*bs)
 	}
 	return bc
 }
@@ -282,6 +389,25 @@ func (bc *BusinessCreate) AddManages(m ...*Manager) *BusinessCreate {
 	return bc.AddManageIDs(ids...)
 }
 
+// SetRegisteredByUserID sets the "registered_by_user" edge to the User entity by ID.
+func (bc *BusinessCreate) SetRegisteredByUserID(id string) *BusinessCreate {
+	bc.mutation.SetRegisteredByUserID(id)
+	return bc
+}
+
+// SetNillableRegisteredByUserID sets the "registered_by_user" edge to the User entity by ID if the given value is not nil.
+func (bc *BusinessCreate) SetNillableRegisteredByUserID(id *string) *BusinessCreate {
+	if id != nil {
+		bc = bc.SetRegisteredByUserID(*id)
+	}
+	return bc
+}
+
+// SetRegisteredByUser sets the "registered_by_user" edge to the User entity.
+func (bc *BusinessCreate) SetRegisteredByUser(u *User) *BusinessCreate {
+	return bc.SetRegisteredByUserID(u.ID)
+}
+
 // AddVerificationIDs adds the "verifications" edge to the Verification entity by IDs.
 func (bc *BusinessCreate) AddVerificationIDs(ids ...string) *BusinessCreate {
 	bc.mutation.AddVerificationIDs(ids...)
@@ -313,18 +439,48 @@ func (bc *BusinessCreate) AddRequestVerifications(r ...*RequestVerification) *Bu
 }
 
 // AddBusinessDocumentIDs adds the "business_documents" edge to the BusinessDocument entity by IDs.
-func (bc *BusinessCreate) AddBusinessDocumentIDs(ids ...int) *BusinessCreate {
+func (bc *BusinessCreate) AddBusinessDocumentIDs(ids ...string) *BusinessCreate {
 	bc.mutation.AddBusinessDocumentIDs(ids...)
 	return bc
 }
 
 // AddBusinessDocuments adds the "business_documents" edges to the BusinessDocument entity.
 func (bc *BusinessCreate) AddBusinessDocuments(b ...*BusinessDocument) *BusinessCreate {
-	ids := make([]int, len(b))
+	ids := make([]string, len(b))
 	for i := range b {
 		ids[i] = b[i].ID
 	}
 	return bc.AddBusinessDocumentIDs(ids...)
+}
+
+// AddLocationIDs adds the "locations" edge to the BusinessLocation entity by IDs.
+func (bc *BusinessCreate) AddLocationIDs(ids ...string) *BusinessCreate {
+	bc.mutation.AddLocationIDs(ids...)
+	return bc
+}
+
+// AddLocations adds the "locations" edges to the BusinessLocation entity.
+func (bc *BusinessCreate) AddLocations(b ...*BusinessLocation) *BusinessCreate {
+	ids := make([]string, len(b))
+	for i := range b {
+		ids[i] = b[i].ID
+	}
+	return bc.AddLocationIDs(ids...)
+}
+
+// AddKybMessageIDs adds the "kyb_messages" edge to the KYBMessage entity by IDs.
+func (bc *BusinessCreate) AddKybMessageIDs(ids ...string) *BusinessCreate {
+	bc.mutation.AddKybMessageIDs(ids...)
+	return bc
+}
+
+// AddKybMessages adds the "kyb_messages" edges to the KYBMessage entity.
+func (bc *BusinessCreate) AddKybMessages(k ...*KYBMessage) *BusinessCreate {
+	ids := make([]string, len(k))
+	for i := range k {
+		ids[i] = k[i].ID
+	}
+	return bc.AddKybMessageIDs(ids...)
 }
 
 // Mutation returns the BusinessMutation object of the builder.
@@ -374,9 +530,17 @@ func (bc *BusinessCreate) defaults() {
 		v := business.DefaultCategory
 		bc.mutation.SetCategory(v)
 	}
+	if _, ok := bc.mutation.OnSite(); !ok {
+		v := business.DefaultOnSite
+		bc.mutation.SetOnSite(v)
+	}
 	if _, ok := bc.mutation.Active(); !ok {
 		v := business.DefaultActive
 		bc.mutation.SetActive(v)
+	}
+	if _, ok := bc.mutation.Live(); !ok {
+		v := business.DefaultLive
+		bc.mutation.SetLive(v)
 	}
 	if _, ok := bc.mutation.Disabled(); !ok {
 		v := business.DefaultDisabled
@@ -385,6 +549,10 @@ func (bc *BusinessCreate) defaults() {
 	if _, ok := bc.mutation.DisabledAt(); !ok {
 		v := business.DefaultDisabledAt()
 		bc.mutation.SetDisabledAt(v)
+	}
+	if _, ok := bc.mutation.VerificationStatus(); !ok {
+		v := business.DefaultVerificationStatus
+		bc.mutation.SetVerificationStatus(v)
 	}
 	if _, ok := bc.mutation.Verified(); !ok {
 		v := business.DefaultVerified
@@ -415,6 +583,14 @@ func (bc *BusinessCreate) check() error {
 			return &ValidationError{Name: "name", err: fmt.Errorf(`ent: validator failed for field "Business.name": %w`, err)}
 		}
 	}
+	if _, ok := bc.mutation.About(); !ok {
+		return &ValidationError{Name: "about", err: errors.New(`ent: missing required field "Business.about"`)}
+	}
+	if v, ok := bc.mutation.About(); ok {
+		if err := business.AboutValidator(v); err != nil {
+			return &ValidationError{Name: "about", err: fmt.Errorf(`ent: validator failed for field "Business.about": %w`, err)}
+		}
+	}
 	if _, ok := bc.mutation.Email(); !ok {
 		return &ValidationError{Name: "email", err: errors.New(`ent: missing required field "Business.email"`)}
 	}
@@ -428,14 +604,28 @@ func (bc *BusinessCreate) check() error {
 			return &ValidationError{Name: "website", err: fmt.Errorf(`ent: validator failed for field "Business.website": %w`, err)}
 		}
 	}
+	if _, ok := bc.mutation.OnSite(); !ok {
+		return &ValidationError{Name: "on_site", err: errors.New(`ent: missing required field "Business.on_site"`)}
+	}
 	if _, ok := bc.mutation.Active(); !ok {
 		return &ValidationError{Name: "active", err: errors.New(`ent: missing required field "Business.active"`)}
+	}
+	if _, ok := bc.mutation.Live(); !ok {
+		return &ValidationError{Name: "live", err: errors.New(`ent: missing required field "Business.live"`)}
 	}
 	if _, ok := bc.mutation.Disabled(); !ok {
 		return &ValidationError{Name: "disabled", err: errors.New(`ent: missing required field "Business.disabled"`)}
 	}
 	if _, ok := bc.mutation.DisabledAt(); !ok {
 		return &ValidationError{Name: "disabled_at", err: errors.New(`ent: missing required field "Business.disabled_at"`)}
+	}
+	if _, ok := bc.mutation.VerificationStatus(); !ok {
+		return &ValidationError{Name: "verification_status", err: errors.New(`ent: missing required field "Business.verification_status"`)}
+	}
+	if v, ok := bc.mutation.VerificationStatus(); ok {
+		if err := business.VerificationStatusValidator(v); err != nil {
+			return &ValidationError{Name: "verification_status", err: fmt.Errorf(`ent: validator failed for field "Business.verification_status": %w`, err)}
+		}
 	}
 	if _, ok := bc.mutation.Verified(); !ok {
 		return &ValidationError{Name: "verified", err: errors.New(`ent: missing required field "Business.verified"`)}
@@ -504,6 +694,22 @@ func (bc *BusinessCreate) createSpec() (*Business, *sqlgraph.CreateSpec) {
 		_spec.SetField(business.FieldLogo, field.TypeString, value)
 		_node.Logo = value
 	}
+	if value, ok := bc.mutation.CoverImage(); ok {
+		_spec.SetField(business.FieldCoverImage, field.TypeString, value)
+		_node.CoverImage = value
+	}
+	if value, ok := bc.mutation.CountryOfIncorporation(); ok {
+		_spec.SetField(business.FieldCountryOfIncorporation, field.TypeString, value)
+		_node.CountryOfIncorporation = &value
+	}
+	if value, ok := bc.mutation.DateOfIncorporation(); ok {
+		_spec.SetField(business.FieldDateOfIncorporation, field.TypeString, value)
+		_node.DateOfIncorporation = &value
+	}
+	if value, ok := bc.mutation.RegistrationNumber(); ok {
+		_spec.SetField(business.FieldRegistrationNumber, field.TypeString, value)
+		_node.RegistrationNumber = &value
+	}
 	if value, ok := bc.mutation.Email(); ok {
 		_spec.SetField(business.FieldEmail, field.TypeString, value)
 		_node.Email = value
@@ -512,9 +718,17 @@ func (bc *BusinessCreate) createSpec() (*Business, *sqlgraph.CreateSpec) {
 		_spec.SetField(business.FieldWebsite, field.TypeString, value)
 		_node.Website = value
 	}
+	if value, ok := bc.mutation.OnSite(); ok {
+		_spec.SetField(business.FieldOnSite, field.TypeBool, value)
+		_node.OnSite = value
+	}
 	if value, ok := bc.mutation.Active(); ok {
 		_spec.SetField(business.FieldActive, field.TypeBool, value)
 		_node.Active = value
+	}
+	if value, ok := bc.mutation.Live(); ok {
+		_spec.SetField(business.FieldLive, field.TypeBool, value)
+		_node.Live = value
 	}
 	if value, ok := bc.mutation.Disabled(); ok {
 		_spec.SetField(business.FieldDisabled, field.TypeBool, value)
@@ -527,6 +741,10 @@ func (bc *BusinessCreate) createSpec() (*Business, *sqlgraph.CreateSpec) {
 	if value, ok := bc.mutation.DisableReason(); ok {
 		_spec.SetField(business.FieldDisableReason, field.TypeString, value)
 		_node.DisableReason = value
+	}
+	if value, ok := bc.mutation.VerificationStatus(); ok {
+		_spec.SetField(business.FieldVerificationStatus, field.TypeEnum, value)
+		_node.VerificationStatus = value
 	}
 	if value, ok := bc.mutation.Verified(); ok {
 		_spec.SetField(business.FieldVerified, field.TypeBool, value)
@@ -584,6 +802,23 @@ func (bc *BusinessCreate) createSpec() (*Business, *sqlgraph.CreateSpec) {
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
+	if nodes := bc.mutation.RegisteredByUserIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   business.RegisteredByUserTable,
+			Columns: []string{business.RegisteredByUserColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_node.RegisteredBy = &nodes[0]
+		_spec.Edges = append(_spec.Edges, edge)
+	}
 	if nodes := bc.mutation.VerificationsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
@@ -624,7 +859,39 @@ func (bc *BusinessCreate) createSpec() (*Business, *sqlgraph.CreateSpec) {
 			Columns: []string{business.BusinessDocumentsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(businessdocument.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(businessdocument.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := bc.mutation.LocationsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   business.LocationsTable,
+			Columns: []string{business.LocationsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(businesslocation.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := bc.mutation.KybMessagesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   business.KybMessagesTable,
+			Columns: []string{business.KybMessagesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(kybmessage.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {
@@ -750,12 +1017,6 @@ func (u *BusinessUpsert) UpdateAbout() *BusinessUpsert {
 	return u
 }
 
-// ClearAbout clears the value of the "about" field.
-func (u *BusinessUpsert) ClearAbout() *BusinessUpsert {
-	u.SetNull(business.FieldAbout)
-	return u
-}
-
 // SetLogo sets the "logo" field.
 func (u *BusinessUpsert) SetLogo(v string) *BusinessUpsert {
 	u.Set(business.FieldLogo, v)
@@ -771,6 +1032,96 @@ func (u *BusinessUpsert) UpdateLogo() *BusinessUpsert {
 // ClearLogo clears the value of the "logo" field.
 func (u *BusinessUpsert) ClearLogo() *BusinessUpsert {
 	u.SetNull(business.FieldLogo)
+	return u
+}
+
+// SetCoverImage sets the "cover_image" field.
+func (u *BusinessUpsert) SetCoverImage(v string) *BusinessUpsert {
+	u.Set(business.FieldCoverImage, v)
+	return u
+}
+
+// UpdateCoverImage sets the "cover_image" field to the value that was provided on create.
+func (u *BusinessUpsert) UpdateCoverImage() *BusinessUpsert {
+	u.SetExcluded(business.FieldCoverImage)
+	return u
+}
+
+// ClearCoverImage clears the value of the "cover_image" field.
+func (u *BusinessUpsert) ClearCoverImage() *BusinessUpsert {
+	u.SetNull(business.FieldCoverImage)
+	return u
+}
+
+// SetRegisteredBy sets the "registered_by" field.
+func (u *BusinessUpsert) SetRegisteredBy(v string) *BusinessUpsert {
+	u.Set(business.FieldRegisteredBy, v)
+	return u
+}
+
+// UpdateRegisteredBy sets the "registered_by" field to the value that was provided on create.
+func (u *BusinessUpsert) UpdateRegisteredBy() *BusinessUpsert {
+	u.SetExcluded(business.FieldRegisteredBy)
+	return u
+}
+
+// ClearRegisteredBy clears the value of the "registered_by" field.
+func (u *BusinessUpsert) ClearRegisteredBy() *BusinessUpsert {
+	u.SetNull(business.FieldRegisteredBy)
+	return u
+}
+
+// SetCountryOfIncorporation sets the "country_of_incorporation" field.
+func (u *BusinessUpsert) SetCountryOfIncorporation(v string) *BusinessUpsert {
+	u.Set(business.FieldCountryOfIncorporation, v)
+	return u
+}
+
+// UpdateCountryOfIncorporation sets the "country_of_incorporation" field to the value that was provided on create.
+func (u *BusinessUpsert) UpdateCountryOfIncorporation() *BusinessUpsert {
+	u.SetExcluded(business.FieldCountryOfIncorporation)
+	return u
+}
+
+// ClearCountryOfIncorporation clears the value of the "country_of_incorporation" field.
+func (u *BusinessUpsert) ClearCountryOfIncorporation() *BusinessUpsert {
+	u.SetNull(business.FieldCountryOfIncorporation)
+	return u
+}
+
+// SetDateOfIncorporation sets the "date_of_incorporation" field.
+func (u *BusinessUpsert) SetDateOfIncorporation(v string) *BusinessUpsert {
+	u.Set(business.FieldDateOfIncorporation, v)
+	return u
+}
+
+// UpdateDateOfIncorporation sets the "date_of_incorporation" field to the value that was provided on create.
+func (u *BusinessUpsert) UpdateDateOfIncorporation() *BusinessUpsert {
+	u.SetExcluded(business.FieldDateOfIncorporation)
+	return u
+}
+
+// ClearDateOfIncorporation clears the value of the "date_of_incorporation" field.
+func (u *BusinessUpsert) ClearDateOfIncorporation() *BusinessUpsert {
+	u.SetNull(business.FieldDateOfIncorporation)
+	return u
+}
+
+// SetRegistrationNumber sets the "registration_number" field.
+func (u *BusinessUpsert) SetRegistrationNumber(v string) *BusinessUpsert {
+	u.Set(business.FieldRegistrationNumber, v)
+	return u
+}
+
+// UpdateRegistrationNumber sets the "registration_number" field to the value that was provided on create.
+func (u *BusinessUpsert) UpdateRegistrationNumber() *BusinessUpsert {
+	u.SetExcluded(business.FieldRegistrationNumber)
+	return u
+}
+
+// ClearRegistrationNumber clears the value of the "registration_number" field.
+func (u *BusinessUpsert) ClearRegistrationNumber() *BusinessUpsert {
+	u.SetNull(business.FieldRegistrationNumber)
 	return u
 }
 
@@ -804,6 +1155,18 @@ func (u *BusinessUpsert) ClearWebsite() *BusinessUpsert {
 	return u
 }
 
+// SetOnSite sets the "on_site" field.
+func (u *BusinessUpsert) SetOnSite(v bool) *BusinessUpsert {
+	u.Set(business.FieldOnSite, v)
+	return u
+}
+
+// UpdateOnSite sets the "on_site" field to the value that was provided on create.
+func (u *BusinessUpsert) UpdateOnSite() *BusinessUpsert {
+	u.SetExcluded(business.FieldOnSite)
+	return u
+}
+
 // SetActive sets the "active" field.
 func (u *BusinessUpsert) SetActive(v bool) *BusinessUpsert {
 	u.Set(business.FieldActive, v)
@@ -813,6 +1176,18 @@ func (u *BusinessUpsert) SetActive(v bool) *BusinessUpsert {
 // UpdateActive sets the "active" field to the value that was provided on create.
 func (u *BusinessUpsert) UpdateActive() *BusinessUpsert {
 	u.SetExcluded(business.FieldActive)
+	return u
+}
+
+// SetLive sets the "live" field.
+func (u *BusinessUpsert) SetLive(v bool) *BusinessUpsert {
+	u.Set(business.FieldLive, v)
+	return u
+}
+
+// UpdateLive sets the "live" field to the value that was provided on create.
+func (u *BusinessUpsert) UpdateLive() *BusinessUpsert {
+	u.SetExcluded(business.FieldLive)
 	return u
 }
 
@@ -855,6 +1230,18 @@ func (u *BusinessUpsert) UpdateDisableReason() *BusinessUpsert {
 // ClearDisableReason clears the value of the "disable_reason" field.
 func (u *BusinessUpsert) ClearDisableReason() *BusinessUpsert {
 	u.SetNull(business.FieldDisableReason)
+	return u
+}
+
+// SetVerificationStatus sets the "verification_status" field.
+func (u *BusinessUpsert) SetVerificationStatus(v business.VerificationStatus) *BusinessUpsert {
+	u.Set(business.FieldVerificationStatus, v)
+	return u
+}
+
+// UpdateVerificationStatus sets the "verification_status" field to the value that was provided on create.
+func (u *BusinessUpsert) UpdateVerificationStatus() *BusinessUpsert {
+	u.SetExcluded(business.FieldVerificationStatus)
 	return u
 }
 
@@ -1016,13 +1403,6 @@ func (u *BusinessUpsertOne) UpdateAbout() *BusinessUpsertOne {
 	})
 }
 
-// ClearAbout clears the value of the "about" field.
-func (u *BusinessUpsertOne) ClearAbout() *BusinessUpsertOne {
-	return u.Update(func(s *BusinessUpsert) {
-		s.ClearAbout()
-	})
-}
-
 // SetLogo sets the "logo" field.
 func (u *BusinessUpsertOne) SetLogo(v string) *BusinessUpsertOne {
 	return u.Update(func(s *BusinessUpsert) {
@@ -1041,6 +1421,111 @@ func (u *BusinessUpsertOne) UpdateLogo() *BusinessUpsertOne {
 func (u *BusinessUpsertOne) ClearLogo() *BusinessUpsertOne {
 	return u.Update(func(s *BusinessUpsert) {
 		s.ClearLogo()
+	})
+}
+
+// SetCoverImage sets the "cover_image" field.
+func (u *BusinessUpsertOne) SetCoverImage(v string) *BusinessUpsertOne {
+	return u.Update(func(s *BusinessUpsert) {
+		s.SetCoverImage(v)
+	})
+}
+
+// UpdateCoverImage sets the "cover_image" field to the value that was provided on create.
+func (u *BusinessUpsertOne) UpdateCoverImage() *BusinessUpsertOne {
+	return u.Update(func(s *BusinessUpsert) {
+		s.UpdateCoverImage()
+	})
+}
+
+// ClearCoverImage clears the value of the "cover_image" field.
+func (u *BusinessUpsertOne) ClearCoverImage() *BusinessUpsertOne {
+	return u.Update(func(s *BusinessUpsert) {
+		s.ClearCoverImage()
+	})
+}
+
+// SetRegisteredBy sets the "registered_by" field.
+func (u *BusinessUpsertOne) SetRegisteredBy(v string) *BusinessUpsertOne {
+	return u.Update(func(s *BusinessUpsert) {
+		s.SetRegisteredBy(v)
+	})
+}
+
+// UpdateRegisteredBy sets the "registered_by" field to the value that was provided on create.
+func (u *BusinessUpsertOne) UpdateRegisteredBy() *BusinessUpsertOne {
+	return u.Update(func(s *BusinessUpsert) {
+		s.UpdateRegisteredBy()
+	})
+}
+
+// ClearRegisteredBy clears the value of the "registered_by" field.
+func (u *BusinessUpsertOne) ClearRegisteredBy() *BusinessUpsertOne {
+	return u.Update(func(s *BusinessUpsert) {
+		s.ClearRegisteredBy()
+	})
+}
+
+// SetCountryOfIncorporation sets the "country_of_incorporation" field.
+func (u *BusinessUpsertOne) SetCountryOfIncorporation(v string) *BusinessUpsertOne {
+	return u.Update(func(s *BusinessUpsert) {
+		s.SetCountryOfIncorporation(v)
+	})
+}
+
+// UpdateCountryOfIncorporation sets the "country_of_incorporation" field to the value that was provided on create.
+func (u *BusinessUpsertOne) UpdateCountryOfIncorporation() *BusinessUpsertOne {
+	return u.Update(func(s *BusinessUpsert) {
+		s.UpdateCountryOfIncorporation()
+	})
+}
+
+// ClearCountryOfIncorporation clears the value of the "country_of_incorporation" field.
+func (u *BusinessUpsertOne) ClearCountryOfIncorporation() *BusinessUpsertOne {
+	return u.Update(func(s *BusinessUpsert) {
+		s.ClearCountryOfIncorporation()
+	})
+}
+
+// SetDateOfIncorporation sets the "date_of_incorporation" field.
+func (u *BusinessUpsertOne) SetDateOfIncorporation(v string) *BusinessUpsertOne {
+	return u.Update(func(s *BusinessUpsert) {
+		s.SetDateOfIncorporation(v)
+	})
+}
+
+// UpdateDateOfIncorporation sets the "date_of_incorporation" field to the value that was provided on create.
+func (u *BusinessUpsertOne) UpdateDateOfIncorporation() *BusinessUpsertOne {
+	return u.Update(func(s *BusinessUpsert) {
+		s.UpdateDateOfIncorporation()
+	})
+}
+
+// ClearDateOfIncorporation clears the value of the "date_of_incorporation" field.
+func (u *BusinessUpsertOne) ClearDateOfIncorporation() *BusinessUpsertOne {
+	return u.Update(func(s *BusinessUpsert) {
+		s.ClearDateOfIncorporation()
+	})
+}
+
+// SetRegistrationNumber sets the "registration_number" field.
+func (u *BusinessUpsertOne) SetRegistrationNumber(v string) *BusinessUpsertOne {
+	return u.Update(func(s *BusinessUpsert) {
+		s.SetRegistrationNumber(v)
+	})
+}
+
+// UpdateRegistrationNumber sets the "registration_number" field to the value that was provided on create.
+func (u *BusinessUpsertOne) UpdateRegistrationNumber() *BusinessUpsertOne {
+	return u.Update(func(s *BusinessUpsert) {
+		s.UpdateRegistrationNumber()
+	})
+}
+
+// ClearRegistrationNumber clears the value of the "registration_number" field.
+func (u *BusinessUpsertOne) ClearRegistrationNumber() *BusinessUpsertOne {
+	return u.Update(func(s *BusinessUpsert) {
+		s.ClearRegistrationNumber()
 	})
 }
 
@@ -1079,6 +1564,20 @@ func (u *BusinessUpsertOne) ClearWebsite() *BusinessUpsertOne {
 	})
 }
 
+// SetOnSite sets the "on_site" field.
+func (u *BusinessUpsertOne) SetOnSite(v bool) *BusinessUpsertOne {
+	return u.Update(func(s *BusinessUpsert) {
+		s.SetOnSite(v)
+	})
+}
+
+// UpdateOnSite sets the "on_site" field to the value that was provided on create.
+func (u *BusinessUpsertOne) UpdateOnSite() *BusinessUpsertOne {
+	return u.Update(func(s *BusinessUpsert) {
+		s.UpdateOnSite()
+	})
+}
+
 // SetActive sets the "active" field.
 func (u *BusinessUpsertOne) SetActive(v bool) *BusinessUpsertOne {
 	return u.Update(func(s *BusinessUpsert) {
@@ -1090,6 +1589,20 @@ func (u *BusinessUpsertOne) SetActive(v bool) *BusinessUpsertOne {
 func (u *BusinessUpsertOne) UpdateActive() *BusinessUpsertOne {
 	return u.Update(func(s *BusinessUpsert) {
 		s.UpdateActive()
+	})
+}
+
+// SetLive sets the "live" field.
+func (u *BusinessUpsertOne) SetLive(v bool) *BusinessUpsertOne {
+	return u.Update(func(s *BusinessUpsert) {
+		s.SetLive(v)
+	})
+}
+
+// UpdateLive sets the "live" field to the value that was provided on create.
+func (u *BusinessUpsertOne) UpdateLive() *BusinessUpsertOne {
+	return u.Update(func(s *BusinessUpsert) {
+		s.UpdateLive()
 	})
 }
 
@@ -1139,6 +1652,20 @@ func (u *BusinessUpsertOne) UpdateDisableReason() *BusinessUpsertOne {
 func (u *BusinessUpsertOne) ClearDisableReason() *BusinessUpsertOne {
 	return u.Update(func(s *BusinessUpsert) {
 		s.ClearDisableReason()
+	})
+}
+
+// SetVerificationStatus sets the "verification_status" field.
+func (u *BusinessUpsertOne) SetVerificationStatus(v business.VerificationStatus) *BusinessUpsertOne {
+	return u.Update(func(s *BusinessUpsert) {
+		s.SetVerificationStatus(v)
+	})
+}
+
+// UpdateVerificationStatus sets the "verification_status" field to the value that was provided on create.
+func (u *BusinessUpsertOne) UpdateVerificationStatus() *BusinessUpsertOne {
+	return u.Update(func(s *BusinessUpsert) {
+		s.UpdateVerificationStatus()
 	})
 }
 
@@ -1472,13 +1999,6 @@ func (u *BusinessUpsertBulk) UpdateAbout() *BusinessUpsertBulk {
 	})
 }
 
-// ClearAbout clears the value of the "about" field.
-func (u *BusinessUpsertBulk) ClearAbout() *BusinessUpsertBulk {
-	return u.Update(func(s *BusinessUpsert) {
-		s.ClearAbout()
-	})
-}
-
 // SetLogo sets the "logo" field.
 func (u *BusinessUpsertBulk) SetLogo(v string) *BusinessUpsertBulk {
 	return u.Update(func(s *BusinessUpsert) {
@@ -1497,6 +2017,111 @@ func (u *BusinessUpsertBulk) UpdateLogo() *BusinessUpsertBulk {
 func (u *BusinessUpsertBulk) ClearLogo() *BusinessUpsertBulk {
 	return u.Update(func(s *BusinessUpsert) {
 		s.ClearLogo()
+	})
+}
+
+// SetCoverImage sets the "cover_image" field.
+func (u *BusinessUpsertBulk) SetCoverImage(v string) *BusinessUpsertBulk {
+	return u.Update(func(s *BusinessUpsert) {
+		s.SetCoverImage(v)
+	})
+}
+
+// UpdateCoverImage sets the "cover_image" field to the value that was provided on create.
+func (u *BusinessUpsertBulk) UpdateCoverImage() *BusinessUpsertBulk {
+	return u.Update(func(s *BusinessUpsert) {
+		s.UpdateCoverImage()
+	})
+}
+
+// ClearCoverImage clears the value of the "cover_image" field.
+func (u *BusinessUpsertBulk) ClearCoverImage() *BusinessUpsertBulk {
+	return u.Update(func(s *BusinessUpsert) {
+		s.ClearCoverImage()
+	})
+}
+
+// SetRegisteredBy sets the "registered_by" field.
+func (u *BusinessUpsertBulk) SetRegisteredBy(v string) *BusinessUpsertBulk {
+	return u.Update(func(s *BusinessUpsert) {
+		s.SetRegisteredBy(v)
+	})
+}
+
+// UpdateRegisteredBy sets the "registered_by" field to the value that was provided on create.
+func (u *BusinessUpsertBulk) UpdateRegisteredBy() *BusinessUpsertBulk {
+	return u.Update(func(s *BusinessUpsert) {
+		s.UpdateRegisteredBy()
+	})
+}
+
+// ClearRegisteredBy clears the value of the "registered_by" field.
+func (u *BusinessUpsertBulk) ClearRegisteredBy() *BusinessUpsertBulk {
+	return u.Update(func(s *BusinessUpsert) {
+		s.ClearRegisteredBy()
+	})
+}
+
+// SetCountryOfIncorporation sets the "country_of_incorporation" field.
+func (u *BusinessUpsertBulk) SetCountryOfIncorporation(v string) *BusinessUpsertBulk {
+	return u.Update(func(s *BusinessUpsert) {
+		s.SetCountryOfIncorporation(v)
+	})
+}
+
+// UpdateCountryOfIncorporation sets the "country_of_incorporation" field to the value that was provided on create.
+func (u *BusinessUpsertBulk) UpdateCountryOfIncorporation() *BusinessUpsertBulk {
+	return u.Update(func(s *BusinessUpsert) {
+		s.UpdateCountryOfIncorporation()
+	})
+}
+
+// ClearCountryOfIncorporation clears the value of the "country_of_incorporation" field.
+func (u *BusinessUpsertBulk) ClearCountryOfIncorporation() *BusinessUpsertBulk {
+	return u.Update(func(s *BusinessUpsert) {
+		s.ClearCountryOfIncorporation()
+	})
+}
+
+// SetDateOfIncorporation sets the "date_of_incorporation" field.
+func (u *BusinessUpsertBulk) SetDateOfIncorporation(v string) *BusinessUpsertBulk {
+	return u.Update(func(s *BusinessUpsert) {
+		s.SetDateOfIncorporation(v)
+	})
+}
+
+// UpdateDateOfIncorporation sets the "date_of_incorporation" field to the value that was provided on create.
+func (u *BusinessUpsertBulk) UpdateDateOfIncorporation() *BusinessUpsertBulk {
+	return u.Update(func(s *BusinessUpsert) {
+		s.UpdateDateOfIncorporation()
+	})
+}
+
+// ClearDateOfIncorporation clears the value of the "date_of_incorporation" field.
+func (u *BusinessUpsertBulk) ClearDateOfIncorporation() *BusinessUpsertBulk {
+	return u.Update(func(s *BusinessUpsert) {
+		s.ClearDateOfIncorporation()
+	})
+}
+
+// SetRegistrationNumber sets the "registration_number" field.
+func (u *BusinessUpsertBulk) SetRegistrationNumber(v string) *BusinessUpsertBulk {
+	return u.Update(func(s *BusinessUpsert) {
+		s.SetRegistrationNumber(v)
+	})
+}
+
+// UpdateRegistrationNumber sets the "registration_number" field to the value that was provided on create.
+func (u *BusinessUpsertBulk) UpdateRegistrationNumber() *BusinessUpsertBulk {
+	return u.Update(func(s *BusinessUpsert) {
+		s.UpdateRegistrationNumber()
+	})
+}
+
+// ClearRegistrationNumber clears the value of the "registration_number" field.
+func (u *BusinessUpsertBulk) ClearRegistrationNumber() *BusinessUpsertBulk {
+	return u.Update(func(s *BusinessUpsert) {
+		s.ClearRegistrationNumber()
 	})
 }
 
@@ -1535,6 +2160,20 @@ func (u *BusinessUpsertBulk) ClearWebsite() *BusinessUpsertBulk {
 	})
 }
 
+// SetOnSite sets the "on_site" field.
+func (u *BusinessUpsertBulk) SetOnSite(v bool) *BusinessUpsertBulk {
+	return u.Update(func(s *BusinessUpsert) {
+		s.SetOnSite(v)
+	})
+}
+
+// UpdateOnSite sets the "on_site" field to the value that was provided on create.
+func (u *BusinessUpsertBulk) UpdateOnSite() *BusinessUpsertBulk {
+	return u.Update(func(s *BusinessUpsert) {
+		s.UpdateOnSite()
+	})
+}
+
 // SetActive sets the "active" field.
 func (u *BusinessUpsertBulk) SetActive(v bool) *BusinessUpsertBulk {
 	return u.Update(func(s *BusinessUpsert) {
@@ -1546,6 +2185,20 @@ func (u *BusinessUpsertBulk) SetActive(v bool) *BusinessUpsertBulk {
 func (u *BusinessUpsertBulk) UpdateActive() *BusinessUpsertBulk {
 	return u.Update(func(s *BusinessUpsert) {
 		s.UpdateActive()
+	})
+}
+
+// SetLive sets the "live" field.
+func (u *BusinessUpsertBulk) SetLive(v bool) *BusinessUpsertBulk {
+	return u.Update(func(s *BusinessUpsert) {
+		s.SetLive(v)
+	})
+}
+
+// UpdateLive sets the "live" field to the value that was provided on create.
+func (u *BusinessUpsertBulk) UpdateLive() *BusinessUpsertBulk {
+	return u.Update(func(s *BusinessUpsert) {
+		s.UpdateLive()
 	})
 }
 
@@ -1595,6 +2248,20 @@ func (u *BusinessUpsertBulk) UpdateDisableReason() *BusinessUpsertBulk {
 func (u *BusinessUpsertBulk) ClearDisableReason() *BusinessUpsertBulk {
 	return u.Update(func(s *BusinessUpsert) {
 		s.ClearDisableReason()
+	})
+}
+
+// SetVerificationStatus sets the "verification_status" field.
+func (u *BusinessUpsertBulk) SetVerificationStatus(v business.VerificationStatus) *BusinessUpsertBulk {
+	return u.Update(func(s *BusinessUpsert) {
+		s.SetVerificationStatus(v)
+	})
+}
+
+// UpdateVerificationStatus sets the "verification_status" field to the value that was provided on create.
+func (u *BusinessUpsertBulk) UpdateVerificationStatus() *BusinessUpsertBulk {
+	return u.Update(func(s *BusinessUpsert) {
+		s.UpdateVerificationStatus()
 	})
 }
 

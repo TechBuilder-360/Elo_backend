@@ -33,6 +33,8 @@ type User struct {
 	MiddleName string `json:"middle_name,omitempty"`
 	// DisplayName holds the value of the "display_name" field.
 	DisplayName string `json:"display_name,omitempty"`
+	// DateOfBirth holds the value of the "date_of_birth" field.
+	DateOfBirth time.Time `json:"date_of_birth,omitempty"`
 	// EmailAddress holds the value of the "email_address" field.
 	EmailAddress string `json:"email_address,omitempty"`
 	// EmailVerified holds the value of the "email_verified" field.
@@ -61,13 +63,15 @@ type UserEdges struct {
 	Manages []*Manager `json:"manages,omitempty"`
 	// UserDocuments holds the value of the user_documents edge.
 	UserDocuments []*UserDocument `json:"user_documents,omitempty"`
+	// RegisteredBusinesses holds the value of the registered_businesses edge.
+	RegisteredBusinesses []*Business `json:"registered_businesses,omitempty"`
 	// Verifications holds the value of the verifications edge.
 	Verifications []*Verification `json:"verifications,omitempty"`
 	// RequestVerifications holds the value of the request_verifications edge.
 	RequestVerifications []*RequestVerification `json:"request_verifications,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [4]bool
+	loadedTypes [5]bool
 }
 
 // ManagesOrErr returns the Manages value or an error if the edge
@@ -88,10 +92,19 @@ func (e UserEdges) UserDocumentsOrErr() ([]*UserDocument, error) {
 	return nil, &NotLoadedError{edge: "user_documents"}
 }
 
+// RegisteredBusinessesOrErr returns the RegisteredBusinesses value or an error if the edge
+// was not loaded in eager-loading.
+func (e UserEdges) RegisteredBusinessesOrErr() ([]*Business, error) {
+	if e.loadedTypes[2] {
+		return e.RegisteredBusinesses, nil
+	}
+	return nil, &NotLoadedError{edge: "registered_businesses"}
+}
+
 // VerificationsOrErr returns the Verifications value or an error if the edge
 // was not loaded in eager-loading.
 func (e UserEdges) VerificationsOrErr() ([]*Verification, error) {
-	if e.loadedTypes[2] {
+	if e.loadedTypes[3] {
 		return e.Verifications, nil
 	}
 	return nil, &NotLoadedError{edge: "verifications"}
@@ -100,7 +113,7 @@ func (e UserEdges) VerificationsOrErr() ([]*Verification, error) {
 // RequestVerificationsOrErr returns the RequestVerifications value or an error if the edge
 // was not loaded in eager-loading.
 func (e UserEdges) RequestVerificationsOrErr() ([]*RequestVerification, error) {
-	if e.loadedTypes[3] {
+	if e.loadedTypes[4] {
 		return e.RequestVerifications, nil
 	}
 	return nil, &NotLoadedError{edge: "request_verifications"}
@@ -115,7 +128,7 @@ func (*User) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullBool)
 		case user.FieldID, user.FieldFirstName, user.FieldLastName, user.FieldPassword, user.FieldMiddleName, user.FieldDisplayName, user.FieldEmailAddress, user.FieldPhoneNumber, user.FieldAvatar, user.FieldDisableReason:
 			values[i] = new(sql.NullString)
-		case user.FieldCreatedAt, user.FieldUpdatedAt, user.FieldDeletedAt, user.FieldEmailVerifiedAt:
+		case user.FieldCreatedAt, user.FieldUpdatedAt, user.FieldDeletedAt, user.FieldDateOfBirth, user.FieldEmailVerifiedAt:
 			values[i] = new(sql.NullTime)
 		default:
 			values[i] = new(sql.UnknownType)
@@ -186,6 +199,12 @@ func (u *User) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field display_name", values[i])
 			} else if value.Valid {
 				u.DisplayName = value.String
+			}
+		case user.FieldDateOfBirth:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field date_of_birth", values[i])
+			} else if value.Valid {
+				u.DateOfBirth = value.Time
 			}
 		case user.FieldEmailAddress:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -261,6 +280,11 @@ func (u *User) QueryUserDocuments() *UserDocumentQuery {
 	return NewUserClient(u.config).QueryUserDocuments(u)
 }
 
+// QueryRegisteredBusinesses queries the "registered_businesses" edge of the User entity.
+func (u *User) QueryRegisteredBusinesses() *BusinessQuery {
+	return NewUserClient(u.config).QueryRegisteredBusinesses(u)
+}
+
 // QueryVerifications queries the "verifications" edge of the User entity.
 func (u *User) QueryVerifications() *VerificationQuery {
 	return NewUserClient(u.config).QueryVerifications(u)
@@ -319,6 +343,9 @@ func (u *User) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("display_name=")
 	builder.WriteString(u.DisplayName)
+	builder.WriteString(", ")
+	builder.WriteString("date_of_birth=")
+	builder.WriteString(u.DateOfBirth.Format(time.ANSIC))
 	builder.WriteString(", ")
 	builder.WriteString("email_address=")
 	builder.WriteString(u.EmailAddress)

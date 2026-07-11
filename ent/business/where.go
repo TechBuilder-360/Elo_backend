@@ -100,6 +100,31 @@ func Logo(v string) predicate.Business {
 	return predicate.Business(sql.FieldEQ(FieldLogo, v))
 }
 
+// CoverImage applies equality check predicate on the "cover_image" field. It's identical to CoverImageEQ.
+func CoverImage(v string) predicate.Business {
+	return predicate.Business(sql.FieldEQ(FieldCoverImage, v))
+}
+
+// RegisteredBy applies equality check predicate on the "registered_by" field. It's identical to RegisteredByEQ.
+func RegisteredBy(v string) predicate.Business {
+	return predicate.Business(sql.FieldEQ(FieldRegisteredBy, v))
+}
+
+// CountryOfIncorporation applies equality check predicate on the "country_of_incorporation" field. It's identical to CountryOfIncorporationEQ.
+func CountryOfIncorporation(v string) predicate.Business {
+	return predicate.Business(sql.FieldEQ(FieldCountryOfIncorporation, v))
+}
+
+// DateOfIncorporation applies equality check predicate on the "date_of_incorporation" field. It's identical to DateOfIncorporationEQ.
+func DateOfIncorporation(v string) predicate.Business {
+	return predicate.Business(sql.FieldEQ(FieldDateOfIncorporation, v))
+}
+
+// RegistrationNumber applies equality check predicate on the "registration_number" field. It's identical to RegistrationNumberEQ.
+func RegistrationNumber(v string) predicate.Business {
+	return predicate.Business(sql.FieldEQ(FieldRegistrationNumber, v))
+}
+
 // Email applies equality check predicate on the "email" field. It's identical to EmailEQ.
 func Email(v string) predicate.Business {
 	return predicate.Business(sql.FieldEQ(FieldEmail, v))
@@ -110,9 +135,19 @@ func Website(v string) predicate.Business {
 	return predicate.Business(sql.FieldEQ(FieldWebsite, v))
 }
 
+// OnSite applies equality check predicate on the "on_site" field. It's identical to OnSiteEQ.
+func OnSite(v bool) predicate.Business {
+	return predicate.Business(sql.FieldEQ(FieldOnSite, v))
+}
+
 // Active applies equality check predicate on the "active" field. It's identical to ActiveEQ.
 func Active(v bool) predicate.Business {
 	return predicate.Business(sql.FieldEQ(FieldActive, v))
+}
+
+// Live applies equality check predicate on the "live" field. It's identical to LiveEQ.
+func Live(v bool) predicate.Business {
+	return predicate.Business(sql.FieldEQ(FieldLive, v))
 }
 
 // Disabled applies equality check predicate on the "disabled" field. It's identical to DisabledEQ.
@@ -455,16 +490,6 @@ func AboutHasSuffix(v string) predicate.Business {
 	return predicate.Business(sql.FieldHasSuffix(FieldAbout, v))
 }
 
-// AboutIsNil applies the IsNil predicate on the "about" field.
-func AboutIsNil() predicate.Business {
-	return predicate.Business(sql.FieldIsNull(FieldAbout))
-}
-
-// AboutNotNil applies the NotNil predicate on the "about" field.
-func AboutNotNil() predicate.Business {
-	return predicate.Business(sql.FieldNotNull(FieldAbout))
-}
-
 // AboutEqualFold applies the EqualFold predicate on the "about" field.
 func AboutEqualFold(v string) predicate.Business {
 	return predicate.Business(sql.FieldEqualFold(FieldAbout, v))
@@ -548,6 +573,381 @@ func LogoEqualFold(v string) predicate.Business {
 // LogoContainsFold applies the ContainsFold predicate on the "logo" field.
 func LogoContainsFold(v string) predicate.Business {
 	return predicate.Business(sql.FieldContainsFold(FieldLogo, v))
+}
+
+// CoverImageEQ applies the EQ predicate on the "cover_image" field.
+func CoverImageEQ(v string) predicate.Business {
+	return predicate.Business(sql.FieldEQ(FieldCoverImage, v))
+}
+
+// CoverImageNEQ applies the NEQ predicate on the "cover_image" field.
+func CoverImageNEQ(v string) predicate.Business {
+	return predicate.Business(sql.FieldNEQ(FieldCoverImage, v))
+}
+
+// CoverImageIn applies the In predicate on the "cover_image" field.
+func CoverImageIn(vs ...string) predicate.Business {
+	return predicate.Business(sql.FieldIn(FieldCoverImage, vs...))
+}
+
+// CoverImageNotIn applies the NotIn predicate on the "cover_image" field.
+func CoverImageNotIn(vs ...string) predicate.Business {
+	return predicate.Business(sql.FieldNotIn(FieldCoverImage, vs...))
+}
+
+// CoverImageGT applies the GT predicate on the "cover_image" field.
+func CoverImageGT(v string) predicate.Business {
+	return predicate.Business(sql.FieldGT(FieldCoverImage, v))
+}
+
+// CoverImageGTE applies the GTE predicate on the "cover_image" field.
+func CoverImageGTE(v string) predicate.Business {
+	return predicate.Business(sql.FieldGTE(FieldCoverImage, v))
+}
+
+// CoverImageLT applies the LT predicate on the "cover_image" field.
+func CoverImageLT(v string) predicate.Business {
+	return predicate.Business(sql.FieldLT(FieldCoverImage, v))
+}
+
+// CoverImageLTE applies the LTE predicate on the "cover_image" field.
+func CoverImageLTE(v string) predicate.Business {
+	return predicate.Business(sql.FieldLTE(FieldCoverImage, v))
+}
+
+// CoverImageContains applies the Contains predicate on the "cover_image" field.
+func CoverImageContains(v string) predicate.Business {
+	return predicate.Business(sql.FieldContains(FieldCoverImage, v))
+}
+
+// CoverImageHasPrefix applies the HasPrefix predicate on the "cover_image" field.
+func CoverImageHasPrefix(v string) predicate.Business {
+	return predicate.Business(sql.FieldHasPrefix(FieldCoverImage, v))
+}
+
+// CoverImageHasSuffix applies the HasSuffix predicate on the "cover_image" field.
+func CoverImageHasSuffix(v string) predicate.Business {
+	return predicate.Business(sql.FieldHasSuffix(FieldCoverImage, v))
+}
+
+// CoverImageIsNil applies the IsNil predicate on the "cover_image" field.
+func CoverImageIsNil() predicate.Business {
+	return predicate.Business(sql.FieldIsNull(FieldCoverImage))
+}
+
+// CoverImageNotNil applies the NotNil predicate on the "cover_image" field.
+func CoverImageNotNil() predicate.Business {
+	return predicate.Business(sql.FieldNotNull(FieldCoverImage))
+}
+
+// CoverImageEqualFold applies the EqualFold predicate on the "cover_image" field.
+func CoverImageEqualFold(v string) predicate.Business {
+	return predicate.Business(sql.FieldEqualFold(FieldCoverImage, v))
+}
+
+// CoverImageContainsFold applies the ContainsFold predicate on the "cover_image" field.
+func CoverImageContainsFold(v string) predicate.Business {
+	return predicate.Business(sql.FieldContainsFold(FieldCoverImage, v))
+}
+
+// RegisteredByEQ applies the EQ predicate on the "registered_by" field.
+func RegisteredByEQ(v string) predicate.Business {
+	return predicate.Business(sql.FieldEQ(FieldRegisteredBy, v))
+}
+
+// RegisteredByNEQ applies the NEQ predicate on the "registered_by" field.
+func RegisteredByNEQ(v string) predicate.Business {
+	return predicate.Business(sql.FieldNEQ(FieldRegisteredBy, v))
+}
+
+// RegisteredByIn applies the In predicate on the "registered_by" field.
+func RegisteredByIn(vs ...string) predicate.Business {
+	return predicate.Business(sql.FieldIn(FieldRegisteredBy, vs...))
+}
+
+// RegisteredByNotIn applies the NotIn predicate on the "registered_by" field.
+func RegisteredByNotIn(vs ...string) predicate.Business {
+	return predicate.Business(sql.FieldNotIn(FieldRegisteredBy, vs...))
+}
+
+// RegisteredByGT applies the GT predicate on the "registered_by" field.
+func RegisteredByGT(v string) predicate.Business {
+	return predicate.Business(sql.FieldGT(FieldRegisteredBy, v))
+}
+
+// RegisteredByGTE applies the GTE predicate on the "registered_by" field.
+func RegisteredByGTE(v string) predicate.Business {
+	return predicate.Business(sql.FieldGTE(FieldRegisteredBy, v))
+}
+
+// RegisteredByLT applies the LT predicate on the "registered_by" field.
+func RegisteredByLT(v string) predicate.Business {
+	return predicate.Business(sql.FieldLT(FieldRegisteredBy, v))
+}
+
+// RegisteredByLTE applies the LTE predicate on the "registered_by" field.
+func RegisteredByLTE(v string) predicate.Business {
+	return predicate.Business(sql.FieldLTE(FieldRegisteredBy, v))
+}
+
+// RegisteredByContains applies the Contains predicate on the "registered_by" field.
+func RegisteredByContains(v string) predicate.Business {
+	return predicate.Business(sql.FieldContains(FieldRegisteredBy, v))
+}
+
+// RegisteredByHasPrefix applies the HasPrefix predicate on the "registered_by" field.
+func RegisteredByHasPrefix(v string) predicate.Business {
+	return predicate.Business(sql.FieldHasPrefix(FieldRegisteredBy, v))
+}
+
+// RegisteredByHasSuffix applies the HasSuffix predicate on the "registered_by" field.
+func RegisteredByHasSuffix(v string) predicate.Business {
+	return predicate.Business(sql.FieldHasSuffix(FieldRegisteredBy, v))
+}
+
+// RegisteredByIsNil applies the IsNil predicate on the "registered_by" field.
+func RegisteredByIsNil() predicate.Business {
+	return predicate.Business(sql.FieldIsNull(FieldRegisteredBy))
+}
+
+// RegisteredByNotNil applies the NotNil predicate on the "registered_by" field.
+func RegisteredByNotNil() predicate.Business {
+	return predicate.Business(sql.FieldNotNull(FieldRegisteredBy))
+}
+
+// RegisteredByEqualFold applies the EqualFold predicate on the "registered_by" field.
+func RegisteredByEqualFold(v string) predicate.Business {
+	return predicate.Business(sql.FieldEqualFold(FieldRegisteredBy, v))
+}
+
+// RegisteredByContainsFold applies the ContainsFold predicate on the "registered_by" field.
+func RegisteredByContainsFold(v string) predicate.Business {
+	return predicate.Business(sql.FieldContainsFold(FieldRegisteredBy, v))
+}
+
+// CountryOfIncorporationEQ applies the EQ predicate on the "country_of_incorporation" field.
+func CountryOfIncorporationEQ(v string) predicate.Business {
+	return predicate.Business(sql.FieldEQ(FieldCountryOfIncorporation, v))
+}
+
+// CountryOfIncorporationNEQ applies the NEQ predicate on the "country_of_incorporation" field.
+func CountryOfIncorporationNEQ(v string) predicate.Business {
+	return predicate.Business(sql.FieldNEQ(FieldCountryOfIncorporation, v))
+}
+
+// CountryOfIncorporationIn applies the In predicate on the "country_of_incorporation" field.
+func CountryOfIncorporationIn(vs ...string) predicate.Business {
+	return predicate.Business(sql.FieldIn(FieldCountryOfIncorporation, vs...))
+}
+
+// CountryOfIncorporationNotIn applies the NotIn predicate on the "country_of_incorporation" field.
+func CountryOfIncorporationNotIn(vs ...string) predicate.Business {
+	return predicate.Business(sql.FieldNotIn(FieldCountryOfIncorporation, vs...))
+}
+
+// CountryOfIncorporationGT applies the GT predicate on the "country_of_incorporation" field.
+func CountryOfIncorporationGT(v string) predicate.Business {
+	return predicate.Business(sql.FieldGT(FieldCountryOfIncorporation, v))
+}
+
+// CountryOfIncorporationGTE applies the GTE predicate on the "country_of_incorporation" field.
+func CountryOfIncorporationGTE(v string) predicate.Business {
+	return predicate.Business(sql.FieldGTE(FieldCountryOfIncorporation, v))
+}
+
+// CountryOfIncorporationLT applies the LT predicate on the "country_of_incorporation" field.
+func CountryOfIncorporationLT(v string) predicate.Business {
+	return predicate.Business(sql.FieldLT(FieldCountryOfIncorporation, v))
+}
+
+// CountryOfIncorporationLTE applies the LTE predicate on the "country_of_incorporation" field.
+func CountryOfIncorporationLTE(v string) predicate.Business {
+	return predicate.Business(sql.FieldLTE(FieldCountryOfIncorporation, v))
+}
+
+// CountryOfIncorporationContains applies the Contains predicate on the "country_of_incorporation" field.
+func CountryOfIncorporationContains(v string) predicate.Business {
+	return predicate.Business(sql.FieldContains(FieldCountryOfIncorporation, v))
+}
+
+// CountryOfIncorporationHasPrefix applies the HasPrefix predicate on the "country_of_incorporation" field.
+func CountryOfIncorporationHasPrefix(v string) predicate.Business {
+	return predicate.Business(sql.FieldHasPrefix(FieldCountryOfIncorporation, v))
+}
+
+// CountryOfIncorporationHasSuffix applies the HasSuffix predicate on the "country_of_incorporation" field.
+func CountryOfIncorporationHasSuffix(v string) predicate.Business {
+	return predicate.Business(sql.FieldHasSuffix(FieldCountryOfIncorporation, v))
+}
+
+// CountryOfIncorporationIsNil applies the IsNil predicate on the "country_of_incorporation" field.
+func CountryOfIncorporationIsNil() predicate.Business {
+	return predicate.Business(sql.FieldIsNull(FieldCountryOfIncorporation))
+}
+
+// CountryOfIncorporationNotNil applies the NotNil predicate on the "country_of_incorporation" field.
+func CountryOfIncorporationNotNil() predicate.Business {
+	return predicate.Business(sql.FieldNotNull(FieldCountryOfIncorporation))
+}
+
+// CountryOfIncorporationEqualFold applies the EqualFold predicate on the "country_of_incorporation" field.
+func CountryOfIncorporationEqualFold(v string) predicate.Business {
+	return predicate.Business(sql.FieldEqualFold(FieldCountryOfIncorporation, v))
+}
+
+// CountryOfIncorporationContainsFold applies the ContainsFold predicate on the "country_of_incorporation" field.
+func CountryOfIncorporationContainsFold(v string) predicate.Business {
+	return predicate.Business(sql.FieldContainsFold(FieldCountryOfIncorporation, v))
+}
+
+// DateOfIncorporationEQ applies the EQ predicate on the "date_of_incorporation" field.
+func DateOfIncorporationEQ(v string) predicate.Business {
+	return predicate.Business(sql.FieldEQ(FieldDateOfIncorporation, v))
+}
+
+// DateOfIncorporationNEQ applies the NEQ predicate on the "date_of_incorporation" field.
+func DateOfIncorporationNEQ(v string) predicate.Business {
+	return predicate.Business(sql.FieldNEQ(FieldDateOfIncorporation, v))
+}
+
+// DateOfIncorporationIn applies the In predicate on the "date_of_incorporation" field.
+func DateOfIncorporationIn(vs ...string) predicate.Business {
+	return predicate.Business(sql.FieldIn(FieldDateOfIncorporation, vs...))
+}
+
+// DateOfIncorporationNotIn applies the NotIn predicate on the "date_of_incorporation" field.
+func DateOfIncorporationNotIn(vs ...string) predicate.Business {
+	return predicate.Business(sql.FieldNotIn(FieldDateOfIncorporation, vs...))
+}
+
+// DateOfIncorporationGT applies the GT predicate on the "date_of_incorporation" field.
+func DateOfIncorporationGT(v string) predicate.Business {
+	return predicate.Business(sql.FieldGT(FieldDateOfIncorporation, v))
+}
+
+// DateOfIncorporationGTE applies the GTE predicate on the "date_of_incorporation" field.
+func DateOfIncorporationGTE(v string) predicate.Business {
+	return predicate.Business(sql.FieldGTE(FieldDateOfIncorporation, v))
+}
+
+// DateOfIncorporationLT applies the LT predicate on the "date_of_incorporation" field.
+func DateOfIncorporationLT(v string) predicate.Business {
+	return predicate.Business(sql.FieldLT(FieldDateOfIncorporation, v))
+}
+
+// DateOfIncorporationLTE applies the LTE predicate on the "date_of_incorporation" field.
+func DateOfIncorporationLTE(v string) predicate.Business {
+	return predicate.Business(sql.FieldLTE(FieldDateOfIncorporation, v))
+}
+
+// DateOfIncorporationContains applies the Contains predicate on the "date_of_incorporation" field.
+func DateOfIncorporationContains(v string) predicate.Business {
+	return predicate.Business(sql.FieldContains(FieldDateOfIncorporation, v))
+}
+
+// DateOfIncorporationHasPrefix applies the HasPrefix predicate on the "date_of_incorporation" field.
+func DateOfIncorporationHasPrefix(v string) predicate.Business {
+	return predicate.Business(sql.FieldHasPrefix(FieldDateOfIncorporation, v))
+}
+
+// DateOfIncorporationHasSuffix applies the HasSuffix predicate on the "date_of_incorporation" field.
+func DateOfIncorporationHasSuffix(v string) predicate.Business {
+	return predicate.Business(sql.FieldHasSuffix(FieldDateOfIncorporation, v))
+}
+
+// DateOfIncorporationIsNil applies the IsNil predicate on the "date_of_incorporation" field.
+func DateOfIncorporationIsNil() predicate.Business {
+	return predicate.Business(sql.FieldIsNull(FieldDateOfIncorporation))
+}
+
+// DateOfIncorporationNotNil applies the NotNil predicate on the "date_of_incorporation" field.
+func DateOfIncorporationNotNil() predicate.Business {
+	return predicate.Business(sql.FieldNotNull(FieldDateOfIncorporation))
+}
+
+// DateOfIncorporationEqualFold applies the EqualFold predicate on the "date_of_incorporation" field.
+func DateOfIncorporationEqualFold(v string) predicate.Business {
+	return predicate.Business(sql.FieldEqualFold(FieldDateOfIncorporation, v))
+}
+
+// DateOfIncorporationContainsFold applies the ContainsFold predicate on the "date_of_incorporation" field.
+func DateOfIncorporationContainsFold(v string) predicate.Business {
+	return predicate.Business(sql.FieldContainsFold(FieldDateOfIncorporation, v))
+}
+
+// RegistrationNumberEQ applies the EQ predicate on the "registration_number" field.
+func RegistrationNumberEQ(v string) predicate.Business {
+	return predicate.Business(sql.FieldEQ(FieldRegistrationNumber, v))
+}
+
+// RegistrationNumberNEQ applies the NEQ predicate on the "registration_number" field.
+func RegistrationNumberNEQ(v string) predicate.Business {
+	return predicate.Business(sql.FieldNEQ(FieldRegistrationNumber, v))
+}
+
+// RegistrationNumberIn applies the In predicate on the "registration_number" field.
+func RegistrationNumberIn(vs ...string) predicate.Business {
+	return predicate.Business(sql.FieldIn(FieldRegistrationNumber, vs...))
+}
+
+// RegistrationNumberNotIn applies the NotIn predicate on the "registration_number" field.
+func RegistrationNumberNotIn(vs ...string) predicate.Business {
+	return predicate.Business(sql.FieldNotIn(FieldRegistrationNumber, vs...))
+}
+
+// RegistrationNumberGT applies the GT predicate on the "registration_number" field.
+func RegistrationNumberGT(v string) predicate.Business {
+	return predicate.Business(sql.FieldGT(FieldRegistrationNumber, v))
+}
+
+// RegistrationNumberGTE applies the GTE predicate on the "registration_number" field.
+func RegistrationNumberGTE(v string) predicate.Business {
+	return predicate.Business(sql.FieldGTE(FieldRegistrationNumber, v))
+}
+
+// RegistrationNumberLT applies the LT predicate on the "registration_number" field.
+func RegistrationNumberLT(v string) predicate.Business {
+	return predicate.Business(sql.FieldLT(FieldRegistrationNumber, v))
+}
+
+// RegistrationNumberLTE applies the LTE predicate on the "registration_number" field.
+func RegistrationNumberLTE(v string) predicate.Business {
+	return predicate.Business(sql.FieldLTE(FieldRegistrationNumber, v))
+}
+
+// RegistrationNumberContains applies the Contains predicate on the "registration_number" field.
+func RegistrationNumberContains(v string) predicate.Business {
+	return predicate.Business(sql.FieldContains(FieldRegistrationNumber, v))
+}
+
+// RegistrationNumberHasPrefix applies the HasPrefix predicate on the "registration_number" field.
+func RegistrationNumberHasPrefix(v string) predicate.Business {
+	return predicate.Business(sql.FieldHasPrefix(FieldRegistrationNumber, v))
+}
+
+// RegistrationNumberHasSuffix applies the HasSuffix predicate on the "registration_number" field.
+func RegistrationNumberHasSuffix(v string) predicate.Business {
+	return predicate.Business(sql.FieldHasSuffix(FieldRegistrationNumber, v))
+}
+
+// RegistrationNumberIsNil applies the IsNil predicate on the "registration_number" field.
+func RegistrationNumberIsNil() predicate.Business {
+	return predicate.Business(sql.FieldIsNull(FieldRegistrationNumber))
+}
+
+// RegistrationNumberNotNil applies the NotNil predicate on the "registration_number" field.
+func RegistrationNumberNotNil() predicate.Business {
+	return predicate.Business(sql.FieldNotNull(FieldRegistrationNumber))
+}
+
+// RegistrationNumberEqualFold applies the EqualFold predicate on the "registration_number" field.
+func RegistrationNumberEqualFold(v string) predicate.Business {
+	return predicate.Business(sql.FieldEqualFold(FieldRegistrationNumber, v))
+}
+
+// RegistrationNumberContainsFold applies the ContainsFold predicate on the "registration_number" field.
+func RegistrationNumberContainsFold(v string) predicate.Business {
+	return predicate.Business(sql.FieldContainsFold(FieldRegistrationNumber, v))
 }
 
 // EmailEQ applies the EQ predicate on the "email" field.
@@ -690,6 +1090,16 @@ func WebsiteContainsFold(v string) predicate.Business {
 	return predicate.Business(sql.FieldContainsFold(FieldWebsite, v))
 }
 
+// OnSiteEQ applies the EQ predicate on the "on_site" field.
+func OnSiteEQ(v bool) predicate.Business {
+	return predicate.Business(sql.FieldEQ(FieldOnSite, v))
+}
+
+// OnSiteNEQ applies the NEQ predicate on the "on_site" field.
+func OnSiteNEQ(v bool) predicate.Business {
+	return predicate.Business(sql.FieldNEQ(FieldOnSite, v))
+}
+
 // ActiveEQ applies the EQ predicate on the "active" field.
 func ActiveEQ(v bool) predicate.Business {
 	return predicate.Business(sql.FieldEQ(FieldActive, v))
@@ -698,6 +1108,16 @@ func ActiveEQ(v bool) predicate.Business {
 // ActiveNEQ applies the NEQ predicate on the "active" field.
 func ActiveNEQ(v bool) predicate.Business {
 	return predicate.Business(sql.FieldNEQ(FieldActive, v))
+}
+
+// LiveEQ applies the EQ predicate on the "live" field.
+func LiveEQ(v bool) predicate.Business {
+	return predicate.Business(sql.FieldEQ(FieldLive, v))
+}
+
+// LiveNEQ applies the NEQ predicate on the "live" field.
+func LiveNEQ(v bool) predicate.Business {
+	return predicate.Business(sql.FieldNEQ(FieldLive, v))
 }
 
 // DisabledEQ applies the EQ predicate on the "disabled" field.
@@ -823,6 +1243,26 @@ func DisableReasonEqualFold(v string) predicate.Business {
 // DisableReasonContainsFold applies the ContainsFold predicate on the "disable_reason" field.
 func DisableReasonContainsFold(v string) predicate.Business {
 	return predicate.Business(sql.FieldContainsFold(FieldDisableReason, v))
+}
+
+// VerificationStatusEQ applies the EQ predicate on the "verification_status" field.
+func VerificationStatusEQ(v VerificationStatus) predicate.Business {
+	return predicate.Business(sql.FieldEQ(FieldVerificationStatus, v))
+}
+
+// VerificationStatusNEQ applies the NEQ predicate on the "verification_status" field.
+func VerificationStatusNEQ(v VerificationStatus) predicate.Business {
+	return predicate.Business(sql.FieldNEQ(FieldVerificationStatus, v))
+}
+
+// VerificationStatusIn applies the In predicate on the "verification_status" field.
+func VerificationStatusIn(vs ...VerificationStatus) predicate.Business {
+	return predicate.Business(sql.FieldIn(FieldVerificationStatus, vs...))
+}
+
+// VerificationStatusNotIn applies the NotIn predicate on the "verification_status" field.
+func VerificationStatusNotIn(vs ...VerificationStatus) predicate.Business {
+	return predicate.Business(sql.FieldNotIn(FieldVerificationStatus, vs...))
 }
 
 // VerifiedEQ applies the EQ predicate on the "verified" field.
@@ -954,6 +1394,29 @@ func HasManagesWith(preds ...predicate.Manager) predicate.Business {
 	})
 }
 
+// HasRegisteredByUser applies the HasEdge predicate on the "registered_by_user" edge.
+func HasRegisteredByUser() predicate.Business {
+	return predicate.Business(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, RegisteredByUserTable, RegisteredByUserColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasRegisteredByUserWith applies the HasEdge predicate on the "registered_by_user" edge with a given conditions (other predicates).
+func HasRegisteredByUserWith(preds ...predicate.User) predicate.Business {
+	return predicate.Business(func(s *sql.Selector) {
+		step := newRegisteredByUserStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
 // HasVerifications applies the HasEdge predicate on the "verifications" edge.
 func HasVerifications() predicate.Business {
 	return predicate.Business(func(s *sql.Selector) {
@@ -1015,6 +1478,52 @@ func HasBusinessDocuments() predicate.Business {
 func HasBusinessDocumentsWith(preds ...predicate.BusinessDocument) predicate.Business {
 	return predicate.Business(func(s *sql.Selector) {
 		step := newBusinessDocumentsStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasLocations applies the HasEdge predicate on the "locations" edge.
+func HasLocations() predicate.Business {
+	return predicate.Business(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, LocationsTable, LocationsColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasLocationsWith applies the HasEdge predicate on the "locations" edge with a given conditions (other predicates).
+func HasLocationsWith(preds ...predicate.BusinessLocation) predicate.Business {
+	return predicate.Business(func(s *sql.Selector) {
+		step := newLocationsStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasKybMessages applies the HasEdge predicate on the "kyb_messages" edge.
+func HasKybMessages() predicate.Business {
+	return predicate.Business(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, KybMessagesTable, KybMessagesColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasKybMessagesWith applies the HasEdge predicate on the "kyb_messages" edge with a given conditions (other predicates).
+func HasKybMessagesWith(preds ...predicate.KYBMessage) predicate.Business {
+	return predicate.Business(func(s *sql.Selector) {
+		step := newKybMessagesStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)

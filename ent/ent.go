@@ -15,12 +15,16 @@ import (
 	"github.com/Toflex/directory_v2/ent/business"
 	"github.com/Toflex/directory_v2/ent/businessdocument"
 	"github.com/Toflex/directory_v2/ent/businessfeature"
+	"github.com/Toflex/directory_v2/ent/businesslocation"
 	"github.com/Toflex/directory_v2/ent/businessservices"
+	"github.com/Toflex/directory_v2/ent/kybdocument"
+	"github.com/Toflex/directory_v2/ent/kybmessage"
 	"github.com/Toflex/directory_v2/ent/manager"
 	"github.com/Toflex/directory_v2/ent/permission"
 	"github.com/Toflex/directory_v2/ent/provider"
 	"github.com/Toflex/directory_v2/ent/requestverification"
 	"github.com/Toflex/directory_v2/ent/role"
+	"github.com/Toflex/directory_v2/ent/rolepermission"
 	"github.com/Toflex/directory_v2/ent/service"
 	"github.com/Toflex/directory_v2/ent/social"
 	"github.com/Toflex/directory_v2/ent/user"
@@ -89,12 +93,16 @@ func checkColumn(table, column string) error {
 			business.Table:            business.ValidColumn,
 			businessdocument.Table:    businessdocument.ValidColumn,
 			businessfeature.Table:     businessfeature.ValidColumn,
+			businesslocation.Table:    businesslocation.ValidColumn,
 			businessservices.Table:    businessservices.ValidColumn,
+			kybdocument.Table:         kybdocument.ValidColumn,
+			kybmessage.Table:          kybmessage.ValidColumn,
 			manager.Table:             manager.ValidColumn,
 			permission.Table:          permission.ValidColumn,
 			provider.Table:            provider.ValidColumn,
 			requestverification.Table: requestverification.ValidColumn,
 			role.Table:                role.ValidColumn,
+			rolepermission.Table:      rolepermission.ValidColumn,
 			service.Table:             service.ValidColumn,
 			social.Table:              social.ValidColumn,
 			user.Table:                user.ValidColumn,

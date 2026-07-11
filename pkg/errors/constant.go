@@ -12,4 +12,5 @@ const (
 	ErrFailed          ErrorCode = "REQUEST FAILED"
 	ErrTooManyRequests ErrorCode = "TOO MANY REQUESTS"
 	ErrInputRequired   ErrorCode = "INPUT REQUIRED"
+	ErrUnauthorized    ErrorCode = "UNAUTHORIZED"
 )

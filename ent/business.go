@@ -10,6 +10,7 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"github.com/Toflex/directory_v2/ent/business"
+	"github.com/Toflex/directory_v2/ent/user"
 )
 
 // Business is the model entity for the Business schema.
@@ -31,18 +32,34 @@ type Business struct {
 	About string `json:"about,omitempty"`
 	// Logo holds the value of the "logo" field.
 	Logo string `json:"logo,omitempty"`
+	// CoverImage holds the value of the "cover_image" field.
+	CoverImage string `json:"cover_image,omitempty"`
+	// RegisteredBy holds the value of the "registered_by" field.
+	RegisteredBy *string `json:"registered_by,omitempty"`
+	// CountryOfIncorporation holds the value of the "country_of_incorporation" field.
+	CountryOfIncorporation *string `json:"country_of_incorporation,omitempty"`
+	// DateOfIncorporation holds the value of the "date_of_incorporation" field.
+	DateOfIncorporation *string `json:"date_of_incorporation,omitempty"`
+	// RegistrationNumber holds the value of the "registration_number" field.
+	RegistrationNumber *string `json:"registration_number,omitempty"`
 	// Email holds the value of the "email" field.
 	Email string `json:"email,omitempty"`
 	// Website holds the value of the "website" field.
 	Website string `json:"website,omitempty"`
+	// OnSite holds the value of the "on_site" field.
+	OnSite bool `json:"on_site,omitempty"`
 	// Active holds the value of the "active" field.
 	Active bool `json:"active,omitempty"`
+	// Live holds the value of the "live" field.
+	Live bool `json:"live,omitempty"`
 	// Disabled holds the value of the "disabled" field.
 	Disabled bool `json:"disabled,omitempty"`
 	// DisabledAt holds the value of the "disabled_at" field.
 	DisabledAt time.Time `json:"disabled_at,omitempty"`
 	// DisableReason holds the value of the "disable_reason" field.
 	DisableReason string `json:"disable_reason,omitempty"`
+	// VerificationStatus holds the value of the "verification_status" field.
+	VerificationStatus business.VerificationStatus `json:"verification_status,omitempty"`
 	// Verified holds the value of the "verified" field.
 	Verified bool `json:"verified,omitempty"`
 	// VerifiedAt holds the value of the "verified_at" field.
@@ -61,15 +78,21 @@ type BusinessEdges struct {
 	Services []*BusinessServices `json:"services,omitempty"`
 	// Manages holds the value of the manages edge.
 	Manages []*Manager `json:"manages,omitempty"`
+	// RegisteredByUser holds the value of the registered_by_user edge.
+	RegisteredByUser *User `json:"registered_by_user,omitempty"`
 	// Verifications holds the value of the verifications edge.
 	Verifications []*Verification `json:"verifications,omitempty"`
 	// RequestVerifications holds the value of the request_verifications edge.
 	RequestVerifications []*RequestVerification `json:"request_verifications,omitempty"`
 	// BusinessDocuments holds the value of the business_documents edge.
 	BusinessDocuments []*BusinessDocument `json:"business_documents,omitempty"`
+	// Locations holds the value of the locations edge.
+	Locations []*BusinessLocation `json:"locations,omitempty"`
+	// KybMessages holds the value of the kyb_messages edge.
+	KybMessages []*KYBMessage `json:"kyb_messages,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [6]bool
+	loadedTypes [9]bool
 }
 
 // SocialsOrErr returns the Socials value or an error if the edge
@@ -99,10 +122,21 @@ func (e BusinessEdges) ManagesOrErr() ([]*Manager, error) {
 	return nil, &NotLoadedError{edge: "manages"}
 }
 
+// RegisteredByUserOrErr returns the RegisteredByUser value or an error if the edge
+// was not loaded in eager-loading, or loaded but was not found.
+func (e BusinessEdges) RegisteredByUserOrErr() (*User, error) {
+	if e.RegisteredByUser != nil {
+		return e.RegisteredByUser, nil
+	} else if e.loadedTypes[3] {
+		return nil, &NotFoundError{label: user.Label}
+	}
+	return nil, &NotLoadedError{edge: "registered_by_user"}
+}
+
 // VerificationsOrErr returns the Verifications value or an error if the edge
 // was not loaded in eager-loading.
 func (e BusinessEdges) VerificationsOrErr() ([]*Verification, error) {
-	if e.loadedTypes[3] {
+	if e.loadedTypes[4] {
 		return e.Verifications, nil
 	}
 	return nil, &NotLoadedError{edge: "verifications"}
@@ -111,7 +145,7 @@ func (e BusinessEdges) VerificationsOrErr() ([]*Verification, error) {
 // RequestVerificationsOrErr returns the RequestVerifications value or an error if the edge
 // was not loaded in eager-loading.
 func (e BusinessEdges) RequestVerificationsOrErr() ([]*RequestVerification, error) {
-	if e.loadedTypes[4] {
+	if e.loadedTypes[5] {
 		return e.RequestVerifications, nil
 	}
 	return nil, &NotLoadedError{edge: "request_verifications"}
@@ -120,10 +154,28 @@ func (e BusinessEdges) RequestVerificationsOrErr() ([]*RequestVerification, erro
 // BusinessDocumentsOrErr returns the BusinessDocuments value or an error if the edge
 // was not loaded in eager-loading.
 func (e BusinessEdges) BusinessDocumentsOrErr() ([]*BusinessDocument, error) {
-	if e.loadedTypes[5] {
+	if e.loadedTypes[6] {
 		return e.BusinessDocuments, nil
 	}
 	return nil, &NotLoadedError{edge: "business_documents"}
+}
+
+// LocationsOrErr returns the Locations value or an error if the edge
+// was not loaded in eager-loading.
+func (e BusinessEdges) LocationsOrErr() ([]*BusinessLocation, error) {
+	if e.loadedTypes[7] {
+		return e.Locations, nil
+	}
+	return nil, &NotLoadedError{edge: "locations"}
+}
+
+// KybMessagesOrErr returns the KybMessages value or an error if the edge
+// was not loaded in eager-loading.
+func (e BusinessEdges) KybMessagesOrErr() ([]*KYBMessage, error) {
+	if e.loadedTypes[8] {
+		return e.KybMessages, nil
+	}
+	return nil, &NotLoadedError{edge: "kyb_messages"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -131,9 +183,9 @@ func (*Business) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case business.FieldActive, business.FieldDisabled, business.FieldVerified:
+		case business.FieldOnSite, business.FieldActive, business.FieldLive, business.FieldDisabled, business.FieldVerified:
 			values[i] = new(sql.NullBool)
-		case business.FieldID, business.FieldCategory, business.FieldName, business.FieldAbout, business.FieldLogo, business.FieldEmail, business.FieldWebsite, business.FieldDisableReason:
+		case business.FieldID, business.FieldCategory, business.FieldName, business.FieldAbout, business.FieldLogo, business.FieldCoverImage, business.FieldRegisteredBy, business.FieldCountryOfIncorporation, business.FieldDateOfIncorporation, business.FieldRegistrationNumber, business.FieldEmail, business.FieldWebsite, business.FieldDisableReason, business.FieldVerificationStatus:
 			values[i] = new(sql.NullString)
 		case business.FieldCreatedAt, business.FieldUpdatedAt, business.FieldDeletedAt, business.FieldDisabledAt, business.FieldVerifiedAt:
 			values[i] = new(sql.NullTime)
@@ -201,6 +253,40 @@ func (b *Business) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				b.Logo = value.String
 			}
+		case business.FieldCoverImage:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field cover_image", values[i])
+			} else if value.Valid {
+				b.CoverImage = value.String
+			}
+		case business.FieldRegisteredBy:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field registered_by", values[i])
+			} else if value.Valid {
+				b.RegisteredBy = new(string)
+				*b.RegisteredBy = value.String
+			}
+		case business.FieldCountryOfIncorporation:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field country_of_incorporation", values[i])
+			} else if value.Valid {
+				b.CountryOfIncorporation = new(string)
+				*b.CountryOfIncorporation = value.String
+			}
+		case business.FieldDateOfIncorporation:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field date_of_incorporation", values[i])
+			} else if value.Valid {
+				b.DateOfIncorporation = new(string)
+				*b.DateOfIncorporation = value.String
+			}
+		case business.FieldRegistrationNumber:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field registration_number", values[i])
+			} else if value.Valid {
+				b.RegistrationNumber = new(string)
+				*b.RegistrationNumber = value.String
+			}
 		case business.FieldEmail:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field email", values[i])
@@ -213,11 +299,23 @@ func (b *Business) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				b.Website = value.String
 			}
+		case business.FieldOnSite:
+			if value, ok := values[i].(*sql.NullBool); !ok {
+				return fmt.Errorf("unexpected type %T for field on_site", values[i])
+			} else if value.Valid {
+				b.OnSite = value.Bool
+			}
 		case business.FieldActive:
 			if value, ok := values[i].(*sql.NullBool); !ok {
 				return fmt.Errorf("unexpected type %T for field active", values[i])
 			} else if value.Valid {
 				b.Active = value.Bool
+			}
+		case business.FieldLive:
+			if value, ok := values[i].(*sql.NullBool); !ok {
+				return fmt.Errorf("unexpected type %T for field live", values[i])
+			} else if value.Valid {
+				b.Live = value.Bool
 			}
 		case business.FieldDisabled:
 			if value, ok := values[i].(*sql.NullBool); !ok {
@@ -236,6 +334,12 @@ func (b *Business) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field disable_reason", values[i])
 			} else if value.Valid {
 				b.DisableReason = value.String
+			}
+		case business.FieldVerificationStatus:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field verification_status", values[i])
+			} else if value.Valid {
+				b.VerificationStatus = business.VerificationStatus(value.String)
 			}
 		case business.FieldVerified:
 			if value, ok := values[i].(*sql.NullBool); !ok {
@@ -277,6 +381,11 @@ func (b *Business) QueryManages() *ManagerQuery {
 	return NewBusinessClient(b.config).QueryManages(b)
 }
 
+// QueryRegisteredByUser queries the "registered_by_user" edge of the Business entity.
+func (b *Business) QueryRegisteredByUser() *UserQuery {
+	return NewBusinessClient(b.config).QueryRegisteredByUser(b)
+}
+
 // QueryVerifications queries the "verifications" edge of the Business entity.
 func (b *Business) QueryVerifications() *VerificationQuery {
 	return NewBusinessClient(b.config).QueryVerifications(b)
@@ -290,6 +399,16 @@ func (b *Business) QueryRequestVerifications() *RequestVerificationQuery {
 // QueryBusinessDocuments queries the "business_documents" edge of the Business entity.
 func (b *Business) QueryBusinessDocuments() *BusinessDocumentQuery {
 	return NewBusinessClient(b.config).QueryBusinessDocuments(b)
+}
+
+// QueryLocations queries the "locations" edge of the Business entity.
+func (b *Business) QueryLocations() *BusinessLocationQuery {
+	return NewBusinessClient(b.config).QueryLocations(b)
+}
+
+// QueryKybMessages queries the "kyb_messages" edge of the Business entity.
+func (b *Business) QueryKybMessages() *KYBMessageQuery {
+	return NewBusinessClient(b.config).QueryKybMessages(b)
 }
 
 // Update returns a builder for updating this Business.
@@ -338,14 +457,43 @@ func (b *Business) String() string {
 	builder.WriteString("logo=")
 	builder.WriteString(b.Logo)
 	builder.WriteString(", ")
+	builder.WriteString("cover_image=")
+	builder.WriteString(b.CoverImage)
+	builder.WriteString(", ")
+	if v := b.RegisteredBy; v != nil {
+		builder.WriteString("registered_by=")
+		builder.WriteString(*v)
+	}
+	builder.WriteString(", ")
+	if v := b.CountryOfIncorporation; v != nil {
+		builder.WriteString("country_of_incorporation=")
+		builder.WriteString(*v)
+	}
+	builder.WriteString(", ")
+	if v := b.DateOfIncorporation; v != nil {
+		builder.WriteString("date_of_incorporation=")
+		builder.WriteString(*v)
+	}
+	builder.WriteString(", ")
+	if v := b.RegistrationNumber; v != nil {
+		builder.WriteString("registration_number=")
+		builder.WriteString(*v)
+	}
+	builder.WriteString(", ")
 	builder.WriteString("email=")
 	builder.WriteString(b.Email)
 	builder.WriteString(", ")
 	builder.WriteString("website=")
 	builder.WriteString(b.Website)
 	builder.WriteString(", ")
+	builder.WriteString("on_site=")
+	builder.WriteString(fmt.Sprintf("%v", b.OnSite))
+	builder.WriteString(", ")
 	builder.WriteString("active=")
 	builder.WriteString(fmt.Sprintf("%v", b.Active))
+	builder.WriteString(", ")
+	builder.WriteString("live=")
+	builder.WriteString(fmt.Sprintf("%v", b.Live))
 	builder.WriteString(", ")
 	builder.WriteString("disabled=")
 	builder.WriteString(fmt.Sprintf("%v", b.Disabled))
@@ -355,6 +503,9 @@ func (b *Business) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("disable_reason=")
 	builder.WriteString(b.DisableReason)
+	builder.WriteString(", ")
+	builder.WriteString("verification_status=")
+	builder.WriteString(fmt.Sprintf("%v", b.VerificationStatus))
 	builder.WriteString(", ")
 	builder.WriteString("verified=")
 	builder.WriteString(fmt.Sprintf("%v", b.Verified))

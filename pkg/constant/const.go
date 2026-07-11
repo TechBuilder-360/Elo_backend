@@ -12,6 +12,7 @@ const (
 	TaskTypeOTPEmail             string = "email:otp"
 	TaskTypeIdentityVerification string = "identity:verification"
 	TaskUserVerification         string = "user:verification"
+	TaskKYBDocument              string = "kyb:document"
 )
 
 // Verification Types
@@ -24,4 +25,10 @@ const (
 	Success types.VerificationStatus = "SUCCESS"
 	Failed  types.VerificationStatus = "FAILED"
 	Pending types.VerificationStatus = "PENDING"
+)
+
+const (
+	PDF  types.DocumentType = "pdf"
+	JPEG types.DocumentType = "jpeg"
+	JPG  types.DocumentType = "jpg"
 )

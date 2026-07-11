@@ -18,13 +18,13 @@ type IService interface {
 type Service struct {
 	db             *ent.Client
 	serviceLocator provider.IService
-	cloudinary     cloudinary.Cloud
+	cloudinary     *cloudinary.Cloud
 }
 
 func NewService() IService {
 	return &Service{
 		db:             database.DBInstance(),
 		serviceLocator: provider.NewService(),
-		cloudinary:     *cloudinary.New(),
+		cloudinary:     cloudinary.New(),
 	}
 }

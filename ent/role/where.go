@@ -350,21 +350,44 @@ func DescriptionContainsFold(v string) predicate.Role {
 	return predicate.Role(sql.FieldContainsFold(FieldDescription, v))
 }
 
-// HasPermissions applies the HasEdge predicate on the "permissions" edge.
-func HasPermissions() predicate.Role {
+// HasRolePermissions applies the HasEdge predicate on the "role_permissions" edge.
+func HasRolePermissions() predicate.Role {
 	return predicate.Role(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.M2M, false, PermissionsTable, PermissionsPrimaryKey...),
+			sqlgraph.Edge(sqlgraph.O2M, false, RolePermissionsTable, RolePermissionsColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})
 }
 
-// HasPermissionsWith applies the HasEdge predicate on the "permissions" edge with a given conditions (other predicates).
-func HasPermissionsWith(preds ...predicate.Permission) predicate.Role {
+// HasRolePermissionsWith applies the HasEdge predicate on the "role_permissions" edge with a given conditions (other predicates).
+func HasRolePermissionsWith(preds ...predicate.RolePermission) predicate.Role {
 	return predicate.Role(func(s *sql.Selector) {
-		step := newPermissionsStep()
+		step := newRolePermissionsStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasManagers applies the HasEdge predicate on the "managers" edge.
+func HasManagers() predicate.Role {
+	return predicate.Role(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, ManagersTable, ManagersColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasManagersWith applies the HasEdge predicate on the "managers" edge with a given conditions (other predicates).
+func HasManagersWith(preds ...predicate.Manager) predicate.Role {
+	return predicate.Role(func(s *sql.Selector) {
+		step := newManagersStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)

@@ -85,6 +85,11 @@ func Provider(v string) predicate.Verification {
 	return predicate.Verification(sql.FieldEQ(FieldProvider, v))
 }
 
+// Number applies equality check predicate on the "number" field. It's identical to NumberEQ.
+func Number(v string) predicate.Verification {
+	return predicate.Verification(sql.FieldEQ(FieldNumber, v))
+}
+
 // ReferenceID applies equality check predicate on the "reference_id" field. It's identical to ReferenceIDEQ.
 func ReferenceID(v string) predicate.Verification {
 	return predicate.Verification(sql.FieldEQ(FieldReferenceID, v))
@@ -338,6 +343,81 @@ func StatusIn(vs ...Status) predicate.Verification {
 // StatusNotIn applies the NotIn predicate on the "status" field.
 func StatusNotIn(vs ...Status) predicate.Verification {
 	return predicate.Verification(sql.FieldNotIn(FieldStatus, vs...))
+}
+
+// NumberEQ applies the EQ predicate on the "number" field.
+func NumberEQ(v string) predicate.Verification {
+	return predicate.Verification(sql.FieldEQ(FieldNumber, v))
+}
+
+// NumberNEQ applies the NEQ predicate on the "number" field.
+func NumberNEQ(v string) predicate.Verification {
+	return predicate.Verification(sql.FieldNEQ(FieldNumber, v))
+}
+
+// NumberIn applies the In predicate on the "number" field.
+func NumberIn(vs ...string) predicate.Verification {
+	return predicate.Verification(sql.FieldIn(FieldNumber, vs...))
+}
+
+// NumberNotIn applies the NotIn predicate on the "number" field.
+func NumberNotIn(vs ...string) predicate.Verification {
+	return predicate.Verification(sql.FieldNotIn(FieldNumber, vs...))
+}
+
+// NumberGT applies the GT predicate on the "number" field.
+func NumberGT(v string) predicate.Verification {
+	return predicate.Verification(sql.FieldGT(FieldNumber, v))
+}
+
+// NumberGTE applies the GTE predicate on the "number" field.
+func NumberGTE(v string) predicate.Verification {
+	return predicate.Verification(sql.FieldGTE(FieldNumber, v))
+}
+
+// NumberLT applies the LT predicate on the "number" field.
+func NumberLT(v string) predicate.Verification {
+	return predicate.Verification(sql.FieldLT(FieldNumber, v))
+}
+
+// NumberLTE applies the LTE predicate on the "number" field.
+func NumberLTE(v string) predicate.Verification {
+	return predicate.Verification(sql.FieldLTE(FieldNumber, v))
+}
+
+// NumberContains applies the Contains predicate on the "number" field.
+func NumberContains(v string) predicate.Verification {
+	return predicate.Verification(sql.FieldContains(FieldNumber, v))
+}
+
+// NumberHasPrefix applies the HasPrefix predicate on the "number" field.
+func NumberHasPrefix(v string) predicate.Verification {
+	return predicate.Verification(sql.FieldHasPrefix(FieldNumber, v))
+}
+
+// NumberHasSuffix applies the HasSuffix predicate on the "number" field.
+func NumberHasSuffix(v string) predicate.Verification {
+	return predicate.Verification(sql.FieldHasSuffix(FieldNumber, v))
+}
+
+// NumberIsNil applies the IsNil predicate on the "number" field.
+func NumberIsNil() predicate.Verification {
+	return predicate.Verification(sql.FieldIsNull(FieldNumber))
+}
+
+// NumberNotNil applies the NotNil predicate on the "number" field.
+func NumberNotNil() predicate.Verification {
+	return predicate.Verification(sql.FieldNotNull(FieldNumber))
+}
+
+// NumberEqualFold applies the EqualFold predicate on the "number" field.
+func NumberEqualFold(v string) predicate.Verification {
+	return predicate.Verification(sql.FieldEqualFold(FieldNumber, v))
+}
+
+// NumberContainsFold applies the ContainsFold predicate on the "number" field.
+func NumberContainsFold(v string) predicate.Verification {
+	return predicate.Verification(sql.FieldContainsFold(FieldNumber, v))
 }
 
 // ReferenceIDEQ applies the EQ predicate on the "reference_id" field.

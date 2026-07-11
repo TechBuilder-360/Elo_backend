@@ -6,6 +6,7 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
+	"entgo.io/ent/schema/index"
 )
 
 // Verification holds the schema definition for the Verification entity.
@@ -37,6 +38,7 @@ func (Verification) Fields() []ent.Field {
 			"REJECTED",
 			"EXPIRED",
 		).Default("IN_PROGRESS"),
+		field.String("number").Optional(),
 		field.String("reference_id").NotEmpty(),
 		field.String("provider_reference").NotEmpty(),
 		field.JSON("metadata", map[string]interface{}{}),
@@ -51,5 +53,11 @@ func (Verification) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.To("user", User.Type),
 		edge.To("business", Business.Type),
+	}
+}
+
+func (Verification) Indexes() []ent.Index {
+	return []ent.Index{
+		index.Fields("number", "verification_type").Unique(),
 	}
 }

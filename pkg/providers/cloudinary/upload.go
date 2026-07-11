@@ -26,10 +26,10 @@ func (c *Cloud) upload(ctx context.Context, file string, fileName string, fileDe
 }
 
 // UploadBusinessFile uploads a file to the business folder structure
-func (c *Cloud) UploadBusinessFile(ctx context.Context, file string, fileName string, businessID string, uploadType string) (string, error) {
+func (c *Cloud) UploadBusinessFile(ctx context.Context, file string, fileName string, businessName string, uploadType string) (string, error) {
 	destination := FileDestination{
 		Type: uploadType,
-		ID:   businessID,
+		ID:   businessName,
 	}
 	return c.upload(ctx, file, fileName, destination, BusinessEntity)
 }

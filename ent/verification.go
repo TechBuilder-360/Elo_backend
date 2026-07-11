@@ -30,6 +30,8 @@ type Verification struct {
 	VerificationType verification.VerificationType `json:"verification_type,omitempty"`
 	// Status holds the value of the "status" field.
 	Status verification.Status `json:"status,omitempty"`
+	// Number holds the value of the "number" field.
+	Number string `json:"number,omitempty"`
 	// ReferenceID holds the value of the "reference_id" field.
 	ReferenceID string `json:"reference_id,omitempty"`
 	// ProviderReference holds the value of the "provider_reference" field.
@@ -86,7 +88,7 @@ func (*Verification) scanValues(columns []string) ([]any, error) {
 			values[i] = new([]byte)
 		case verification.FieldIsObsolate:
 			values[i] = new(sql.NullBool)
-		case verification.FieldID, verification.FieldProvider, verification.FieldVerificationType, verification.FieldStatus, verification.FieldReferenceID, verification.FieldProviderReference:
+		case verification.FieldID, verification.FieldProvider, verification.FieldVerificationType, verification.FieldStatus, verification.FieldNumber, verification.FieldReferenceID, verification.FieldProviderReference:
 			values[i] = new(sql.NullString)
 		case verification.FieldCreatedAt, verification.FieldUpdatedAt, verification.FieldDeletedAt, verification.FieldVerifiedAt:
 			values[i] = new(sql.NullTime)
@@ -147,6 +149,12 @@ func (v *Verification) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field status", values[i])
 			} else if value.Valid {
 				v.Status = verification.Status(value.String)
+			}
+		case verification.FieldNumber:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field number", values[i])
+			} else if value.Valid {
+				v.Number = value.String
 			}
 		case verification.FieldReferenceID:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -253,6 +261,9 @@ func (v *Verification) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("status=")
 	builder.WriteString(fmt.Sprintf("%v", v.Status))
+	builder.WriteString(", ")
+	builder.WriteString("number=")
+	builder.WriteString(v.Number)
 	builder.WriteString(", ")
 	builder.WriteString("reference_id=")
 	builder.WriteString(v.ReferenceID)

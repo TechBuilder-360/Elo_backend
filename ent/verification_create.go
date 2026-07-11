@@ -93,6 +93,20 @@ func (vc *VerificationCreate) SetNillableStatus(v *verification.Status) *Verific
 	return vc
 }
 
+// SetNumber sets the "number" field.
+func (vc *VerificationCreate) SetNumber(s string) *VerificationCreate {
+	vc.mutation.SetNumber(s)
+	return vc
+}
+
+// SetNillableNumber sets the "number" field if the given value is not nil.
+func (vc *VerificationCreate) SetNillableNumber(s *string) *VerificationCreate {
+	if s != nil {
+		vc.SetNumber(*s)
+	}
+	return vc
+}
+
 // SetReferenceID sets the "reference_id" field.
 func (vc *VerificationCreate) SetReferenceID(s string) *VerificationCreate {
 	vc.mutation.SetReferenceID(s)
@@ -367,6 +381,10 @@ func (vc *VerificationCreate) createSpec() (*Verification, *sqlgraph.CreateSpec)
 		_spec.SetField(verification.FieldStatus, field.TypeEnum, value)
 		_node.Status = value
 	}
+	if value, ok := vc.mutation.Number(); ok {
+		_spec.SetField(verification.FieldNumber, field.TypeString, value)
+		_node.Number = value
+	}
 	if value, ok := vc.mutation.ReferenceID(); ok {
 		_spec.SetField(verification.FieldReferenceID, field.TypeString, value)
 		_node.ReferenceID = value
@@ -538,6 +556,24 @@ func (u *VerificationUpsert) SetStatus(v verification.Status) *VerificationUpser
 // UpdateStatus sets the "status" field to the value that was provided on create.
 func (u *VerificationUpsert) UpdateStatus() *VerificationUpsert {
 	u.SetExcluded(verification.FieldStatus)
+	return u
+}
+
+// SetNumber sets the "number" field.
+func (u *VerificationUpsert) SetNumber(v string) *VerificationUpsert {
+	u.Set(verification.FieldNumber, v)
+	return u
+}
+
+// UpdateNumber sets the "number" field to the value that was provided on create.
+func (u *VerificationUpsert) UpdateNumber() *VerificationUpsert {
+	u.SetExcluded(verification.FieldNumber)
+	return u
+}
+
+// ClearNumber clears the value of the "number" field.
+func (u *VerificationUpsert) ClearNumber() *VerificationUpsert {
+	u.SetNull(verification.FieldNumber)
 	return u
 }
 
@@ -744,6 +780,27 @@ func (u *VerificationUpsertOne) SetStatus(v verification.Status) *VerificationUp
 func (u *VerificationUpsertOne) UpdateStatus() *VerificationUpsertOne {
 	return u.Update(func(s *VerificationUpsert) {
 		s.UpdateStatus()
+	})
+}
+
+// SetNumber sets the "number" field.
+func (u *VerificationUpsertOne) SetNumber(v string) *VerificationUpsertOne {
+	return u.Update(func(s *VerificationUpsert) {
+		s.SetNumber(v)
+	})
+}
+
+// UpdateNumber sets the "number" field to the value that was provided on create.
+func (u *VerificationUpsertOne) UpdateNumber() *VerificationUpsertOne {
+	return u.Update(func(s *VerificationUpsert) {
+		s.UpdateNumber()
+	})
+}
+
+// ClearNumber clears the value of the "number" field.
+func (u *VerificationUpsertOne) ClearNumber() *VerificationUpsertOne {
+	return u.Update(func(s *VerificationUpsert) {
+		s.ClearNumber()
 	})
 }
 
@@ -1130,6 +1187,27 @@ func (u *VerificationUpsertBulk) SetStatus(v verification.Status) *VerificationU
 func (u *VerificationUpsertBulk) UpdateStatus() *VerificationUpsertBulk {
 	return u.Update(func(s *VerificationUpsert) {
 		s.UpdateStatus()
+	})
+}
+
+// SetNumber sets the "number" field.
+func (u *VerificationUpsertBulk) SetNumber(v string) *VerificationUpsertBulk {
+	return u.Update(func(s *VerificationUpsert) {
+		s.SetNumber(v)
+	})
+}
+
+// UpdateNumber sets the "number" field to the value that was provided on create.
+func (u *VerificationUpsertBulk) UpdateNumber() *VerificationUpsertBulk {
+	return u.Update(func(s *VerificationUpsert) {
+		s.UpdateNumber()
+	})
+}
+
+// ClearNumber clears the value of the "number" field.
+func (u *VerificationUpsertBulk) ClearNumber() *VerificationUpsertBulk {
+	return u.Update(func(s *VerificationUpsert) {
+		s.ClearNumber()
 	})
 }
 

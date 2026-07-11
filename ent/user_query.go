@@ -12,6 +12,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/Toflex/directory_v2/ent/business"
 	"github.com/Toflex/directory_v2/ent/manager"
 	"github.com/Toflex/directory_v2/ent/predicate"
 	"github.com/Toflex/directory_v2/ent/requestverification"
@@ -29,6 +30,7 @@ type UserQuery struct {
 	predicates               []predicate.User
 	withManages              *ManagerQuery
 	withUserDocuments        *UserDocumentQuery
+	withRegisteredBusinesses *BusinessQuery
 	withVerifications        *VerificationQuery
 	withRequestVerifications *RequestVerificationQuery
 	// intermediate query (i.e. traversal path).
@@ -104,6 +106,28 @@ func (uq *UserQuery) QueryUserDocuments() *UserDocumentQuery {
 			sqlgraph.From(user.Table, user.FieldID, selector),
 			sqlgraph.To(userdocument.Table, userdocument.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, user.UserDocumentsTable, user.UserDocumentsColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(uq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryRegisteredBusinesses chains the current query on the "registered_businesses" edge.
+func (uq *UserQuery) QueryRegisteredBusinesses() *BusinessQuery {
+	query := (&BusinessClient{config: uq.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := uq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := uq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, selector),
+			sqlgraph.To(business.Table, business.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, user.RegisteredBusinessesTable, user.RegisteredBusinessesColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(uq.driver.Dialect(), step)
 		return fromU, nil
@@ -349,6 +373,7 @@ func (uq *UserQuery) Clone() *UserQuery {
 		predicates:               append([]predicate.User{}, uq.predicates...),
 		withManages:              uq.withManages.Clone(),
 		withUserDocuments:        uq.withUserDocuments.Clone(),
+		withRegisteredBusinesses: uq.withRegisteredBusinesses.Clone(),
 		withVerifications:        uq.withVerifications.Clone(),
 		withRequestVerifications: uq.withRequestVerifications.Clone(),
 		// clone intermediate query.
@@ -376,6 +401,17 @@ func (uq *UserQuery) WithUserDocuments(opts ...func(*UserDocumentQuery)) *UserQu
 		opt(query)
 	}
 	uq.withUserDocuments = query
+	return uq
+}
+
+// WithRegisteredBusinesses tells the query-builder to eager-load the nodes that are connected to
+// the "registered_businesses" edge. The optional arguments are used to configure the query builder of the edge.
+func (uq *UserQuery) WithRegisteredBusinesses(opts ...func(*BusinessQuery)) *UserQuery {
+	query := (&BusinessClient{config: uq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	uq.withRegisteredBusinesses = query
 	return uq
 }
 
@@ -479,9 +515,10 @@ func (uq *UserQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*User, e
 	var (
 		nodes       = []*User{}
 		_spec       = uq.querySpec()
-		loadedTypes = [4]bool{
+		loadedTypes = [5]bool{
 			uq.withManages != nil,
 			uq.withUserDocuments != nil,
+			uq.withRegisteredBusinesses != nil,
 			uq.withVerifications != nil,
 			uq.withRequestVerifications != nil,
 		}
@@ -515,6 +552,13 @@ func (uq *UserQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*User, e
 		if err := uq.loadUserDocuments(ctx, query, nodes,
 			func(n *User) { n.Edges.UserDocuments = []*UserDocument{} },
 			func(n *User, e *UserDocument) { n.Edges.UserDocuments = append(n.Edges.UserDocuments, e) }); err != nil {
+			return nil, err
+		}
+	}
+	if query := uq.withRegisteredBusinesses; query != nil {
+		if err := uq.loadRegisteredBusinesses(ctx, query, nodes,
+			func(n *User) { n.Edges.RegisteredBusinesses = []*Business{} },
+			func(n *User, e *Business) { n.Edges.RegisteredBusinesses = append(n.Edges.RegisteredBusinesses, e) }); err != nil {
 			return nil, err
 		}
 	}
@@ -593,6 +637,39 @@ func (uq *UserQuery) loadUserDocuments(ctx context.Context, query *UserDocumentQ
 		node, ok := nodeids[*fk]
 		if !ok {
 			return fmt.Errorf(`unexpected referenced foreign-key "user_user_documents" returned %v for node %v`, *fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (uq *UserQuery) loadRegisteredBusinesses(ctx context.Context, query *BusinessQuery, nodes []*User, init func(*User), assign func(*User, *Business)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[string]*User)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(business.FieldRegisteredBy)
+	}
+	query.Where(predicate.Business(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(user.RegisteredBusinessesColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.RegisteredBy
+		if fk == nil {
+			return fmt.Errorf(`foreign-key "registered_by" is nil for node %v`, n.ID)
+		}
+		node, ok := nodeids[*fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "registered_by" returned %v for node %v`, *fk, n.ID)
 		}
 		assign(node, n)
 	}

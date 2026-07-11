@@ -14,6 +14,7 @@ import (
 	"entgo.io/ent/schema/field"
 	"github.com/Toflex/directory_v2/ent/business"
 	"github.com/Toflex/directory_v2/ent/manager"
+	"github.com/Toflex/directory_v2/ent/role"
 	"github.com/Toflex/directory_v2/ent/user"
 )
 
@@ -76,6 +77,26 @@ func (mc *ManagerCreate) SetUserID(s string) *ManagerCreate {
 // SetBusinessID sets the "business_id" field.
 func (mc *ManagerCreate) SetBusinessID(s string) *ManagerCreate {
 	mc.mutation.SetBusinessID(s)
+	return mc
+}
+
+// SetIsOwner sets the "is_owner" field.
+func (mc *ManagerCreate) SetIsOwner(b bool) *ManagerCreate {
+	mc.mutation.SetIsOwner(b)
+	return mc
+}
+
+// SetNillableIsOwner sets the "is_owner" field if the given value is not nil.
+func (mc *ManagerCreate) SetNillableIsOwner(b *bool) *ManagerCreate {
+	if b != nil {
+		mc.SetIsOwner(*b)
+	}
+	return mc
+}
+
+// SetRoleID sets the "role_id" field.
+func (mc *ManagerCreate) SetRoleID(s string) *ManagerCreate {
+	mc.mutation.SetRoleID(s)
 	return mc
 }
 
@@ -145,6 +166,11 @@ func (mc *ManagerCreate) SetUser(u *User) *ManagerCreate {
 	return mc.SetUserID(u.ID)
 }
 
+// SetRole sets the "role" edge to the Role entity.
+func (mc *ManagerCreate) SetRole(r *Role) *ManagerCreate {
+	return mc.SetRoleID(r.ID)
+}
+
 // Mutation returns the ManagerMutation object of the builder.
 func (mc *ManagerCreate) Mutation() *ManagerMutation {
 	return mc.mutation
@@ -188,6 +214,10 @@ func (mc *ManagerCreate) defaults() {
 		v := manager.DefaultUpdatedAt()
 		mc.mutation.SetUpdatedAt(v)
 	}
+	if _, ok := mc.mutation.IsOwner(); !ok {
+		v := manager.DefaultIsOwner
+		mc.mutation.SetIsOwner(v)
+	}
 	if _, ok := mc.mutation.Disabled(); !ok {
 		v := manager.DefaultDisabled
 		mc.mutation.SetDisabled(v)
@@ -212,6 +242,17 @@ func (mc *ManagerCreate) check() error {
 	if _, ok := mc.mutation.BusinessID(); !ok {
 		return &ValidationError{Name: "business_id", err: errors.New(`ent: missing required field "Manager.business_id"`)}
 	}
+	if _, ok := mc.mutation.IsOwner(); !ok {
+		return &ValidationError{Name: "is_owner", err: errors.New(`ent: missing required field "Manager.is_owner"`)}
+	}
+	if _, ok := mc.mutation.RoleID(); !ok {
+		return &ValidationError{Name: "role_id", err: errors.New(`ent: missing required field "Manager.role_id"`)}
+	}
+	if v, ok := mc.mutation.RoleID(); ok {
+		if err := manager.RoleIDValidator(v); err != nil {
+			return &ValidationError{Name: "role_id", err: fmt.Errorf(`ent: validator failed for field "Manager.role_id": %w`, err)}
+		}
+	}
 	if _, ok := mc.mutation.Disabled(); !ok {
 		return &ValidationError{Name: "disabled", err: errors.New(`ent: missing required field "Manager.disabled"`)}
 	}
@@ -220,6 +261,9 @@ func (mc *ManagerCreate) check() error {
 	}
 	if len(mc.mutation.UserIDs()) == 0 {
 		return &ValidationError{Name: "user", err: errors.New(`ent: missing required edge "Manager.user"`)}
+	}
+	if len(mc.mutation.RoleIDs()) == 0 {
+		return &ValidationError{Name: "role", err: errors.New(`ent: missing required edge "Manager.role"`)}
 	}
 	return nil
 }
@@ -269,6 +313,10 @@ func (mc *ManagerCreate) createSpec() (*Manager, *sqlgraph.CreateSpec) {
 		_spec.SetField(manager.FieldDeletedAt, field.TypeTime, value)
 		_node.DeletedAt = &value
 	}
+	if value, ok := mc.mutation.IsOwner(); ok {
+		_spec.SetField(manager.FieldIsOwner, field.TypeBool, value)
+		_node.IsOwner = value
+	}
 	if value, ok := mc.mutation.Disabled(); ok {
 		_spec.SetField(manager.FieldDisabled, field.TypeBool, value)
 		_node.Disabled = value
@@ -313,6 +361,23 @@ func (mc *ManagerCreate) createSpec() (*Manager, *sqlgraph.CreateSpec) {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_node.UserID = nodes[0]
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := mc.mutation.RoleIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   manager.RoleTable,
+			Columns: []string{manager.RoleColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(role.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_node.RoleID = nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec
@@ -418,6 +483,30 @@ func (u *ManagerUpsert) SetBusinessID(v string) *ManagerUpsert {
 // UpdateBusinessID sets the "business_id" field to the value that was provided on create.
 func (u *ManagerUpsert) UpdateBusinessID() *ManagerUpsert {
 	u.SetExcluded(manager.FieldBusinessID)
+	return u
+}
+
+// SetIsOwner sets the "is_owner" field.
+func (u *ManagerUpsert) SetIsOwner(v bool) *ManagerUpsert {
+	u.Set(manager.FieldIsOwner, v)
+	return u
+}
+
+// UpdateIsOwner sets the "is_owner" field to the value that was provided on create.
+func (u *ManagerUpsert) UpdateIsOwner() *ManagerUpsert {
+	u.SetExcluded(manager.FieldIsOwner)
+	return u
+}
+
+// SetRoleID sets the "role_id" field.
+func (u *ManagerUpsert) SetRoleID(v string) *ManagerUpsert {
+	u.Set(manager.FieldRoleID, v)
+	return u
+}
+
+// UpdateRoleID sets the "role_id" field to the value that was provided on create.
+func (u *ManagerUpsert) UpdateRoleID() *ManagerUpsert {
+	u.SetExcluded(manager.FieldRoleID)
 	return u
 }
 
@@ -580,6 +669,34 @@ func (u *ManagerUpsertOne) SetBusinessID(v string) *ManagerUpsertOne {
 func (u *ManagerUpsertOne) UpdateBusinessID() *ManagerUpsertOne {
 	return u.Update(func(s *ManagerUpsert) {
 		s.UpdateBusinessID()
+	})
+}
+
+// SetIsOwner sets the "is_owner" field.
+func (u *ManagerUpsertOne) SetIsOwner(v bool) *ManagerUpsertOne {
+	return u.Update(func(s *ManagerUpsert) {
+		s.SetIsOwner(v)
+	})
+}
+
+// UpdateIsOwner sets the "is_owner" field to the value that was provided on create.
+func (u *ManagerUpsertOne) UpdateIsOwner() *ManagerUpsertOne {
+	return u.Update(func(s *ManagerUpsert) {
+		s.UpdateIsOwner()
+	})
+}
+
+// SetRoleID sets the "role_id" field.
+func (u *ManagerUpsertOne) SetRoleID(v string) *ManagerUpsertOne {
+	return u.Update(func(s *ManagerUpsert) {
+		s.SetRoleID(v)
+	})
+}
+
+// UpdateRoleID sets the "role_id" field to the value that was provided on create.
+func (u *ManagerUpsertOne) UpdateRoleID() *ManagerUpsertOne {
+	return u.Update(func(s *ManagerUpsert) {
+		s.UpdateRoleID()
 	})
 }
 
@@ -917,6 +1034,34 @@ func (u *ManagerUpsertBulk) SetBusinessID(v string) *ManagerUpsertBulk {
 func (u *ManagerUpsertBulk) UpdateBusinessID() *ManagerUpsertBulk {
 	return u.Update(func(s *ManagerUpsert) {
 		s.UpdateBusinessID()
+	})
+}
+
+// SetIsOwner sets the "is_owner" field.
+func (u *ManagerUpsertBulk) SetIsOwner(v bool) *ManagerUpsertBulk {
+	return u.Update(func(s *ManagerUpsert) {
+		s.SetIsOwner(v)
+	})
+}
+
+// UpdateIsOwner sets the "is_owner" field to the value that was provided on create.
+func (u *ManagerUpsertBulk) UpdateIsOwner() *ManagerUpsertBulk {
+	return u.Update(func(s *ManagerUpsert) {
+		s.UpdateIsOwner()
+	})
+}
+
+// SetRoleID sets the "role_id" field.
+func (u *ManagerUpsertBulk) SetRoleID(v string) *ManagerUpsertBulk {
+	return u.Update(func(s *ManagerUpsert) {
+		s.SetRoleID(v)
+	})
+}
+
+// UpdateRoleID sets the "role_id" field to the value that was provided on create.
+func (u *ManagerUpsertBulk) UpdateRoleID() *ManagerUpsertBulk {
+	return u.Update(func(s *ManagerUpsert) {
+		s.UpdateRoleID()
 	})
 }
 

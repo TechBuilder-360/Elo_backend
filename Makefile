@@ -4,6 +4,7 @@ generate-ent-schema:
 	 go run -mod=mod entgo.io/ent/cmd/ent generate --feature sql/upsert ./ent/schema
 
 migrate-schema:
+	set -a; . ./.env; set +a; \
 	atlas migrate diff directory \
       --dir "file://ent/migrate/migrations" \
       --to "ent://ent/schema" \
@@ -14,9 +15,11 @@ migration-compute_hash:
 	 	--dir "file://ent/migrate/migrations"
 
 migrate:
+	set -a; . ./.env; set +a; \
 	go run cmd/migration/migration.go
 
 start-server:
+	set -a; . ./.env; set +a; \
 	go run cmd/http/server.go 
 
 

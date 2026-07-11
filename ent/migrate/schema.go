@@ -16,26 +16,52 @@ var (
 		{Name: "deleted_at", Type: field.TypeTime, Nullable: true},
 		{Name: "category", Type: field.TypeString, Default: "others"},
 		{Name: "name", Type: field.TypeString, Unique: true},
-		{Name: "about", Type: field.TypeString, Nullable: true},
+		{Name: "about", Type: field.TypeString},
 		{Name: "logo", Type: field.TypeString, Nullable: true},
+		{Name: "cover_image", Type: field.TypeString, Nullable: true},
+		{Name: "country_of_incorporation", Type: field.TypeString, Nullable: true},
+		{Name: "date_of_incorporation", Type: field.TypeString, Nullable: true},
+		{Name: "registration_number", Type: field.TypeString, Nullable: true},
 		{Name: "email", Type: field.TypeString},
 		{Name: "website", Type: field.TypeString, Nullable: true},
+		{Name: "on_site", Type: field.TypeBool, Default: false},
 		{Name: "active", Type: field.TypeBool, Default: false},
+		{Name: "live", Type: field.TypeBool, Default: false},
 		{Name: "disabled", Type: field.TypeBool, Default: true},
 		{Name: "disabled_at", Type: field.TypeTime},
 		{Name: "disable_reason", Type: field.TypeString, Nullable: true},
+		{Name: "verification_status", Type: field.TypeEnum, Enums: []string{"UNVERIFIED", "IN_PROGRESS", "VERIFIED", "REJECTED"}, Default: "UNVERIFIED"},
 		{Name: "verified", Type: field.TypeBool, Default: false},
 		{Name: "verified_at", Type: field.TypeTime, Nullable: true},
+		{Name: "registered_by", Type: field.TypeString, Nullable: true},
 	}
 	// BusinessesTable holds the schema information for the "businesses" table.
 	BusinessesTable = &schema.Table{
 		Name:       "businesses",
 		Columns:    BusinessesColumns,
 		PrimaryKey: []*schema.Column{BusinessesColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "businesses_users_registered_businesses",
+				Columns:    []*schema.Column{BusinessesColumns[23]},
+				RefColumns: []*schema.Column{UsersColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "business_registration_number_name",
+				Unique:  true,
+				Columns: []*schema.Column{BusinessesColumns[11], BusinessesColumns[5]},
+			},
+		},
 	}
 	// BusinessDocumentsColumns holds the columns for the "business_documents" table.
 	BusinessDocumentsColumns = []*schema.Column{
-		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "id", Type: field.TypeString},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "deleted_at", Type: field.TypeTime, Nullable: true},
 		{Name: "title", Type: field.TypeString},
 		{Name: "description", Type: field.TypeString},
 		{Name: "url", Type: field.TypeString},
@@ -51,7 +77,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "business_documents_businesses_business_documents",
-				Columns:    []*schema.Column{BusinessDocumentsColumns[6]},
+				Columns:    []*schema.Column{BusinessDocumentsColumns[9]},
 				RefColumns: []*schema.Column{BusinessesColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
@@ -77,6 +103,38 @@ var (
 		Columns:    BusinessFeaturesColumns,
 		PrimaryKey: []*schema.Column{BusinessFeaturesColumns[0]},
 	}
+	// BusinessLocationsColumns holds the columns for the "business_locations" table.
+	BusinessLocationsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeString},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "deleted_at", Type: field.TypeTime, Nullable: true},
+		{Name: "is_head_office", Type: field.TypeBool, Default: false},
+		{Name: "name", Type: field.TypeString},
+		{Name: "address", Type: field.TypeString},
+		{Name: "city", Type: field.TypeString},
+		{Name: "state", Type: field.TypeString},
+		{Name: "country", Type: field.TypeString},
+		{Name: "zip_code", Type: field.TypeString},
+		{Name: "latitude", Type: field.TypeFloat64, Nullable: true},
+		{Name: "longitude", Type: field.TypeFloat64, Nullable: true},
+		{Name: "active", Type: field.TypeBool, Default: true},
+		{Name: "business_locations", Type: field.TypeString, Nullable: true},
+	}
+	// BusinessLocationsTable holds the schema information for the "business_locations" table.
+	BusinessLocationsTable = &schema.Table{
+		Name:       "business_locations",
+		Columns:    BusinessLocationsColumns,
+		PrimaryKey: []*schema.Column{BusinessLocationsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "business_locations_businesses_locations",
+				Columns:    []*schema.Column{BusinessLocationsColumns[14]},
+				RefColumns: []*schema.Column{BusinessesColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+		},
+	}
 	// BusinessServicesColumns holds the columns for the "business_services" table.
 	BusinessServicesColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
@@ -98,16 +156,58 @@ var (
 			},
 		},
 	}
+	// KybDocumentsColumns holds the columns for the "kyb_documents" table.
+	KybDocumentsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeString},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "deleted_at", Type: field.TypeTime, Nullable: true},
+		{Name: "name", Type: field.TypeString, Unique: true},
+		{Name: "required", Type: field.TypeBool, Default: true},
+		{Name: "active", Type: field.TypeBool, Default: true},
+	}
+	// KybDocumentsTable holds the schema information for the "kyb_documents" table.
+	KybDocumentsTable = &schema.Table{
+		Name:       "kyb_documents",
+		Columns:    KybDocumentsColumns,
+		PrimaryKey: []*schema.Column{KybDocumentsColumns[0]},
+	}
+	// KybMessagesColumns holds the columns for the "kyb_messages" table.
+	KybMessagesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeString},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "deleted_at", Type: field.TypeTime, Nullable: true},
+		{Name: "message", Type: field.TypeString},
+		{Name: "status", Type: field.TypeEnum, Enums: []string{"OPEN", "CLOSED", "RESOLVED"}, Default: "OPEN"},
+		{Name: "business_kyb_messages", Type: field.TypeString},
+	}
+	// KybMessagesTable holds the schema information for the "kyb_messages" table.
+	KybMessagesTable = &schema.Table{
+		Name:       "kyb_messages",
+		Columns:    KybMessagesColumns,
+		PrimaryKey: []*schema.Column{KybMessagesColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "kyb_messages_businesses_kyb_messages",
+				Columns:    []*schema.Column{KybMessagesColumns[6]},
+				RefColumns: []*schema.Column{BusinessesColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+		},
+	}
 	// ManagersColumns holds the columns for the "managers" table.
 	ManagersColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeString},
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "updated_at", Type: field.TypeTime},
 		{Name: "deleted_at", Type: field.TypeTime, Nullable: true},
+		{Name: "is_owner", Type: field.TypeBool, Default: false},
 		{Name: "disabled", Type: field.TypeBool, Default: false},
 		{Name: "disable_reason", Type: field.TypeString, Nullable: true},
 		{Name: "disabled_at", Type: field.TypeTime, Nullable: true},
 		{Name: "business_id", Type: field.TypeString},
+		{Name: "role_id", Type: field.TypeString},
 		{Name: "user_id", Type: field.TypeString},
 	}
 	// ManagersTable holds the schema information for the "managers" table.
@@ -118,15 +218,28 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "managers_businesses_manages",
-				Columns:    []*schema.Column{ManagersColumns[7]},
+				Columns:    []*schema.Column{ManagersColumns[8]},
 				RefColumns: []*schema.Column{BusinessesColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
 			{
+				Symbol:     "managers_roles_managers",
+				Columns:    []*schema.Column{ManagersColumns[9]},
+				RefColumns: []*schema.Column{RolesColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+			{
 				Symbol:     "managers_users_manages",
-				Columns:    []*schema.Column{ManagersColumns[8]},
+				Columns:    []*schema.Column{ManagersColumns[10]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.NoAction,
+			},
+		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "manager_user_id_business_id_role_id",
+				Unique:  true,
+				Columns: []*schema.Column{ManagersColumns[10], ManagersColumns[8], ManagersColumns[9]},
 			},
 		},
 	}
@@ -136,7 +249,7 @@ var (
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "updated_at", Type: field.TypeTime},
 		{Name: "deleted_at", Type: field.TypeTime, Nullable: true},
-		{Name: "name", Type: field.TypeString},
+		{Name: "name", Type: field.TypeString, Unique: true},
 		{Name: "description", Type: field.TypeString},
 	}
 	// PermissionsTable holds the schema information for the "permissions" table.
@@ -193,7 +306,7 @@ var (
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "updated_at", Type: field.TypeTime},
 		{Name: "deleted_at", Type: field.TypeTime, Nullable: true},
-		{Name: "name", Type: field.TypeString},
+		{Name: "name", Type: field.TypeString, Unique: true},
 		{Name: "description", Type: field.TypeString},
 	}
 	// RolesTable holds the schema information for the "roles" table.
@@ -201,6 +314,42 @@ var (
 		Name:       "roles",
 		Columns:    RolesColumns,
 		PrimaryKey: []*schema.Column{RolesColumns[0]},
+	}
+	// RolePermissionsColumns holds the columns for the "role_permissions" table.
+	RolePermissionsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeString},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "deleted_at", Type: field.TypeTime, Nullable: true},
+		{Name: "permission_id", Type: field.TypeString},
+		{Name: "role_id", Type: field.TypeString},
+	}
+	// RolePermissionsTable holds the schema information for the "role_permissions" table.
+	RolePermissionsTable = &schema.Table{
+		Name:       "role_permissions",
+		Columns:    RolePermissionsColumns,
+		PrimaryKey: []*schema.Column{RolePermissionsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "role_permissions_permissions_role_permissions",
+				Columns:    []*schema.Column{RolePermissionsColumns[4]},
+				RefColumns: []*schema.Column{PermissionsColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+			{
+				Symbol:     "role_permissions_roles_role_permissions",
+				Columns:    []*schema.Column{RolePermissionsColumns[5]},
+				RefColumns: []*schema.Column{RolesColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "rolepermission_role_id_permission_id",
+				Unique:  true,
+				Columns: []*schema.Column{RolePermissionsColumns[5], RolePermissionsColumns[4]},
+			},
+		},
 	}
 	// ServicesColumns holds the columns for the "services" table.
 	ServicesColumns = []*schema.Column{
@@ -265,6 +414,7 @@ var (
 		{Name: "password", Type: field.TypeString},
 		{Name: "middle_name", Type: field.TypeString, Nullable: true},
 		{Name: "display_name", Type: field.TypeString, Nullable: true},
+		{Name: "date_of_birth", Type: field.TypeTime, Nullable: true},
 		{Name: "email_address", Type: field.TypeString, Unique: true},
 		{Name: "email_verified", Type: field.TypeBool, Default: false},
 		{Name: "email_verified_at", Type: field.TypeTime, Nullable: true},
@@ -311,6 +461,7 @@ var (
 		{Name: "provider", Type: field.TypeString},
 		{Name: "verification_type", Type: field.TypeEnum, Enums: []string{"BVN", "NIN", "PASSPORT", "VOTER_ID", "DRIVERS_LICENSE"}},
 		{Name: "status", Type: field.TypeEnum, Enums: []string{"PENDING", "IN_PROGRESS", "VERIFIED", "FAILED", "REJECTED", "EXPIRED"}, Default: "IN_PROGRESS"},
+		{Name: "number", Type: field.TypeString, Nullable: true},
 		{Name: "reference_id", Type: field.TypeString},
 		{Name: "provider_reference", Type: field.TypeString},
 		{Name: "metadata", Type: field.TypeJSON},
@@ -323,6 +474,38 @@ var (
 		Name:       "verifications",
 		Columns:    VerificationsColumns,
 		PrimaryKey: []*schema.Column{VerificationsColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "verification_number_verification_type",
+				Unique:  true,
+				Columns: []*schema.Column{VerificationsColumns[7], VerificationsColumns[5]},
+			},
+		},
+	}
+	// KybDocumentKybDocumentsColumns holds the columns for the "kyb_document_kyb_documents" table.
+	KybDocumentKybDocumentsColumns = []*schema.Column{
+		{Name: "kyb_document_id", Type: field.TypeString},
+		{Name: "business_document_id", Type: field.TypeString},
+	}
+	// KybDocumentKybDocumentsTable holds the schema information for the "kyb_document_kyb_documents" table.
+	KybDocumentKybDocumentsTable = &schema.Table{
+		Name:       "kyb_document_kyb_documents",
+		Columns:    KybDocumentKybDocumentsColumns,
+		PrimaryKey: []*schema.Column{KybDocumentKybDocumentsColumns[0], KybDocumentKybDocumentsColumns[1]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "kyb_document_kyb_documents_kyb_document_id",
+				Columns:    []*schema.Column{KybDocumentKybDocumentsColumns[0]},
+				RefColumns: []*schema.Column{KybDocumentsColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+			{
+				Symbol:     "kyb_document_kyb_documents_business_document_id",
+				Columns:    []*schema.Column{KybDocumentKybDocumentsColumns[1]},
+				RefColumns: []*schema.Column{BusinessDocumentsColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+		},
 	}
 	// RequestVerificationUserColumns holds the columns for the "request_verification_user" table.
 	RequestVerificationUserColumns = []*schema.Column{
@@ -370,31 +553,6 @@ var (
 				Symbol:     "request_verification_business_business_id",
 				Columns:    []*schema.Column{RequestVerificationBusinessColumns[1]},
 				RefColumns: []*schema.Column{BusinessesColumns[0]},
-				OnDelete:   schema.Cascade,
-			},
-		},
-	}
-	// RolePermissionsColumns holds the columns for the "role_permissions" table.
-	RolePermissionsColumns = []*schema.Column{
-		{Name: "role_id", Type: field.TypeString},
-		{Name: "permission_id", Type: field.TypeString},
-	}
-	// RolePermissionsTable holds the schema information for the "role_permissions" table.
-	RolePermissionsTable = &schema.Table{
-		Name:       "role_permissions",
-		Columns:    RolePermissionsColumns,
-		PrimaryKey: []*schema.Column{RolePermissionsColumns[0], RolePermissionsColumns[1]},
-		ForeignKeys: []*schema.ForeignKey{
-			{
-				Symbol:     "role_permissions_role_id",
-				Columns:    []*schema.Column{RolePermissionsColumns[0]},
-				RefColumns: []*schema.Column{RolesColumns[0]},
-				OnDelete:   schema.Cascade,
-			},
-			{
-				Symbol:     "role_permissions_permission_id",
-				Columns:    []*schema.Column{RolePermissionsColumns[1]},
-				RefColumns: []*schema.Column{PermissionsColumns[0]},
 				OnDelete:   schema.Cascade,
 			},
 		},
@@ -454,38 +612,48 @@ var (
 		BusinessesTable,
 		BusinessDocumentsTable,
 		BusinessFeaturesTable,
+		BusinessLocationsTable,
 		BusinessServicesTable,
+		KybDocumentsTable,
+		KybMessagesTable,
 		ManagersTable,
 		PermissionsTable,
 		ProvidersTable,
 		RequestVerificationsTable,
 		RolesTable,
+		RolePermissionsTable,
 		ServicesTable,
 		SocialsTable,
 		UsersTable,
 		UserDocumentsTable,
 		VerificationsTable,
+		KybDocumentKybDocumentsTable,
 		RequestVerificationUserTable,
 		RequestVerificationBusinessTable,
-		RolePermissionsTable,
 		VerificationUserTable,
 		VerificationBusinessTable,
 	}
 )
 
 func init() {
+	BusinessesTable.ForeignKeys[0].RefTable = UsersTable
 	BusinessDocumentsTable.ForeignKeys[0].RefTable = BusinessesTable
+	BusinessLocationsTable.ForeignKeys[0].RefTable = BusinessesTable
 	BusinessServicesTable.ForeignKeys[0].RefTable = BusinessesTable
+	KybMessagesTable.ForeignKeys[0].RefTable = BusinessesTable
 	ManagersTable.ForeignKeys[0].RefTable = BusinessesTable
-	ManagersTable.ForeignKeys[1].RefTable = UsersTable
+	ManagersTable.ForeignKeys[1].RefTable = RolesTable
+	ManagersTable.ForeignKeys[2].RefTable = UsersTable
+	RolePermissionsTable.ForeignKeys[0].RefTable = PermissionsTable
+	RolePermissionsTable.ForeignKeys[1].RefTable = RolesTable
 	SocialsTable.ForeignKeys[0].RefTable = BusinessesTable
 	UserDocumentsTable.ForeignKeys[0].RefTable = UsersTable
+	KybDocumentKybDocumentsTable.ForeignKeys[0].RefTable = KybDocumentsTable
+	KybDocumentKybDocumentsTable.ForeignKeys[1].RefTable = BusinessDocumentsTable
 	RequestVerificationUserTable.ForeignKeys[0].RefTable = RequestVerificationsTable
 	RequestVerificationUserTable.ForeignKeys[1].RefTable = UsersTable
 	RequestVerificationBusinessTable.ForeignKeys[0].RefTable = RequestVerificationsTable
 	RequestVerificationBusinessTable.ForeignKeys[1].RefTable = BusinessesTable
-	RolePermissionsTable.ForeignKeys[0].RefTable = RolesTable
-	RolePermissionsTable.ForeignKeys[1].RefTable = PermissionsTable
 	VerificationUserTable.ForeignKeys[0].RefTable = VerificationsTable
 	VerificationUserTable.ForeignKeys[1].RefTable = UsersTable
 	VerificationBusinessTable.ForeignKeys[0].RefTable = VerificationsTable
