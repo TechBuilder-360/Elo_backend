@@ -8,12 +8,16 @@ import (
 	"github.com/Toflex/directory_v2/ent/business"
 	"github.com/Toflex/directory_v2/ent/businessdocument"
 	"github.com/Toflex/directory_v2/ent/businessfeature"
+	"github.com/Toflex/directory_v2/ent/businesslocation"
 	"github.com/Toflex/directory_v2/ent/businessservices"
+	"github.com/Toflex/directory_v2/ent/kybdocument"
+	"github.com/Toflex/directory_v2/ent/kybmessage"
 	"github.com/Toflex/directory_v2/ent/manager"
 	"github.com/Toflex/directory_v2/ent/permission"
 	"github.com/Toflex/directory_v2/ent/provider"
 	"github.com/Toflex/directory_v2/ent/requestverification"
 	"github.com/Toflex/directory_v2/ent/role"
+	"github.com/Toflex/directory_v2/ent/rolepermission"
 	"github.com/Toflex/directory_v2/ent/schema"
 	"github.com/Toflex/directory_v2/ent/service"
 	"github.com/Toflex/directory_v2/ent/social"
@@ -49,8 +53,12 @@ func init() {
 	businessDescName := businessFields[1].Descriptor()
 	// business.NameValidator is a validator for the "name" field. It is called by the builders before save.
 	business.NameValidator = businessDescName.Validators[0].(func(string) error)
+	// businessDescAbout is the schema descriptor for about field.
+	businessDescAbout := businessFields[2].Descriptor()
+	// business.AboutValidator is a validator for the "about" field. It is called by the builders before save.
+	business.AboutValidator = businessDescAbout.Validators[0].(func(string) error)
 	// businessDescEmail is the schema descriptor for email field.
-	businessDescEmail := businessFields[4].Descriptor()
+	businessDescEmail := businessFields[9].Descriptor()
 	// business.EmailValidator is a validator for the "email" field. It is called by the builders before save.
 	business.EmailValidator = func() func(string) error {
 		validators := businessDescEmail.Validators
@@ -68,31 +76,52 @@ func init() {
 		}
 	}()
 	// businessDescWebsite is the schema descriptor for website field.
-	businessDescWebsite := businessFields[5].Descriptor()
+	businessDescWebsite := businessFields[10].Descriptor()
 	// business.WebsiteValidator is a validator for the "website" field. It is called by the builders before save.
 	business.WebsiteValidator = businessDescWebsite.Validators[0].(func(string) error)
+	// businessDescOnSite is the schema descriptor for on_site field.
+	businessDescOnSite := businessFields[11].Descriptor()
+	// business.DefaultOnSite holds the default value on creation for the on_site field.
+	business.DefaultOnSite = businessDescOnSite.Default.(bool)
 	// businessDescActive is the schema descriptor for active field.
-	businessDescActive := businessFields[6].Descriptor()
+	businessDescActive := businessFields[12].Descriptor()
 	// business.DefaultActive holds the default value on creation for the active field.
 	business.DefaultActive = businessDescActive.Default.(bool)
+	// businessDescLive is the schema descriptor for live field.
+	businessDescLive := businessFields[13].Descriptor()
+	// business.DefaultLive holds the default value on creation for the live field.
+	business.DefaultLive = businessDescLive.Default.(bool)
 	// businessDescDisabled is the schema descriptor for disabled field.
-	businessDescDisabled := businessFields[7].Descriptor()
+	businessDescDisabled := businessFields[14].Descriptor()
 	// business.DefaultDisabled holds the default value on creation for the disabled field.
 	business.DefaultDisabled = businessDescDisabled.Default.(bool)
 	// businessDescDisabledAt is the schema descriptor for disabled_at field.
-	businessDescDisabledAt := businessFields[8].Descriptor()
+	businessDescDisabledAt := businessFields[15].Descriptor()
 	// business.DefaultDisabledAt holds the default value on creation for the disabled_at field.
 	business.DefaultDisabledAt = businessDescDisabledAt.Default.(func() time.Time)
 	// businessDescVerified is the schema descriptor for verified field.
-	businessDescVerified := businessFields[10].Descriptor()
+	businessDescVerified := businessFields[18].Descriptor()
 	// business.DefaultVerified holds the default value on creation for the verified field.
 	business.DefaultVerified = businessDescVerified.Default.(bool)
 	// businessDescID is the schema descriptor for id field.
 	businessDescID := businessMixinFields0[0].Descriptor()
 	// business.DefaultID holds the default value on creation for the id field.
 	business.DefaultID = businessDescID.Default.(func() string)
+	businessdocumentMixin := schema.BusinessDocument{}.Mixin()
+	businessdocumentMixinFields0 := businessdocumentMixin[0].Fields()
+	_ = businessdocumentMixinFields0
 	businessdocumentFields := schema.BusinessDocument{}.Fields()
 	_ = businessdocumentFields
+	// businessdocumentDescCreatedAt is the schema descriptor for created_at field.
+	businessdocumentDescCreatedAt := businessdocumentMixinFields0[1].Descriptor()
+	// businessdocument.DefaultCreatedAt holds the default value on creation for the created_at field.
+	businessdocument.DefaultCreatedAt = businessdocumentDescCreatedAt.Default.(func() time.Time)
+	// businessdocumentDescUpdatedAt is the schema descriptor for updated_at field.
+	businessdocumentDescUpdatedAt := businessdocumentMixinFields0[2].Descriptor()
+	// businessdocument.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	businessdocument.DefaultUpdatedAt = businessdocumentDescUpdatedAt.Default.(func() time.Time)
+	// businessdocument.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	businessdocument.UpdateDefaultUpdatedAt = businessdocumentDescUpdatedAt.UpdateDefault.(func() time.Time)
 	// businessdocumentDescTitle is the schema descriptor for title field.
 	businessdocumentDescTitle := businessdocumentFields[0].Descriptor()
 	// businessdocument.TitleValidator is a validator for the "title" field. It is called by the builders before save.
@@ -109,6 +138,10 @@ func init() {
 	businessdocumentDescVerified := businessdocumentFields[3].Descriptor()
 	// businessdocument.DefaultVerified holds the default value on creation for the verified field.
 	businessdocument.DefaultVerified = businessdocumentDescVerified.Default.(bool)
+	// businessdocumentDescID is the schema descriptor for id field.
+	businessdocumentDescID := businessdocumentMixinFields0[0].Descriptor()
+	// businessdocument.DefaultID holds the default value on creation for the id field.
+	businessdocument.DefaultID = businessdocumentDescID.Default.(func() string)
 	businessfeatureMixin := schema.BusinessFeature{}.Mixin()
 	businessfeatureMixinFields0 := businessfeatureMixin[0].Fields()
 	_ = businessfeatureMixinFields0
@@ -152,6 +185,57 @@ func init() {
 	businessfeatureDescID := businessfeatureMixinFields0[0].Descriptor()
 	// businessfeature.DefaultID holds the default value on creation for the id field.
 	businessfeature.DefaultID = businessfeatureDescID.Default.(func() string)
+	businesslocationMixin := schema.BusinessLocation{}.Mixin()
+	businesslocationMixinFields0 := businesslocationMixin[0].Fields()
+	_ = businesslocationMixinFields0
+	businesslocationFields := schema.BusinessLocation{}.Fields()
+	_ = businesslocationFields
+	// businesslocationDescCreatedAt is the schema descriptor for created_at field.
+	businesslocationDescCreatedAt := businesslocationMixinFields0[1].Descriptor()
+	// businesslocation.DefaultCreatedAt holds the default value on creation for the created_at field.
+	businesslocation.DefaultCreatedAt = businesslocationDescCreatedAt.Default.(func() time.Time)
+	// businesslocationDescUpdatedAt is the schema descriptor for updated_at field.
+	businesslocationDescUpdatedAt := businesslocationMixinFields0[2].Descriptor()
+	// businesslocation.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	businesslocation.DefaultUpdatedAt = businesslocationDescUpdatedAt.Default.(func() time.Time)
+	// businesslocation.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	businesslocation.UpdateDefaultUpdatedAt = businesslocationDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// businesslocationDescIsHeadOffice is the schema descriptor for is_head_office field.
+	businesslocationDescIsHeadOffice := businesslocationFields[0].Descriptor()
+	// businesslocation.DefaultIsHeadOffice holds the default value on creation for the is_head_office field.
+	businesslocation.DefaultIsHeadOffice = businesslocationDescIsHeadOffice.Default.(bool)
+	// businesslocationDescName is the schema descriptor for name field.
+	businesslocationDescName := businesslocationFields[1].Descriptor()
+	// businesslocation.NameValidator is a validator for the "name" field. It is called by the builders before save.
+	businesslocation.NameValidator = businesslocationDescName.Validators[0].(func(string) error)
+	// businesslocationDescAddress is the schema descriptor for address field.
+	businesslocationDescAddress := businesslocationFields[2].Descriptor()
+	// businesslocation.AddressValidator is a validator for the "address" field. It is called by the builders before save.
+	businesslocation.AddressValidator = businesslocationDescAddress.Validators[0].(func(string) error)
+	// businesslocationDescCity is the schema descriptor for city field.
+	businesslocationDescCity := businesslocationFields[3].Descriptor()
+	// businesslocation.CityValidator is a validator for the "city" field. It is called by the builders before save.
+	businesslocation.CityValidator = businesslocationDescCity.Validators[0].(func(string) error)
+	// businesslocationDescState is the schema descriptor for state field.
+	businesslocationDescState := businesslocationFields[4].Descriptor()
+	// businesslocation.StateValidator is a validator for the "state" field. It is called by the builders before save.
+	businesslocation.StateValidator = businesslocationDescState.Validators[0].(func(string) error)
+	// businesslocationDescCountry is the schema descriptor for country field.
+	businesslocationDescCountry := businesslocationFields[5].Descriptor()
+	// businesslocation.CountryValidator is a validator for the "country" field. It is called by the builders before save.
+	businesslocation.CountryValidator = businesslocationDescCountry.Validators[0].(func(string) error)
+	// businesslocationDescZipCode is the schema descriptor for zip_code field.
+	businesslocationDescZipCode := businesslocationFields[6].Descriptor()
+	// businesslocation.ZipCodeValidator is a validator for the "zip_code" field. It is called by the builders before save.
+	businesslocation.ZipCodeValidator = businesslocationDescZipCode.Validators[0].(func(string) error)
+	// businesslocationDescActive is the schema descriptor for active field.
+	businesslocationDescActive := businesslocationFields[9].Descriptor()
+	// businesslocation.DefaultActive holds the default value on creation for the active field.
+	businesslocation.DefaultActive = businesslocationDescActive.Default.(bool)
+	// businesslocationDescID is the schema descriptor for id field.
+	businesslocationDescID := businesslocationMixinFields0[0].Descriptor()
+	// businesslocation.DefaultID holds the default value on creation for the id field.
+	businesslocation.DefaultID = businesslocationDescID.Default.(func() string)
 	businessservicesFields := schema.BusinessServices{}.Fields()
 	_ = businessservicesFields
 	// businessservicesDescTitle is the schema descriptor for title field.
@@ -162,6 +246,60 @@ func init() {
 	businessservicesDescDescription := businessservicesFields[2].Descriptor()
 	// businessservices.DescriptionValidator is a validator for the "description" field. It is called by the builders before save.
 	businessservices.DescriptionValidator = businessservicesDescDescription.Validators[0].(func(string) error)
+	kybdocumentMixin := schema.KYBDocument{}.Mixin()
+	kybdocumentMixinFields0 := kybdocumentMixin[0].Fields()
+	_ = kybdocumentMixinFields0
+	kybdocumentFields := schema.KYBDocument{}.Fields()
+	_ = kybdocumentFields
+	// kybdocumentDescCreatedAt is the schema descriptor for created_at field.
+	kybdocumentDescCreatedAt := kybdocumentMixinFields0[1].Descriptor()
+	// kybdocument.DefaultCreatedAt holds the default value on creation for the created_at field.
+	kybdocument.DefaultCreatedAt = kybdocumentDescCreatedAt.Default.(func() time.Time)
+	// kybdocumentDescUpdatedAt is the schema descriptor for updated_at field.
+	kybdocumentDescUpdatedAt := kybdocumentMixinFields0[2].Descriptor()
+	// kybdocument.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	kybdocument.DefaultUpdatedAt = kybdocumentDescUpdatedAt.Default.(func() time.Time)
+	// kybdocument.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	kybdocument.UpdateDefaultUpdatedAt = kybdocumentDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// kybdocumentDescName is the schema descriptor for name field.
+	kybdocumentDescName := kybdocumentFields[0].Descriptor()
+	// kybdocument.NameValidator is a validator for the "name" field. It is called by the builders before save.
+	kybdocument.NameValidator = kybdocumentDescName.Validators[0].(func(string) error)
+	// kybdocumentDescRequired is the schema descriptor for required field.
+	kybdocumentDescRequired := kybdocumentFields[1].Descriptor()
+	// kybdocument.DefaultRequired holds the default value on creation for the required field.
+	kybdocument.DefaultRequired = kybdocumentDescRequired.Default.(bool)
+	// kybdocumentDescActive is the schema descriptor for active field.
+	kybdocumentDescActive := kybdocumentFields[2].Descriptor()
+	// kybdocument.DefaultActive holds the default value on creation for the active field.
+	kybdocument.DefaultActive = kybdocumentDescActive.Default.(bool)
+	// kybdocumentDescID is the schema descriptor for id field.
+	kybdocumentDescID := kybdocumentMixinFields0[0].Descriptor()
+	// kybdocument.DefaultID holds the default value on creation for the id field.
+	kybdocument.DefaultID = kybdocumentDescID.Default.(func() string)
+	kybmessageMixin := schema.KYBMessage{}.Mixin()
+	kybmessageMixinFields0 := kybmessageMixin[0].Fields()
+	_ = kybmessageMixinFields0
+	kybmessageFields := schema.KYBMessage{}.Fields()
+	_ = kybmessageFields
+	// kybmessageDescCreatedAt is the schema descriptor for created_at field.
+	kybmessageDescCreatedAt := kybmessageMixinFields0[1].Descriptor()
+	// kybmessage.DefaultCreatedAt holds the default value on creation for the created_at field.
+	kybmessage.DefaultCreatedAt = kybmessageDescCreatedAt.Default.(func() time.Time)
+	// kybmessageDescUpdatedAt is the schema descriptor for updated_at field.
+	kybmessageDescUpdatedAt := kybmessageMixinFields0[2].Descriptor()
+	// kybmessage.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	kybmessage.DefaultUpdatedAt = kybmessageDescUpdatedAt.Default.(func() time.Time)
+	// kybmessage.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	kybmessage.UpdateDefaultUpdatedAt = kybmessageDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// kybmessageDescMessage is the schema descriptor for message field.
+	kybmessageDescMessage := kybmessageFields[0].Descriptor()
+	// kybmessage.MessageValidator is a validator for the "message" field. It is called by the builders before save.
+	kybmessage.MessageValidator = kybmessageDescMessage.Validators[0].(func(string) error)
+	// kybmessageDescID is the schema descriptor for id field.
+	kybmessageDescID := kybmessageMixinFields0[0].Descriptor()
+	// kybmessage.DefaultID holds the default value on creation for the id field.
+	kybmessage.DefaultID = kybmessageDescID.Default.(func() string)
 	managerMixin := schema.Manager{}.Mixin()
 	managerMixinFields0 := managerMixin[0].Fields()
 	_ = managerMixinFields0
@@ -177,8 +315,16 @@ func init() {
 	manager.DefaultUpdatedAt = managerDescUpdatedAt.Default.(func() time.Time)
 	// manager.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
 	manager.UpdateDefaultUpdatedAt = managerDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// managerDescIsOwner is the schema descriptor for is_owner field.
+	managerDescIsOwner := managerFields[2].Descriptor()
+	// manager.DefaultIsOwner holds the default value on creation for the is_owner field.
+	manager.DefaultIsOwner = managerDescIsOwner.Default.(bool)
+	// managerDescRoleID is the schema descriptor for role_id field.
+	managerDescRoleID := managerFields[3].Descriptor()
+	// manager.RoleIDValidator is a validator for the "role_id" field. It is called by the builders before save.
+	manager.RoleIDValidator = managerDescRoleID.Validators[0].(func(string) error)
 	// managerDescDisabled is the schema descriptor for disabled field.
-	managerDescDisabled := managerFields[2].Descriptor()
+	managerDescDisabled := managerFields[4].Descriptor()
 	// manager.DefaultDisabled holds the default value on creation for the disabled field.
 	manager.DefaultDisabled = managerDescDisabled.Default.(bool)
 	// managerDescID is the schema descriptor for id field.
@@ -311,6 +457,33 @@ func init() {
 	roleDescID := roleMixinFields0[0].Descriptor()
 	// role.DefaultID holds the default value on creation for the id field.
 	role.DefaultID = roleDescID.Default.(func() string)
+	rolepermissionMixin := schema.RolePermission{}.Mixin()
+	rolepermissionMixinFields0 := rolepermissionMixin[0].Fields()
+	_ = rolepermissionMixinFields0
+	rolepermissionFields := schema.RolePermission{}.Fields()
+	_ = rolepermissionFields
+	// rolepermissionDescCreatedAt is the schema descriptor for created_at field.
+	rolepermissionDescCreatedAt := rolepermissionMixinFields0[1].Descriptor()
+	// rolepermission.DefaultCreatedAt holds the default value on creation for the created_at field.
+	rolepermission.DefaultCreatedAt = rolepermissionDescCreatedAt.Default.(func() time.Time)
+	// rolepermissionDescUpdatedAt is the schema descriptor for updated_at field.
+	rolepermissionDescUpdatedAt := rolepermissionMixinFields0[2].Descriptor()
+	// rolepermission.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	rolepermission.DefaultUpdatedAt = rolepermissionDescUpdatedAt.Default.(func() time.Time)
+	// rolepermission.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	rolepermission.UpdateDefaultUpdatedAt = rolepermissionDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// rolepermissionDescRoleID is the schema descriptor for role_id field.
+	rolepermissionDescRoleID := rolepermissionFields[0].Descriptor()
+	// rolepermission.RoleIDValidator is a validator for the "role_id" field. It is called by the builders before save.
+	rolepermission.RoleIDValidator = rolepermissionDescRoleID.Validators[0].(func(string) error)
+	// rolepermissionDescPermissionID is the schema descriptor for permission_id field.
+	rolepermissionDescPermissionID := rolepermissionFields[1].Descriptor()
+	// rolepermission.PermissionIDValidator is a validator for the "permission_id" field. It is called by the builders before save.
+	rolepermission.PermissionIDValidator = rolepermissionDescPermissionID.Validators[0].(func(string) error)
+	// rolepermissionDescID is the schema descriptor for id field.
+	rolepermissionDescID := rolepermissionMixinFields0[0].Descriptor()
+	// rolepermission.DefaultID holds the default value on creation for the id field.
+	rolepermission.DefaultID = rolepermissionDescID.Default.(func() string)
 	serviceMixin := schema.Service{}.Mixin()
 	serviceMixinFields0 := serviceMixin[0].Fields()
 	_ = serviceMixinFields0
@@ -413,7 +586,7 @@ func init() {
 	// user.PasswordValidator is a validator for the "password" field. It is called by the builders before save.
 	user.PasswordValidator = userDescPassword.Validators[0].(func(string) error)
 	// userDescEmailAddress is the schema descriptor for email_address field.
-	userDescEmailAddress := userFields[5].Descriptor()
+	userDescEmailAddress := userFields[6].Descriptor()
 	// user.EmailAddressValidator is a validator for the "email_address" field. It is called by the builders before save.
 	user.EmailAddressValidator = func() func(string) error {
 		validators := userDescEmailAddress.Validators
@@ -431,19 +604,19 @@ func init() {
 		}
 	}()
 	// userDescEmailVerified is the schema descriptor for email_verified field.
-	userDescEmailVerified := userFields[6].Descriptor()
+	userDescEmailVerified := userFields[7].Descriptor()
 	// user.DefaultEmailVerified holds the default value on creation for the email_verified field.
 	user.DefaultEmailVerified = userDescEmailVerified.Default.(bool)
 	// userDescPhoneNumber is the schema descriptor for phone_number field.
-	userDescPhoneNumber := userFields[8].Descriptor()
+	userDescPhoneNumber := userFields[9].Descriptor()
 	// user.PhoneNumberValidator is a validator for the "phone_number" field. It is called by the builders before save.
 	user.PhoneNumberValidator = userDescPhoneNumber.Validators[0].(func(string) error)
 	// userDescDisabled is the schema descriptor for disabled field.
-	userDescDisabled := userFields[10].Descriptor()
+	userDescDisabled := userFields[11].Descriptor()
 	// user.DefaultDisabled holds the default value on creation for the disabled field.
 	user.DefaultDisabled = userDescDisabled.Default.(bool)
 	// userDescVerified is the schema descriptor for verified field.
-	userDescVerified := userFields[12].Descriptor()
+	userDescVerified := userFields[13].Descriptor()
 	// user.DefaultVerified holds the default value on creation for the verified field.
 	user.DefaultVerified = userDescVerified.Default.(bool)
 	// userDescID is the schema descriptor for id field.
@@ -484,19 +657,19 @@ func init() {
 	// verification.ProviderValidator is a validator for the "provider" field. It is called by the builders before save.
 	verification.ProviderValidator = verificationDescProvider.Validators[0].(func(string) error)
 	// verificationDescReferenceID is the schema descriptor for reference_id field.
-	verificationDescReferenceID := verificationFields[3].Descriptor()
+	verificationDescReferenceID := verificationFields[4].Descriptor()
 	// verification.ReferenceIDValidator is a validator for the "reference_id" field. It is called by the builders before save.
 	verification.ReferenceIDValidator = verificationDescReferenceID.Validators[0].(func(string) error)
 	// verificationDescProviderReference is the schema descriptor for provider_reference field.
-	verificationDescProviderReference := verificationFields[4].Descriptor()
+	verificationDescProviderReference := verificationFields[5].Descriptor()
 	// verification.ProviderReferenceValidator is a validator for the "provider_reference" field. It is called by the builders before save.
 	verification.ProviderReferenceValidator = verificationDescProviderReference.Validators[0].(func(string) error)
 	// verificationDescVerifiedAt is the schema descriptor for verified_at field.
-	verificationDescVerifiedAt := verificationFields[7].Descriptor()
+	verificationDescVerifiedAt := verificationFields[8].Descriptor()
 	// verification.DefaultVerifiedAt holds the default value on creation for the verified_at field.
 	verification.DefaultVerifiedAt = verificationDescVerifiedAt.Default.(time.Time)
 	// verificationDescIsObsolate is the schema descriptor for is_obsolate field.
-	verificationDescIsObsolate := verificationFields[8].Descriptor()
+	verificationDescIsObsolate := verificationFields[9].Descriptor()
 	// verification.DefaultIsObsolate holds the default value on creation for the is_obsolate field.
 	verification.DefaultIsObsolate = verificationDescIsObsolate.Default.(bool)
 	// verificationDescID is the schema descriptor for id field.

@@ -5,6 +5,7 @@ package resolver
 import (
 	"github.com/Toflex/directory_v2/graph/generated"
 	"github.com/Toflex/directory_v2/internal/authentication"
+	"github.com/Toflex/directory_v2/internal/business"
 	"github.com/Toflex/directory_v2/pkg/verification"
 )
 
@@ -17,6 +18,7 @@ import (
 type Resolver struct {
 	AuthenticationService authentication.IService
 	VerificationService   verification.IService
+	BusinessService       business.IService
 }
 
 // Query returns generated.QueryResolver implementation.

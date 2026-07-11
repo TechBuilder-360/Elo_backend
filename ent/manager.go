@@ -11,6 +11,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"github.com/Toflex/directory_v2/ent/business"
 	"github.com/Toflex/directory_v2/ent/manager"
+	"github.com/Toflex/directory_v2/ent/role"
 	"github.com/Toflex/directory_v2/ent/user"
 )
 
@@ -29,6 +30,10 @@ type Manager struct {
 	UserID string `json:"user_id,omitempty"`
 	// BusinessID holds the value of the "business_id" field.
 	BusinessID string `json:"business_id,omitempty"`
+	// IsOwner holds the value of the "is_owner" field.
+	IsOwner bool `json:"is_owner,omitempty"`
+	// RoleID holds the value of the "role_id" field.
+	RoleID string `json:"role_id,omitempty"`
 	// Disabled holds the value of the "disabled" field.
 	Disabled bool `json:"disabled,omitempty"`
 	// DisableReason holds the value of the "disable_reason" field.
@@ -47,9 +52,11 @@ type ManagerEdges struct {
 	Business *Business `json:"business,omitempty"`
 	// User holds the value of the user edge.
 	User *User `json:"user,omitempty"`
+	// Role holds the value of the role edge.
+	Role *Role `json:"role,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [2]bool
+	loadedTypes [3]bool
 }
 
 // BusinessOrErr returns the Business value or an error if the edge
@@ -74,14 +81,25 @@ func (e ManagerEdges) UserOrErr() (*User, error) {
 	return nil, &NotLoadedError{edge: "user"}
 }
 
+// RoleOrErr returns the Role value or an error if the edge
+// was not loaded in eager-loading, or loaded but was not found.
+func (e ManagerEdges) RoleOrErr() (*Role, error) {
+	if e.Role != nil {
+		return e.Role, nil
+	} else if e.loadedTypes[2] {
+		return nil, &NotFoundError{label: role.Label}
+	}
+	return nil, &NotLoadedError{edge: "role"}
+}
+
 // scanValues returns the types for scanning values from sql.Rows.
 func (*Manager) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case manager.FieldDisabled:
+		case manager.FieldIsOwner, manager.FieldDisabled:
 			values[i] = new(sql.NullBool)
-		case manager.FieldID, manager.FieldUserID, manager.FieldBusinessID, manager.FieldDisableReason:
+		case manager.FieldID, manager.FieldUserID, manager.FieldBusinessID, manager.FieldRoleID, manager.FieldDisableReason:
 			values[i] = new(sql.NullString)
 		case manager.FieldCreatedAt, manager.FieldUpdatedAt, manager.FieldDeletedAt, manager.FieldDisabledAt:
 			values[i] = new(sql.NullTime)
@@ -137,6 +155,18 @@ func (m *Manager) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				m.BusinessID = value.String
 			}
+		case manager.FieldIsOwner:
+			if value, ok := values[i].(*sql.NullBool); !ok {
+				return fmt.Errorf("unexpected type %T for field is_owner", values[i])
+			} else if value.Valid {
+				m.IsOwner = value.Bool
+			}
+		case manager.FieldRoleID:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field role_id", values[i])
+			} else if value.Valid {
+				m.RoleID = value.String
+			}
 		case manager.FieldDisabled:
 			if value, ok := values[i].(*sql.NullBool); !ok {
 				return fmt.Errorf("unexpected type %T for field disabled", values[i])
@@ -178,6 +208,11 @@ func (m *Manager) QueryUser() *UserQuery {
 	return NewManagerClient(m.config).QueryUser(m)
 }
 
+// QueryRole queries the "role" edge of the Manager entity.
+func (m *Manager) QueryRole() *RoleQuery {
+	return NewManagerClient(m.config).QueryRole(m)
+}
+
 // Update returns a builder for updating this Manager.
 // Note that you need to call Manager.Unwrap() before calling this method if this Manager
 // was returned from a transaction, and the transaction was committed or rolled back.
@@ -217,6 +252,12 @@ func (m *Manager) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("business_id=")
 	builder.WriteString(m.BusinessID)
+	builder.WriteString(", ")
+	builder.WriteString("is_owner=")
+	builder.WriteString(fmt.Sprintf("%v", m.IsOwner))
+	builder.WriteString(", ")
+	builder.WriteString("role_id=")
+	builder.WriteString(m.RoleID)
 	builder.WriteString(", ")
 	builder.WriteString("disabled=")
 	builder.WriteString(fmt.Sprintf("%v", m.Disabled))

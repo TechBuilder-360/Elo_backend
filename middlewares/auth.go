@@ -16,7 +16,9 @@ import (
 )
 
 const (
-	UserContextKey = "user"
+	UserContextKey     = "user"
+	BusinessContextKey = "business"
+	RoleContextKey     = "role"
 )
 
 func authJWT(a authentication.IService) gin.HandlerFunc {
@@ -69,8 +71,19 @@ func UserFromContext(ctx context.Context) (*ent.User, error) {
 
 	user, ok := usr.(*ent.User)
 	if !ok {
-		return nil, errors.New(errors.ErrFailed, "user not found")
+		return nil, errors.New(errors.ErrNotFound, "user not found")
 	}
 
 	return user, nil
+}
+
+func BusinessFromContext(ctx context.Context) (*ent.Business, error) {
+	business := ctx.Value(BusinessContextKey)
+
+	b, ok := business.(*ent.Business)
+	if !ok {
+		return nil, errors.New(errors.ErrNotFound, "business not found")
+	}
+
+	return b, nil
 }

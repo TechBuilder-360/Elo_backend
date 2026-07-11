@@ -13,7 +13,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/Toflex/directory_v2/ent/permission"
-	"github.com/Toflex/directory_v2/ent/role"
+	"github.com/Toflex/directory_v2/ent/rolepermission"
 )
 
 // PermissionCreate is the builder for creating a Permission entity.
@@ -92,19 +92,19 @@ func (pc *PermissionCreate) SetNillableID(s *string) *PermissionCreate {
 	return pc
 }
 
-// AddRoleIDs adds the "roles" edge to the Role entity by IDs.
-func (pc *PermissionCreate) AddRoleIDs(ids ...string) *PermissionCreate {
-	pc.mutation.AddRoleIDs(ids...)
+// AddRolePermissionIDs adds the "role_permissions" edge to the RolePermission entity by IDs.
+func (pc *PermissionCreate) AddRolePermissionIDs(ids ...string) *PermissionCreate {
+	pc.mutation.AddRolePermissionIDs(ids...)
 	return pc
 }
 
-// AddRoles adds the "roles" edges to the Role entity.
-func (pc *PermissionCreate) AddRoles(r ...*Role) *PermissionCreate {
+// AddRolePermissions adds the "role_permissions" edges to the RolePermission entity.
+func (pc *PermissionCreate) AddRolePermissions(r ...*RolePermission) *PermissionCreate {
 	ids := make([]string, len(r))
 	for i := range r {
 		ids[i] = r[i].ID
 	}
-	return pc.AddRoleIDs(ids...)
+	return pc.AddRolePermissionIDs(ids...)
 }
 
 // Mutation returns the PermissionMutation object of the builder.
@@ -236,15 +236,15 @@ func (pc *PermissionCreate) createSpec() (*Permission, *sqlgraph.CreateSpec) {
 		_spec.SetField(permission.FieldDescription, field.TypeString, value)
 		_node.Description = value
 	}
-	if nodes := pc.mutation.RolesIDs(); len(nodes) > 0 {
+	if nodes := pc.mutation.RolePermissionsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
-			Inverse: true,
-			Table:   permission.RolesTable,
-			Columns: permission.RolesPrimaryKey,
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   permission.RolePermissionsTable,
+			Columns: []string{permission.RolePermissionsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(role.FieldID, field.TypeString),
+				IDSpec: sqlgraph.NewFieldSpec(rolepermission.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {

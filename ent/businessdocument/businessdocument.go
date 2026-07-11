@@ -4,6 +4,7 @@ package businessdocument
 
 import (
 	"fmt"
+	"time"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -14,6 +15,12 @@ const (
 	Label = "business_document"
 	// FieldID holds the string denoting the id field in the database.
 	FieldID = "id"
+	// FieldCreatedAt holds the string denoting the created_at field in the database.
+	FieldCreatedAt = "created_at"
+	// FieldUpdatedAt holds the string denoting the updated_at field in the database.
+	FieldUpdatedAt = "updated_at"
+	// FieldDeletedAt holds the string denoting the deleted_at field in the database.
+	FieldDeletedAt = "deleted_at"
 	// FieldTitle holds the string denoting the title field in the database.
 	FieldTitle = "title"
 	// FieldDescription holds the string denoting the description field in the database.
@@ -24,22 +31,32 @@ const (
 	FieldVerified = "verified"
 	// FieldType holds the string denoting the type field in the database.
 	FieldType = "type"
-	// EdgeBusinessDocument holds the string denoting the business_document edge name in mutations.
-	EdgeBusinessDocument = "business_document"
+	// EdgeBusiness holds the string denoting the business edge name in mutations.
+	EdgeBusiness = "business"
+	// EdgeKybDocument holds the string denoting the kyb_document edge name in mutations.
+	EdgeKybDocument = "kyb_document"
 	// Table holds the table name of the businessdocument in the database.
 	Table = "business_documents"
-	// BusinessDocumentTable is the table that holds the business_document relation/edge.
-	BusinessDocumentTable = "business_documents"
-	// BusinessDocumentInverseTable is the table name for the Business entity.
+	// BusinessTable is the table that holds the business relation/edge.
+	BusinessTable = "business_documents"
+	// BusinessInverseTable is the table name for the Business entity.
 	// It exists in this package in order to avoid circular dependency with the "business" package.
-	BusinessDocumentInverseTable = "businesses"
-	// BusinessDocumentColumn is the table column denoting the business_document relation/edge.
-	BusinessDocumentColumn = "business_business_documents"
+	BusinessInverseTable = "businesses"
+	// BusinessColumn is the table column denoting the business relation/edge.
+	BusinessColumn = "business_business_documents"
+	// KybDocumentTable is the table that holds the kyb_document relation/edge. The primary key declared below.
+	KybDocumentTable = "kyb_document_kyb_documents"
+	// KybDocumentInverseTable is the table name for the KYBDocument entity.
+	// It exists in this package in order to avoid circular dependency with the "kybdocument" package.
+	KybDocumentInverseTable = "kyb_documents"
 )
 
 // Columns holds all SQL columns for businessdocument fields.
 var Columns = []string{
 	FieldID,
+	FieldCreatedAt,
+	FieldUpdatedAt,
+	FieldDeletedAt,
 	FieldTitle,
 	FieldDescription,
 	FieldURL,
@@ -52,6 +69,12 @@ var Columns = []string{
 var ForeignKeys = []string{
 	"business_business_documents",
 }
+
+var (
+	// KybDocumentPrimaryKey and KybDocumentColumn2 are the table columns denoting the
+	// primary key for the kyb_document relation (M2M).
+	KybDocumentPrimaryKey = []string{"kyb_document_id", "business_document_id"}
+)
 
 // ValidColumn reports if the column name is valid (part of the table columns).
 func ValidColumn(column string) bool {
@@ -69,6 +92,12 @@ func ValidColumn(column string) bool {
 }
 
 var (
+	// DefaultCreatedAt holds the default value on creation for the "created_at" field.
+	DefaultCreatedAt func() time.Time
+	// DefaultUpdatedAt holds the default value on creation for the "updated_at" field.
+	DefaultUpdatedAt func() time.Time
+	// UpdateDefaultUpdatedAt holds the default value on update for the "updated_at" field.
+	UpdateDefaultUpdatedAt func() time.Time
 	// TitleValidator is a validator for the "title" field. It is called by the builders before save.
 	TitleValidator func(string) error
 	// DescriptionValidator is a validator for the "description" field. It is called by the builders before save.
@@ -77,6 +106,8 @@ var (
 	URLValidator func(string) error
 	// DefaultVerified holds the default value on creation for the "verified" field.
 	DefaultVerified bool
+	// DefaultID holds the default value on creation for the "id" field.
+	DefaultID func() string
 )
 
 // Type defines the type for the "type" enum field.
@@ -111,6 +142,21 @@ func ByID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldID, opts...).ToFunc()
 }
 
+// ByCreatedAt orders the results by the created_at field.
+func ByCreatedAt(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldCreatedAt, opts...).ToFunc()
+}
+
+// ByUpdatedAt orders the results by the updated_at field.
+func ByUpdatedAt(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldUpdatedAt, opts...).ToFunc()
+}
+
+// ByDeletedAt orders the results by the deleted_at field.
+func ByDeletedAt(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldDeletedAt, opts...).ToFunc()
+}
+
 // ByTitle orders the results by the title field.
 func ByTitle(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldTitle, opts...).ToFunc()
@@ -136,16 +182,37 @@ func ByType(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldType, opts...).ToFunc()
 }
 
-// ByBusinessDocumentField orders the results by business_document field.
-func ByBusinessDocumentField(field string, opts ...sql.OrderTermOption) OrderOption {
+// ByBusinessField orders the results by business field.
+func ByBusinessField(field string, opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newBusinessDocumentStep(), sql.OrderByField(field, opts...))
+		sqlgraph.OrderByNeighborTerms(s, newBusinessStep(), sql.OrderByField(field, opts...))
 	}
 }
-func newBusinessDocumentStep() *sqlgraph.Step {
+
+// ByKybDocumentCount orders the results by kyb_document count.
+func ByKybDocumentCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newKybDocumentStep(), opts...)
+	}
+}
+
+// ByKybDocument orders the results by kyb_document terms.
+func ByKybDocument(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newKybDocumentStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+func newBusinessStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
-		sqlgraph.To(BusinessDocumentInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.M2O, true, BusinessDocumentTable, BusinessDocumentColumn),
+		sqlgraph.To(BusinessInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.M2O, true, BusinessTable, BusinessColumn),
+	)
+}
+func newKybDocumentStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(KybDocumentInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.M2M, true, KybDocumentTable, KybDocumentPrimaryKey...),
 	)
 }

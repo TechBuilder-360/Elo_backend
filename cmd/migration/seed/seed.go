@@ -16,6 +16,10 @@ func Seeder(db *ent.Client) {
 
 	errs = append(errs, seedServices(ctx, db))
 	errs = append(errs, seedProviders(ctx, db))
+	errs = append(errs, seedRoles(ctx, db))
+	errs = append(errs, seedPermissions(ctx, db))
+	errs = append(errs, seedRolePermissions(ctx, db))
+	errs = append(errs, seedKYBDocuments(ctx, db))
 
 	for _, e := range errs {
 		if e != nil {

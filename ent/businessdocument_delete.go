@@ -40,7 +40,7 @@ func (bdd *BusinessDocumentDelete) ExecX(ctx context.Context) int {
 }
 
 func (bdd *BusinessDocumentDelete) sqlExec(ctx context.Context) (int, error) {
-	_spec := sqlgraph.NewDeleteSpec(businessdocument.Table, sqlgraph.NewFieldSpec(businessdocument.FieldID, field.TypeInt))
+	_spec := sqlgraph.NewDeleteSpec(businessdocument.Table, sqlgraph.NewFieldSpec(businessdocument.FieldID, field.TypeString))
 	if ps := bdd.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {

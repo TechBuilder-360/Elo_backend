@@ -35,20 +35,20 @@ type Permission struct {
 
 // PermissionEdges holds the relations/edges for other nodes in the graph.
 type PermissionEdges struct {
-	// Roles holds the value of the roles edge.
-	Roles []*Role `json:"roles,omitempty"`
+	// RolePermissions holds the value of the role_permissions edge.
+	RolePermissions []*RolePermission `json:"role_permissions,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
 	loadedTypes [1]bool
 }
 
-// RolesOrErr returns the Roles value or an error if the edge
+// RolePermissionsOrErr returns the RolePermissions value or an error if the edge
 // was not loaded in eager-loading.
-func (e PermissionEdges) RolesOrErr() ([]*Role, error) {
+func (e PermissionEdges) RolePermissionsOrErr() ([]*RolePermission, error) {
 	if e.loadedTypes[0] {
-		return e.Roles, nil
+		return e.RolePermissions, nil
 	}
-	return nil, &NotLoadedError{edge: "roles"}
+	return nil, &NotLoadedError{edge: "role_permissions"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -125,9 +125,9 @@ func (pe *Permission) Value(name string) (ent.Value, error) {
 	return pe.selectValues.Get(name)
 }
 
-// QueryRoles queries the "roles" edge of the Permission entity.
-func (pe *Permission) QueryRoles() *RoleQuery {
-	return NewPermissionClient(pe.config).QueryRoles(pe)
+// QueryRolePermissions queries the "role_permissions" edge of the Permission entity.
+func (pe *Permission) QueryRolePermissions() *RolePermissionQuery {
+	return NewPermissionClient(pe.config).QueryRolePermissions(pe)
 }
 
 // Update returns a builder for updating this Permission.

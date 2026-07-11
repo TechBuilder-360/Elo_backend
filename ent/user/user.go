@@ -30,6 +30,8 @@ const (
 	FieldMiddleName = "middle_name"
 	// FieldDisplayName holds the string denoting the display_name field in the database.
 	FieldDisplayName = "display_name"
+	// FieldDateOfBirth holds the string denoting the date_of_birth field in the database.
+	FieldDateOfBirth = "date_of_birth"
 	// FieldEmailAddress holds the string denoting the email_address field in the database.
 	FieldEmailAddress = "email_address"
 	// FieldEmailVerified holds the string denoting the email_verified field in the database.
@@ -50,6 +52,8 @@ const (
 	EdgeManages = "manages"
 	// EdgeUserDocuments holds the string denoting the user_documents edge name in mutations.
 	EdgeUserDocuments = "user_documents"
+	// EdgeRegisteredBusinesses holds the string denoting the registered_businesses edge name in mutations.
+	EdgeRegisteredBusinesses = "registered_businesses"
 	// EdgeVerifications holds the string denoting the verifications edge name in mutations.
 	EdgeVerifications = "verifications"
 	// EdgeRequestVerifications holds the string denoting the request_verifications edge name in mutations.
@@ -70,6 +74,13 @@ const (
 	UserDocumentsInverseTable = "user_documents"
 	// UserDocumentsColumn is the table column denoting the user_documents relation/edge.
 	UserDocumentsColumn = "user_user_documents"
+	// RegisteredBusinessesTable is the table that holds the registered_businesses relation/edge.
+	RegisteredBusinessesTable = "businesses"
+	// RegisteredBusinessesInverseTable is the table name for the Business entity.
+	// It exists in this package in order to avoid circular dependency with the "business" package.
+	RegisteredBusinessesInverseTable = "businesses"
+	// RegisteredBusinessesColumn is the table column denoting the registered_businesses relation/edge.
+	RegisteredBusinessesColumn = "registered_by"
 	// VerificationsTable is the table that holds the verifications relation/edge. The primary key declared below.
 	VerificationsTable = "verification_user"
 	// VerificationsInverseTable is the table name for the Verification entity.
@@ -93,6 +104,7 @@ var Columns = []string{
 	FieldPassword,
 	FieldMiddleName,
 	FieldDisplayName,
+	FieldDateOfBirth,
 	FieldEmailAddress,
 	FieldEmailVerified,
 	FieldEmailVerifiedAt,
@@ -197,6 +209,11 @@ func ByDisplayName(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldDisplayName, opts...).ToFunc()
 }
 
+// ByDateOfBirth orders the results by the date_of_birth field.
+func ByDateOfBirth(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldDateOfBirth, opts...).ToFunc()
+}
+
 // ByEmailAddress orders the results by the email_address field.
 func ByEmailAddress(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldEmailAddress, opts...).ToFunc()
@@ -265,6 +282,20 @@ func ByUserDocuments(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 	}
 }
 
+// ByRegisteredBusinessesCount orders the results by registered_businesses count.
+func ByRegisteredBusinessesCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newRegisteredBusinessesStep(), opts...)
+	}
+}
+
+// ByRegisteredBusinesses orders the results by registered_businesses terms.
+func ByRegisteredBusinesses(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newRegisteredBusinessesStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+
 // ByVerificationsCount orders the results by verifications count.
 func ByVerificationsCount(opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
@@ -304,6 +335,13 @@ func newUserDocumentsStep() *sqlgraph.Step {
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(UserDocumentsInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.O2M, false, UserDocumentsTable, UserDocumentsColumn),
+	)
+}
+func newRegisteredBusinessesStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(RegisteredBusinessesInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, RegisteredBusinessesTable, RegisteredBusinessesColumn),
 	)
 }
 func newVerificationsStep() *sqlgraph.Step {

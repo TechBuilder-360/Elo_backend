@@ -13,11 +13,14 @@ import (
 	"entgo.io/ent/schema/field"
 	"github.com/Toflex/directory_v2/ent/business"
 	"github.com/Toflex/directory_v2/ent/businessdocument"
+	"github.com/Toflex/directory_v2/ent/businesslocation"
 	"github.com/Toflex/directory_v2/ent/businessservices"
+	"github.com/Toflex/directory_v2/ent/kybmessage"
 	"github.com/Toflex/directory_v2/ent/manager"
 	"github.com/Toflex/directory_v2/ent/predicate"
 	"github.com/Toflex/directory_v2/ent/requestverification"
 	"github.com/Toflex/directory_v2/ent/social"
+	"github.com/Toflex/directory_v2/ent/user"
 	"github.com/Toflex/directory_v2/ent/verification"
 )
 
@@ -102,12 +105,6 @@ func (bu *BusinessUpdate) SetNillableAbout(s *string) *BusinessUpdate {
 	return bu
 }
 
-// ClearAbout clears the value of the "about" field.
-func (bu *BusinessUpdate) ClearAbout() *BusinessUpdate {
-	bu.mutation.ClearAbout()
-	return bu
-}
-
 // SetLogo sets the "logo" field.
 func (bu *BusinessUpdate) SetLogo(s string) *BusinessUpdate {
 	bu.mutation.SetLogo(s)
@@ -125,6 +122,106 @@ func (bu *BusinessUpdate) SetNillableLogo(s *string) *BusinessUpdate {
 // ClearLogo clears the value of the "logo" field.
 func (bu *BusinessUpdate) ClearLogo() *BusinessUpdate {
 	bu.mutation.ClearLogo()
+	return bu
+}
+
+// SetCoverImage sets the "cover_image" field.
+func (bu *BusinessUpdate) SetCoverImage(s string) *BusinessUpdate {
+	bu.mutation.SetCoverImage(s)
+	return bu
+}
+
+// SetNillableCoverImage sets the "cover_image" field if the given value is not nil.
+func (bu *BusinessUpdate) SetNillableCoverImage(s *string) *BusinessUpdate {
+	if s != nil {
+		bu.SetCoverImage(*s)
+	}
+	return bu
+}
+
+// ClearCoverImage clears the value of the "cover_image" field.
+func (bu *BusinessUpdate) ClearCoverImage() *BusinessUpdate {
+	bu.mutation.ClearCoverImage()
+	return bu
+}
+
+// SetRegisteredBy sets the "registered_by" field.
+func (bu *BusinessUpdate) SetRegisteredBy(s string) *BusinessUpdate {
+	bu.mutation.SetRegisteredBy(s)
+	return bu
+}
+
+// SetNillableRegisteredBy sets the "registered_by" field if the given value is not nil.
+func (bu *BusinessUpdate) SetNillableRegisteredBy(s *string) *BusinessUpdate {
+	if s != nil {
+		bu.SetRegisteredBy(*s)
+	}
+	return bu
+}
+
+// ClearRegisteredBy clears the value of the "registered_by" field.
+func (bu *BusinessUpdate) ClearRegisteredBy() *BusinessUpdate {
+	bu.mutation.ClearRegisteredBy()
+	return bu
+}
+
+// SetCountryOfIncorporation sets the "country_of_incorporation" field.
+func (bu *BusinessUpdate) SetCountryOfIncorporation(s string) *BusinessUpdate {
+	bu.mutation.SetCountryOfIncorporation(s)
+	return bu
+}
+
+// SetNillableCountryOfIncorporation sets the "country_of_incorporation" field if the given value is not nil.
+func (bu *BusinessUpdate) SetNillableCountryOfIncorporation(s *string) *BusinessUpdate {
+	if s != nil {
+		bu.SetCountryOfIncorporation(*s)
+	}
+	return bu
+}
+
+// ClearCountryOfIncorporation clears the value of the "country_of_incorporation" field.
+func (bu *BusinessUpdate) ClearCountryOfIncorporation() *BusinessUpdate {
+	bu.mutation.ClearCountryOfIncorporation()
+	return bu
+}
+
+// SetDateOfIncorporation sets the "date_of_incorporation" field.
+func (bu *BusinessUpdate) SetDateOfIncorporation(s string) *BusinessUpdate {
+	bu.mutation.SetDateOfIncorporation(s)
+	return bu
+}
+
+// SetNillableDateOfIncorporation sets the "date_of_incorporation" field if the given value is not nil.
+func (bu *BusinessUpdate) SetNillableDateOfIncorporation(s *string) *BusinessUpdate {
+	if s != nil {
+		bu.SetDateOfIncorporation(*s)
+	}
+	return bu
+}
+
+// ClearDateOfIncorporation clears the value of the "date_of_incorporation" field.
+func (bu *BusinessUpdate) ClearDateOfIncorporation() *BusinessUpdate {
+	bu.mutation.ClearDateOfIncorporation()
+	return bu
+}
+
+// SetRegistrationNumber sets the "registration_number" field.
+func (bu *BusinessUpdate) SetRegistrationNumber(s string) *BusinessUpdate {
+	bu.mutation.SetRegistrationNumber(s)
+	return bu
+}
+
+// SetNillableRegistrationNumber sets the "registration_number" field if the given value is not nil.
+func (bu *BusinessUpdate) SetNillableRegistrationNumber(s *string) *BusinessUpdate {
+	if s != nil {
+		bu.SetRegistrationNumber(*s)
+	}
+	return bu
+}
+
+// ClearRegistrationNumber clears the value of the "registration_number" field.
+func (bu *BusinessUpdate) ClearRegistrationNumber() *BusinessUpdate {
+	bu.mutation.ClearRegistrationNumber()
 	return bu
 }
 
@@ -162,6 +259,20 @@ func (bu *BusinessUpdate) ClearWebsite() *BusinessUpdate {
 	return bu
 }
 
+// SetOnSite sets the "on_site" field.
+func (bu *BusinessUpdate) SetOnSite(b bool) *BusinessUpdate {
+	bu.mutation.SetOnSite(b)
+	return bu
+}
+
+// SetNillableOnSite sets the "on_site" field if the given value is not nil.
+func (bu *BusinessUpdate) SetNillableOnSite(b *bool) *BusinessUpdate {
+	if b != nil {
+		bu.SetOnSite(*b)
+	}
+	return bu
+}
+
 // SetActive sets the "active" field.
 func (bu *BusinessUpdate) SetActive(b bool) *BusinessUpdate {
 	bu.mutation.SetActive(b)
@@ -172,6 +283,20 @@ func (bu *BusinessUpdate) SetActive(b bool) *BusinessUpdate {
 func (bu *BusinessUpdate) SetNillableActive(b *bool) *BusinessUpdate {
 	if b != nil {
 		bu.SetActive(*b)
+	}
+	return bu
+}
+
+// SetLive sets the "live" field.
+func (bu *BusinessUpdate) SetLive(b bool) *BusinessUpdate {
+	bu.mutation.SetLive(b)
+	return bu
+}
+
+// SetNillableLive sets the "live" field if the given value is not nil.
+func (bu *BusinessUpdate) SetNillableLive(b *bool) *BusinessUpdate {
+	if b != nil {
+		bu.SetLive(*b)
 	}
 	return bu
 }
@@ -221,6 +346,20 @@ func (bu *BusinessUpdate) SetNillableDisableReason(s *string) *BusinessUpdate {
 // ClearDisableReason clears the value of the "disable_reason" field.
 func (bu *BusinessUpdate) ClearDisableReason() *BusinessUpdate {
 	bu.mutation.ClearDisableReason()
+	return bu
+}
+
+// SetVerificationStatus sets the "verification_status" field.
+func (bu *BusinessUpdate) SetVerificationStatus(bs business.VerificationStatus) *BusinessUpdate {
+	bu.mutation.SetVerificationStatus(bs)
+	return bu
+}
+
+// SetNillableVerificationStatus sets the "verification_status" field if the given value is not nil.
+func (bu *BusinessUpdate) SetNillableVerificationStatus(bs *business.VerificationStatus) *BusinessUpdate {
+	if bs != nil {
+		bu.SetVerificationStatus(*bs)
+	}
 	return bu
 }
 
@@ -303,6 +442,25 @@ func (bu *BusinessUpdate) AddManages(m ...*Manager) *BusinessUpdate {
 	return bu.AddManageIDs(ids...)
 }
 
+// SetRegisteredByUserID sets the "registered_by_user" edge to the User entity by ID.
+func (bu *BusinessUpdate) SetRegisteredByUserID(id string) *BusinessUpdate {
+	bu.mutation.SetRegisteredByUserID(id)
+	return bu
+}
+
+// SetNillableRegisteredByUserID sets the "registered_by_user" edge to the User entity by ID if the given value is not nil.
+func (bu *BusinessUpdate) SetNillableRegisteredByUserID(id *string) *BusinessUpdate {
+	if id != nil {
+		bu = bu.SetRegisteredByUserID(*id)
+	}
+	return bu
+}
+
+// SetRegisteredByUser sets the "registered_by_user" edge to the User entity.
+func (bu *BusinessUpdate) SetRegisteredByUser(u *User) *BusinessUpdate {
+	return bu.SetRegisteredByUserID(u.ID)
+}
+
 // AddVerificationIDs adds the "verifications" edge to the Verification entity by IDs.
 func (bu *BusinessUpdate) AddVerificationIDs(ids ...string) *BusinessUpdate {
 	bu.mutation.AddVerificationIDs(ids...)
@@ -334,18 +492,48 @@ func (bu *BusinessUpdate) AddRequestVerifications(r ...*RequestVerification) *Bu
 }
 
 // AddBusinessDocumentIDs adds the "business_documents" edge to the BusinessDocument entity by IDs.
-func (bu *BusinessUpdate) AddBusinessDocumentIDs(ids ...int) *BusinessUpdate {
+func (bu *BusinessUpdate) AddBusinessDocumentIDs(ids ...string) *BusinessUpdate {
 	bu.mutation.AddBusinessDocumentIDs(ids...)
 	return bu
 }
 
 // AddBusinessDocuments adds the "business_documents" edges to the BusinessDocument entity.
 func (bu *BusinessUpdate) AddBusinessDocuments(b ...*BusinessDocument) *BusinessUpdate {
-	ids := make([]int, len(b))
+	ids := make([]string, len(b))
 	for i := range b {
 		ids[i] = b[i].ID
 	}
 	return bu.AddBusinessDocumentIDs(ids...)
+}
+
+// AddLocationIDs adds the "locations" edge to the BusinessLocation entity by IDs.
+func (bu *BusinessUpdate) AddLocationIDs(ids ...string) *BusinessUpdate {
+	bu.mutation.AddLocationIDs(ids...)
+	return bu
+}
+
+// AddLocations adds the "locations" edges to the BusinessLocation entity.
+func (bu *BusinessUpdate) AddLocations(b ...*BusinessLocation) *BusinessUpdate {
+	ids := make([]string, len(b))
+	for i := range b {
+		ids[i] = b[i].ID
+	}
+	return bu.AddLocationIDs(ids...)
+}
+
+// AddKybMessageIDs adds the "kyb_messages" edge to the KYBMessage entity by IDs.
+func (bu *BusinessUpdate) AddKybMessageIDs(ids ...string) *BusinessUpdate {
+	bu.mutation.AddKybMessageIDs(ids...)
+	return bu
+}
+
+// AddKybMessages adds the "kyb_messages" edges to the KYBMessage entity.
+func (bu *BusinessUpdate) AddKybMessages(k ...*KYBMessage) *BusinessUpdate {
+	ids := make([]string, len(k))
+	for i := range k {
+		ids[i] = k[i].ID
+	}
+	return bu.AddKybMessageIDs(ids...)
 }
 
 // Mutation returns the BusinessMutation object of the builder.
@@ -416,6 +604,12 @@ func (bu *BusinessUpdate) RemoveManages(m ...*Manager) *BusinessUpdate {
 	return bu.RemoveManageIDs(ids...)
 }
 
+// ClearRegisteredByUser clears the "registered_by_user" edge to the User entity.
+func (bu *BusinessUpdate) ClearRegisteredByUser() *BusinessUpdate {
+	bu.mutation.ClearRegisteredByUser()
+	return bu
+}
+
 // ClearVerifications clears all "verifications" edges to the Verification entity.
 func (bu *BusinessUpdate) ClearVerifications() *BusinessUpdate {
 	bu.mutation.ClearVerifications()
@@ -465,18 +659,60 @@ func (bu *BusinessUpdate) ClearBusinessDocuments() *BusinessUpdate {
 }
 
 // RemoveBusinessDocumentIDs removes the "business_documents" edge to BusinessDocument entities by IDs.
-func (bu *BusinessUpdate) RemoveBusinessDocumentIDs(ids ...int) *BusinessUpdate {
+func (bu *BusinessUpdate) RemoveBusinessDocumentIDs(ids ...string) *BusinessUpdate {
 	bu.mutation.RemoveBusinessDocumentIDs(ids...)
 	return bu
 }
 
 // RemoveBusinessDocuments removes "business_documents" edges to BusinessDocument entities.
 func (bu *BusinessUpdate) RemoveBusinessDocuments(b ...*BusinessDocument) *BusinessUpdate {
-	ids := make([]int, len(b))
+	ids := make([]string, len(b))
 	for i := range b {
 		ids[i] = b[i].ID
 	}
 	return bu.RemoveBusinessDocumentIDs(ids...)
+}
+
+// ClearLocations clears all "locations" edges to the BusinessLocation entity.
+func (bu *BusinessUpdate) ClearLocations() *BusinessUpdate {
+	bu.mutation.ClearLocations()
+	return bu
+}
+
+// RemoveLocationIDs removes the "locations" edge to BusinessLocation entities by IDs.
+func (bu *BusinessUpdate) RemoveLocationIDs(ids ...string) *BusinessUpdate {
+	bu.mutation.RemoveLocationIDs(ids...)
+	return bu
+}
+
+// RemoveLocations removes "locations" edges to BusinessLocation entities.
+func (bu *BusinessUpdate) RemoveLocations(b ...*BusinessLocation) *BusinessUpdate {
+	ids := make([]string, len(b))
+	for i := range b {
+		ids[i] = b[i].ID
+	}
+	return bu.RemoveLocationIDs(ids...)
+}
+
+// ClearKybMessages clears all "kyb_messages" edges to the KYBMessage entity.
+func (bu *BusinessUpdate) ClearKybMessages() *BusinessUpdate {
+	bu.mutation.ClearKybMessages()
+	return bu
+}
+
+// RemoveKybMessageIDs removes the "kyb_messages" edge to KYBMessage entities by IDs.
+func (bu *BusinessUpdate) RemoveKybMessageIDs(ids ...string) *BusinessUpdate {
+	bu.mutation.RemoveKybMessageIDs(ids...)
+	return bu
+}
+
+// RemoveKybMessages removes "kyb_messages" edges to KYBMessage entities.
+func (bu *BusinessUpdate) RemoveKybMessages(k ...*KYBMessage) *BusinessUpdate {
+	ids := make([]string, len(k))
+	for i := range k {
+		ids[i] = k[i].ID
+	}
+	return bu.RemoveKybMessageIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -522,6 +758,11 @@ func (bu *BusinessUpdate) check() error {
 			return &ValidationError{Name: "name", err: fmt.Errorf(`ent: validator failed for field "Business.name": %w`, err)}
 		}
 	}
+	if v, ok := bu.mutation.About(); ok {
+		if err := business.AboutValidator(v); err != nil {
+			return &ValidationError{Name: "about", err: fmt.Errorf(`ent: validator failed for field "Business.about": %w`, err)}
+		}
+	}
 	if v, ok := bu.mutation.Email(); ok {
 		if err := business.EmailValidator(v); err != nil {
 			return &ValidationError{Name: "email", err: fmt.Errorf(`ent: validator failed for field "Business.email": %w`, err)}
@@ -530,6 +771,11 @@ func (bu *BusinessUpdate) check() error {
 	if v, ok := bu.mutation.Website(); ok {
 		if err := business.WebsiteValidator(v); err != nil {
 			return &ValidationError{Name: "website", err: fmt.Errorf(`ent: validator failed for field "Business.website": %w`, err)}
+		}
+	}
+	if v, ok := bu.mutation.VerificationStatus(); ok {
+		if err := business.VerificationStatusValidator(v); err != nil {
+			return &ValidationError{Name: "verification_status", err: fmt.Errorf(`ent: validator failed for field "Business.verification_status": %w`, err)}
 		}
 	}
 	return nil
@@ -565,14 +811,35 @@ func (bu *BusinessUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if value, ok := bu.mutation.About(); ok {
 		_spec.SetField(business.FieldAbout, field.TypeString, value)
 	}
-	if bu.mutation.AboutCleared() {
-		_spec.ClearField(business.FieldAbout, field.TypeString)
-	}
 	if value, ok := bu.mutation.Logo(); ok {
 		_spec.SetField(business.FieldLogo, field.TypeString, value)
 	}
 	if bu.mutation.LogoCleared() {
 		_spec.ClearField(business.FieldLogo, field.TypeString)
+	}
+	if value, ok := bu.mutation.CoverImage(); ok {
+		_spec.SetField(business.FieldCoverImage, field.TypeString, value)
+	}
+	if bu.mutation.CoverImageCleared() {
+		_spec.ClearField(business.FieldCoverImage, field.TypeString)
+	}
+	if value, ok := bu.mutation.CountryOfIncorporation(); ok {
+		_spec.SetField(business.FieldCountryOfIncorporation, field.TypeString, value)
+	}
+	if bu.mutation.CountryOfIncorporationCleared() {
+		_spec.ClearField(business.FieldCountryOfIncorporation, field.TypeString)
+	}
+	if value, ok := bu.mutation.DateOfIncorporation(); ok {
+		_spec.SetField(business.FieldDateOfIncorporation, field.TypeString, value)
+	}
+	if bu.mutation.DateOfIncorporationCleared() {
+		_spec.ClearField(business.FieldDateOfIncorporation, field.TypeString)
+	}
+	if value, ok := bu.mutation.RegistrationNumber(); ok {
+		_spec.SetField(business.FieldRegistrationNumber, field.TypeString, value)
+	}
+	if bu.mutation.RegistrationNumberCleared() {
+		_spec.ClearField(business.FieldRegistrationNumber, field.TypeString)
 	}
 	if value, ok := bu.mutation.Email(); ok {
 		_spec.SetField(business.FieldEmail, field.TypeString, value)
@@ -583,8 +850,14 @@ func (bu *BusinessUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if bu.mutation.WebsiteCleared() {
 		_spec.ClearField(business.FieldWebsite, field.TypeString)
 	}
+	if value, ok := bu.mutation.OnSite(); ok {
+		_spec.SetField(business.FieldOnSite, field.TypeBool, value)
+	}
 	if value, ok := bu.mutation.Active(); ok {
 		_spec.SetField(business.FieldActive, field.TypeBool, value)
+	}
+	if value, ok := bu.mutation.Live(); ok {
+		_spec.SetField(business.FieldLive, field.TypeBool, value)
 	}
 	if value, ok := bu.mutation.Disabled(); ok {
 		_spec.SetField(business.FieldDisabled, field.TypeBool, value)
@@ -597,6 +870,9 @@ func (bu *BusinessUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if bu.mutation.DisableReasonCleared() {
 		_spec.ClearField(business.FieldDisableReason, field.TypeString)
+	}
+	if value, ok := bu.mutation.VerificationStatus(); ok {
+		_spec.SetField(business.FieldVerificationStatus, field.TypeEnum, value)
 	}
 	if value, ok := bu.mutation.Verified(); ok {
 		_spec.SetField(business.FieldVerified, field.TypeBool, value)
@@ -742,6 +1018,35 @@ func (bu *BusinessUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	if bu.mutation.RegisteredByUserCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   business.RegisteredByUserTable,
+			Columns: []string{business.RegisteredByUserColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeString),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := bu.mutation.RegisteredByUserIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   business.RegisteredByUserTable,
+			Columns: []string{business.RegisteredByUserColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
 	if bu.mutation.VerificationsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
@@ -840,7 +1145,7 @@ func (bu *BusinessUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{business.BusinessDocumentsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(businessdocument.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(businessdocument.FieldID, field.TypeString),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -853,7 +1158,7 @@ func (bu *BusinessUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{business.BusinessDocumentsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(businessdocument.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(businessdocument.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {
@@ -869,7 +1174,97 @@ func (bu *BusinessUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{business.BusinessDocumentsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(businessdocument.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(businessdocument.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if bu.mutation.LocationsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   business.LocationsTable,
+			Columns: []string{business.LocationsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(businesslocation.FieldID, field.TypeString),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := bu.mutation.RemovedLocationsIDs(); len(nodes) > 0 && !bu.mutation.LocationsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   business.LocationsTable,
+			Columns: []string{business.LocationsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(businesslocation.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := bu.mutation.LocationsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   business.LocationsTable,
+			Columns: []string{business.LocationsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(businesslocation.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if bu.mutation.KybMessagesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   business.KybMessagesTable,
+			Columns: []string{business.KybMessagesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(kybmessage.FieldID, field.TypeString),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := bu.mutation.RemovedKybMessagesIDs(); len(nodes) > 0 && !bu.mutation.KybMessagesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   business.KybMessagesTable,
+			Columns: []string{business.KybMessagesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(kybmessage.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := bu.mutation.KybMessagesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   business.KybMessagesTable,
+			Columns: []string{business.KybMessagesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(kybmessage.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {
@@ -965,12 +1360,6 @@ func (buo *BusinessUpdateOne) SetNillableAbout(s *string) *BusinessUpdateOne {
 	return buo
 }
 
-// ClearAbout clears the value of the "about" field.
-func (buo *BusinessUpdateOne) ClearAbout() *BusinessUpdateOne {
-	buo.mutation.ClearAbout()
-	return buo
-}
-
 // SetLogo sets the "logo" field.
 func (buo *BusinessUpdateOne) SetLogo(s string) *BusinessUpdateOne {
 	buo.mutation.SetLogo(s)
@@ -988,6 +1377,106 @@ func (buo *BusinessUpdateOne) SetNillableLogo(s *string) *BusinessUpdateOne {
 // ClearLogo clears the value of the "logo" field.
 func (buo *BusinessUpdateOne) ClearLogo() *BusinessUpdateOne {
 	buo.mutation.ClearLogo()
+	return buo
+}
+
+// SetCoverImage sets the "cover_image" field.
+func (buo *BusinessUpdateOne) SetCoverImage(s string) *BusinessUpdateOne {
+	buo.mutation.SetCoverImage(s)
+	return buo
+}
+
+// SetNillableCoverImage sets the "cover_image" field if the given value is not nil.
+func (buo *BusinessUpdateOne) SetNillableCoverImage(s *string) *BusinessUpdateOne {
+	if s != nil {
+		buo.SetCoverImage(*s)
+	}
+	return buo
+}
+
+// ClearCoverImage clears the value of the "cover_image" field.
+func (buo *BusinessUpdateOne) ClearCoverImage() *BusinessUpdateOne {
+	buo.mutation.ClearCoverImage()
+	return buo
+}
+
+// SetRegisteredBy sets the "registered_by" field.
+func (buo *BusinessUpdateOne) SetRegisteredBy(s string) *BusinessUpdateOne {
+	buo.mutation.SetRegisteredBy(s)
+	return buo
+}
+
+// SetNillableRegisteredBy sets the "registered_by" field if the given value is not nil.
+func (buo *BusinessUpdateOne) SetNillableRegisteredBy(s *string) *BusinessUpdateOne {
+	if s != nil {
+		buo.SetRegisteredBy(*s)
+	}
+	return buo
+}
+
+// ClearRegisteredBy clears the value of the "registered_by" field.
+func (buo *BusinessUpdateOne) ClearRegisteredBy() *BusinessUpdateOne {
+	buo.mutation.ClearRegisteredBy()
+	return buo
+}
+
+// SetCountryOfIncorporation sets the "country_of_incorporation" field.
+func (buo *BusinessUpdateOne) SetCountryOfIncorporation(s string) *BusinessUpdateOne {
+	buo.mutation.SetCountryOfIncorporation(s)
+	return buo
+}
+
+// SetNillableCountryOfIncorporation sets the "country_of_incorporation" field if the given value is not nil.
+func (buo *BusinessUpdateOne) SetNillableCountryOfIncorporation(s *string) *BusinessUpdateOne {
+	if s != nil {
+		buo.SetCountryOfIncorporation(*s)
+	}
+	return buo
+}
+
+// ClearCountryOfIncorporation clears the value of the "country_of_incorporation" field.
+func (buo *BusinessUpdateOne) ClearCountryOfIncorporation() *BusinessUpdateOne {
+	buo.mutation.ClearCountryOfIncorporation()
+	return buo
+}
+
+// SetDateOfIncorporation sets the "date_of_incorporation" field.
+func (buo *BusinessUpdateOne) SetDateOfIncorporation(s string) *BusinessUpdateOne {
+	buo.mutation.SetDateOfIncorporation(s)
+	return buo
+}
+
+// SetNillableDateOfIncorporation sets the "date_of_incorporation" field if the given value is not nil.
+func (buo *BusinessUpdateOne) SetNillableDateOfIncorporation(s *string) *BusinessUpdateOne {
+	if s != nil {
+		buo.SetDateOfIncorporation(*s)
+	}
+	return buo
+}
+
+// ClearDateOfIncorporation clears the value of the "date_of_incorporation" field.
+func (buo *BusinessUpdateOne) ClearDateOfIncorporation() *BusinessUpdateOne {
+	buo.mutation.ClearDateOfIncorporation()
+	return buo
+}
+
+// SetRegistrationNumber sets the "registration_number" field.
+func (buo *BusinessUpdateOne) SetRegistrationNumber(s string) *BusinessUpdateOne {
+	buo.mutation.SetRegistrationNumber(s)
+	return buo
+}
+
+// SetNillableRegistrationNumber sets the "registration_number" field if the given value is not nil.
+func (buo *BusinessUpdateOne) SetNillableRegistrationNumber(s *string) *BusinessUpdateOne {
+	if s != nil {
+		buo.SetRegistrationNumber(*s)
+	}
+	return buo
+}
+
+// ClearRegistrationNumber clears the value of the "registration_number" field.
+func (buo *BusinessUpdateOne) ClearRegistrationNumber() *BusinessUpdateOne {
+	buo.mutation.ClearRegistrationNumber()
 	return buo
 }
 
@@ -1025,6 +1514,20 @@ func (buo *BusinessUpdateOne) ClearWebsite() *BusinessUpdateOne {
 	return buo
 }
 
+// SetOnSite sets the "on_site" field.
+func (buo *BusinessUpdateOne) SetOnSite(b bool) *BusinessUpdateOne {
+	buo.mutation.SetOnSite(b)
+	return buo
+}
+
+// SetNillableOnSite sets the "on_site" field if the given value is not nil.
+func (buo *BusinessUpdateOne) SetNillableOnSite(b *bool) *BusinessUpdateOne {
+	if b != nil {
+		buo.SetOnSite(*b)
+	}
+	return buo
+}
+
 // SetActive sets the "active" field.
 func (buo *BusinessUpdateOne) SetActive(b bool) *BusinessUpdateOne {
 	buo.mutation.SetActive(b)
@@ -1035,6 +1538,20 @@ func (buo *BusinessUpdateOne) SetActive(b bool) *BusinessUpdateOne {
 func (buo *BusinessUpdateOne) SetNillableActive(b *bool) *BusinessUpdateOne {
 	if b != nil {
 		buo.SetActive(*b)
+	}
+	return buo
+}
+
+// SetLive sets the "live" field.
+func (buo *BusinessUpdateOne) SetLive(b bool) *BusinessUpdateOne {
+	buo.mutation.SetLive(b)
+	return buo
+}
+
+// SetNillableLive sets the "live" field if the given value is not nil.
+func (buo *BusinessUpdateOne) SetNillableLive(b *bool) *BusinessUpdateOne {
+	if b != nil {
+		buo.SetLive(*b)
 	}
 	return buo
 }
@@ -1084,6 +1601,20 @@ func (buo *BusinessUpdateOne) SetNillableDisableReason(s *string) *BusinessUpdat
 // ClearDisableReason clears the value of the "disable_reason" field.
 func (buo *BusinessUpdateOne) ClearDisableReason() *BusinessUpdateOne {
 	buo.mutation.ClearDisableReason()
+	return buo
+}
+
+// SetVerificationStatus sets the "verification_status" field.
+func (buo *BusinessUpdateOne) SetVerificationStatus(bs business.VerificationStatus) *BusinessUpdateOne {
+	buo.mutation.SetVerificationStatus(bs)
+	return buo
+}
+
+// SetNillableVerificationStatus sets the "verification_status" field if the given value is not nil.
+func (buo *BusinessUpdateOne) SetNillableVerificationStatus(bs *business.VerificationStatus) *BusinessUpdateOne {
+	if bs != nil {
+		buo.SetVerificationStatus(*bs)
+	}
 	return buo
 }
 
@@ -1166,6 +1697,25 @@ func (buo *BusinessUpdateOne) AddManages(m ...*Manager) *BusinessUpdateOne {
 	return buo.AddManageIDs(ids...)
 }
 
+// SetRegisteredByUserID sets the "registered_by_user" edge to the User entity by ID.
+func (buo *BusinessUpdateOne) SetRegisteredByUserID(id string) *BusinessUpdateOne {
+	buo.mutation.SetRegisteredByUserID(id)
+	return buo
+}
+
+// SetNillableRegisteredByUserID sets the "registered_by_user" edge to the User entity by ID if the given value is not nil.
+func (buo *BusinessUpdateOne) SetNillableRegisteredByUserID(id *string) *BusinessUpdateOne {
+	if id != nil {
+		buo = buo.SetRegisteredByUserID(*id)
+	}
+	return buo
+}
+
+// SetRegisteredByUser sets the "registered_by_user" edge to the User entity.
+func (buo *BusinessUpdateOne) SetRegisteredByUser(u *User) *BusinessUpdateOne {
+	return buo.SetRegisteredByUserID(u.ID)
+}
+
 // AddVerificationIDs adds the "verifications" edge to the Verification entity by IDs.
 func (buo *BusinessUpdateOne) AddVerificationIDs(ids ...string) *BusinessUpdateOne {
 	buo.mutation.AddVerificationIDs(ids...)
@@ -1197,18 +1747,48 @@ func (buo *BusinessUpdateOne) AddRequestVerifications(r ...*RequestVerification)
 }
 
 // AddBusinessDocumentIDs adds the "business_documents" edge to the BusinessDocument entity by IDs.
-func (buo *BusinessUpdateOne) AddBusinessDocumentIDs(ids ...int) *BusinessUpdateOne {
+func (buo *BusinessUpdateOne) AddBusinessDocumentIDs(ids ...string) *BusinessUpdateOne {
 	buo.mutation.AddBusinessDocumentIDs(ids...)
 	return buo
 }
 
 // AddBusinessDocuments adds the "business_documents" edges to the BusinessDocument entity.
 func (buo *BusinessUpdateOne) AddBusinessDocuments(b ...*BusinessDocument) *BusinessUpdateOne {
-	ids := make([]int, len(b))
+	ids := make([]string, len(b))
 	for i := range b {
 		ids[i] = b[i].ID
 	}
 	return buo.AddBusinessDocumentIDs(ids...)
+}
+
+// AddLocationIDs adds the "locations" edge to the BusinessLocation entity by IDs.
+func (buo *BusinessUpdateOne) AddLocationIDs(ids ...string) *BusinessUpdateOne {
+	buo.mutation.AddLocationIDs(ids...)
+	return buo
+}
+
+// AddLocations adds the "locations" edges to the BusinessLocation entity.
+func (buo *BusinessUpdateOne) AddLocations(b ...*BusinessLocation) *BusinessUpdateOne {
+	ids := make([]string, len(b))
+	for i := range b {
+		ids[i] = b[i].ID
+	}
+	return buo.AddLocationIDs(ids...)
+}
+
+// AddKybMessageIDs adds the "kyb_messages" edge to the KYBMessage entity by IDs.
+func (buo *BusinessUpdateOne) AddKybMessageIDs(ids ...string) *BusinessUpdateOne {
+	buo.mutation.AddKybMessageIDs(ids...)
+	return buo
+}
+
+// AddKybMessages adds the "kyb_messages" edges to the KYBMessage entity.
+func (buo *BusinessUpdateOne) AddKybMessages(k ...*KYBMessage) *BusinessUpdateOne {
+	ids := make([]string, len(k))
+	for i := range k {
+		ids[i] = k[i].ID
+	}
+	return buo.AddKybMessageIDs(ids...)
 }
 
 // Mutation returns the BusinessMutation object of the builder.
@@ -1279,6 +1859,12 @@ func (buo *BusinessUpdateOne) RemoveManages(m ...*Manager) *BusinessUpdateOne {
 	return buo.RemoveManageIDs(ids...)
 }
 
+// ClearRegisteredByUser clears the "registered_by_user" edge to the User entity.
+func (buo *BusinessUpdateOne) ClearRegisteredByUser() *BusinessUpdateOne {
+	buo.mutation.ClearRegisteredByUser()
+	return buo
+}
+
 // ClearVerifications clears all "verifications" edges to the Verification entity.
 func (buo *BusinessUpdateOne) ClearVerifications() *BusinessUpdateOne {
 	buo.mutation.ClearVerifications()
@@ -1328,18 +1914,60 @@ func (buo *BusinessUpdateOne) ClearBusinessDocuments() *BusinessUpdateOne {
 }
 
 // RemoveBusinessDocumentIDs removes the "business_documents" edge to BusinessDocument entities by IDs.
-func (buo *BusinessUpdateOne) RemoveBusinessDocumentIDs(ids ...int) *BusinessUpdateOne {
+func (buo *BusinessUpdateOne) RemoveBusinessDocumentIDs(ids ...string) *BusinessUpdateOne {
 	buo.mutation.RemoveBusinessDocumentIDs(ids...)
 	return buo
 }
 
 // RemoveBusinessDocuments removes "business_documents" edges to BusinessDocument entities.
 func (buo *BusinessUpdateOne) RemoveBusinessDocuments(b ...*BusinessDocument) *BusinessUpdateOne {
-	ids := make([]int, len(b))
+	ids := make([]string, len(b))
 	for i := range b {
 		ids[i] = b[i].ID
 	}
 	return buo.RemoveBusinessDocumentIDs(ids...)
+}
+
+// ClearLocations clears all "locations" edges to the BusinessLocation entity.
+func (buo *BusinessUpdateOne) ClearLocations() *BusinessUpdateOne {
+	buo.mutation.ClearLocations()
+	return buo
+}
+
+// RemoveLocationIDs removes the "locations" edge to BusinessLocation entities by IDs.
+func (buo *BusinessUpdateOne) RemoveLocationIDs(ids ...string) *BusinessUpdateOne {
+	buo.mutation.RemoveLocationIDs(ids...)
+	return buo
+}
+
+// RemoveLocations removes "locations" edges to BusinessLocation entities.
+func (buo *BusinessUpdateOne) RemoveLocations(b ...*BusinessLocation) *BusinessUpdateOne {
+	ids := make([]string, len(b))
+	for i := range b {
+		ids[i] = b[i].ID
+	}
+	return buo.RemoveLocationIDs(ids...)
+}
+
+// ClearKybMessages clears all "kyb_messages" edges to the KYBMessage entity.
+func (buo *BusinessUpdateOne) ClearKybMessages() *BusinessUpdateOne {
+	buo.mutation.ClearKybMessages()
+	return buo
+}
+
+// RemoveKybMessageIDs removes the "kyb_messages" edge to KYBMessage entities by IDs.
+func (buo *BusinessUpdateOne) RemoveKybMessageIDs(ids ...string) *BusinessUpdateOne {
+	buo.mutation.RemoveKybMessageIDs(ids...)
+	return buo
+}
+
+// RemoveKybMessages removes "kyb_messages" edges to KYBMessage entities.
+func (buo *BusinessUpdateOne) RemoveKybMessages(k ...*KYBMessage) *BusinessUpdateOne {
+	ids := make([]string, len(k))
+	for i := range k {
+		ids[i] = k[i].ID
+	}
+	return buo.RemoveKybMessageIDs(ids...)
 }
 
 // Where appends a list predicates to the BusinessUpdate builder.
@@ -1398,6 +2026,11 @@ func (buo *BusinessUpdateOne) check() error {
 			return &ValidationError{Name: "name", err: fmt.Errorf(`ent: validator failed for field "Business.name": %w`, err)}
 		}
 	}
+	if v, ok := buo.mutation.About(); ok {
+		if err := business.AboutValidator(v); err != nil {
+			return &ValidationError{Name: "about", err: fmt.Errorf(`ent: validator failed for field "Business.about": %w`, err)}
+		}
+	}
 	if v, ok := buo.mutation.Email(); ok {
 		if err := business.EmailValidator(v); err != nil {
 			return &ValidationError{Name: "email", err: fmt.Errorf(`ent: validator failed for field "Business.email": %w`, err)}
@@ -1406,6 +2039,11 @@ func (buo *BusinessUpdateOne) check() error {
 	if v, ok := buo.mutation.Website(); ok {
 		if err := business.WebsiteValidator(v); err != nil {
 			return &ValidationError{Name: "website", err: fmt.Errorf(`ent: validator failed for field "Business.website": %w`, err)}
+		}
+	}
+	if v, ok := buo.mutation.VerificationStatus(); ok {
+		if err := business.VerificationStatusValidator(v); err != nil {
+			return &ValidationError{Name: "verification_status", err: fmt.Errorf(`ent: validator failed for field "Business.verification_status": %w`, err)}
 		}
 	}
 	return nil
@@ -1458,14 +2096,35 @@ func (buo *BusinessUpdateOne) sqlSave(ctx context.Context) (_node *Business, err
 	if value, ok := buo.mutation.About(); ok {
 		_spec.SetField(business.FieldAbout, field.TypeString, value)
 	}
-	if buo.mutation.AboutCleared() {
-		_spec.ClearField(business.FieldAbout, field.TypeString)
-	}
 	if value, ok := buo.mutation.Logo(); ok {
 		_spec.SetField(business.FieldLogo, field.TypeString, value)
 	}
 	if buo.mutation.LogoCleared() {
 		_spec.ClearField(business.FieldLogo, field.TypeString)
+	}
+	if value, ok := buo.mutation.CoverImage(); ok {
+		_spec.SetField(business.FieldCoverImage, field.TypeString, value)
+	}
+	if buo.mutation.CoverImageCleared() {
+		_spec.ClearField(business.FieldCoverImage, field.TypeString)
+	}
+	if value, ok := buo.mutation.CountryOfIncorporation(); ok {
+		_spec.SetField(business.FieldCountryOfIncorporation, field.TypeString, value)
+	}
+	if buo.mutation.CountryOfIncorporationCleared() {
+		_spec.ClearField(business.FieldCountryOfIncorporation, field.TypeString)
+	}
+	if value, ok := buo.mutation.DateOfIncorporation(); ok {
+		_spec.SetField(business.FieldDateOfIncorporation, field.TypeString, value)
+	}
+	if buo.mutation.DateOfIncorporationCleared() {
+		_spec.ClearField(business.FieldDateOfIncorporation, field.TypeString)
+	}
+	if value, ok := buo.mutation.RegistrationNumber(); ok {
+		_spec.SetField(business.FieldRegistrationNumber, field.TypeString, value)
+	}
+	if buo.mutation.RegistrationNumberCleared() {
+		_spec.ClearField(business.FieldRegistrationNumber, field.TypeString)
 	}
 	if value, ok := buo.mutation.Email(); ok {
 		_spec.SetField(business.FieldEmail, field.TypeString, value)
@@ -1476,8 +2135,14 @@ func (buo *BusinessUpdateOne) sqlSave(ctx context.Context) (_node *Business, err
 	if buo.mutation.WebsiteCleared() {
 		_spec.ClearField(business.FieldWebsite, field.TypeString)
 	}
+	if value, ok := buo.mutation.OnSite(); ok {
+		_spec.SetField(business.FieldOnSite, field.TypeBool, value)
+	}
 	if value, ok := buo.mutation.Active(); ok {
 		_spec.SetField(business.FieldActive, field.TypeBool, value)
+	}
+	if value, ok := buo.mutation.Live(); ok {
+		_spec.SetField(business.FieldLive, field.TypeBool, value)
 	}
 	if value, ok := buo.mutation.Disabled(); ok {
 		_spec.SetField(business.FieldDisabled, field.TypeBool, value)
@@ -1490,6 +2155,9 @@ func (buo *BusinessUpdateOne) sqlSave(ctx context.Context) (_node *Business, err
 	}
 	if buo.mutation.DisableReasonCleared() {
 		_spec.ClearField(business.FieldDisableReason, field.TypeString)
+	}
+	if value, ok := buo.mutation.VerificationStatus(); ok {
+		_spec.SetField(business.FieldVerificationStatus, field.TypeEnum, value)
 	}
 	if value, ok := buo.mutation.Verified(); ok {
 		_spec.SetField(business.FieldVerified, field.TypeBool, value)
@@ -1635,6 +2303,35 @@ func (buo *BusinessUpdateOne) sqlSave(ctx context.Context) (_node *Business, err
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	if buo.mutation.RegisteredByUserCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   business.RegisteredByUserTable,
+			Columns: []string{business.RegisteredByUserColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeString),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := buo.mutation.RegisteredByUserIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   business.RegisteredByUserTable,
+			Columns: []string{business.RegisteredByUserColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
 	if buo.mutation.VerificationsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
@@ -1733,7 +2430,7 @@ func (buo *BusinessUpdateOne) sqlSave(ctx context.Context) (_node *Business, err
 			Columns: []string{business.BusinessDocumentsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(businessdocument.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(businessdocument.FieldID, field.TypeString),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -1746,7 +2443,7 @@ func (buo *BusinessUpdateOne) sqlSave(ctx context.Context) (_node *Business, err
 			Columns: []string{business.BusinessDocumentsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(businessdocument.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(businessdocument.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {
@@ -1762,7 +2459,97 @@ func (buo *BusinessUpdateOne) sqlSave(ctx context.Context) (_node *Business, err
 			Columns: []string{business.BusinessDocumentsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(businessdocument.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(businessdocument.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if buo.mutation.LocationsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   business.LocationsTable,
+			Columns: []string{business.LocationsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(businesslocation.FieldID, field.TypeString),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := buo.mutation.RemovedLocationsIDs(); len(nodes) > 0 && !buo.mutation.LocationsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   business.LocationsTable,
+			Columns: []string{business.LocationsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(businesslocation.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := buo.mutation.LocationsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   business.LocationsTable,
+			Columns: []string{business.LocationsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(businesslocation.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if buo.mutation.KybMessagesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   business.KybMessagesTable,
+			Columns: []string{business.KybMessagesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(kybmessage.FieldID, field.TypeString),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := buo.mutation.RemovedKybMessagesIDs(); len(nodes) > 0 && !buo.mutation.KybMessagesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   business.KybMessagesTable,
+			Columns: []string{business.KybMessagesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(kybmessage.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := buo.mutation.KybMessagesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   business.KybMessagesTable,
+			Columns: []string{business.KybMessagesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(kybmessage.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {

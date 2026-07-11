@@ -18,8 +18,14 @@ type Tx struct {
 	BusinessDocument *BusinessDocumentClient
 	// BusinessFeature is the client for interacting with the BusinessFeature builders.
 	BusinessFeature *BusinessFeatureClient
+	// BusinessLocation is the client for interacting with the BusinessLocation builders.
+	BusinessLocation *BusinessLocationClient
 	// BusinessServices is the client for interacting with the BusinessServices builders.
 	BusinessServices *BusinessServicesClient
+	// KYBDocument is the client for interacting with the KYBDocument builders.
+	KYBDocument *KYBDocumentClient
+	// KYBMessage is the client for interacting with the KYBMessage builders.
+	KYBMessage *KYBMessageClient
 	// Manager is the client for interacting with the Manager builders.
 	Manager *ManagerClient
 	// Permission is the client for interacting with the Permission builders.
@@ -30,6 +36,8 @@ type Tx struct {
 	RequestVerification *RequestVerificationClient
 	// Role is the client for interacting with the Role builders.
 	Role *RoleClient
+	// RolePermission is the client for interacting with the RolePermission builders.
+	RolePermission *RolePermissionClient
 	// Service is the client for interacting with the Service builders.
 	Service *ServiceClient
 	// Social is the client for interacting with the Social builders.
@@ -174,12 +182,16 @@ func (tx *Tx) init() {
 	tx.Business = NewBusinessClient(tx.config)
 	tx.BusinessDocument = NewBusinessDocumentClient(tx.config)
 	tx.BusinessFeature = NewBusinessFeatureClient(tx.config)
+	tx.BusinessLocation = NewBusinessLocationClient(tx.config)
 	tx.BusinessServices = NewBusinessServicesClient(tx.config)
+	tx.KYBDocument = NewKYBDocumentClient(tx.config)
+	tx.KYBMessage = NewKYBMessageClient(tx.config)
 	tx.Manager = NewManagerClient(tx.config)
 	tx.Permission = NewPermissionClient(tx.config)
 	tx.Provider = NewProviderClient(tx.config)
 	tx.RequestVerification = NewRequestVerificationClient(tx.config)
 	tx.Role = NewRoleClient(tx.config)
+	tx.RolePermission = NewRolePermissionClient(tx.config)
 	tx.Service = NewServiceClient(tx.config)
 	tx.Social = NewSocialClient(tx.config)
 	tx.User = NewUserClient(tx.config)

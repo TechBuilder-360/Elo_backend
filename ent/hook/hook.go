@@ -45,6 +45,18 @@ func (f BusinessFeatureFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Va
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.BusinessFeatureMutation", m)
 }
 
+// The BusinessLocationFunc type is an adapter to allow the use of ordinary
+// function as BusinessLocation mutator.
+type BusinessLocationFunc func(context.Context, *ent.BusinessLocationMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f BusinessLocationFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.BusinessLocationMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.BusinessLocationMutation", m)
+}
+
 // The BusinessServicesFunc type is an adapter to allow the use of ordinary
 // function as BusinessServices mutator.
 type BusinessServicesFunc func(context.Context, *ent.BusinessServicesMutation) (ent.Value, error)
@@ -55,6 +67,30 @@ func (f BusinessServicesFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.V
 		return f(ctx, mv)
 	}
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.BusinessServicesMutation", m)
+}
+
+// The KYBDocumentFunc type is an adapter to allow the use of ordinary
+// function as KYBDocument mutator.
+type KYBDocumentFunc func(context.Context, *ent.KYBDocumentMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f KYBDocumentFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.KYBDocumentMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.KYBDocumentMutation", m)
+}
+
+// The KYBMessageFunc type is an adapter to allow the use of ordinary
+// function as KYBMessage mutator.
+type KYBMessageFunc func(context.Context, *ent.KYBMessageMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f KYBMessageFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.KYBMessageMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.KYBMessageMutation", m)
 }
 
 // The ManagerFunc type is an adapter to allow the use of ordinary
@@ -115,6 +151,18 @@ func (f RoleFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error)
 		return f(ctx, mv)
 	}
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.RoleMutation", m)
+}
+
+// The RolePermissionFunc type is an adapter to allow the use of ordinary
+// function as RolePermission mutator.
+type RolePermissionFunc func(context.Context, *ent.RolePermissionMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f RolePermissionFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.RolePermissionMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.RolePermissionMutation", m)
 }
 
 // The ServiceFunc type is an adapter to allow the use of ordinary

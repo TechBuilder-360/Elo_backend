@@ -26,6 +26,7 @@ func (User) Fields() []ent.Field {
 		field.String("password").NotEmpty(),
 		field.String("middle_name").Optional(),
 		field.String("display_name").Optional(),
+		field.Time("date_of_birth").Optional(),
 		field.String("email_address").NotEmpty().Unique().Validate(util.ValidateEmail),
 		field.Bool("email_verified").Default(false),
 		field.Time("email_verified_at").Optional(),
@@ -42,6 +43,7 @@ func (User) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.To("manages", Manager.Type),
 		edge.To("user_documents", UserDocument.Type),
+		edge.To("registered_businesses", Business.Type),
 		edge.From("verifications", Verification.Type).
 			Ref("user"),
 		edge.From("request_verifications", RequestVerification.Type).

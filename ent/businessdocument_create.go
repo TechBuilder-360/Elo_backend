@@ -6,12 +6,15 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"time"
 
+	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/Toflex/directory_v2/ent/business"
 	"github.com/Toflex/directory_v2/ent/businessdocument"
+	"github.com/Toflex/directory_v2/ent/kybdocument"
 )
 
 // BusinessDocumentCreate is the builder for creating a BusinessDocument entity.
@@ -20,6 +23,48 @@ type BusinessDocumentCreate struct {
 	mutation *BusinessDocumentMutation
 	hooks    []Hook
 	conflict []sql.ConflictOption
+}
+
+// SetCreatedAt sets the "created_at" field.
+func (bdc *BusinessDocumentCreate) SetCreatedAt(t time.Time) *BusinessDocumentCreate {
+	bdc.mutation.SetCreatedAt(t)
+	return bdc
+}
+
+// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
+func (bdc *BusinessDocumentCreate) SetNillableCreatedAt(t *time.Time) *BusinessDocumentCreate {
+	if t != nil {
+		bdc.SetCreatedAt(*t)
+	}
+	return bdc
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (bdc *BusinessDocumentCreate) SetUpdatedAt(t time.Time) *BusinessDocumentCreate {
+	bdc.mutation.SetUpdatedAt(t)
+	return bdc
+}
+
+// SetNillableUpdatedAt sets the "updated_at" field if the given value is not nil.
+func (bdc *BusinessDocumentCreate) SetNillableUpdatedAt(t *time.Time) *BusinessDocumentCreate {
+	if t != nil {
+		bdc.SetUpdatedAt(*t)
+	}
+	return bdc
+}
+
+// SetDeletedAt sets the "deleted_at" field.
+func (bdc *BusinessDocumentCreate) SetDeletedAt(t time.Time) *BusinessDocumentCreate {
+	bdc.mutation.SetDeletedAt(t)
+	return bdc
+}
+
+// SetNillableDeletedAt sets the "deleted_at" field if the given value is not nil.
+func (bdc *BusinessDocumentCreate) SetNillableDeletedAt(t *time.Time) *BusinessDocumentCreate {
+	if t != nil {
+		bdc.SetDeletedAt(*t)
+	}
+	return bdc
 }
 
 // SetTitle sets the "title" field.
@@ -60,15 +105,44 @@ func (bdc *BusinessDocumentCreate) SetType(b businessdocument.Type) *BusinessDoc
 	return bdc
 }
 
-// SetBusinessDocumentID sets the "business_document" edge to the Business entity by ID.
-func (bdc *BusinessDocumentCreate) SetBusinessDocumentID(id string) *BusinessDocumentCreate {
-	bdc.mutation.SetBusinessDocumentID(id)
+// SetID sets the "id" field.
+func (bdc *BusinessDocumentCreate) SetID(s string) *BusinessDocumentCreate {
+	bdc.mutation.SetID(s)
 	return bdc
 }
 
-// SetBusinessDocument sets the "business_document" edge to the Business entity.
-func (bdc *BusinessDocumentCreate) SetBusinessDocument(b *Business) *BusinessDocumentCreate {
-	return bdc.SetBusinessDocumentID(b.ID)
+// SetNillableID sets the "id" field if the given value is not nil.
+func (bdc *BusinessDocumentCreate) SetNillableID(s *string) *BusinessDocumentCreate {
+	if s != nil {
+		bdc.SetID(*s)
+	}
+	return bdc
+}
+
+// SetBusinessID sets the "business" edge to the Business entity by ID.
+func (bdc *BusinessDocumentCreate) SetBusinessID(id string) *BusinessDocumentCreate {
+	bdc.mutation.SetBusinessID(id)
+	return bdc
+}
+
+// SetBusiness sets the "business" edge to the Business entity.
+func (bdc *BusinessDocumentCreate) SetBusiness(b *Business) *BusinessDocumentCreate {
+	return bdc.SetBusinessID(b.ID)
+}
+
+// AddKybDocumentIDs adds the "kyb_document" edge to the KYBDocument entity by IDs.
+func (bdc *BusinessDocumentCreate) AddKybDocumentIDs(ids ...string) *BusinessDocumentCreate {
+	bdc.mutation.AddKybDocumentIDs(ids...)
+	return bdc
+}
+
+// AddKybDocument adds the "kyb_document" edges to the KYBDocument entity.
+func (bdc *BusinessDocumentCreate) AddKybDocument(k ...*KYBDocument) *BusinessDocumentCreate {
+	ids := make([]string, len(k))
+	for i := range k {
+		ids[i] = k[i].ID
+	}
+	return bdc.AddKybDocumentIDs(ids...)
 }
 
 // Mutation returns the BusinessDocumentMutation object of the builder.
@@ -106,14 +180,32 @@ func (bdc *BusinessDocumentCreate) ExecX(ctx context.Context) {
 
 // defaults sets the default values of the builder before save.
 func (bdc *BusinessDocumentCreate) defaults() {
+	if _, ok := bdc.mutation.CreatedAt(); !ok {
+		v := businessdocument.DefaultCreatedAt()
+		bdc.mutation.SetCreatedAt(v)
+	}
+	if _, ok := bdc.mutation.UpdatedAt(); !ok {
+		v := businessdocument.DefaultUpdatedAt()
+		bdc.mutation.SetUpdatedAt(v)
+	}
 	if _, ok := bdc.mutation.Verified(); !ok {
 		v := businessdocument.DefaultVerified
 		bdc.mutation.SetVerified(v)
+	}
+	if _, ok := bdc.mutation.ID(); !ok {
+		v := businessdocument.DefaultID()
+		bdc.mutation.SetID(v)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
 func (bdc *BusinessDocumentCreate) check() error {
+	if _, ok := bdc.mutation.CreatedAt(); !ok {
+		return &ValidationError{Name: "created_at", err: errors.New(`ent: missing required field "BusinessDocument.created_at"`)}
+	}
+	if _, ok := bdc.mutation.UpdatedAt(); !ok {
+		return &ValidationError{Name: "updated_at", err: errors.New(`ent: missing required field "BusinessDocument.updated_at"`)}
+	}
 	if _, ok := bdc.mutation.Title(); !ok {
 		return &ValidationError{Name: "title", err: errors.New(`ent: missing required field "BusinessDocument.title"`)}
 	}
@@ -149,8 +241,8 @@ func (bdc *BusinessDocumentCreate) check() error {
 			return &ValidationError{Name: "type", err: fmt.Errorf(`ent: validator failed for field "BusinessDocument.type": %w`, err)}
 		}
 	}
-	if len(bdc.mutation.BusinessDocumentIDs()) == 0 {
-		return &ValidationError{Name: "business_document", err: errors.New(`ent: missing required edge "BusinessDocument.business_document"`)}
+	if len(bdc.mutation.BusinessIDs()) == 0 {
+		return &ValidationError{Name: "business", err: errors.New(`ent: missing required edge "BusinessDocument.business"`)}
 	}
 	return nil
 }
@@ -166,8 +258,13 @@ func (bdc *BusinessDocumentCreate) sqlSave(ctx context.Context) (*BusinessDocume
 		}
 		return nil, err
 	}
-	id := _spec.ID.Value.(int64)
-	_node.ID = int(id)
+	if _spec.ID.Value != nil {
+		if id, ok := _spec.ID.Value.(string); ok {
+			_node.ID = id
+		} else {
+			return nil, fmt.Errorf("unexpected BusinessDocument.ID type: %T", _spec.ID.Value)
+		}
+	}
 	bdc.mutation.id = &_node.ID
 	bdc.mutation.done = true
 	return _node, nil
@@ -176,9 +273,25 @@ func (bdc *BusinessDocumentCreate) sqlSave(ctx context.Context) (*BusinessDocume
 func (bdc *BusinessDocumentCreate) createSpec() (*BusinessDocument, *sqlgraph.CreateSpec) {
 	var (
 		_node = &BusinessDocument{config: bdc.config}
-		_spec = sqlgraph.NewCreateSpec(businessdocument.Table, sqlgraph.NewFieldSpec(businessdocument.FieldID, field.TypeInt))
+		_spec = sqlgraph.NewCreateSpec(businessdocument.Table, sqlgraph.NewFieldSpec(businessdocument.FieldID, field.TypeString))
 	)
 	_spec.OnConflict = bdc.conflict
+	if id, ok := bdc.mutation.ID(); ok {
+		_node.ID = id
+		_spec.ID.Value = id
+	}
+	if value, ok := bdc.mutation.CreatedAt(); ok {
+		_spec.SetField(businessdocument.FieldCreatedAt, field.TypeTime, value)
+		_node.CreatedAt = value
+	}
+	if value, ok := bdc.mutation.UpdatedAt(); ok {
+		_spec.SetField(businessdocument.FieldUpdatedAt, field.TypeTime, value)
+		_node.UpdatedAt = value
+	}
+	if value, ok := bdc.mutation.DeletedAt(); ok {
+		_spec.SetField(businessdocument.FieldDeletedAt, field.TypeTime, value)
+		_node.DeletedAt = &value
+	}
 	if value, ok := bdc.mutation.Title(); ok {
 		_spec.SetField(businessdocument.FieldTitle, field.TypeString, value)
 		_node.Title = value
@@ -199,12 +312,12 @@ func (bdc *BusinessDocumentCreate) createSpec() (*BusinessDocument, *sqlgraph.Cr
 		_spec.SetField(businessdocument.FieldType, field.TypeEnum, value)
 		_node.Type = value
 	}
-	if nodes := bdc.mutation.BusinessDocumentIDs(); len(nodes) > 0 {
+	if nodes := bdc.mutation.BusinessIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   businessdocument.BusinessDocumentTable,
-			Columns: []string{businessdocument.BusinessDocumentColumn},
+			Table:   businessdocument.BusinessTable,
+			Columns: []string{businessdocument.BusinessColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(business.FieldID, field.TypeString),
@@ -216,6 +329,22 @@ func (bdc *BusinessDocumentCreate) createSpec() (*BusinessDocument, *sqlgraph.Cr
 		_node.business_business_documents = &nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
+	if nodes := bdc.mutation.KybDocumentIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   businessdocument.KybDocumentTable,
+			Columns: businessdocument.KybDocumentPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(kybdocument.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
 	return _node, _spec
 }
 
@@ -223,7 +352,7 @@ func (bdc *BusinessDocumentCreate) createSpec() (*BusinessDocument, *sqlgraph.Cr
 // of the `INSERT` statement. For example:
 //
 //	client.BusinessDocument.Create().
-//		SetTitle(v).
+//		SetCreatedAt(v).
 //		OnConflict(
 //			// Update the row with the new values
 //			// the was proposed for insertion.
@@ -232,7 +361,7 @@ func (bdc *BusinessDocumentCreate) createSpec() (*BusinessDocument, *sqlgraph.Cr
 //		// Override some of the fields with custom
 //		// update values.
 //		Update(func(u *ent.BusinessDocumentUpsert) {
-//			SetTitle(v+v).
+//			SetCreatedAt(v+v).
 //		}).
 //		Exec(ctx)
 func (bdc *BusinessDocumentCreate) OnConflict(opts ...sql.ConflictOption) *BusinessDocumentUpsertOne {
@@ -267,6 +396,36 @@ type (
 		*sql.UpdateSet
 	}
 )
+
+// SetUpdatedAt sets the "updated_at" field.
+func (u *BusinessDocumentUpsert) SetUpdatedAt(v time.Time) *BusinessDocumentUpsert {
+	u.Set(businessdocument.FieldUpdatedAt, v)
+	return u
+}
+
+// UpdateUpdatedAt sets the "updated_at" field to the value that was provided on create.
+func (u *BusinessDocumentUpsert) UpdateUpdatedAt() *BusinessDocumentUpsert {
+	u.SetExcluded(businessdocument.FieldUpdatedAt)
+	return u
+}
+
+// SetDeletedAt sets the "deleted_at" field.
+func (u *BusinessDocumentUpsert) SetDeletedAt(v time.Time) *BusinessDocumentUpsert {
+	u.Set(businessdocument.FieldDeletedAt, v)
+	return u
+}
+
+// UpdateDeletedAt sets the "deleted_at" field to the value that was provided on create.
+func (u *BusinessDocumentUpsert) UpdateDeletedAt() *BusinessDocumentUpsert {
+	u.SetExcluded(businessdocument.FieldDeletedAt)
+	return u
+}
+
+// ClearDeletedAt clears the value of the "deleted_at" field.
+func (u *BusinessDocumentUpsert) ClearDeletedAt() *BusinessDocumentUpsert {
+	u.SetNull(businessdocument.FieldDeletedAt)
+	return u
+}
 
 // SetTitle sets the "title" field.
 func (u *BusinessDocumentUpsert) SetTitle(v string) *BusinessDocumentUpsert {
@@ -328,16 +487,27 @@ func (u *BusinessDocumentUpsert) UpdateType() *BusinessDocumentUpsert {
 	return u
 }
 
-// UpdateNewValues updates the mutable fields using the new values that were set on create.
+// UpdateNewValues updates the mutable fields using the new values that were set on create except the ID field.
 // Using this option is equivalent to using:
 //
 //	client.BusinessDocument.Create().
 //		OnConflict(
 //			sql.ResolveWithNewValues(),
+//			sql.ResolveWith(func(u *sql.UpdateSet) {
+//				u.SetIgnore(businessdocument.FieldID)
+//			}),
 //		).
 //		Exec(ctx)
 func (u *BusinessDocumentUpsertOne) UpdateNewValues() *BusinessDocumentUpsertOne {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
+	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(s *sql.UpdateSet) {
+		if _, exists := u.create.mutation.ID(); exists {
+			s.SetIgnore(businessdocument.FieldID)
+		}
+		if _, exists := u.create.mutation.CreatedAt(); exists {
+			s.SetIgnore(businessdocument.FieldCreatedAt)
+		}
+	}))
 	return u
 }
 
@@ -366,6 +536,41 @@ func (u *BusinessDocumentUpsertOne) Update(set func(*BusinessDocumentUpsert)) *B
 		set(&BusinessDocumentUpsert{UpdateSet: update})
 	}))
 	return u
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (u *BusinessDocumentUpsertOne) SetUpdatedAt(v time.Time) *BusinessDocumentUpsertOne {
+	return u.Update(func(s *BusinessDocumentUpsert) {
+		s.SetUpdatedAt(v)
+	})
+}
+
+// UpdateUpdatedAt sets the "updated_at" field to the value that was provided on create.
+func (u *BusinessDocumentUpsertOne) UpdateUpdatedAt() *BusinessDocumentUpsertOne {
+	return u.Update(func(s *BusinessDocumentUpsert) {
+		s.UpdateUpdatedAt()
+	})
+}
+
+// SetDeletedAt sets the "deleted_at" field.
+func (u *BusinessDocumentUpsertOne) SetDeletedAt(v time.Time) *BusinessDocumentUpsertOne {
+	return u.Update(func(s *BusinessDocumentUpsert) {
+		s.SetDeletedAt(v)
+	})
+}
+
+// UpdateDeletedAt sets the "deleted_at" field to the value that was provided on create.
+func (u *BusinessDocumentUpsertOne) UpdateDeletedAt() *BusinessDocumentUpsertOne {
+	return u.Update(func(s *BusinessDocumentUpsert) {
+		s.UpdateDeletedAt()
+	})
+}
+
+// ClearDeletedAt clears the value of the "deleted_at" field.
+func (u *BusinessDocumentUpsertOne) ClearDeletedAt() *BusinessDocumentUpsertOne {
+	return u.Update(func(s *BusinessDocumentUpsert) {
+		s.ClearDeletedAt()
+	})
 }
 
 // SetTitle sets the "title" field.
@@ -454,7 +659,12 @@ func (u *BusinessDocumentUpsertOne) ExecX(ctx context.Context) {
 }
 
 // Exec executes the UPSERT query and returns the inserted/updated ID.
-func (u *BusinessDocumentUpsertOne) ID(ctx context.Context) (id int, err error) {
+func (u *BusinessDocumentUpsertOne) ID(ctx context.Context) (id string, err error) {
+	if u.create.driver.Dialect() == dialect.MySQL {
+		// In case of "ON CONFLICT", there is no way to get back non-numeric ID
+		// fields from the database since MySQL does not support the RETURNING clause.
+		return id, errors.New("ent: BusinessDocumentUpsertOne.ID is not supported by MySQL driver. Use BusinessDocumentUpsertOne.Exec instead")
+	}
 	node, err := u.create.Save(ctx)
 	if err != nil {
 		return id, err
@@ -463,7 +673,7 @@ func (u *BusinessDocumentUpsertOne) ID(ctx context.Context) (id int, err error) 
 }
 
 // IDX is like ID, but panics if an error occurs.
-func (u *BusinessDocumentUpsertOne) IDX(ctx context.Context) int {
+func (u *BusinessDocumentUpsertOne) IDX(ctx context.Context) string {
 	id, err := u.ID(ctx)
 	if err != nil {
 		panic(err)
@@ -518,10 +728,6 @@ func (bdcb *BusinessDocumentCreateBulk) Save(ctx context.Context) ([]*BusinessDo
 					return nil, err
 				}
 				mutation.id = &nodes[i].ID
-				if specs[i].ID.Value != nil {
-					id := specs[i].ID.Value.(int64)
-					nodes[i].ID = int(id)
-				}
 				mutation.done = true
 				return nodes[i], nil
 			})
@@ -573,7 +779,7 @@ func (bdcb *BusinessDocumentCreateBulk) ExecX(ctx context.Context) {
 //		// Override some of the fields with custom
 //		// update values.
 //		Update(func(u *ent.BusinessDocumentUpsert) {
-//			SetTitle(v+v).
+//			SetCreatedAt(v+v).
 //		}).
 //		Exec(ctx)
 func (bdcb *BusinessDocumentCreateBulk) OnConflict(opts ...sql.ConflictOption) *BusinessDocumentUpsertBulk {
@@ -608,10 +814,23 @@ type BusinessDocumentUpsertBulk struct {
 //	client.BusinessDocument.Create().
 //		OnConflict(
 //			sql.ResolveWithNewValues(),
+//			sql.ResolveWith(func(u *sql.UpdateSet) {
+//				u.SetIgnore(businessdocument.FieldID)
+//			}),
 //		).
 //		Exec(ctx)
 func (u *BusinessDocumentUpsertBulk) UpdateNewValues() *BusinessDocumentUpsertBulk {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
+	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(s *sql.UpdateSet) {
+		for _, b := range u.create.builders {
+			if _, exists := b.mutation.ID(); exists {
+				s.SetIgnore(businessdocument.FieldID)
+			}
+			if _, exists := b.mutation.CreatedAt(); exists {
+				s.SetIgnore(businessdocument.FieldCreatedAt)
+			}
+		}
+	}))
 	return u
 }
 
@@ -640,6 +859,41 @@ func (u *BusinessDocumentUpsertBulk) Update(set func(*BusinessDocumentUpsert)) *
 		set(&BusinessDocumentUpsert{UpdateSet: update})
 	}))
 	return u
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (u *BusinessDocumentUpsertBulk) SetUpdatedAt(v time.Time) *BusinessDocumentUpsertBulk {
+	return u.Update(func(s *BusinessDocumentUpsert) {
+		s.SetUpdatedAt(v)
+	})
+}
+
+// UpdateUpdatedAt sets the "updated_at" field to the value that was provided on create.
+func (u *BusinessDocumentUpsertBulk) UpdateUpdatedAt() *BusinessDocumentUpsertBulk {
+	return u.Update(func(s *BusinessDocumentUpsert) {
+		s.UpdateUpdatedAt()
+	})
+}
+
+// SetDeletedAt sets the "deleted_at" field.
+func (u *BusinessDocumentUpsertBulk) SetDeletedAt(v time.Time) *BusinessDocumentUpsertBulk {
+	return u.Update(func(s *BusinessDocumentUpsert) {
+		s.SetDeletedAt(v)
+	})
+}
+
+// UpdateDeletedAt sets the "deleted_at" field to the value that was provided on create.
+func (u *BusinessDocumentUpsertBulk) UpdateDeletedAt() *BusinessDocumentUpsertBulk {
+	return u.Update(func(s *BusinessDocumentUpsert) {
+		s.UpdateDeletedAt()
+	})
+}
+
+// ClearDeletedAt clears the value of the "deleted_at" field.
+func (u *BusinessDocumentUpsertBulk) ClearDeletedAt() *BusinessDocumentUpsertBulk {
+	return u.Update(func(s *BusinessDocumentUpsert) {
+		s.ClearDeletedAt()
+	})
 }
 
 // SetTitle sets the "title" field.

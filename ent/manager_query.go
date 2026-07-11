@@ -14,6 +14,7 @@ import (
 	"github.com/Toflex/directory_v2/ent/business"
 	"github.com/Toflex/directory_v2/ent/manager"
 	"github.com/Toflex/directory_v2/ent/predicate"
+	"github.com/Toflex/directory_v2/ent/role"
 	"github.com/Toflex/directory_v2/ent/user"
 )
 
@@ -26,6 +27,7 @@ type ManagerQuery struct {
 	predicates   []predicate.Manager
 	withBusiness *BusinessQuery
 	withUser     *UserQuery
+	withRole     *RoleQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -99,6 +101,28 @@ func (mq *ManagerQuery) QueryUser() *UserQuery {
 			sqlgraph.From(manager.Table, manager.FieldID, selector),
 			sqlgraph.To(user.Table, user.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, true, manager.UserTable, manager.UserColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(mq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryRole chains the current query on the "role" edge.
+func (mq *ManagerQuery) QueryRole() *RoleQuery {
+	query := (&RoleClient{config: mq.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := mq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := mq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(manager.Table, manager.FieldID, selector),
+			sqlgraph.To(role.Table, role.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, manager.RoleTable, manager.RoleColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(mq.driver.Dialect(), step)
 		return fromU, nil
@@ -300,6 +324,7 @@ func (mq *ManagerQuery) Clone() *ManagerQuery {
 		predicates:   append([]predicate.Manager{}, mq.predicates...),
 		withBusiness: mq.withBusiness.Clone(),
 		withUser:     mq.withUser.Clone(),
+		withRole:     mq.withRole.Clone(),
 		// clone intermediate query.
 		sql:  mq.sql.Clone(),
 		path: mq.path,
@@ -325,6 +350,17 @@ func (mq *ManagerQuery) WithUser(opts ...func(*UserQuery)) *ManagerQuery {
 		opt(query)
 	}
 	mq.withUser = query
+	return mq
+}
+
+// WithRole tells the query-builder to eager-load the nodes that are connected to
+// the "role" edge. The optional arguments are used to configure the query builder of the edge.
+func (mq *ManagerQuery) WithRole(opts ...func(*RoleQuery)) *ManagerQuery {
+	query := (&RoleClient{config: mq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	mq.withRole = query
 	return mq
 }
 
@@ -406,9 +442,10 @@ func (mq *ManagerQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Mana
 	var (
 		nodes       = []*Manager{}
 		_spec       = mq.querySpec()
-		loadedTypes = [2]bool{
+		loadedTypes = [3]bool{
 			mq.withBusiness != nil,
 			mq.withUser != nil,
+			mq.withRole != nil,
 		}
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
@@ -438,6 +475,12 @@ func (mq *ManagerQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Mana
 	if query := mq.withUser; query != nil {
 		if err := mq.loadUser(ctx, query, nodes, nil,
 			func(n *Manager, e *User) { n.Edges.User = e }); err != nil {
+			return nil, err
+		}
+	}
+	if query := mq.withRole; query != nil {
+		if err := mq.loadRole(ctx, query, nodes, nil,
+			func(n *Manager, e *Role) { n.Edges.Role = e }); err != nil {
 			return nil, err
 		}
 	}
@@ -502,6 +545,35 @@ func (mq *ManagerQuery) loadUser(ctx context.Context, query *UserQuery, nodes []
 	}
 	return nil
 }
+func (mq *ManagerQuery) loadRole(ctx context.Context, query *RoleQuery, nodes []*Manager, init func(*Manager), assign func(*Manager, *Role)) error {
+	ids := make([]string, 0, len(nodes))
+	nodeids := make(map[string][]*Manager)
+	for i := range nodes {
+		fk := nodes[i].RoleID
+		if _, ok := nodeids[fk]; !ok {
+			ids = append(ids, fk)
+		}
+		nodeids[fk] = append(nodeids[fk], nodes[i])
+	}
+	if len(ids) == 0 {
+		return nil
+	}
+	query.Where(role.IDIn(ids...))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		nodes, ok := nodeids[n.ID]
+		if !ok {
+			return fmt.Errorf(`unexpected foreign-key "role_id" returned %v`, n.ID)
+		}
+		for i := range nodes {
+			assign(nodes[i], n)
+		}
+	}
+	return nil
+}
 
 func (mq *ManagerQuery) sqlCount(ctx context.Context) (int, error) {
 	_spec := mq.querySpec()
@@ -533,6 +605,9 @@ func (mq *ManagerQuery) querySpec() *sqlgraph.QuerySpec {
 		}
 		if mq.withUser != nil {
 			_spec.Node.AddColumnOnce(manager.FieldUserID)
+		}
+		if mq.withRole != nil {
+			_spec.Node.AddColumnOnce(manager.FieldRoleID)
 		}
 	}
 	if ps := mq.predicates; len(ps) > 0 {

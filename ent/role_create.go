@@ -12,8 +12,9 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/Toflex/directory_v2/ent/permission"
+	"github.com/Toflex/directory_v2/ent/manager"
 	"github.com/Toflex/directory_v2/ent/role"
+	"github.com/Toflex/directory_v2/ent/rolepermission"
 )
 
 // RoleCreate is the builder for creating a Role entity.
@@ -92,19 +93,34 @@ func (rc *RoleCreate) SetNillableID(s *string) *RoleCreate {
 	return rc
 }
 
-// AddPermissionIDs adds the "permissions" edge to the Permission entity by IDs.
-func (rc *RoleCreate) AddPermissionIDs(ids ...string) *RoleCreate {
-	rc.mutation.AddPermissionIDs(ids...)
+// AddRolePermissionIDs adds the "role_permissions" edge to the RolePermission entity by IDs.
+func (rc *RoleCreate) AddRolePermissionIDs(ids ...string) *RoleCreate {
+	rc.mutation.AddRolePermissionIDs(ids...)
 	return rc
 }
 
-// AddPermissions adds the "permissions" edges to the Permission entity.
-func (rc *RoleCreate) AddPermissions(p ...*Permission) *RoleCreate {
-	ids := make([]string, len(p))
-	for i := range p {
-		ids[i] = p[i].ID
+// AddRolePermissions adds the "role_permissions" edges to the RolePermission entity.
+func (rc *RoleCreate) AddRolePermissions(r ...*RolePermission) *RoleCreate {
+	ids := make([]string, len(r))
+	for i := range r {
+		ids[i] = r[i].ID
 	}
-	return rc.AddPermissionIDs(ids...)
+	return rc.AddRolePermissionIDs(ids...)
+}
+
+// AddManagerIDs adds the "managers" edge to the Manager entity by IDs.
+func (rc *RoleCreate) AddManagerIDs(ids ...string) *RoleCreate {
+	rc.mutation.AddManagerIDs(ids...)
+	return rc
+}
+
+// AddManagers adds the "managers" edges to the Manager entity.
+func (rc *RoleCreate) AddManagers(m ...*Manager) *RoleCreate {
+	ids := make([]string, len(m))
+	for i := range m {
+		ids[i] = m[i].ID
+	}
+	return rc.AddManagerIDs(ids...)
 }
 
 // Mutation returns the RoleMutation object of the builder.
@@ -236,15 +252,31 @@ func (rc *RoleCreate) createSpec() (*Role, *sqlgraph.CreateSpec) {
 		_spec.SetField(role.FieldDescription, field.TypeString, value)
 		_node.Description = value
 	}
-	if nodes := rc.mutation.PermissionsIDs(); len(nodes) > 0 {
+	if nodes := rc.mutation.RolePermissionsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
+			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   role.PermissionsTable,
-			Columns: role.PermissionsPrimaryKey,
+			Table:   role.RolePermissionsTable,
+			Columns: []string{role.RolePermissionsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(permission.FieldID, field.TypeString),
+				IDSpec: sqlgraph.NewFieldSpec(rolepermission.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := rc.mutation.ManagersIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   role.ManagersTable,
+			Columns: []string{role.ManagersColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(manager.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {

@@ -10,11 +10,66 @@ import (
 	"fmt"
 
 	"github.com/Toflex/directory_v2/graph/model"
+	b "github.com/Toflex/directory_v2/internal/business"
+	"github.com/Toflex/directory_v2/middlewares"
+	"github.com/Toflex/directory_v2/pkg/errors"
+	"github.com/Toflex/directory_v2/pkg/log"
+	"github.com/Toflex/directory_v2/pkg/util"
 )
 
 // GetBusiness is the resolver for the getBusiness field.
-func (r *queryResolver) GetBusiness(ctx context.Context, id string) (*model.Business, error) {
-	panic(fmt.Errorf("not implemented: GetBusiness - getBusiness"))
+func (r *queryResolver) Business(ctx context.Context, id string) (*model.Business, error) {
+	logger := log.LoggerInContext(ctx)
+
+	u, err := middlewares.UserFromContext(ctx)
+	if err != nil {
+		logger.WithError(err).Error("failed to fetch user in context")
+		return nil, err
+	}
+
+	result, err := r.BusinessService.GetBusiness(ctx, u, id, logger)
+	if err != nil {
+		logger.WithError(err).WithField("id", id).Error("failed to business by id")
+		return nil, err
+	}
+
+	return &model.Business{
+		ID:    result.ID,
+		Name:  result.Name,
+		Logo:  result.Logo,
+		Email: result.Email,
+		About: result.About,
+	}, nil
+}
+
+// MyBusinesses is the resolver for the getBusiness field.
+func (r *queryResolver) MyBusinesses(ctx context.Context) ([]*model.MyBusiness, error) {
+	logger := log.LoggerInContext(ctx)
+
+	u, err := middlewares.UserFromContext(ctx)
+	if err != nil {
+		logger.WithError(err).Error("failed to fetch user in context")
+		return nil, err
+	}
+
+	result, err := r.BusinessService.Businesses(ctx, u, logger)
+	if err != nil {
+		logger.WithError(err).WithField("user", u.ID).Error("failed to businesses")
+		return nil, err
+	}
+
+	businesses := make([]*model.MyBusiness, 0)
+
+	for _, v := range result {
+		businesses = append(businesses, &model.MyBusiness{
+			ID:   v.ID,
+			Name: v.Name,
+			Logo: v.Logo,
+			Role: v.Role,
+		})
+	}
+
+	return businesses, nil
 }
 
 // FindBusiness is the resolver for the findBusiness field.
@@ -23,7 +78,227 @@ func (r *queryResolver) FindBusiness(ctx context.Context, name *string, service 
 }
 
 // RegisterBusiness is the resolver for the registerBusiness field.
-func (r *mutationResolver) RegisterBusiness(ctx context.Context, input model.RegisterBusinessInput) (*model.Response, error) {
-	// logger := log.LoggerInContext(ctx)
-	return nil, nil
+func (r *mutationResolver) RegisterBusiness(ctx context.Context, input model.RegisterBusinessInput) (bool, error) {
+	logger := log.LoggerInContext(ctx)
+
+	u, err := middlewares.UserFromContext(ctx)
+	if err != nil {
+		logger.WithError(err).Error("failed to fetch user in context")
+		return false, err
+	}
+
+	role := b.Role{}
+	if input.Role != nil {
+		role = b.Role{
+			AuthorizedRepresentative:      input.Role.AuthorizedRepresentative,
+			AuthorizedRepresentativeEmail: input.Role.AuthorizedRepresentativeEmail,
+		}
+	}
+
+	payload := b.CreateBusinessRequest{
+		User:     u,
+		Name:     input.Name,
+		About:    input.About,
+		Email:    input.Email,
+		OnSite:   input.OnSite,
+		Industry: input.Industry,
+		// IsRegistered:  input.IsRegistered,
+		// OtherDocument: []b.Document{},
+		Role: role,
+	}
+
+	// set Address field
+	if input.Address != nil {
+		payload.Address = b.BusinessAddress{
+			Number:  util.AddressToString(input.Address.Number),
+			Street:  input.Address.Street,
+			State:   input.Address.State,
+			Country: input.Address.Country,
+			ZipCode: input.Address.ZipCode,
+			City:    input.Address.City,
+		}
+	}
+
+	err = payload.Validate()
+	if err != nil {
+		logger.WithError(err).Error("validation failed")
+		return false, errors.New(errors.ErrValidation, err.Error())
+	}
+
+	err = r.BusinessService.CreateBusiness(ctx, payload, logger)
+	if err != nil {
+		logger.WithError(err).Error("business onboarding failed")
+		return false, err
+	}
+
+	return true, nil
+}
+
+func (r *mutationResolver) UploadDocument(ctx context.Context, input model.DocumentInput) (bool, error) {
+	logger := log.LoggerInContext(ctx)
+
+	u, err := middlewares.UserFromContext(ctx)
+	if err != nil {
+		logger.WithError(err).Error("failed to fetch user in context")
+		return false, err
+	}
+
+	biz, err := middlewares.BusinessFromContext(ctx)
+	if err != nil {
+		logger.WithError(err).Error("failed to fetch business in context")
+		return false, err
+	}
+
+	if biz.Verified {
+		return false, errors.New(errors.ErrFailed, "business is already verified")
+	}
+
+	err = r.BusinessService.AddDocument(ctx, b.UploadDocumentRequest{
+		User:        u,
+		Business:    biz,
+		DocumentID:  input.DocumentID,
+		Description: input.Description,
+		File:        input.File,
+	}, logger)
+	if err != nil {
+		logger.WithError(err).Error("failed to upload registration document")
+		return false, err
+	}
+
+	return true, nil
+}
+
+func (r *mutationResolver) DeleteDocument(ctx context.Context, input model.RemoveDocumentInput) (bool, error) {
+	logger := log.LoggerInContext(ctx)
+
+	_, err := middlewares.UserFromContext(ctx)
+	if err != nil {
+		logger.WithError(err).Error("failed to fetch user in context")
+		return false, err
+	}
+
+	biz, err := middlewares.BusinessFromContext(ctx)
+	if err != nil {
+		logger.WithError(err).Error("failed to fetch business in context")
+		return false, err
+	}
+
+	if biz.Verified {
+		return false, errors.New(errors.ErrFailed, "business is already verified")
+	}
+
+	err = r.BusinessService.DeleteDocument(ctx, biz, input.ID, logger)
+	if err != nil {
+		logger.WithError(err).Error("failed to delete registration document")
+		return false, err
+	}
+
+	return true, nil
+}
+
+func (r *mutationResolver) BusinessDetail(ctx context.Context, input model.BusinessDetail) (bool, error) {
+	logger := log.LoggerInContext(ctx)
+
+	u, err := middlewares.UserFromContext(ctx)
+	if err != nil {
+		logger.WithError(err).Error("failed to fetch user in context")
+		return false, err
+	}
+
+	biz, err := middlewares.BusinessFromContext(ctx)
+	if err != nil {
+		logger.WithError(err).Error("failed to fetch business in context")
+		return false, err
+	}
+
+	if biz.Verified {
+		return false, errors.New(errors.ErrFailed, "business is already verified")
+	}
+
+	registrationDetail := new(b.RegistrationDetail)
+	if input.RegistrationDetail != nil {
+		registrationDetail = &b.RegistrationDetail{
+			Number:                 input.RegistrationDetail.Number,
+			CountryOfIncorporation: input.RegistrationDetail.CountryOfIncorporation,
+			DateOfIncorporation:    input.RegistrationDetail.DateOfIncorporation,
+		}
+	}
+
+	payload := b.BusinessDetailRequest{
+		RegistrationDetail: registrationDetail,
+		Name:               input.Name,
+		Industry:           input.Industry,
+		About:              input.About,
+		Website:            input.Website,
+	}
+
+	err = payload.Validate()
+	if err != nil {
+		logger.WithError(err).Error("failed to validate registration details")
+		return false, errors.New(errors.ErrValidation, err.Error())
+	}
+
+	err = r.BusinessService.BusinessDetail(ctx, u, biz, &payload, logger)
+	if err != nil {
+		logger.WithError(err).Error("failed to update registration details")
+		return false, err
+	}
+
+	return true, nil
+}
+
+func (r *queryResolver) GetKYBDocuments(ctx context.Context) ([]*model.KybDocument, error) {
+	logger := log.LoggerInContext(ctx)
+
+	docs, err := r.BusinessService.GetDocuments(ctx)
+	if err != nil {
+		logger.WithError(err).Error("failed to get KYB documents")
+		return nil, err
+	}
+
+	results := make([]*model.KybDocument, 0)
+	for _, doc := range docs {
+		results = append(results, &model.KybDocument{
+			ID:       doc.ID,
+			Name:     doc.Name,
+			Required: doc.Required,
+		})
+	}
+
+	return results, nil
+}
+
+// GetBusiness is the resolver for the getBusiness field.
+func (r *queryResolver) GetDocuments(ctx context.Context) ([]*model.BusinessDocument, error) {
+	logger := log.LoggerInContext(ctx)
+
+	b, err := middlewares.BusinessFromContext(ctx)
+	if err != nil {
+		logger.WithError(err).Error("failed to fetch business in context")
+		return nil, err
+	}
+
+	result, err := r.BusinessService.GetKYBDocuments(ctx, b)
+	if err != nil {
+		logger.WithError(err).Error("failed to business documents")
+		return nil, err
+	}
+
+	docs := make([]*model.BusinessDocument, 0)
+
+	for _, doc := range result {
+		docs = append(docs, &model.BusinessDocument{
+			ID:          doc.ID,
+			Description: doc.Description,
+			URL:         doc.File,
+			DocumentID:  doc.DocumentID,
+		})
+	}
+
+	return docs, nil
+}
+
+// GetCategories is the resolver for the getBusiness field.
+func (r *queryResolver) GetCategories(ctx context.Context) ([]string, error) {
+	return r.BusinessService.GetCategory(ctx), nil
 }

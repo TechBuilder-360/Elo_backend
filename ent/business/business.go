@@ -3,6 +3,7 @@
 package business
 
 import (
+	"fmt"
 	"time"
 
 	"entgo.io/ent/dialect/sql"
@@ -28,18 +29,34 @@ const (
 	FieldAbout = "about"
 	// FieldLogo holds the string denoting the logo field in the database.
 	FieldLogo = "logo"
+	// FieldCoverImage holds the string denoting the cover_image field in the database.
+	FieldCoverImage = "cover_image"
+	// FieldRegisteredBy holds the string denoting the registered_by field in the database.
+	FieldRegisteredBy = "registered_by"
+	// FieldCountryOfIncorporation holds the string denoting the country_of_incorporation field in the database.
+	FieldCountryOfIncorporation = "country_of_incorporation"
+	// FieldDateOfIncorporation holds the string denoting the date_of_incorporation field in the database.
+	FieldDateOfIncorporation = "date_of_incorporation"
+	// FieldRegistrationNumber holds the string denoting the registration_number field in the database.
+	FieldRegistrationNumber = "registration_number"
 	// FieldEmail holds the string denoting the email field in the database.
 	FieldEmail = "email"
 	// FieldWebsite holds the string denoting the website field in the database.
 	FieldWebsite = "website"
+	// FieldOnSite holds the string denoting the on_site field in the database.
+	FieldOnSite = "on_site"
 	// FieldActive holds the string denoting the active field in the database.
 	FieldActive = "active"
+	// FieldLive holds the string denoting the live field in the database.
+	FieldLive = "live"
 	// FieldDisabled holds the string denoting the disabled field in the database.
 	FieldDisabled = "disabled"
 	// FieldDisabledAt holds the string denoting the disabled_at field in the database.
 	FieldDisabledAt = "disabled_at"
 	// FieldDisableReason holds the string denoting the disable_reason field in the database.
 	FieldDisableReason = "disable_reason"
+	// FieldVerificationStatus holds the string denoting the verification_status field in the database.
+	FieldVerificationStatus = "verification_status"
 	// FieldVerified holds the string denoting the verified field in the database.
 	FieldVerified = "verified"
 	// FieldVerifiedAt holds the string denoting the verified_at field in the database.
@@ -50,12 +67,18 @@ const (
 	EdgeServices = "services"
 	// EdgeManages holds the string denoting the manages edge name in mutations.
 	EdgeManages = "manages"
+	// EdgeRegisteredByUser holds the string denoting the registered_by_user edge name in mutations.
+	EdgeRegisteredByUser = "registered_by_user"
 	// EdgeVerifications holds the string denoting the verifications edge name in mutations.
 	EdgeVerifications = "verifications"
 	// EdgeRequestVerifications holds the string denoting the request_verifications edge name in mutations.
 	EdgeRequestVerifications = "request_verifications"
 	// EdgeBusinessDocuments holds the string denoting the business_documents edge name in mutations.
 	EdgeBusinessDocuments = "business_documents"
+	// EdgeLocations holds the string denoting the locations edge name in mutations.
+	EdgeLocations = "locations"
+	// EdgeKybMessages holds the string denoting the kyb_messages edge name in mutations.
+	EdgeKybMessages = "kyb_messages"
 	// Table holds the table name of the business in the database.
 	Table = "businesses"
 	// SocialsTable is the table that holds the socials relation/edge.
@@ -79,6 +102,13 @@ const (
 	ManagesInverseTable = "managers"
 	// ManagesColumn is the table column denoting the manages relation/edge.
 	ManagesColumn = "business_id"
+	// RegisteredByUserTable is the table that holds the registered_by_user relation/edge.
+	RegisteredByUserTable = "businesses"
+	// RegisteredByUserInverseTable is the table name for the User entity.
+	// It exists in this package in order to avoid circular dependency with the "user" package.
+	RegisteredByUserInverseTable = "users"
+	// RegisteredByUserColumn is the table column denoting the registered_by_user relation/edge.
+	RegisteredByUserColumn = "registered_by"
 	// VerificationsTable is the table that holds the verifications relation/edge. The primary key declared below.
 	VerificationsTable = "verification_business"
 	// VerificationsInverseTable is the table name for the Verification entity.
@@ -96,6 +126,20 @@ const (
 	BusinessDocumentsInverseTable = "business_documents"
 	// BusinessDocumentsColumn is the table column denoting the business_documents relation/edge.
 	BusinessDocumentsColumn = "business_business_documents"
+	// LocationsTable is the table that holds the locations relation/edge.
+	LocationsTable = "business_locations"
+	// LocationsInverseTable is the table name for the BusinessLocation entity.
+	// It exists in this package in order to avoid circular dependency with the "businesslocation" package.
+	LocationsInverseTable = "business_locations"
+	// LocationsColumn is the table column denoting the locations relation/edge.
+	LocationsColumn = "business_locations"
+	// KybMessagesTable is the table that holds the kyb_messages relation/edge.
+	KybMessagesTable = "kyb_messages"
+	// KybMessagesInverseTable is the table name for the KYBMessage entity.
+	// It exists in this package in order to avoid circular dependency with the "kybmessage" package.
+	KybMessagesInverseTable = "kyb_messages"
+	// KybMessagesColumn is the table column denoting the kyb_messages relation/edge.
+	KybMessagesColumn = "business_kyb_messages"
 )
 
 // Columns holds all SQL columns for business fields.
@@ -108,12 +152,20 @@ var Columns = []string{
 	FieldName,
 	FieldAbout,
 	FieldLogo,
+	FieldCoverImage,
+	FieldRegisteredBy,
+	FieldCountryOfIncorporation,
+	FieldDateOfIncorporation,
+	FieldRegistrationNumber,
 	FieldEmail,
 	FieldWebsite,
+	FieldOnSite,
 	FieldActive,
+	FieldLive,
 	FieldDisabled,
 	FieldDisabledAt,
 	FieldDisableReason,
+	FieldVerificationStatus,
 	FieldVerified,
 	FieldVerifiedAt,
 }
@@ -148,12 +200,18 @@ var (
 	DefaultCategory string
 	// NameValidator is a validator for the "name" field. It is called by the builders before save.
 	NameValidator func(string) error
+	// AboutValidator is a validator for the "about" field. It is called by the builders before save.
+	AboutValidator func(string) error
 	// EmailValidator is a validator for the "email" field. It is called by the builders before save.
 	EmailValidator func(string) error
 	// WebsiteValidator is a validator for the "website" field. It is called by the builders before save.
 	WebsiteValidator func(string) error
+	// DefaultOnSite holds the default value on creation for the "on_site" field.
+	DefaultOnSite bool
 	// DefaultActive holds the default value on creation for the "active" field.
 	DefaultActive bool
+	// DefaultLive holds the default value on creation for the "live" field.
+	DefaultLive bool
 	// DefaultDisabled holds the default value on creation for the "disabled" field.
 	DefaultDisabled bool
 	// DefaultDisabledAt holds the default value on creation for the "disabled_at" field.
@@ -163,6 +221,34 @@ var (
 	// DefaultID holds the default value on creation for the "id" field.
 	DefaultID func() string
 )
+
+// VerificationStatus defines the type for the "verification_status" enum field.
+type VerificationStatus string
+
+// VerificationStatusUNVERIFIED is the default value of the VerificationStatus enum.
+const DefaultVerificationStatus = VerificationStatusUNVERIFIED
+
+// VerificationStatus values.
+const (
+	VerificationStatusUNVERIFIED  VerificationStatus = "UNVERIFIED"
+	VerificationStatusIN_PROGRESS VerificationStatus = "IN_PROGRESS"
+	VerificationStatusVERIFIED    VerificationStatus = "VERIFIED"
+	VerificationStatusREJECTED    VerificationStatus = "REJECTED"
+)
+
+func (vs VerificationStatus) String() string {
+	return string(vs)
+}
+
+// VerificationStatusValidator is a validator for the "verification_status" field enum values. It is called by the builders before save.
+func VerificationStatusValidator(vs VerificationStatus) error {
+	switch vs {
+	case VerificationStatusUNVERIFIED, VerificationStatusIN_PROGRESS, VerificationStatusVERIFIED, VerificationStatusREJECTED:
+		return nil
+	default:
+		return fmt.Errorf("business: invalid enum value for verification_status field: %q", vs)
+	}
+}
 
 // OrderOption defines the ordering options for the Business queries.
 type OrderOption func(*sql.Selector)
@@ -207,6 +293,31 @@ func ByLogo(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldLogo, opts...).ToFunc()
 }
 
+// ByCoverImage orders the results by the cover_image field.
+func ByCoverImage(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldCoverImage, opts...).ToFunc()
+}
+
+// ByRegisteredBy orders the results by the registered_by field.
+func ByRegisteredBy(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldRegisteredBy, opts...).ToFunc()
+}
+
+// ByCountryOfIncorporation orders the results by the country_of_incorporation field.
+func ByCountryOfIncorporation(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldCountryOfIncorporation, opts...).ToFunc()
+}
+
+// ByDateOfIncorporation orders the results by the date_of_incorporation field.
+func ByDateOfIncorporation(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldDateOfIncorporation, opts...).ToFunc()
+}
+
+// ByRegistrationNumber orders the results by the registration_number field.
+func ByRegistrationNumber(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldRegistrationNumber, opts...).ToFunc()
+}
+
 // ByEmail orders the results by the email field.
 func ByEmail(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldEmail, opts...).ToFunc()
@@ -217,9 +328,19 @@ func ByWebsite(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldWebsite, opts...).ToFunc()
 }
 
+// ByOnSite orders the results by the on_site field.
+func ByOnSite(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldOnSite, opts...).ToFunc()
+}
+
 // ByActive orders the results by the active field.
 func ByActive(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldActive, opts...).ToFunc()
+}
+
+// ByLive orders the results by the live field.
+func ByLive(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldLive, opts...).ToFunc()
 }
 
 // ByDisabled orders the results by the disabled field.
@@ -235,6 +356,11 @@ func ByDisabledAt(opts ...sql.OrderTermOption) OrderOption {
 // ByDisableReason orders the results by the disable_reason field.
 func ByDisableReason(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldDisableReason, opts...).ToFunc()
+}
+
+// ByVerificationStatus orders the results by the verification_status field.
+func ByVerificationStatus(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldVerificationStatus, opts...).ToFunc()
 }
 
 // ByVerified orders the results by the verified field.
@@ -289,6 +415,13 @@ func ByManages(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 	}
 }
 
+// ByRegisteredByUserField orders the results by registered_by_user field.
+func ByRegisteredByUserField(field string, opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newRegisteredByUserStep(), sql.OrderByField(field, opts...))
+	}
+}
+
 // ByVerificationsCount orders the results by verifications count.
 func ByVerificationsCount(opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
@@ -330,6 +463,34 @@ func ByBusinessDocuments(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption
 		sqlgraph.OrderByNeighborTerms(s, newBusinessDocumentsStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
+
+// ByLocationsCount orders the results by locations count.
+func ByLocationsCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newLocationsStep(), opts...)
+	}
+}
+
+// ByLocations orders the results by locations terms.
+func ByLocations(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newLocationsStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+
+// ByKybMessagesCount orders the results by kyb_messages count.
+func ByKybMessagesCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newKybMessagesStep(), opts...)
+	}
+}
+
+// ByKybMessages orders the results by kyb_messages terms.
+func ByKybMessages(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newKybMessagesStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
 func newSocialsStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
@@ -351,6 +512,13 @@ func newManagesStep() *sqlgraph.Step {
 		sqlgraph.Edge(sqlgraph.O2M, false, ManagesTable, ManagesColumn),
 	)
 }
+func newRegisteredByUserStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(RegisteredByUserInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.M2O, true, RegisteredByUserTable, RegisteredByUserColumn),
+	)
+}
 func newVerificationsStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
@@ -370,5 +538,19 @@ func newBusinessDocumentsStep() *sqlgraph.Step {
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(BusinessDocumentsInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.O2M, false, BusinessDocumentsTable, BusinessDocumentsColumn),
+	)
+}
+func newLocationsStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(LocationsInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, LocationsTable, LocationsColumn),
+	)
+}
+func newKybMessagesStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(KybMessagesInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, KybMessagesTable, KybMessagesColumn),
 	)
 }

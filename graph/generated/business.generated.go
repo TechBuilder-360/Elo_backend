@@ -18,7 +18,11 @@ import (
 // region    ************************** generated!.gotpl **************************
 
 type QueryResolver interface {
-	GetBusiness(ctx context.Context, id string) (*model.Business, error)
+	MyBusinesses(ctx context.Context) ([]*model.MyBusiness, error)
+	Business(ctx context.Context, id string) (*model.Business, error)
+	GetKYBDocuments(ctx context.Context) ([]*model.KybDocument, error)
+	GetDocuments(ctx context.Context) ([]*model.BusinessDocument, error)
+	GetCategories(ctx context.Context) ([]string, error)
 	FindBusiness(ctx context.Context, name *string, service *string, limit *int32) ([]*model.SearchBusiness, error)
 	Me(ctx context.Context) (*model.User, error)
 	GetUserBusinsses(ctx context.Context) ([]*model.UserBusiness, error)
@@ -28,6 +32,17 @@ type QueryResolver interface {
 
 // region    ***************************** args.gotpl *****************************
 
+func (ec *executionContext) dir_hasRole_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "role", ec.unmarshalNRole2githubᚗcomᚋToflexᚋdirectory_v2ᚋgraphᚋmodelᚐRole0)
+	if err != nil {
+		return nil, err
+	}
+	args["role"] = arg0
+	return args, nil
+}
+
 func (ec *executionContext) field_Query___type_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
@@ -36,6 +51,17 @@ func (ec *executionContext) field_Query___type_args(ctx context.Context, rawArgs
 		return nil, err
 	}
 	args["name"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_business_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "id", ec.unmarshalNString2string)
+	if err != nil {
+		return nil, err
+	}
+	args["id"] = arg0
 	return args, nil
 }
 
@@ -57,17 +83,6 @@ func (ec *executionContext) field_Query_findBusiness_args(ctx context.Context, r
 		return nil, err
 	}
 	args["limit"] = arg2
-	return args, nil
-}
-
-func (ec *executionContext) field_Query_getBusiness_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
-	var err error
-	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "id", ec.unmarshalNString2string)
-	if err != nil {
-		return nil, err
-	}
-	args["id"] = arg0
 	return args, nil
 }
 
@@ -224,88 +239,89 @@ func (ec *executionContext) fieldContext_Business_about(_ context.Context, field
 	return fc, nil
 }
 
-func (ec *executionContext) _Business_services(ctx context.Context, field graphql.CollectedField, obj *model.Business) (ret graphql.Marshaler) {
+func (ec *executionContext) _Query_myBusinesses(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Business_services,
+		ec.fieldContext_Query_myBusinesses,
 		func(ctx context.Context) (any, error) {
-			return obj.Services, nil
+			return ec.resolvers.Query().MyBusinesses(ctx)
 		},
-		nil,
-		ec.marshalNString2ᚕᚖstring,
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			directive0 := next
+
+			directive1 := func(ctx context.Context) (any, error) {
+				if ec.directives.AuthUser == nil {
+					var zeroVal []*model.MyBusiness
+					return zeroVal, errors.New("directive authUser is not implemented")
+				}
+				return ec.directives.AuthUser(ctx, nil, directive0)
+			}
+
+			next = directive1
+			return next
+		},
+		ec.marshalOmyBusiness2ᚕᚖgithubᚗcomᚋToflexᚋdirectory_v2ᚋgraphᚋmodelᚐMyBusinessᚄ,
 		true,
-		true,
+		false,
 	)
 }
 
-func (ec *executionContext) fieldContext_Business_services(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Query_myBusinesses(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
-		Object:     "Business",
+		Object:     "Query",
 		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _Business_socials(ctx context.Context, field graphql.CollectedField, obj *model.Business) (ret graphql.Marshaler) {
-	return graphql.ResolveField(
-		ctx,
-		ec.OperationContext,
-		field,
-		ec.fieldContext_Business_socials,
-		func(ctx context.Context) (any, error) {
-			return obj.Socials, nil
-		},
-		nil,
-		ec.marshalNSocial2ᚕᚖgithubᚗcomᚋToflexᚋdirectory_v2ᚋgraphᚋmodelᚐSocial,
-		true,
-		true,
-	)
-}
-
-func (ec *executionContext) fieldContext_Business_socials(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Business",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
+		IsMethod:   true,
+		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
+			case "id":
+				return ec.fieldContext_myBusiness_id(ctx, field)
 			case "name":
-				return ec.fieldContext_Social_name(ctx, field)
-			case "url":
-				return ec.fieldContext_Social_url(ctx, field)
+				return ec.fieldContext_myBusiness_name(ctx, field)
+			case "logo":
+				return ec.fieldContext_myBusiness_logo(ctx, field)
+			case "role":
+				return ec.fieldContext_myBusiness_role(ctx, field)
 			}
-			return nil, fmt.Errorf("no field named %q was found under type Social", field.Name)
+			return nil, fmt.Errorf("no field named %q was found under type myBusiness", field.Name)
 		},
 	}
 	return fc, nil
 }
 
-func (ec *executionContext) _Query_getBusiness(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+func (ec *executionContext) _Query_business(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Query_getBusiness,
+		ec.fieldContext_Query_business,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Query().GetBusiness(ctx, fc.Args["id"].(string))
+			return ec.resolvers.Query().Business(ctx, fc.Args["id"].(string))
 		},
-		nil,
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			directive0 := next
+
+			directive1 := func(ctx context.Context) (any, error) {
+				if ec.directives.AuthUser == nil {
+					var zeroVal *model.Business
+					return zeroVal, errors.New("directive authUser is not implemented")
+				}
+				return ec.directives.AuthUser(ctx, nil, directive0)
+			}
+
+			next = directive1
+			return next
+		},
 		ec.marshalOBusiness2ᚖgithubᚗcomᚋToflexᚋdirectory_v2ᚋgraphᚋmodelᚐBusiness,
 		true,
 		false,
 	)
 }
 
-func (ec *executionContext) fieldContext_Query_getBusiness(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Query_business(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Query",
 		Field:      field,
@@ -323,10 +339,6 @@ func (ec *executionContext) fieldContext_Query_getBusiness(ctx context.Context, 
 				return ec.fieldContext_Business_email(ctx, field)
 			case "about":
 				return ec.fieldContext_Business_about(ctx, field)
-			case "services":
-				return ec.fieldContext_Business_services(ctx, field)
-			case "socials":
-				return ec.fieldContext_Business_socials(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Business", field.Name)
 		},
@@ -338,9 +350,158 @@ func (ec *executionContext) fieldContext_Query_getBusiness(ctx context.Context, 
 		}
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Query_getBusiness_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+	if fc.Args, err = ec.field_Query_business_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Query_getKYBDocuments(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Query_getKYBDocuments,
+		func(ctx context.Context) (any, error) {
+			return ec.resolvers.Query().GetKYBDocuments(ctx)
+		},
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			directive0 := next
+
+			directive1 := func(ctx context.Context) (any, error) {
+				if ec.directives.AuthUser == nil {
+					var zeroVal []*model.KybDocument
+					return zeroVal, errors.New("directive authUser is not implemented")
+				}
+				return ec.directives.AuthUser(ctx, nil, directive0)
+			}
+
+			next = directive1
+			return next
+		},
+		ec.marshalOkybDocument2ᚕᚖgithubᚗcomᚋToflexᚋdirectory_v2ᚋgraphᚋmodelᚐKybDocumentᚄ,
+		true,
+		false,
+	)
+}
+
+func (ec *executionContext) fieldContext_Query_getKYBDocuments(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_kybDocument_id(ctx, field)
+			case "name":
+				return ec.fieldContext_kybDocument_name(ctx, field)
+			case "required":
+				return ec.fieldContext_kybDocument_required(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type kybDocument", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Query_getDocuments(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Query_getDocuments,
+		func(ctx context.Context) (any, error) {
+			return ec.resolvers.Query().GetDocuments(ctx)
+		},
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			directive0 := next
+
+			directive1 := func(ctx context.Context) (any, error) {
+				role, err := ec.unmarshalNRole2githubᚗcomᚋToflexᚋdirectory_v2ᚋgraphᚋmodelᚐRole0(ctx, "ADMIN")
+				if err != nil {
+					var zeroVal []*model.BusinessDocument
+					return zeroVal, err
+				}
+				if ec.directives.HasRole == nil {
+					var zeroVal []*model.BusinessDocument
+					return zeroVal, errors.New("directive hasRole is not implemented")
+				}
+				return ec.directives.HasRole(ctx, nil, directive0, role)
+			}
+
+			next = directive1
+			return next
+		},
+		ec.marshalObusinessDocument2ᚕᚖgithubᚗcomᚋToflexᚋdirectory_v2ᚋgraphᚋmodelᚐBusinessDocumentᚄ,
+		true,
+		false,
+	)
+}
+
+func (ec *executionContext) fieldContext_Query_getDocuments(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_businessDocument_id(ctx, field)
+			case "description":
+				return ec.fieldContext_businessDocument_description(ctx, field)
+			case "url":
+				return ec.fieldContext_businessDocument_url(ctx, field)
+			case "document_id":
+				return ec.fieldContext_businessDocument_document_id(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type businessDocument", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Query_getCategories(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Query_getCategories,
+		func(ctx context.Context) (any, error) {
+			return ec.resolvers.Query().GetCategories(ctx)
+		},
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			directive0 := next
+
+			directive1 := func(ctx context.Context) (any, error) {
+				if ec.directives.AuthUser == nil {
+					var zeroVal []string
+					return zeroVal, errors.New("directive authUser is not implemented")
+				}
+				return ec.directives.AuthUser(ctx, nil, directive0)
+			}
+
+			next = directive1
+			return next
+		},
+		ec.marshalNString2ᚕstringᚄ,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Query_getCategories(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
 	}
 	return fc, nil
 }
@@ -601,35 +762,6 @@ func (ec *executionContext) fieldContext_Query___schema(_ context.Context, field
 	return fc, nil
 }
 
-func (ec *executionContext) _Response_ok(ctx context.Context, field graphql.CollectedField, obj *model.Response) (ret graphql.Marshaler) {
-	return graphql.ResolveField(
-		ctx,
-		ec.OperationContext,
-		field,
-		ec.fieldContext_Response_ok,
-		func(ctx context.Context) (any, error) {
-			return obj.Ok, nil
-		},
-		nil,
-		ec.marshalOBoolean2ᚖbool,
-		true,
-		false,
-	)
-}
-
-func (ec *executionContext) fieldContext_Response_ok(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Response",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type Boolean does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
 func (ec *executionContext) _SearchBusiness_id(ctx context.Context, field graphql.CollectedField, obj *model.SearchBusiness) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
@@ -804,6 +936,325 @@ func (ec *executionContext) fieldContext_Social_url(_ context.Context, field gra
 	return fc, nil
 }
 
+func (ec *executionContext) _businessDocument_id(ctx context.Context, field graphql.CollectedField, obj *model.BusinessDocument) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_businessDocument_id,
+		func(ctx context.Context) (any, error) {
+			return obj.ID, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_businessDocument_id(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "businessDocument",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _businessDocument_description(ctx context.Context, field graphql.CollectedField, obj *model.BusinessDocument) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_businessDocument_description,
+		func(ctx context.Context) (any, error) {
+			return obj.Description, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_businessDocument_description(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "businessDocument",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _businessDocument_url(ctx context.Context, field graphql.CollectedField, obj *model.BusinessDocument) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_businessDocument_url,
+		func(ctx context.Context) (any, error) {
+			return obj.URL, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_businessDocument_url(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "businessDocument",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _businessDocument_document_id(ctx context.Context, field graphql.CollectedField, obj *model.BusinessDocument) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_businessDocument_document_id,
+		func(ctx context.Context) (any, error) {
+			return obj.DocumentID, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_businessDocument_document_id(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "businessDocument",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _kybDocument_id(ctx context.Context, field graphql.CollectedField, obj *model.KybDocument) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_kybDocument_id,
+		func(ctx context.Context) (any, error) {
+			return obj.ID, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_kybDocument_id(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "kybDocument",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _kybDocument_name(ctx context.Context, field graphql.CollectedField, obj *model.KybDocument) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_kybDocument_name,
+		func(ctx context.Context) (any, error) {
+			return obj.Name, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_kybDocument_name(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "kybDocument",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _kybDocument_required(ctx context.Context, field graphql.CollectedField, obj *model.KybDocument) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_kybDocument_required,
+		func(ctx context.Context) (any, error) {
+			return obj.Required, nil
+		},
+		nil,
+		ec.marshalNBoolean2bool,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_kybDocument_required(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "kybDocument",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Boolean does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _myBusiness_id(ctx context.Context, field graphql.CollectedField, obj *model.MyBusiness) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_myBusiness_id,
+		func(ctx context.Context) (any, error) {
+			return obj.ID, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_myBusiness_id(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "myBusiness",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _myBusiness_name(ctx context.Context, field graphql.CollectedField, obj *model.MyBusiness) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_myBusiness_name,
+		func(ctx context.Context) (any, error) {
+			return obj.Name, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_myBusiness_name(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "myBusiness",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _myBusiness_logo(ctx context.Context, field graphql.CollectedField, obj *model.MyBusiness) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_myBusiness_logo,
+		func(ctx context.Context) (any, error) {
+			return obj.Logo, nil
+		},
+		nil,
+		ec.marshalOString2ᚖstring,
+		true,
+		false,
+	)
+}
+
+func (ec *executionContext) fieldContext_myBusiness_logo(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "myBusiness",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _myBusiness_role(ctx context.Context, field graphql.CollectedField, obj *model.MyBusiness) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_myBusiness_role,
+		func(ctx context.Context) (any, error) {
+			return obj.Role, nil
+		},
+		nil,
+		ec.marshalOString2ᚖstring,
+		true,
+		false,
+	)
+}
+
+func (ec *executionContext) fieldContext_myBusiness_role(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "myBusiness",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
 // endregion **************************** field.gotpl *****************************
 
 // region    **************************** input.gotpl *****************************
@@ -815,7 +1266,7 @@ func (ec *executionContext) unmarshalInputBusinessAddress(ctx context.Context, o
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"number", "street", "state", "country", "zip_code"}
+	fieldsInOrder := [...]string{"number", "city", "street", "state", "country", "zip_code"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
@@ -829,6 +1280,13 @@ func (ec *executionContext) unmarshalInputBusinessAddress(ctx context.Context, o
 				return it, err
 			}
 			it.Number = data
+		case "city":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("city"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.City = data
 		case "street":
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("street"))
 			data, err := ec.unmarshalNString2string(ctx, v)
@@ -870,7 +1328,7 @@ func (ec *executionContext) unmarshalInputBusinessRegistrationDetail(ctx context
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"number", "country_of_incorporation", "date_of_incorporation", "certificate_of_incorporation", "articles_of_association", "status_certificate"}
+	fieldsInOrder := [...]string{"number", "country_of_incorporation", "date_of_incorporation", "tax_identification_number"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
@@ -898,27 +1356,13 @@ func (ec *executionContext) unmarshalInputBusinessRegistrationDetail(ctx context
 				return it, err
 			}
 			it.DateOfIncorporation = data
-		case "certificate_of_incorporation":
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("certificate_of_incorporation"))
-			data, err := ec.unmarshalNUpload2githubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚐUpload(ctx, v)
+		case "tax_identification_number":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("tax_identification_number"))
+			data, err := ec.unmarshalNString2string(ctx, v)
 			if err != nil {
 				return it, err
 			}
-			it.CertificateOfIncorporation = data
-		case "articles_of_association":
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("articles_of_association"))
-			data, err := ec.unmarshalNUpload2githubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚐUpload(ctx, v)
-			if err != nil {
-				return it, err
-			}
-			it.ArticlesOfAssociation = data
-		case "status_certificate":
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("status_certificate"))
-			data, err := ec.unmarshalNUpload2githubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚐUpload(ctx, v)
-			if err != nil {
-				return it, err
-			}
-			it.StatusCertificate = data
+			it.TaxIdentificationNumber = data
 		}
 	}
 
@@ -959,6 +1403,47 @@ func (ec *executionContext) unmarshalInputDocument(ctx context.Context, obj any)
 	return it, nil
 }
 
+func (ec *executionContext) unmarshalInputDocumentInput(ctx context.Context, obj any) (model.DocumentInput, error) {
+	var it model.DocumentInput
+	asMap := map[string]any{}
+	for k, v := range obj.(map[string]any) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"document_id", "description", "file"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "document_id":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("document_id"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.DocumentID = data
+		case "description":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("description"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Description = data
+		case "file":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("file"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.File = data
+		}
+	}
+
+	return it, nil
+}
+
 func (ec *executionContext) unmarshalInputRegisterBusinessInput(ctx context.Context, obj any) (model.RegisterBusinessInput, error) {
 	var it model.RegisterBusinessInput
 	asMap := map[string]any{}
@@ -966,7 +1451,7 @@ func (ec *executionContext) unmarshalInputRegisterBusinessInput(ctx context.Cont
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"name", "about", "email", "on_site", "industry", "is_registered", "address", "registration_detail", "other_document"}
+	fieldsInOrder := [...]string{"name", "about", "email", "on_site", "industry", "address", "role"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
@@ -1008,20 +1493,67 @@ func (ec *executionContext) unmarshalInputRegisterBusinessInput(ctx context.Cont
 				return it, err
 			}
 			it.Industry = data
-		case "is_registered":
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("is_registered"))
-			data, err := ec.unmarshalNBoolean2bool(ctx, v)
-			if err != nil {
-				return it, err
-			}
-			it.IsRegistered = data
 		case "address":
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("address"))
-			data, err := ec.unmarshalNBusinessAddress2ᚖgithubᚗcomᚋToflexᚋdirectory_v2ᚋgraphᚋmodelᚐBusinessAddress(ctx, v)
+			data, err := ec.unmarshalOBusinessAddress2ᚖgithubᚗcomᚋToflexᚋdirectory_v2ᚋgraphᚋmodelᚐBusinessAddress(ctx, v)
 			if err != nil {
 				return it, err
 			}
 			it.Address = data
+		case "role":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("role"))
+			data, err := ec.unmarshalNrole2ᚖgithubᚗcomᚋToflexᚋdirectory_v2ᚋgraphᚋmodelᚐRole(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Role = data
+		}
+	}
+
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputRemoveDocumentInput(ctx context.Context, obj any) (model.RemoveDocumentInput, error) {
+	var it model.RemoveDocumentInput
+	asMap := map[string]any{}
+	for k, v := range obj.(map[string]any) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"id"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "id":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.ID = data
+		}
+	}
+
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputbusinessDetail(ctx context.Context, obj any) (model.BusinessDetail, error) {
+	var it model.BusinessDetail
+	asMap := map[string]any{}
+	for k, v := range obj.(map[string]any) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"registration_detail", "name", "about", "industry", "website"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
 		case "registration_detail":
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("registration_detail"))
 			data, err := ec.unmarshalOBusinessRegistrationDetail2ᚖgithubᚗcomᚋToflexᚋdirectory_v2ᚋgraphᚋmodelᚐBusinessRegistrationDetail(ctx, v)
@@ -1029,13 +1561,68 @@ func (ec *executionContext) unmarshalInputRegisterBusinessInput(ctx context.Cont
 				return it, err
 			}
 			it.RegistrationDetail = data
-		case "other_document":
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("other_document"))
-			data, err := ec.unmarshalODocument2ᚕᚖgithubᚗcomᚋToflexᚋdirectory_v2ᚋgraphᚋmodelᚐDocumentᚄ(ctx, v)
+		case "name":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("name"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
 				return it, err
 			}
-			it.OtherDocument = data
+			it.Name = data
+		case "about":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("about"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.About = data
+		case "industry":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("industry"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Industry = data
+		case "website":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("website"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Website = data
+		}
+	}
+
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputrole(ctx context.Context, obj any) (model.Role, error) {
+	var it model.Role
+	asMap := map[string]any{}
+	for k, v := range obj.(map[string]any) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"authorized_representative", "authorized_representative_email"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "authorized_representative":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("authorized_representative"))
+			data, err := ec.unmarshalNBoolean2bool(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.AuthorizedRepresentative = data
+		case "authorized_representative_email":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("authorized_representative_email"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.AuthorizedRepresentativeEmail = data
 		}
 	}
 
@@ -1077,16 +1664,6 @@ func (ec *executionContext) _Business(ctx context.Context, sel ast.SelectionSet,
 			out.Values[i] = ec._Business_email(ctx, field, obj)
 		case "about":
 			out.Values[i] = ec._Business_about(ctx, field, obj)
-		case "services":
-			out.Values[i] = ec._Business_services(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
-		case "socials":
-			out.Values[i] = ec._Business_socials(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -1129,7 +1706,7 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("Query")
-		case "getBusiness":
+		case "myBusinesses":
 			field := field
 
 			innerFunc := func(ctx context.Context, _ *graphql.FieldSet) (res graphql.Marshaler) {
@@ -1138,7 +1715,86 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 						ec.Error(ctx, ec.Recover(ctx, r))
 					}
 				}()
-				res = ec._Query_getBusiness(ctx, field)
+				res = ec._Query_myBusinesses(ctx, field)
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx,
+					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
+		case "business":
+			field := field
+
+			innerFunc := func(ctx context.Context, _ *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_business(ctx, field)
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx,
+					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
+		case "getKYBDocuments":
+			field := field
+
+			innerFunc := func(ctx context.Context, _ *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_getKYBDocuments(ctx, field)
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx,
+					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
+		case "getDocuments":
+			field := field
+
+			innerFunc := func(ctx context.Context, _ *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_getDocuments(ctx, field)
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx,
+					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
+		case "getCategories":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_getCategories(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
 				return res
 			}
 
@@ -1222,42 +1878,6 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Query___schema(ctx, field)
 			})
-		default:
-			panic("unknown field " + strconv.Quote(field.Name))
-		}
-	}
-	out.Dispatch(ctx)
-	if out.Invalids > 0 {
-		return graphql.Null
-	}
-
-	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
-
-	for label, dfs := range deferred {
-		ec.processDeferredGroup(graphql.DeferredGroup{
-			Label:    label,
-			Path:     graphql.GetPath(ctx),
-			FieldSet: dfs,
-			Context:  ctx,
-		})
-	}
-
-	return out
-}
-
-var responseImplementors = []string{"Response"}
-
-func (ec *executionContext) _Response(ctx context.Context, sel ast.SelectionSet, obj *model.Response) graphql.Marshaler {
-	fields := graphql.CollectFields(ec.OperationContext, sel, responseImplementors)
-
-	out := graphql.NewFieldSet(fields)
-	deferred := make(map[string]*graphql.FieldSet)
-	for i, field := range fields {
-		switch field.Name {
-		case "__typename":
-			out.Values[i] = graphql.MarshalString("Response")
-		case "ok":
-			out.Values[i] = ec._Response_ok(ctx, field, obj)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -1376,18 +1996,164 @@ func (ec *executionContext) _Social(ctx context.Context, sel ast.SelectionSet, o
 	return out
 }
 
+var businessDocumentImplementors = []string{"businessDocument"}
+
+func (ec *executionContext) _businessDocument(ctx context.Context, sel ast.SelectionSet, obj *model.BusinessDocument) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, businessDocumentImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("businessDocument")
+		case "id":
+			out.Values[i] = ec._businessDocument_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "description":
+			out.Values[i] = ec._businessDocument_description(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "url":
+			out.Values[i] = ec._businessDocument_url(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "document_id":
+			out.Values[i] = ec._businessDocument_document_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.processDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
+var kybDocumentImplementors = []string{"kybDocument"}
+
+func (ec *executionContext) _kybDocument(ctx context.Context, sel ast.SelectionSet, obj *model.KybDocument) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, kybDocumentImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("kybDocument")
+		case "id":
+			out.Values[i] = ec._kybDocument_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "name":
+			out.Values[i] = ec._kybDocument_name(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "required":
+			out.Values[i] = ec._kybDocument_required(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.processDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
+var myBusinessImplementors = []string{"myBusiness"}
+
+func (ec *executionContext) _myBusiness(ctx context.Context, sel ast.SelectionSet, obj *model.MyBusiness) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, myBusinessImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("myBusiness")
+		case "id":
+			out.Values[i] = ec._myBusiness_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "name":
+			out.Values[i] = ec._myBusiness_name(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "logo":
+			out.Values[i] = ec._myBusiness_logo(ctx, field, obj)
+		case "role":
+			out.Values[i] = ec._myBusiness_role(ctx, field, obj)
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.processDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
 // endregion **************************** object.gotpl ****************************
 
 // region    ***************************** type.gotpl *****************************
 
-func (ec *executionContext) unmarshalNBusinessAddress2ᚖgithubᚗcomᚋToflexᚋdirectory_v2ᚋgraphᚋmodelᚐBusinessAddress(ctx context.Context, v any) (*model.BusinessAddress, error) {
-	res, err := ec.unmarshalInputBusinessAddress(ctx, v)
-	return &res, graphql.ErrorOnPath(ctx, err)
-}
-
-func (ec *executionContext) unmarshalNDocument2ᚖgithubᚗcomᚋToflexᚋdirectory_v2ᚋgraphᚋmodelᚐDocument(ctx context.Context, v any) (*model.Document, error) {
-	res, err := ec.unmarshalInputDocument(ctx, v)
-	return &res, graphql.ErrorOnPath(ctx, err)
+func (ec *executionContext) unmarshalNDocumentInput2githubᚗcomᚋToflexᚋdirectory_v2ᚋgraphᚋmodelᚐDocumentInput(ctx context.Context, v any) (model.DocumentInput, error) {
+	res, err := ec.unmarshalInputDocumentInput(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
 }
 
 func (ec *executionContext) unmarshalNRegisterBusinessInput2githubᚗcomᚋToflexᚋdirectory_v2ᚋgraphᚋmodelᚐRegisterBusinessInput(ctx context.Context, v any) (model.RegisterBusinessInput, error) {
@@ -1395,18 +2161,19 @@ func (ec *executionContext) unmarshalNRegisterBusinessInput2githubᚗcomᚋTofle
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) marshalNResponse2githubᚗcomᚋToflexᚋdirectory_v2ᚋgraphᚋmodelᚐResponse(ctx context.Context, sel ast.SelectionSet, v model.Response) graphql.Marshaler {
-	return ec._Response(ctx, sel, &v)
+func (ec *executionContext) unmarshalNRemoveDocumentInput2githubᚗcomᚋToflexᚋdirectory_v2ᚋgraphᚋmodelᚐRemoveDocumentInput(ctx context.Context, v any) (model.RemoveDocumentInput, error) {
+	res, err := ec.unmarshalInputRemoveDocumentInput(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) marshalNResponse2ᚖgithubᚗcomᚋToflexᚋdirectory_v2ᚋgraphᚋmodelᚐResponse(ctx context.Context, sel ast.SelectionSet, v *model.Response) graphql.Marshaler {
-	if v == nil {
-		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
-		}
-		return graphql.Null
-	}
-	return ec._Response(ctx, sel, v)
+func (ec *executionContext) unmarshalNRole2githubᚗcomᚋToflexᚋdirectory_v2ᚋgraphᚋmodelᚐRole0(ctx context.Context, v any) (model.Role0, error) {
+	var res model.Role0
+	err := res.UnmarshalGQL(v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNRole2githubᚗcomᚋToflexᚋdirectory_v2ᚋgraphᚋmodelᚐRole0(ctx context.Context, sel ast.SelectionSet, v model.Role0) graphql.Marshaler {
+	return v
 }
 
 func (ec *executionContext) marshalNSearchBusiness2ᚕᚖgithubᚗcomᚋToflexᚋdirectory_v2ᚋgraphᚋmodelᚐSearchBusinessᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.SearchBusiness) graphql.Marshaler {
@@ -1463,7 +2230,89 @@ func (ec *executionContext) marshalNSearchBusiness2ᚖgithubᚗcomᚋToflexᚋdi
 	return ec._SearchBusiness(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalNSocial2ᚕᚖgithubᚗcomᚋToflexᚋdirectory_v2ᚋgraphᚋmodelᚐSocial(ctx context.Context, sel ast.SelectionSet, v []*model.Social) graphql.Marshaler {
+func (ec *executionContext) unmarshalNUpload2githubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚐUpload(ctx context.Context, v any) (graphql.Upload, error) {
+	res, err := graphql.UnmarshalUpload(v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNUpload2githubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚐUpload(ctx context.Context, sel ast.SelectionSet, v graphql.Upload) graphql.Marshaler {
+	_ = sel
+	res := graphql.MarshalUpload(v)
+	if res == graphql.Null {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
+		}
+	}
+	return res
+}
+
+func (ec *executionContext) unmarshalNbusinessDetail2githubᚗcomᚋToflexᚋdirectory_v2ᚋgraphᚋmodelᚐBusinessDetail(ctx context.Context, v any) (model.BusinessDetail, error) {
+	res, err := ec.unmarshalInputbusinessDetail(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNbusinessDocument2ᚖgithubᚗcomᚋToflexᚋdirectory_v2ᚋgraphᚋmodelᚐBusinessDocument(ctx context.Context, sel ast.SelectionSet, v *model.BusinessDocument) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._businessDocument(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalNkybDocument2ᚖgithubᚗcomᚋToflexᚋdirectory_v2ᚋgraphᚋmodelᚐKybDocument(ctx context.Context, sel ast.SelectionSet, v *model.KybDocument) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._kybDocument(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalNmyBusiness2ᚖgithubᚗcomᚋToflexᚋdirectory_v2ᚋgraphᚋmodelᚐMyBusiness(ctx context.Context, sel ast.SelectionSet, v *model.MyBusiness) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._myBusiness(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalNrole2ᚖgithubᚗcomᚋToflexᚋdirectory_v2ᚋgraphᚋmodelᚐRole(ctx context.Context, v any) (*model.Role, error) {
+	res, err := ec.unmarshalInputrole(ctx, v)
+	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalOBusiness2ᚖgithubᚗcomᚋToflexᚋdirectory_v2ᚋgraphᚋmodelᚐBusiness(ctx context.Context, sel ast.SelectionSet, v *model.Business) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._Business(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalOBusinessAddress2ᚖgithubᚗcomᚋToflexᚋdirectory_v2ᚋgraphᚋmodelᚐBusinessAddress(ctx context.Context, v any) (*model.BusinessAddress, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := ec.unmarshalInputBusinessAddress(ctx, v)
+	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) unmarshalOBusinessRegistrationDetail2ᚖgithubᚗcomᚋToflexᚋdirectory_v2ᚋgraphᚋmodelᚐBusinessRegistrationDetail(ctx context.Context, v any) (*model.BusinessRegistrationDetail, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := ec.unmarshalInputBusinessRegistrationDetail(ctx, v)
+	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalObusinessDocument2ᚕᚖgithubᚗcomᚋToflexᚋdirectory_v2ᚋgraphᚋmodelᚐBusinessDocumentᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.BusinessDocument) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
 	isLen1 := len(v) == 1
@@ -1487,7 +2336,7 @@ func (ec *executionContext) marshalNSocial2ᚕᚖgithubᚗcomᚋToflexᚋdirecto
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalOSocial2ᚖgithubᚗcomᚋToflexᚋdirectory_v2ᚋgraphᚋmodelᚐSocial(ctx, sel, v[i])
+			ret[i] = ec.marshalNbusinessDocument2ᚖgithubᚗcomᚋToflexᚋdirectory_v2ᚋgraphᚋmodelᚐBusinessDocument(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)
@@ -1498,63 +2347,107 @@ func (ec *executionContext) marshalNSocial2ᚕᚖgithubᚗcomᚋToflexᚋdirecto
 	}
 	wg.Wait()
 
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
 	return ret
 }
 
-func (ec *executionContext) unmarshalNUpload2githubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚐUpload(ctx context.Context, v any) (graphql.Upload, error) {
-	res, err := graphql.UnmarshalUpload(v)
-	return res, graphql.ErrorOnPath(ctx, err)
-}
-
-func (ec *executionContext) marshalNUpload2githubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚐUpload(ctx context.Context, sel ast.SelectionSet, v graphql.Upload) graphql.Marshaler {
-	_ = sel
-	res := graphql.MarshalUpload(v)
-	if res == graphql.Null {
-		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
-		}
-	}
-	return res
-}
-
-func (ec *executionContext) marshalOBusiness2ᚖgithubᚗcomᚋToflexᚋdirectory_v2ᚋgraphᚋmodelᚐBusiness(ctx context.Context, sel ast.SelectionSet, v *model.Business) graphql.Marshaler {
+func (ec *executionContext) marshalOkybDocument2ᚕᚖgithubᚗcomᚋToflexᚋdirectory_v2ᚋgraphᚋmodelᚐKybDocumentᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.KybDocument) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
-	return ec._Business(ctx, sel, v)
-}
-
-func (ec *executionContext) unmarshalOBusinessRegistrationDetail2ᚖgithubᚗcomᚋToflexᚋdirectory_v2ᚋgraphᚋmodelᚐBusinessRegistrationDetail(ctx context.Context, v any) (*model.BusinessRegistrationDetail, error) {
-	if v == nil {
-		return nil, nil
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
 	}
-	res, err := ec.unmarshalInputBusinessRegistrationDetail(ctx, v)
-	return &res, graphql.ErrorOnPath(ctx, err)
-}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalNkybDocument2ᚖgithubᚗcomᚋToflexᚋdirectory_v2ᚋgraphᚋmodelᚐKybDocument(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
 
-func (ec *executionContext) unmarshalODocument2ᚕᚖgithubᚗcomᚋToflexᚋdirectory_v2ᚋgraphᚋmodelᚐDocumentᚄ(ctx context.Context, v any) ([]*model.Document, error) {
-	if v == nil {
-		return nil, nil
 	}
-	var vSlice []any
-	vSlice = graphql.CoerceList(v)
-	var err error
-	res := make([]*model.Document, len(vSlice))
-	for i := range vSlice {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithIndex(i))
-		res[i], err = ec.unmarshalNDocument2ᚖgithubᚗcomᚋToflexᚋdirectory_v2ᚋgraphᚋmodelᚐDocument(ctx, vSlice[i])
-		if err != nil {
-			return nil, err
+	wg.Wait()
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
 		}
 	}
-	return res, nil
+
+	return ret
 }
 
-func (ec *executionContext) marshalOSocial2ᚖgithubᚗcomᚋToflexᚋdirectory_v2ᚋgraphᚋmodelᚐSocial(ctx context.Context, sel ast.SelectionSet, v *model.Social) graphql.Marshaler {
+func (ec *executionContext) marshalOmyBusiness2ᚕᚖgithubᚗcomᚋToflexᚋdirectory_v2ᚋgraphᚋmodelᚐMyBusinessᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.MyBusiness) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
-	return ec._Social(ctx, sel, v)
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalNmyBusiness2ᚖgithubᚗcomᚋToflexᚋdirectory_v2ᚋgraphᚋmodelᚐMyBusiness(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
+	return ret
 }
 
 // endregion ***************************** type.gotpl *****************************

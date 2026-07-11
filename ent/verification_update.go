@@ -98,6 +98,26 @@ func (vu *VerificationUpdate) SetNillableStatus(v *verification.Status) *Verific
 	return vu
 }
 
+// SetNumber sets the "number" field.
+func (vu *VerificationUpdate) SetNumber(s string) *VerificationUpdate {
+	vu.mutation.SetNumber(s)
+	return vu
+}
+
+// SetNillableNumber sets the "number" field if the given value is not nil.
+func (vu *VerificationUpdate) SetNillableNumber(s *string) *VerificationUpdate {
+	if s != nil {
+		vu.SetNumber(*s)
+	}
+	return vu
+}
+
+// ClearNumber clears the value of the "number" field.
+func (vu *VerificationUpdate) ClearNumber() *VerificationUpdate {
+	vu.mutation.ClearNumber()
+	return vu
+}
+
 // SetReferenceID sets the "reference_id" field.
 func (vu *VerificationUpdate) SetReferenceID(s string) *VerificationUpdate {
 	vu.mutation.SetReferenceID(s)
@@ -345,6 +365,12 @@ func (vu *VerificationUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if value, ok := vu.mutation.Status(); ok {
 		_spec.SetField(verification.FieldStatus, field.TypeEnum, value)
 	}
+	if value, ok := vu.mutation.Number(); ok {
+		_spec.SetField(verification.FieldNumber, field.TypeString, value)
+	}
+	if vu.mutation.NumberCleared() {
+		_spec.ClearField(verification.FieldNumber, field.TypeString)
+	}
 	if value, ok := vu.mutation.ReferenceID(); ok {
 		_spec.SetField(verification.FieldReferenceID, field.TypeString, value)
 	}
@@ -541,6 +567,26 @@ func (vuo *VerificationUpdateOne) SetNillableStatus(v *verification.Status) *Ver
 	if v != nil {
 		vuo.SetStatus(*v)
 	}
+	return vuo
+}
+
+// SetNumber sets the "number" field.
+func (vuo *VerificationUpdateOne) SetNumber(s string) *VerificationUpdateOne {
+	vuo.mutation.SetNumber(s)
+	return vuo
+}
+
+// SetNillableNumber sets the "number" field if the given value is not nil.
+func (vuo *VerificationUpdateOne) SetNillableNumber(s *string) *VerificationUpdateOne {
+	if s != nil {
+		vuo.SetNumber(*s)
+	}
+	return vuo
+}
+
+// ClearNumber clears the value of the "number" field.
+func (vuo *VerificationUpdateOne) ClearNumber() *VerificationUpdateOne {
+	vuo.mutation.ClearNumber()
 	return vuo
 }
 
@@ -820,6 +866,12 @@ func (vuo *VerificationUpdateOne) sqlSave(ctx context.Context) (_node *Verificat
 	}
 	if value, ok := vuo.mutation.Status(); ok {
 		_spec.SetField(verification.FieldStatus, field.TypeEnum, value)
+	}
+	if value, ok := vuo.mutation.Number(); ok {
+		_spec.SetField(verification.FieldNumber, field.TypeString, value)
+	}
+	if vuo.mutation.NumberCleared() {
+		_spec.ClearField(verification.FieldNumber, field.TypeString)
 	}
 	if value, ok := vuo.mutation.ReferenceID(); ok {
 		_spec.SetField(verification.FieldReferenceID, field.TypeString, value)

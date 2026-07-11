@@ -10,7 +10,14 @@ import (
 
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/Toflex/directory_v2/pkg/util"
+	"github.com/pariz/gountries"
 )
+
+var g *gountries.Query
+
+func init() {
+	g = gountries.New()
+}
 
 func (b *CreateBusinessRequest) Validate() error {
 	if b.Name == "" {
@@ -24,12 +31,23 @@ func (b *CreateBusinessRequest) Validate() error {
 		return err
 	}
 
-	if b.IsRegistered {
-		return b.RegistrationDetail.Validate()
+	if b.Role.AuthorizedRepresentative {
+		if b.Role.AuthorizedRepresentativeEmail == nil {
+			return errors.New("authorized representative email is required")
+		}
+
+		email := util.AddressToString(b.Role.AuthorizedRepresentativeEmail)
+		err := util.ValidateEmail(email)
+		if err != nil {
+			return err
+		}
+
+		email = strings.ToLower(email)
+		b.Role.AuthorizedRepresentativeEmail = &email
 	}
 
-	for _, document := range b.OtherDocument {
-		return document.Validate()
+	if err := b.Address.Validate(); err != nil {
+		return err
 	}
 
 	return nil
@@ -44,7 +62,11 @@ func (d *Document) Validate() error {
 	return nil
 }
 
-func (b *BusinessRegistrationDetail) Validate() error {
+func (b *RegistrationDetail) Validate() error {
+	if b == nil {
+		return nil
+	}
+
 	if b.Number == "" {
 		return errors.New("business registration number is required")
 	}
@@ -60,19 +82,40 @@ func (b *BusinessRegistrationDetail) Validate() error {
 		return (err)
 	}
 
-	err = validateUpload(b.CertificateOfIncorporation)
-	if err != nil {
-		return fmt.Errorf("Certificate of Incorporation: %s", err.Error())
+	return nil
+}
+
+func (ba *BusinessAddress) Validate() error {
+
+	if ba == nil {
+		return nil
 	}
 
-	err = validateUpload(b.ArticlesOfAssociation)
-	if err != nil {
-		return fmt.Errorf("Articles of Association: %s", err.Error())
+	if strings.TrimSpace(ba.Street) == "" {
+		return errors.New("street address is required")
 	}
 
-	err = validateUpload(b.StatusCertificate)
+	if strings.TrimSpace(ba.City) == "" {
+		return errors.New("city is required")
+	}
+
+	if strings.TrimSpace(ba.State) == "" {
+		return errors.New("state is required")
+	}
+
+	if strings.TrimSpace(ba.Country) == "" {
+		return errors.New("country is required")
+	}
+
+	country, err := g.FindCountryByAlpha(ba.Country)
 	if err != nil {
-		return fmt.Errorf("Status Certificate: %s", err.Error())
+		return errors.New("country not valid")
+	}
+
+	ba.Country = country.Alpha2
+
+	if strings.TrimSpace(ba.ZipCode) == "" {
+		return errors.New("zip code is required")
 	}
 
 	return nil
@@ -127,6 +170,28 @@ func validateUpload(upload graphql.Upload) error {
 
 	if !allowedMime[contentType] {
 		return errors.New("invalid file content")
+	}
+
+	return nil
+}
+
+func (b *BusinessDetailRequest) Validate() error {
+	var err error
+	if b.Name != nil {
+		name := (util.ToTitleCase(*b.Name))
+		b.Name = &name
+	}
+
+	if b.Website != nil {
+		err = util.ValidateURL(*b.Website)
+		if err != nil {
+			return fmt.Errorf("Website %s", err.Error())
+		}
+	}
+
+	err = b.RegistrationDetail.Validate()
+	if err != nil {
+		return err
 	}
 
 	return nil

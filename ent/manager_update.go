@@ -14,6 +14,7 @@ import (
 	"github.com/Toflex/directory_v2/ent/business"
 	"github.com/Toflex/directory_v2/ent/manager"
 	"github.com/Toflex/directory_v2/ent/predicate"
+	"github.com/Toflex/directory_v2/ent/role"
 	"github.com/Toflex/directory_v2/ent/user"
 )
 
@@ -84,6 +85,34 @@ func (mu *ManagerUpdate) SetNillableBusinessID(s *string) *ManagerUpdate {
 	return mu
 }
 
+// SetIsOwner sets the "is_owner" field.
+func (mu *ManagerUpdate) SetIsOwner(b bool) *ManagerUpdate {
+	mu.mutation.SetIsOwner(b)
+	return mu
+}
+
+// SetNillableIsOwner sets the "is_owner" field if the given value is not nil.
+func (mu *ManagerUpdate) SetNillableIsOwner(b *bool) *ManagerUpdate {
+	if b != nil {
+		mu.SetIsOwner(*b)
+	}
+	return mu
+}
+
+// SetRoleID sets the "role_id" field.
+func (mu *ManagerUpdate) SetRoleID(s string) *ManagerUpdate {
+	mu.mutation.SetRoleID(s)
+	return mu
+}
+
+// SetNillableRoleID sets the "role_id" field if the given value is not nil.
+func (mu *ManagerUpdate) SetNillableRoleID(s *string) *ManagerUpdate {
+	if s != nil {
+		mu.SetRoleID(*s)
+	}
+	return mu
+}
+
 // SetDisabled sets the "disabled" field.
 func (mu *ManagerUpdate) SetDisabled(b bool) *ManagerUpdate {
 	mu.mutation.SetDisabled(b)
@@ -148,6 +177,11 @@ func (mu *ManagerUpdate) SetUser(u *User) *ManagerUpdate {
 	return mu.SetUserID(u.ID)
 }
 
+// SetRole sets the "role" edge to the Role entity.
+func (mu *ManagerUpdate) SetRole(r *Role) *ManagerUpdate {
+	return mu.SetRoleID(r.ID)
+}
+
 // Mutation returns the ManagerMutation object of the builder.
 func (mu *ManagerUpdate) Mutation() *ManagerMutation {
 	return mu.mutation
@@ -162,6 +196,12 @@ func (mu *ManagerUpdate) ClearBusiness() *ManagerUpdate {
 // ClearUser clears the "user" edge to the User entity.
 func (mu *ManagerUpdate) ClearUser() *ManagerUpdate {
 	mu.mutation.ClearUser()
+	return mu
+}
+
+// ClearRole clears the "role" edge to the Role entity.
+func (mu *ManagerUpdate) ClearRole() *ManagerUpdate {
+	mu.mutation.ClearRole()
 	return mu
 }
 
@@ -203,11 +243,19 @@ func (mu *ManagerUpdate) defaults() {
 
 // check runs all checks and user-defined validators on the builder.
 func (mu *ManagerUpdate) check() error {
+	if v, ok := mu.mutation.RoleID(); ok {
+		if err := manager.RoleIDValidator(v); err != nil {
+			return &ValidationError{Name: "role_id", err: fmt.Errorf(`ent: validator failed for field "Manager.role_id": %w`, err)}
+		}
+	}
 	if mu.mutation.BusinessCleared() && len(mu.mutation.BusinessIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "Manager.business"`)
 	}
 	if mu.mutation.UserCleared() && len(mu.mutation.UserIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "Manager.user"`)
+	}
+	if mu.mutation.RoleCleared() && len(mu.mutation.RoleIDs()) > 0 {
+		return errors.New(`ent: clearing a required unique edge "Manager.role"`)
 	}
 	return nil
 }
@@ -232,6 +280,9 @@ func (mu *ManagerUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if mu.mutation.DeletedAtCleared() {
 		_spec.ClearField(manager.FieldDeletedAt, field.TypeTime)
+	}
+	if value, ok := mu.mutation.IsOwner(); ok {
+		_spec.SetField(manager.FieldIsOwner, field.TypeBool, value)
 	}
 	if value, ok := mu.mutation.Disabled(); ok {
 		_spec.SetField(manager.FieldDisabled, field.TypeBool, value)
@@ -299,6 +350,35 @@ func (mu *ManagerUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if mu.mutation.RoleCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   manager.RoleTable,
+			Columns: []string{manager.RoleColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(role.FieldID, field.TypeString),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := mu.mutation.RoleIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   manager.RoleTable,
+			Columns: []string{manager.RoleColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(role.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {
@@ -380,6 +460,34 @@ func (muo *ManagerUpdateOne) SetNillableBusinessID(s *string) *ManagerUpdateOne 
 	return muo
 }
 
+// SetIsOwner sets the "is_owner" field.
+func (muo *ManagerUpdateOne) SetIsOwner(b bool) *ManagerUpdateOne {
+	muo.mutation.SetIsOwner(b)
+	return muo
+}
+
+// SetNillableIsOwner sets the "is_owner" field if the given value is not nil.
+func (muo *ManagerUpdateOne) SetNillableIsOwner(b *bool) *ManagerUpdateOne {
+	if b != nil {
+		muo.SetIsOwner(*b)
+	}
+	return muo
+}
+
+// SetRoleID sets the "role_id" field.
+func (muo *ManagerUpdateOne) SetRoleID(s string) *ManagerUpdateOne {
+	muo.mutation.SetRoleID(s)
+	return muo
+}
+
+// SetNillableRoleID sets the "role_id" field if the given value is not nil.
+func (muo *ManagerUpdateOne) SetNillableRoleID(s *string) *ManagerUpdateOne {
+	if s != nil {
+		muo.SetRoleID(*s)
+	}
+	return muo
+}
+
 // SetDisabled sets the "disabled" field.
 func (muo *ManagerUpdateOne) SetDisabled(b bool) *ManagerUpdateOne {
 	muo.mutation.SetDisabled(b)
@@ -444,6 +552,11 @@ func (muo *ManagerUpdateOne) SetUser(u *User) *ManagerUpdateOne {
 	return muo.SetUserID(u.ID)
 }
 
+// SetRole sets the "role" edge to the Role entity.
+func (muo *ManagerUpdateOne) SetRole(r *Role) *ManagerUpdateOne {
+	return muo.SetRoleID(r.ID)
+}
+
 // Mutation returns the ManagerMutation object of the builder.
 func (muo *ManagerUpdateOne) Mutation() *ManagerMutation {
 	return muo.mutation
@@ -458,6 +571,12 @@ func (muo *ManagerUpdateOne) ClearBusiness() *ManagerUpdateOne {
 // ClearUser clears the "user" edge to the User entity.
 func (muo *ManagerUpdateOne) ClearUser() *ManagerUpdateOne {
 	muo.mutation.ClearUser()
+	return muo
+}
+
+// ClearRole clears the "role" edge to the Role entity.
+func (muo *ManagerUpdateOne) ClearRole() *ManagerUpdateOne {
+	muo.mutation.ClearRole()
 	return muo
 }
 
@@ -512,11 +631,19 @@ func (muo *ManagerUpdateOne) defaults() {
 
 // check runs all checks and user-defined validators on the builder.
 func (muo *ManagerUpdateOne) check() error {
+	if v, ok := muo.mutation.RoleID(); ok {
+		if err := manager.RoleIDValidator(v); err != nil {
+			return &ValidationError{Name: "role_id", err: fmt.Errorf(`ent: validator failed for field "Manager.role_id": %w`, err)}
+		}
+	}
 	if muo.mutation.BusinessCleared() && len(muo.mutation.BusinessIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "Manager.business"`)
 	}
 	if muo.mutation.UserCleared() && len(muo.mutation.UserIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "Manager.user"`)
+	}
+	if muo.mutation.RoleCleared() && len(muo.mutation.RoleIDs()) > 0 {
+		return errors.New(`ent: clearing a required unique edge "Manager.role"`)
 	}
 	return nil
 }
@@ -558,6 +685,9 @@ func (muo *ManagerUpdateOne) sqlSave(ctx context.Context) (_node *Manager, err e
 	}
 	if muo.mutation.DeletedAtCleared() {
 		_spec.ClearField(manager.FieldDeletedAt, field.TypeTime)
+	}
+	if value, ok := muo.mutation.IsOwner(); ok {
+		_spec.SetField(manager.FieldIsOwner, field.TypeBool, value)
 	}
 	if value, ok := muo.mutation.Disabled(); ok {
 		_spec.SetField(manager.FieldDisabled, field.TypeBool, value)
@@ -625,6 +755,35 @@ func (muo *ManagerUpdateOne) sqlSave(ctx context.Context) (_node *Manager, err e
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if muo.mutation.RoleCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   manager.RoleTable,
+			Columns: []string{manager.RoleColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(role.FieldID, field.TypeString),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := muo.mutation.RoleIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   manager.RoleTable,
+			Columns: []string{manager.RoleColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(role.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {
