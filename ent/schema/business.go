@@ -38,9 +38,9 @@ func (Business) Fields() []ent.Field {
 		field.String("website").Optional().
 			Validate(util.ValidateURL),
 		field.Bool("on_site").Default(false),
-		field.Bool("active").Default(false),
+		field.Bool("active").Default(true),
 		field.Bool("live").Default(false),
-		field.Bool("disabled").Default(true),
+		field.Bool("disabled").Default(false),
 		field.Time("disabled_at").Default(time.Now),
 		field.String("disable_reason").Optional(),
 		field.Enum("verification_status").Values(

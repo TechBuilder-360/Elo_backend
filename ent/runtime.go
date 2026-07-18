@@ -10,6 +10,7 @@ import (
 	"github.com/Toflex/directory_v2/ent/businessfeature"
 	"github.com/Toflex/directory_v2/ent/businesslocation"
 	"github.com/Toflex/directory_v2/ent/businessservices"
+	"github.com/Toflex/directory_v2/ent/currency"
 	"github.com/Toflex/directory_v2/ent/kybdocument"
 	"github.com/Toflex/directory_v2/ent/kybmessage"
 	"github.com/Toflex/directory_v2/ent/manager"
@@ -24,6 +25,7 @@ import (
 	"github.com/Toflex/directory_v2/ent/user"
 	"github.com/Toflex/directory_v2/ent/userdocument"
 	"github.com/Toflex/directory_v2/ent/verification"
+	"github.com/Toflex/directory_v2/ent/wallet"
 )
 
 // The init function reads all schema descriptors with runtime code
@@ -246,6 +248,45 @@ func init() {
 	businessservicesDescDescription := businessservicesFields[2].Descriptor()
 	// businessservices.DescriptionValidator is a validator for the "description" field. It is called by the builders before save.
 	businessservices.DescriptionValidator = businessservicesDescDescription.Validators[0].(func(string) error)
+	currencyMixin := schema.Currency{}.Mixin()
+	currencyMixinFields0 := currencyMixin[0].Fields()
+	_ = currencyMixinFields0
+	currencyFields := schema.Currency{}.Fields()
+	_ = currencyFields
+	// currencyDescCreatedAt is the schema descriptor for created_at field.
+	currencyDescCreatedAt := currencyMixinFields0[1].Descriptor()
+	// currency.DefaultCreatedAt holds the default value on creation for the created_at field.
+	currency.DefaultCreatedAt = currencyDescCreatedAt.Default.(func() time.Time)
+	// currencyDescUpdatedAt is the schema descriptor for updated_at field.
+	currencyDescUpdatedAt := currencyMixinFields0[2].Descriptor()
+	// currency.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	currency.DefaultUpdatedAt = currencyDescUpdatedAt.Default.(func() time.Time)
+	// currency.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	currency.UpdateDefaultUpdatedAt = currencyDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// currencyDescName is the schema descriptor for name field.
+	currencyDescName := currencyFields[0].Descriptor()
+	// currency.NameValidator is a validator for the "name" field. It is called by the builders before save.
+	currency.NameValidator = currencyDescName.Validators[0].(func(string) error)
+	// currencyDescSymbol is the schema descriptor for symbol field.
+	currencyDescSymbol := currencyFields[1].Descriptor()
+	// currency.SymbolValidator is a validator for the "symbol" field. It is called by the builders before save.
+	currency.SymbolValidator = currencyDescSymbol.Validators[0].(func(string) error)
+	// currencyDescCode is the schema descriptor for code field.
+	currencyDescCode := currencyFields[2].Descriptor()
+	// currency.CodeValidator is a validator for the "code" field. It is called by the builders before save.
+	currency.CodeValidator = currencyDescCode.Validators[0].(func(string) error)
+	// currencyDescIsFiat is the schema descriptor for is_fiat field.
+	currencyDescIsFiat := currencyFields[3].Descriptor()
+	// currency.DefaultIsFiat holds the default value on creation for the is_fiat field.
+	currency.DefaultIsFiat = currencyDescIsFiat.Default.(bool)
+	// currencyDescActive is the schema descriptor for active field.
+	currencyDescActive := currencyFields[4].Descriptor()
+	// currency.DefaultActive holds the default value on creation for the active field.
+	currency.DefaultActive = currencyDescActive.Default.(bool)
+	// currencyDescID is the schema descriptor for id field.
+	currencyDescID := currencyMixinFields0[0].Descriptor()
+	// currency.DefaultID holds the default value on creation for the id field.
+	currency.DefaultID = currencyDescID.Default.(func() string)
 	kybdocumentMixin := schema.KYBDocument{}.Mixin()
 	kybdocumentMixinFields0 := kybdocumentMixin[0].Fields()
 	_ = kybdocumentMixinFields0
@@ -676,4 +717,43 @@ func init() {
 	verificationDescID := verificationMixinFields0[0].Descriptor()
 	// verification.DefaultID holds the default value on creation for the id field.
 	verification.DefaultID = verificationDescID.Default.(func() string)
+	walletMixin := schema.Wallet{}.Mixin()
+	walletMixinFields0 := walletMixin[0].Fields()
+	_ = walletMixinFields0
+	walletFields := schema.Wallet{}.Fields()
+	_ = walletFields
+	// walletDescCreatedAt is the schema descriptor for created_at field.
+	walletDescCreatedAt := walletMixinFields0[1].Descriptor()
+	// wallet.DefaultCreatedAt holds the default value on creation for the created_at field.
+	wallet.DefaultCreatedAt = walletDescCreatedAt.Default.(func() time.Time)
+	// walletDescUpdatedAt is the schema descriptor for updated_at field.
+	walletDescUpdatedAt := walletMixinFields0[2].Descriptor()
+	// wallet.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	wallet.DefaultUpdatedAt = walletDescUpdatedAt.Default.(func() time.Time)
+	// wallet.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	wallet.UpdateDefaultUpdatedAt = walletDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// walletDescAvailableBalance is the schema descriptor for available_balance field.
+	walletDescAvailableBalance := walletFields[1].Descriptor()
+	// wallet.DefaultAvailableBalance holds the default value on creation for the available_balance field.
+	wallet.DefaultAvailableBalance = walletDescAvailableBalance.Default.(int64)
+	// walletDescLedgerBalance is the schema descriptor for ledger_balance field.
+	walletDescLedgerBalance := walletFields[2].Descriptor()
+	// wallet.DefaultLedgerBalance holds the default value on creation for the ledger_balance field.
+	wallet.DefaultLedgerBalance = walletDescLedgerBalance.Default.(int64)
+	// walletDescHoldingBalance is the schema descriptor for holding_balance field.
+	walletDescHoldingBalance := walletFields[3].Descriptor()
+	// wallet.DefaultHoldingBalance holds the default value on creation for the holding_balance field.
+	wallet.DefaultHoldingBalance = walletDescHoldingBalance.Default.(int64)
+	// walletDescCurrencyID is the schema descriptor for currency_id field.
+	walletDescCurrencyID := walletFields[6].Descriptor()
+	// wallet.CurrencyIDValidator is a validator for the "currency_id" field. It is called by the builders before save.
+	wallet.CurrencyIDValidator = walletDescCurrencyID.Validators[0].(func(string) error)
+	// walletDescActive is the schema descriptor for active field.
+	walletDescActive := walletFields[7].Descriptor()
+	// wallet.DefaultActive holds the default value on creation for the active field.
+	wallet.DefaultActive = walletDescActive.Default.(bool)
+	// walletDescID is the schema descriptor for id field.
+	walletDescID := walletMixinFields0[0].Descriptor()
+	// wallet.DefaultID holds the default value on creation for the id field.
+	wallet.DefaultID = walletDescID.Default.(func() string)
 }

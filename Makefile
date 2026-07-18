@@ -22,6 +22,12 @@ start-server:
 	set -a; . ./.env; set +a; \
 	go run cmd/http/server.go 
 
-
 gqlgen:
 	go run github.com/99designs/gqlgen generate
+
+create-ent-schema:
+	@if [ -z "$(name)" ]; then \
+		echo "Usage: make create-ent-schema name=\"BusinessLocation\""; \
+		exit 1; \
+	fi
+	go run -mod=mod entgo.io/ent/cmd/ent new $(name)
