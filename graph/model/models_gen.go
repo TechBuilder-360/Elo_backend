@@ -38,9 +38,11 @@ type BusinessRegistrationDetail struct {
 }
 
 type Currency struct {
-	ID   string `json:"id"`
-	Code string `json:"code"`
-	Name string `json:"name"`
+	ID     string `json:"id"`
+	Code   string `json:"code"`
+	Name   string `json:"name"`
+	Symbol string `json:"symbol"`
+	IsFiat bool   `json:"is_fiat"`
 }
 
 type DocumentInput struct {

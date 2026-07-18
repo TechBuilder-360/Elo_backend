@@ -53,9 +53,11 @@ type ComplexityRoot struct {
 	}
 
 	Currency struct {
-		Code func(childComplexity int) int
-		ID   func(childComplexity int) int
-		Name func(childComplexity int) int
+		Code   func(childComplexity int) int
+		ID     func(childComplexity int) int
+		IsFiat func(childComplexity int) int
+		Name   func(childComplexity int) int
+		Symbol func(childComplexity int) int
 	}
 
 	LoginResponse struct {
@@ -237,12 +239,26 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 
 		return e.complexity.Currency.ID(childComplexity), true
 
+	case "Currency.is_fiat":
+		if e.complexity.Currency.IsFiat == nil {
+			break
+		}
+
+		return e.complexity.Currency.IsFiat(childComplexity), true
+
 	case "Currency.name":
 		if e.complexity.Currency.Name == nil {
 			break
 		}
 
 		return e.complexity.Currency.Name(childComplexity), true
+
+	case "Currency.symbol":
+		if e.complexity.Currency.Symbol == nil {
+			break
+		}
+
+		return e.complexity.Currency.Symbol(childComplexity), true
 
 	case "LoginResponse.access_token":
 		if e.complexity.LoginResponse.AccessToken == nil {
@@ -1048,6 +1064,8 @@ extend type Mutation {
     id: String!
     code: String!
     name: String!
+    symbol: String!
+    is_fiat: Boolean!
 }
 
 extend type Query {
