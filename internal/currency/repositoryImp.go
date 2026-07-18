@@ -14,3 +14,10 @@ func (r *repository) GetCurrencyByCode(ctx context.Context, currencyCode types.C
 		Where(currency.CodeEQ(currencyCode.Capitalize().ToString())).
 		First(ctx)
 }
+
+// GetCurrencyByCode implements [IRepository].
+func (r *repository) Currencyies(ctx context.Context) ([]*ent.Currency, error) {
+	return r.db.Currency.Query().
+		Where(currency.ActiveEQ(true)).
+		All(ctx)
+}

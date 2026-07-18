@@ -9,6 +9,7 @@ import (
 
 type IRepository interface {
 	GetCurrencyByCode(ctx context.Context, currencyCode types.CurrencyCode) (*ent.Currency, error)
+	Currencyies(ctx context.Context) ([]*ent.Currency, error)
 }
 
 type repository struct {

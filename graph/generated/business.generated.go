@@ -617,6 +617,10 @@ func (ec *executionContext) fieldContext_Query_currencies(_ context.Context, fie
 				return ec.fieldContext_Currency_code(ctx, field)
 			case "name":
 				return ec.fieldContext_Currency_name(ctx, field)
+			case "symbol":
+				return ec.fieldContext_Currency_symbol(ctx, field)
+			case "is_fiat":
+				return ec.fieldContext_Currency_is_fiat(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Currency", field.Name)
 		},

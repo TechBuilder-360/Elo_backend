@@ -12,7 +12,7 @@ func SeedCurrencies(ctx context.Context, db *ent.Client) error {
 	return db.Currency.CreateBulk(
 		db.Currency.Create().
 			SetCode("NGN").
-			SetName("Naia").
+			SetName("Naira").
 			SetSymbol("₦").
 			SetMultipler(100).
 			SetIsFiat(true),

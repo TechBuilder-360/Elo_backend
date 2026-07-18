@@ -7,12 +7,19 @@ package resolver
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/Toflex/directory_v2/graph/model"
+	"github.com/Toflex/directory_v2/pkg/log"
 )
 
 // Currencies is the resolver for the currencies field.
 func (r *queryResolver) Currencies(ctx context.Context) ([]*model.Currency, error) {
-	panic(fmt.Errorf("not implemented: Currencies - currencies"))
+	logger := log.LoggerInContext(ctx)
+	result, err := r.CurrencyService.GetCurrencies(ctx)
+	if err != nil {
+		logger.WithError(err).Error("failed to fetch currencies")
+		return nil, err
+	}
+
+	return result, nil
 }
