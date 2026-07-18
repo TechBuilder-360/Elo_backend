@@ -20,6 +20,7 @@ import (
 	"github.com/Toflex/directory_v2/ent/businessfeature"
 	"github.com/Toflex/directory_v2/ent/businesslocation"
 	"github.com/Toflex/directory_v2/ent/businessservices"
+	"github.com/Toflex/directory_v2/ent/currency"
 	"github.com/Toflex/directory_v2/ent/kybdocument"
 	"github.com/Toflex/directory_v2/ent/kybmessage"
 	"github.com/Toflex/directory_v2/ent/manager"
@@ -33,6 +34,7 @@ import (
 	"github.com/Toflex/directory_v2/ent/user"
 	"github.com/Toflex/directory_v2/ent/userdocument"
 	"github.com/Toflex/directory_v2/ent/verification"
+	"github.com/Toflex/directory_v2/ent/wallet"
 )
 
 // Client is the client that holds all ent builders.
@@ -50,6 +52,8 @@ type Client struct {
 	BusinessLocation *BusinessLocationClient
 	// BusinessServices is the client for interacting with the BusinessServices builders.
 	BusinessServices *BusinessServicesClient
+	// Currency is the client for interacting with the Currency builders.
+	Currency *CurrencyClient
 	// KYBDocument is the client for interacting with the KYBDocument builders.
 	KYBDocument *KYBDocumentClient
 	// KYBMessage is the client for interacting with the KYBMessage builders.
@@ -76,6 +80,8 @@ type Client struct {
 	UserDocument *UserDocumentClient
 	// Verification is the client for interacting with the Verification builders.
 	Verification *VerificationClient
+	// Wallet is the client for interacting with the Wallet builders.
+	Wallet *WalletClient
 }
 
 // NewClient creates a new client configured with the given options.
@@ -92,6 +98,7 @@ func (c *Client) init() {
 	c.BusinessFeature = NewBusinessFeatureClient(c.config)
 	c.BusinessLocation = NewBusinessLocationClient(c.config)
 	c.BusinessServices = NewBusinessServicesClient(c.config)
+	c.Currency = NewCurrencyClient(c.config)
 	c.KYBDocument = NewKYBDocumentClient(c.config)
 	c.KYBMessage = NewKYBMessageClient(c.config)
 	c.Manager = NewManagerClient(c.config)
@@ -105,6 +112,7 @@ func (c *Client) init() {
 	c.User = NewUserClient(c.config)
 	c.UserDocument = NewUserDocumentClient(c.config)
 	c.Verification = NewVerificationClient(c.config)
+	c.Wallet = NewWalletClient(c.config)
 }
 
 type (
@@ -202,6 +210,7 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		BusinessFeature:     NewBusinessFeatureClient(cfg),
 		BusinessLocation:    NewBusinessLocationClient(cfg),
 		BusinessServices:    NewBusinessServicesClient(cfg),
+		Currency:            NewCurrencyClient(cfg),
 		KYBDocument:         NewKYBDocumentClient(cfg),
 		KYBMessage:          NewKYBMessageClient(cfg),
 		Manager:             NewManagerClient(cfg),
@@ -215,6 +224,7 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		User:                NewUserClient(cfg),
 		UserDocument:        NewUserDocumentClient(cfg),
 		Verification:        NewVerificationClient(cfg),
+		Wallet:              NewWalletClient(cfg),
 	}, nil
 }
 
@@ -239,6 +249,7 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		BusinessFeature:     NewBusinessFeatureClient(cfg),
 		BusinessLocation:    NewBusinessLocationClient(cfg),
 		BusinessServices:    NewBusinessServicesClient(cfg),
+		Currency:            NewCurrencyClient(cfg),
 		KYBDocument:         NewKYBDocumentClient(cfg),
 		KYBMessage:          NewKYBMessageClient(cfg),
 		Manager:             NewManagerClient(cfg),
@@ -252,6 +263,7 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		User:                NewUserClient(cfg),
 		UserDocument:        NewUserDocumentClient(cfg),
 		Verification:        NewVerificationClient(cfg),
+		Wallet:              NewWalletClient(cfg),
 	}, nil
 }
 
@@ -282,9 +294,9 @@ func (c *Client) Close() error {
 func (c *Client) Use(hooks ...Hook) {
 	for _, n := range []interface{ Use(...Hook) }{
 		c.Business, c.BusinessDocument, c.BusinessFeature, c.BusinessLocation,
-		c.BusinessServices, c.KYBDocument, c.KYBMessage, c.Manager, c.Permission,
-		c.Provider, c.RequestVerification, c.Role, c.RolePermission, c.Service,
-		c.Social, c.User, c.UserDocument, c.Verification,
+		c.BusinessServices, c.Currency, c.KYBDocument, c.KYBMessage, c.Manager,
+		c.Permission, c.Provider, c.RequestVerification, c.Role, c.RolePermission,
+		c.Service, c.Social, c.User, c.UserDocument, c.Verification, c.Wallet,
 	} {
 		n.Use(hooks...)
 	}
@@ -295,9 +307,9 @@ func (c *Client) Use(hooks ...Hook) {
 func (c *Client) Intercept(interceptors ...Interceptor) {
 	for _, n := range []interface{ Intercept(...Interceptor) }{
 		c.Business, c.BusinessDocument, c.BusinessFeature, c.BusinessLocation,
-		c.BusinessServices, c.KYBDocument, c.KYBMessage, c.Manager, c.Permission,
-		c.Provider, c.RequestVerification, c.Role, c.RolePermission, c.Service,
-		c.Social, c.User, c.UserDocument, c.Verification,
+		c.BusinessServices, c.Currency, c.KYBDocument, c.KYBMessage, c.Manager,
+		c.Permission, c.Provider, c.RequestVerification, c.Role, c.RolePermission,
+		c.Service, c.Social, c.User, c.UserDocument, c.Verification, c.Wallet,
 	} {
 		n.Intercept(interceptors...)
 	}
@@ -316,6 +328,8 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.BusinessLocation.mutate(ctx, m)
 	case *BusinessServicesMutation:
 		return c.BusinessServices.mutate(ctx, m)
+	case *CurrencyMutation:
+		return c.Currency.mutate(ctx, m)
 	case *KYBDocumentMutation:
 		return c.KYBDocument.mutate(ctx, m)
 	case *KYBMessageMutation:
@@ -342,6 +356,8 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.UserDocument.mutate(ctx, m)
 	case *VerificationMutation:
 		return c.Verification.mutate(ctx, m)
+	case *WalletMutation:
+		return c.Wallet.mutate(ctx, m)
 	default:
 		return nil, fmt.Errorf("ent: unknown mutation type %T", m)
 	}
@@ -1217,6 +1233,155 @@ func (c *BusinessServicesClient) mutate(ctx context.Context, m *BusinessServices
 		return (&BusinessServicesDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
 	default:
 		return nil, fmt.Errorf("ent: unknown BusinessServices mutation op: %q", m.Op())
+	}
+}
+
+// CurrencyClient is a client for the Currency schema.
+type CurrencyClient struct {
+	config
+}
+
+// NewCurrencyClient returns a client for the Currency from the given config.
+func NewCurrencyClient(c config) *CurrencyClient {
+	return &CurrencyClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `currency.Hooks(f(g(h())))`.
+func (c *CurrencyClient) Use(hooks ...Hook) {
+	c.hooks.Currency = append(c.hooks.Currency, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `currency.Intercept(f(g(h())))`.
+func (c *CurrencyClient) Intercept(interceptors ...Interceptor) {
+	c.inters.Currency = append(c.inters.Currency, interceptors...)
+}
+
+// Create returns a builder for creating a Currency entity.
+func (c *CurrencyClient) Create() *CurrencyCreate {
+	mutation := newCurrencyMutation(c.config, OpCreate)
+	return &CurrencyCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of Currency entities.
+func (c *CurrencyClient) CreateBulk(builders ...*CurrencyCreate) *CurrencyCreateBulk {
+	return &CurrencyCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *CurrencyClient) MapCreateBulk(slice any, setFunc func(*CurrencyCreate, int)) *CurrencyCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &CurrencyCreateBulk{err: fmt.Errorf("calling to CurrencyClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*CurrencyCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &CurrencyCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for Currency.
+func (c *CurrencyClient) Update() *CurrencyUpdate {
+	mutation := newCurrencyMutation(c.config, OpUpdate)
+	return &CurrencyUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *CurrencyClient) UpdateOne(cu *Currency) *CurrencyUpdateOne {
+	mutation := newCurrencyMutation(c.config, OpUpdateOne, withCurrency(cu))
+	return &CurrencyUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *CurrencyClient) UpdateOneID(id string) *CurrencyUpdateOne {
+	mutation := newCurrencyMutation(c.config, OpUpdateOne, withCurrencyID(id))
+	return &CurrencyUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for Currency.
+func (c *CurrencyClient) Delete() *CurrencyDelete {
+	mutation := newCurrencyMutation(c.config, OpDelete)
+	return &CurrencyDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *CurrencyClient) DeleteOne(cu *Currency) *CurrencyDeleteOne {
+	return c.DeleteOneID(cu.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *CurrencyClient) DeleteOneID(id string) *CurrencyDeleteOne {
+	builder := c.Delete().Where(currency.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &CurrencyDeleteOne{builder}
+}
+
+// Query returns a query builder for Currency.
+func (c *CurrencyClient) Query() *CurrencyQuery {
+	return &CurrencyQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeCurrency},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a Currency entity by its id.
+func (c *CurrencyClient) Get(ctx context.Context, id string) (*Currency, error) {
+	return c.Query().Where(currency.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *CurrencyClient) GetX(ctx context.Context, id string) *Currency {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryWallets queries the wallets edge of a Currency.
+func (c *CurrencyClient) QueryWallets(cu *Currency) *WalletQuery {
+	query := (&WalletClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := cu.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(currency.Table, currency.FieldID, id),
+			sqlgraph.To(wallet.Table, wallet.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, currency.WalletsTable, currency.WalletsColumn),
+		)
+		fromV = sqlgraph.Neighbors(cu.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *CurrencyClient) Hooks() []Hook {
+	return c.hooks.Currency
+}
+
+// Interceptors returns the client interceptors.
+func (c *CurrencyClient) Interceptors() []Interceptor {
+	return c.inters.Currency
+}
+
+func (c *CurrencyClient) mutate(ctx context.Context, m *CurrencyMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&CurrencyCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&CurrencyUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&CurrencyUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&CurrencyDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown Currency mutation op: %q", m.Op())
 	}
 }
 
@@ -3285,18 +3450,167 @@ func (c *VerificationClient) mutate(ctx context.Context, m *VerificationMutation
 	}
 }
 
+// WalletClient is a client for the Wallet schema.
+type WalletClient struct {
+	config
+}
+
+// NewWalletClient returns a client for the Wallet from the given config.
+func NewWalletClient(c config) *WalletClient {
+	return &WalletClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `wallet.Hooks(f(g(h())))`.
+func (c *WalletClient) Use(hooks ...Hook) {
+	c.hooks.Wallet = append(c.hooks.Wallet, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `wallet.Intercept(f(g(h())))`.
+func (c *WalletClient) Intercept(interceptors ...Interceptor) {
+	c.inters.Wallet = append(c.inters.Wallet, interceptors...)
+}
+
+// Create returns a builder for creating a Wallet entity.
+func (c *WalletClient) Create() *WalletCreate {
+	mutation := newWalletMutation(c.config, OpCreate)
+	return &WalletCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of Wallet entities.
+func (c *WalletClient) CreateBulk(builders ...*WalletCreate) *WalletCreateBulk {
+	return &WalletCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *WalletClient) MapCreateBulk(slice any, setFunc func(*WalletCreate, int)) *WalletCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &WalletCreateBulk{err: fmt.Errorf("calling to WalletClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*WalletCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &WalletCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for Wallet.
+func (c *WalletClient) Update() *WalletUpdate {
+	mutation := newWalletMutation(c.config, OpUpdate)
+	return &WalletUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *WalletClient) UpdateOne(w *Wallet) *WalletUpdateOne {
+	mutation := newWalletMutation(c.config, OpUpdateOne, withWallet(w))
+	return &WalletUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *WalletClient) UpdateOneID(id string) *WalletUpdateOne {
+	mutation := newWalletMutation(c.config, OpUpdateOne, withWalletID(id))
+	return &WalletUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for Wallet.
+func (c *WalletClient) Delete() *WalletDelete {
+	mutation := newWalletMutation(c.config, OpDelete)
+	return &WalletDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *WalletClient) DeleteOne(w *Wallet) *WalletDeleteOne {
+	return c.DeleteOneID(w.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *WalletClient) DeleteOneID(id string) *WalletDeleteOne {
+	builder := c.Delete().Where(wallet.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &WalletDeleteOne{builder}
+}
+
+// Query returns a query builder for Wallet.
+func (c *WalletClient) Query() *WalletQuery {
+	return &WalletQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeWallet},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a Wallet entity by its id.
+func (c *WalletClient) Get(ctx context.Context, id string) (*Wallet, error) {
+	return c.Query().Where(wallet.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *WalletClient) GetX(ctx context.Context, id string) *Wallet {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryCurrency queries the currency edge of a Wallet.
+func (c *WalletClient) QueryCurrency(w *Wallet) *CurrencyQuery {
+	query := (&CurrencyClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := w.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(wallet.Table, wallet.FieldID, id),
+			sqlgraph.To(currency.Table, currency.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, wallet.CurrencyTable, wallet.CurrencyColumn),
+		)
+		fromV = sqlgraph.Neighbors(w.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *WalletClient) Hooks() []Hook {
+	return c.hooks.Wallet
+}
+
+// Interceptors returns the client interceptors.
+func (c *WalletClient) Interceptors() []Interceptor {
+	return c.inters.Wallet
+}
+
+func (c *WalletClient) mutate(ctx context.Context, m *WalletMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&WalletCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&WalletUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&WalletUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&WalletDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown Wallet mutation op: %q", m.Op())
+	}
+}
+
 // hooks and interceptors per client, for fast access.
 type (
 	hooks struct {
 		Business, BusinessDocument, BusinessFeature, BusinessLocation, BusinessServices,
-		KYBDocument, KYBMessage, Manager, Permission, Provider, RequestVerification,
-		Role, RolePermission, Service, Social, User, UserDocument,
-		Verification []ent.Hook
+		Currency, KYBDocument, KYBMessage, Manager, Permission, Provider,
+		RequestVerification, Role, RolePermission, Service, Social, User, UserDocument,
+		Verification, Wallet []ent.Hook
 	}
 	inters struct {
 		Business, BusinessDocument, BusinessFeature, BusinessLocation, BusinessServices,
-		KYBDocument, KYBMessage, Manager, Permission, Provider, RequestVerification,
-		Role, RolePermission, Service, Social, User, UserDocument,
-		Verification []ent.Interceptor
+		Currency, KYBDocument, KYBMessage, Manager, Permission, Provider,
+		RequestVerification, Role, RolePermission, Service, Social, User, UserDocument,
+		Verification, Wallet []ent.Interceptor
 	}
 )

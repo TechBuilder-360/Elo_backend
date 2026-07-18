@@ -24,8 +24,11 @@ type QueryResolver interface {
 	GetDocuments(ctx context.Context) ([]*model.BusinessDocument, error)
 	GetCategories(ctx context.Context) ([]string, error)
 	FindBusiness(ctx context.Context, name *string, service *string, limit *int32) ([]*model.SearchBusiness, error)
+	Currencies(ctx context.Context) ([]*model.Currency, error)
 	Me(ctx context.Context) (*model.User, error)
 	GetUserBusinsses(ctx context.Context) ([]*model.UserBusiness, error)
+	Wallets(ctx context.Context, walletType model.WalletType) ([]*model.Wallet, error)
+	Wallet(ctx context.Context, currencyCode string, walletType model.WalletType) (*model.Wallet, error)
 }
 
 // endregion ************************** generated!.gotpl **************************
@@ -83,6 +86,33 @@ func (ec *executionContext) field_Query_findBusiness_args(ctx context.Context, r
 		return nil, err
 	}
 	args["limit"] = arg2
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_wallet_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "currencyCode", ec.unmarshalNString2string)
+	if err != nil {
+		return nil, err
+	}
+	args["currencyCode"] = arg0
+	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "wallet_type", ec.unmarshalNWalletType2githubᚗcomᚋToflexᚋdirectory_v2ᚋgraphᚋmodelᚐWalletType)
+	if err != nil {
+		return nil, err
+	}
+	args["wallet_type"] = arg1
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_wallets_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "wallet_type", ec.unmarshalNWalletType2githubᚗcomᚋToflexᚋdirectory_v2ᚋgraphᚋmodelᚐWalletType)
+	if err != nil {
+		return nil, err
+	}
+	args["wallet_type"] = arg0
 	return args, nil
 }
 
@@ -557,6 +587,47 @@ func (ec *executionContext) fieldContext_Query_findBusiness(ctx context.Context,
 	return fc, nil
 }
 
+func (ec *executionContext) _Query_currencies(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Query_currencies,
+		func(ctx context.Context) (any, error) {
+			return ec.resolvers.Query().Currencies(ctx)
+		},
+		nil,
+		ec.marshalNCurrency2ᚕᚖgithubᚗcomᚋToflexᚋdirectory_v2ᚋgraphᚋmodelᚐCurrencyᚄ,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Query_currencies(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_Currency_id(ctx, field)
+			case "code":
+				return ec.fieldContext_Currency_code(ctx, field)
+			case "name":
+				return ec.fieldContext_Currency_name(ctx, field)
+			case "symbol":
+				return ec.fieldContext_Currency_symbol(ctx, field)
+			case "is_fiat":
+				return ec.fieldContext_Currency_is_fiat(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Currency", field.Name)
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _Query_me(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
@@ -650,6 +721,156 @@ func (ec *executionContext) fieldContext_Query_getUserBusinsses(_ context.Contex
 			}
 			return nil, fmt.Errorf("no field named %q was found under type UserBusiness", field.Name)
 		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Query_wallets(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Query_wallets,
+		func(ctx context.Context) (any, error) {
+			fc := graphql.GetFieldContext(ctx)
+			return ec.resolvers.Query().Wallets(ctx, fc.Args["wallet_type"].(model.WalletType))
+		},
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			directive0 := next
+
+			directive1 := func(ctx context.Context) (any, error) {
+				role, err := ec.unmarshalNRole2githubᚗcomᚋToflexᚋdirectory_v2ᚋgraphᚋmodelᚐRole0(ctx, "ADMIN")
+				if err != nil {
+					var zeroVal []*model.Wallet
+					return zeroVal, err
+				}
+				if ec.directives.HasRole == nil {
+					var zeroVal []*model.Wallet
+					return zeroVal, errors.New("directive hasRole is not implemented")
+				}
+				return ec.directives.HasRole(ctx, nil, directive0, role)
+			}
+
+			next = directive1
+			return next
+		},
+		ec.marshalNWallet2ᚕᚖgithubᚗcomᚋToflexᚋdirectory_v2ᚋgraphᚋmodelᚐWalletᚄ,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Query_wallets(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "type":
+				return ec.fieldContext_Wallet_type(ctx, field)
+			case "available_balance":
+				return ec.fieldContext_Wallet_available_balance(ctx, field)
+			case "ledger_balance":
+				return ec.fieldContext_Wallet_ledger_balance(ctx, field)
+			case "holding_balance":
+				return ec.fieldContext_Wallet_holding_balance(ctx, field)
+			case "id":
+				return ec.fieldContext_Wallet_id(ctx, field)
+			case "currency":
+				return ec.fieldContext_Wallet_currency(ctx, field)
+			case "active":
+				return ec.fieldContext_Wallet_active(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Wallet", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Query_wallets_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Query_wallet(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Query_wallet,
+		func(ctx context.Context) (any, error) {
+			fc := graphql.GetFieldContext(ctx)
+			return ec.resolvers.Query().Wallet(ctx, fc.Args["currencyCode"].(string), fc.Args["wallet_type"].(model.WalletType))
+		},
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			directive0 := next
+
+			directive1 := func(ctx context.Context) (any, error) {
+				role, err := ec.unmarshalNRole2githubᚗcomᚋToflexᚋdirectory_v2ᚋgraphᚋmodelᚐRole0(ctx, "ADMIN")
+				if err != nil {
+					var zeroVal *model.Wallet
+					return zeroVal, err
+				}
+				if ec.directives.HasRole == nil {
+					var zeroVal *model.Wallet
+					return zeroVal, errors.New("directive hasRole is not implemented")
+				}
+				return ec.directives.HasRole(ctx, nil, directive0, role)
+			}
+
+			next = directive1
+			return next
+		},
+		ec.marshalNWallet2ᚖgithubᚗcomᚋToflexᚋdirectory_v2ᚋgraphᚋmodelᚐWallet,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Query_wallet(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "type":
+				return ec.fieldContext_Wallet_type(ctx, field)
+			case "available_balance":
+				return ec.fieldContext_Wallet_available_balance(ctx, field)
+			case "ledger_balance":
+				return ec.fieldContext_Wallet_ledger_balance(ctx, field)
+			case "holding_balance":
+				return ec.fieldContext_Wallet_holding_balance(ctx, field)
+			case "id":
+				return ec.fieldContext_Wallet_id(ctx, field)
+			case "currency":
+				return ec.fieldContext_Wallet_currency(ctx, field)
+			case "active":
+				return ec.fieldContext_Wallet_active(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Wallet", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Query_wallet_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
 	}
 	return fc, nil
 }
@@ -1369,40 +1590,6 @@ func (ec *executionContext) unmarshalInputBusinessRegistrationDetail(ctx context
 	return it, nil
 }
 
-func (ec *executionContext) unmarshalInputDocument(ctx context.Context, obj any) (model.Document, error) {
-	var it model.Document
-	asMap := map[string]any{}
-	for k, v := range obj.(map[string]any) {
-		asMap[k] = v
-	}
-
-	fieldsInOrder := [...]string{"description", "file"}
-	for _, k := range fieldsInOrder {
-		v, ok := asMap[k]
-		if !ok {
-			continue
-		}
-		switch k {
-		case "description":
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("description"))
-			data, err := ec.unmarshalNString2string(ctx, v)
-			if err != nil {
-				return it, err
-			}
-			it.Description = data
-		case "file":
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("file"))
-			data, err := ec.unmarshalNUpload2githubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚐUpload(ctx, v)
-			if err != nil {
-				return it, err
-			}
-			it.File = data
-		}
-	}
-
-	return it, nil
-}
-
 func (ec *executionContext) unmarshalInputDocumentInput(ctx context.Context, obj any) (model.DocumentInput, error) {
 	var it model.DocumentInput
 	asMap := map[string]any{}
@@ -1826,6 +2013,28 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 			}
 
 			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
+		case "currencies":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_currencies(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx,
+					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
 		case "me":
 			field := field
 
@@ -1858,6 +2067,50 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 					}
 				}()
 				res = ec._Query_getUserBusinsses(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx,
+					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
+		case "wallets":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_wallets(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx,
+					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
+		case "wallet":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_wallet(ctx, field)
 				if res == graphql.Null {
 					atomic.AddUint32(&fs.Invalids, 1)
 				}
@@ -2228,22 +2481,6 @@ func (ec *executionContext) marshalNSearchBusiness2ᚖgithubᚗcomᚋToflexᚋdi
 		return graphql.Null
 	}
 	return ec._SearchBusiness(ctx, sel, v)
-}
-
-func (ec *executionContext) unmarshalNUpload2githubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚐUpload(ctx context.Context, v any) (graphql.Upload, error) {
-	res, err := graphql.UnmarshalUpload(v)
-	return res, graphql.ErrorOnPath(ctx, err)
-}
-
-func (ec *executionContext) marshalNUpload2githubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚐUpload(ctx context.Context, sel ast.SelectionSet, v graphql.Upload) graphql.Marshaler {
-	_ = sel
-	res := graphql.MarshalUpload(v)
-	if res == graphql.Null {
-		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
-		}
-	}
-	return res
 }
 
 func (ec *executionContext) unmarshalNbusinessDetail2githubᚗcomᚋToflexᚋdirectory_v2ᚋgraphᚋmodelᚐBusinessDetail(ctx context.Context, v any) (model.BusinessDetail, error) {

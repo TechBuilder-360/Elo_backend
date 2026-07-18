@@ -1,0 +1,40 @@
+"""
+Creates a new wallet.
+
+Example:
+
+mutation {
+  addWallet(
+    currencyCode: "NGN"
+    walletType: "MAIN"
+  ) {
+    id
+    currency
+    type
+    availableBalance
+  }
+}
+"""
+
+enum WalletType {
+  TREASURY
+}
+
+type Wallet {
+    type: String!
+    available_balance: Float!
+    ledger_balance: Float!
+    holding_balance: Float!
+    id: String!
+    currency: String!
+    active: Boolean!
+}
+
+extend type Query {
+  wallets(wallet_type: WalletType!=TREASURY): [Wallet!]!  @hasRole (role: ADMIN)
+  wallet(currencyCode: String!, wallet_type: WalletType!=TREASURY): Wallet!  @hasRole (role: ADMIN)
+}
+
+extend type Mutation {
+  add_wallet(currency_code: String!, wallet_type: WalletType!=TREASURY): Wallet!  @hasRole (role: ADMIN)
+}

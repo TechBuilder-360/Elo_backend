@@ -26,11 +26,28 @@ type MutationResolver interface {
 	DeleteDocument(ctx context.Context, input model.RemoveDocumentInput) (bool, error)
 	BusinessDetail(ctx context.Context, input model.BusinessDetail) (bool, error)
 	RequestUserVerification(ctx context.Context, input model.VerificationPayload) (model.VerificationResponse, error)
+	AddWallet(ctx context.Context, currencyCode string, walletType model.WalletType) (*model.Wallet, error)
 }
 
 // endregion ************************** generated!.gotpl **************************
 
 // region    ***************************** args.gotpl *****************************
+
+func (ec *executionContext) field_Mutation_add_wallet_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "currency_code", ec.unmarshalNString2string)
+	if err != nil {
+		return nil, err
+	}
+	args["currency_code"] = arg0
+	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "wallet_type", ec.unmarshalNWalletType2githubᚗcomᚋToflexᚋdirectory_v2ᚋgraphᚋmodelᚐWalletType)
+	if err != nil {
+		return nil, err
+	}
+	args["wallet_type"] = arg1
+	return args, nil
+}
 
 func (ec *executionContext) field_Mutation_businessDetail_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
@@ -695,6 +712,81 @@ func (ec *executionContext) fieldContext_Mutation_requestUserVerification(ctx co
 	return fc, nil
 }
 
+func (ec *executionContext) _Mutation_add_wallet(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Mutation_add_wallet,
+		func(ctx context.Context) (any, error) {
+			fc := graphql.GetFieldContext(ctx)
+			return ec.resolvers.Mutation().AddWallet(ctx, fc.Args["currency_code"].(string), fc.Args["wallet_type"].(model.WalletType))
+		},
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			directive0 := next
+
+			directive1 := func(ctx context.Context) (any, error) {
+				role, err := ec.unmarshalNRole2githubᚗcomᚋToflexᚋdirectory_v2ᚋgraphᚋmodelᚐRole0(ctx, "ADMIN")
+				if err != nil {
+					var zeroVal *model.Wallet
+					return zeroVal, err
+				}
+				if ec.directives.HasRole == nil {
+					var zeroVal *model.Wallet
+					return zeroVal, errors.New("directive hasRole is not implemented")
+				}
+				return ec.directives.HasRole(ctx, nil, directive0, role)
+			}
+
+			next = directive1
+			return next
+		},
+		ec.marshalNWallet2ᚖgithubᚗcomᚋToflexᚋdirectory_v2ᚋgraphᚋmodelᚐWallet,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Mutation_add_wallet(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "type":
+				return ec.fieldContext_Wallet_type(ctx, field)
+			case "available_balance":
+				return ec.fieldContext_Wallet_available_balance(ctx, field)
+			case "ledger_balance":
+				return ec.fieldContext_Wallet_ledger_balance(ctx, field)
+			case "holding_balance":
+				return ec.fieldContext_Wallet_holding_balance(ctx, field)
+			case "id":
+				return ec.fieldContext_Wallet_id(ctx, field)
+			case "currency":
+				return ec.fieldContext_Wallet_currency(ctx, field)
+			case "active":
+				return ec.fieldContext_Wallet_active(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Wallet", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_add_wallet_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _OTPResponse_Identifier(ctx context.Context, field graphql.CollectedField, obj *model.OTPResponse) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
@@ -1008,6 +1100,13 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 		case "requestUserVerification":
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Mutation_requestUserVerification(ctx, field)
+			})
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "add_wallet":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_add_wallet(ctx, field)
 			})
 			if out.Values[i] == graphql.Null {
 				out.Invalids++

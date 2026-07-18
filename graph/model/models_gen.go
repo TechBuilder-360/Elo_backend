@@ -7,8 +7,6 @@ import (
 	"fmt"
 	"io"
 	"strconv"
-
-	"github.com/99designs/gqlgen/graphql"
 )
 
 type VerificationResponse interface {
@@ -39,9 +37,12 @@ type BusinessRegistrationDetail struct {
 	TaxIdentificationNumber string `json:"tax_identification_number"`
 }
 
-type Document struct {
-	Description string         `json:"description"`
-	File        graphql.Upload `json:"file"`
+type Currency struct {
+	ID     string `json:"id"`
+	Code   string `json:"code"`
+	Name   string `json:"name"`
+	Symbol string `json:"symbol"`
+	IsFiat bool   `json:"is_fiat"`
 }
 
 type DocumentInput struct {
@@ -143,6 +144,16 @@ type VerificationSuccess struct {
 }
 
 func (VerificationSuccess) IsVerificationResponse() {}
+
+type Wallet struct {
+	Type             string  `json:"type"`
+	AvailableBalance float64 `json:"available_balance"`
+	LedgerBalance    float64 `json:"ledger_balance"`
+	HoldingBalance   float64 `json:"holding_balance"`
+	ID               string  `json:"id"`
+	Currency         string  `json:"currency"`
+	Active           bool    `json:"active"`
+}
 
 type BusinessDetail struct {
 	RegistrationDetail *BusinessRegistrationDetail `json:"registration_detail,omitempty"`
@@ -288,6 +299,74 @@ func (e *Role0) UnmarshalJSON(b []byte) error {
 }
 
 func (e Role0) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
+}
+
+// Creates a new wallet.
+//
+// Example:
+//
+//	mutation {
+//	  addWallet(
+//	    currencyCode: "NGN"
+//	    walletType: "MAIN"
+//	  ) {
+//	    id
+//	    currency
+//	    type
+//	    availableBalance
+//	  }
+//	}
+type WalletType string
+
+const (
+	WalletTypeTreasury WalletType = "TREASURY"
+)
+
+var AllWalletType = []WalletType{
+	WalletTypeTreasury,
+}
+
+func (e WalletType) IsValid() bool {
+	switch e {
+	case WalletTypeTreasury:
+		return true
+	}
+	return false
+}
+
+func (e WalletType) String() string {
+	return string(e)
+}
+
+func (e *WalletType) UnmarshalGQL(v any) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = WalletType(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid WalletType", str)
+	}
+	return nil
+}
+
+func (e WalletType) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *WalletType) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e WalletType) MarshalJSON() ([]byte, error) {
 	var buf bytes.Buffer
 	e.MarshalGQL(&buf)
 	return buf.Bytes(), nil

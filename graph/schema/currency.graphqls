@@ -1,0 +1,11 @@
+type Currency {
+    id: String!
+    code: String!
+    name: String!
+    symbol: String!
+    is_fiat: Boolean!
+}
+
+extend type Query {
+  currencies: [Currency!]!
+}
