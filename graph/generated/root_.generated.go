@@ -52,6 +52,12 @@ type ComplexityRoot struct {
 		Name  func(childComplexity int) int
 	}
 
+	Currency struct {
+		Code func(childComplexity int) int
+		ID   func(childComplexity int) int
+		Name func(childComplexity int) int
+	}
+
 	LoginResponse struct {
 		AccessToken func(childComplexity int) int
 		ExpireAt    func(childComplexity int) int
@@ -59,6 +65,7 @@ type ComplexityRoot struct {
 	}
 
 	Mutation struct {
+		AddWallet               func(childComplexity int, currencyCode string, walletType model.WalletType) int
 		BusinessDetail          func(childComplexity int, input model.BusinessDetail) int
 		DeleteDocument          func(childComplexity int, input model.RemoveDocumentInput) int
 		Login                   func(childComplexity int, input model.Login) int
@@ -76,6 +83,7 @@ type ComplexityRoot struct {
 
 	Query struct {
 		Business         func(childComplexity int, id string) int
+		Currencies       func(childComplexity int) int
 		FindBusiness     func(childComplexity int, name *string, service *string, limit *int32) int
 		GetCategories    func(childComplexity int) int
 		GetDocuments     func(childComplexity int) int
@@ -83,6 +91,8 @@ type ComplexityRoot struct {
 		GetUserBusinsses func(childComplexity int) int
 		Me               func(childComplexity int) int
 		MyBusinesses     func(childComplexity int) int
+		Wallet           func(childComplexity int, currencyCode string, walletType model.WalletType) int
+		Wallets          func(childComplexity int, walletType model.WalletType) int
 	}
 
 	RegistrationResponse struct {
@@ -126,6 +136,16 @@ type ComplexityRoot struct {
 	VerificationSuccess struct {
 		Link   func(childComplexity int) int
 		Status func(childComplexity int) int
+	}
+
+	Wallet struct {
+		Active           func(childComplexity int) int
+		AvailableBalance func(childComplexity int) int
+		Currency         func(childComplexity int) int
+		HoldingBalance   func(childComplexity int) int
+		ID               func(childComplexity int) int
+		LedgerBalance    func(childComplexity int) int
+		Type             func(childComplexity int) int
 	}
 
 	BusinessDocument struct {
@@ -203,6 +223,27 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 
 		return e.complexity.Business.Name(childComplexity), true
 
+	case "Currency.code":
+		if e.complexity.Currency.Code == nil {
+			break
+		}
+
+		return e.complexity.Currency.Code(childComplexity), true
+
+	case "Currency.id":
+		if e.complexity.Currency.ID == nil {
+			break
+		}
+
+		return e.complexity.Currency.ID(childComplexity), true
+
+	case "Currency.name":
+		if e.complexity.Currency.Name == nil {
+			break
+		}
+
+		return e.complexity.Currency.Name(childComplexity), true
+
 	case "LoginResponse.access_token":
 		if e.complexity.LoginResponse.AccessToken == nil {
 			break
@@ -223,6 +264,18 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.complexity.LoginResponse.User(childComplexity), true
+
+	case "Mutation.add_wallet":
+		if e.complexity.Mutation.AddWallet == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_add_wallet_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.AddWallet(childComplexity, args["currency_code"].(string), args["wallet_type"].(model.WalletType)), true
 
 	case "Mutation.businessDetail":
 		if e.complexity.Mutation.BusinessDetail == nil {
@@ -346,6 +399,13 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 
 		return e.complexity.Query.Business(childComplexity, args["id"].(string)), true
 
+	case "Query.currencies":
+		if e.complexity.Query.Currencies == nil {
+			break
+		}
+
+		return e.complexity.Query.Currencies(childComplexity), true
+
 	case "Query.findBusiness":
 		if e.complexity.Query.FindBusiness == nil {
 			break
@@ -399,6 +459,30 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.complexity.Query.MyBusinesses(childComplexity), true
+
+	case "Query.wallet":
+		if e.complexity.Query.Wallet == nil {
+			break
+		}
+
+		args, err := ec.field_Query_wallet_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.Wallet(childComplexity, args["currencyCode"].(string), args["wallet_type"].(model.WalletType)), true
+
+	case "Query.wallets":
+		if e.complexity.Query.Wallets == nil {
+			break
+		}
+
+		args, err := ec.field_Query_wallets_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.Wallets(childComplexity, args["wallet_type"].(model.WalletType)), true
 
 	case "RegistrationResponse.user_id":
 		if e.complexity.RegistrationResponse.UserID == nil {
@@ -554,6 +638,55 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 
 		return e.complexity.VerificationSuccess.Status(childComplexity), true
 
+	case "Wallet.active":
+		if e.complexity.Wallet.Active == nil {
+			break
+		}
+
+		return e.complexity.Wallet.Active(childComplexity), true
+
+	case "Wallet.available_balance":
+		if e.complexity.Wallet.AvailableBalance == nil {
+			break
+		}
+
+		return e.complexity.Wallet.AvailableBalance(childComplexity), true
+
+	case "Wallet.currency":
+		if e.complexity.Wallet.Currency == nil {
+			break
+		}
+
+		return e.complexity.Wallet.Currency(childComplexity), true
+
+	case "Wallet.holding_balance":
+		if e.complexity.Wallet.HoldingBalance == nil {
+			break
+		}
+
+		return e.complexity.Wallet.HoldingBalance(childComplexity), true
+
+	case "Wallet.id":
+		if e.complexity.Wallet.ID == nil {
+			break
+		}
+
+		return e.complexity.Wallet.ID(childComplexity), true
+
+	case "Wallet.ledger_balance":
+		if e.complexity.Wallet.LedgerBalance == nil {
+			break
+		}
+
+		return e.complexity.Wallet.LedgerBalance(childComplexity), true
+
+	case "Wallet.type":
+		if e.complexity.Wallet.Type == nil {
+			break
+		}
+
+		return e.complexity.Wallet.Type(childComplexity), true
+
 	case "businessDocument.description":
 		if e.complexity.BusinessDocument.Description == nil {
 			break
@@ -641,7 +774,6 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 	inputUnmarshalMap := graphql.BuildUnmarshalerMap(
 		ec.unmarshalInputBusinessAddress,
 		ec.unmarshalInputBusinessRegistrationDetail,
-		ec.unmarshalInputDocument,
 		ec.unmarshalInputDocumentInput,
 		ec.unmarshalInputLogin,
 		ec.unmarshalInputRegisterBusinessInput,
@@ -799,8 +931,6 @@ enum Role {
     MANAGER
 }
 
-scalar Upload
-
 type Business {
   id: ID!
   name: String!
@@ -845,11 +975,6 @@ input RegisterBusinessInput {
 input role {
   authorized_representative: Boolean!
   authorized_representative_email: String
-}
-
-input Document {
-  description: String! # should be a dropdown
-  file: Upload!
 }
 
 input BusinessAddress {
@@ -919,6 +1044,15 @@ extend type Mutation {
   businessDetail(input: businessDetail!): Boolean! @hasRole(role: ADMIN)
 }
 `, BuiltIn: false},
+	{Name: "../schema/currency.graphqls", Input: `type Currency {
+    id: String!
+    code: String!
+    name: String!
+}
+
+extend type Query {
+  currencies: [Currency!]!
+}`, BuiltIn: false},
 	{Name: "../schema/user.graphqls", Input: `directive @authUser on FIELD_DEFINITION
 
 type User {
@@ -968,6 +1102,46 @@ union VerificationResponse = VerificationSuccess | VerificationError
 
 extend type Mutation {
   requestUserVerification(input: verificationPayload!): VerificationResponse! @authUser
+}`, BuiltIn: false},
+	{Name: "../schema/wallet.graphqls", Input: `"""
+Creates a new wallet.
+
+Example:
+
+mutation {
+  addWallet(
+    currencyCode: "NGN"
+    walletType: "MAIN"
+  ) {
+    id
+    currency
+    type
+    availableBalance
+  }
+}
+"""
+
+enum WalletType {
+  TREASURY
+}
+
+type Wallet {
+    type: String!
+    available_balance: Float!
+    ledger_balance: Float!
+    holding_balance: Float!
+    id: String!
+    currency: String!
+    active: Boolean!
+}
+
+extend type Query {
+  wallets(wallet_type: WalletType!=TREASURY): [Wallet!]!  @hasRole (role: ADMIN)
+  wallet(currencyCode: String!, wallet_type: WalletType!=TREASURY): Wallet!  @hasRole (role: ADMIN)
+}
+
+extend type Mutation {
+  add_wallet(currency_code: String!, wallet_type: WalletType!=TREASURY): Wallet!  @hasRole (role: ADMIN)
 }`, BuiltIn: false},
 }
 var parsedSchema = gqlparser.MustLoadSchema(sources...)
