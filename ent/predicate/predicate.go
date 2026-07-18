@@ -21,6 +21,9 @@ type BusinessLocation func(*sql.Selector)
 // BusinessServices is the predicate function for businessservices builders.
 type BusinessServices func(*sql.Selector)
 
+// Currency is the predicate function for currency builders.
+type Currency func(*sql.Selector)
+
 // KYBDocument is the predicate function for kybdocument builders.
 type KYBDocument func(*sql.Selector)
 
@@ -59,3 +62,6 @@ type UserDocument func(*sql.Selector)
 
 // Verification is the predicate function for verification builders.
 type Verification func(*sql.Selector)
+
+// Wallet is the predicate function for wallet builders.
+type Wallet func(*sql.Selector)

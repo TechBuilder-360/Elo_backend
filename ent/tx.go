@@ -22,6 +22,8 @@ type Tx struct {
 	BusinessLocation *BusinessLocationClient
 	// BusinessServices is the client for interacting with the BusinessServices builders.
 	BusinessServices *BusinessServicesClient
+	// Currency is the client for interacting with the Currency builders.
+	Currency *CurrencyClient
 	// KYBDocument is the client for interacting with the KYBDocument builders.
 	KYBDocument *KYBDocumentClient
 	// KYBMessage is the client for interacting with the KYBMessage builders.
@@ -48,6 +50,8 @@ type Tx struct {
 	UserDocument *UserDocumentClient
 	// Verification is the client for interacting with the Verification builders.
 	Verification *VerificationClient
+	// Wallet is the client for interacting with the Wallet builders.
+	Wallet *WalletClient
 
 	// lazily loaded.
 	client     *Client
@@ -184,6 +188,7 @@ func (tx *Tx) init() {
 	tx.BusinessFeature = NewBusinessFeatureClient(tx.config)
 	tx.BusinessLocation = NewBusinessLocationClient(tx.config)
 	tx.BusinessServices = NewBusinessServicesClient(tx.config)
+	tx.Currency = NewCurrencyClient(tx.config)
 	tx.KYBDocument = NewKYBDocumentClient(tx.config)
 	tx.KYBMessage = NewKYBMessageClient(tx.config)
 	tx.Manager = NewManagerClient(tx.config)
@@ -197,6 +202,7 @@ func (tx *Tx) init() {
 	tx.User = NewUserClient(tx.config)
 	tx.UserDocument = NewUserDocumentClient(tx.config)
 	tx.Verification = NewVerificationClient(tx.config)
+	tx.Wallet = NewWalletClient(tx.config)
 }
 
 // txDriver wraps the given dialect.Tx with a nop dialect.Driver implementation.

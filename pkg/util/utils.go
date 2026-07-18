@@ -16,6 +16,7 @@ import (
 	"strings"
 
 	"github.com/99designs/gqlgen/graphql"
+	"github.com/Toflex/directory_v2/pkg/types"
 	"github.com/google/uuid"
 	"github.com/lucsky/cuid"
 	"golang.org/x/crypto/bcrypt"
@@ -254,4 +255,12 @@ func ExtensionFromDataURI(dataURI string) (string, error) {
 	idx := strings.Index(mimeType, "/")
 
 	return mimeType[idx+1:], nil
+}
+
+func ToMajorUnit(unit types.ToMajor) float64 {
+	return float64(unit.Amount) / float64(unit.Precision)
+}
+
+func ToMinorUnit(unit types.ToMinor) int64 {
+	return int64(float64(unit.Amount) * float64(unit.Precision))
 }

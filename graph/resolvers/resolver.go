@@ -6,6 +6,9 @@ import (
 	"github.com/Toflex/directory_v2/graph/generated"
 	"github.com/Toflex/directory_v2/internal/authentication"
 	"github.com/Toflex/directory_v2/internal/business"
+	"github.com/Toflex/directory_v2/internal/currency"
+	"github.com/Toflex/directory_v2/internal/transaction"
+	"github.com/Toflex/directory_v2/internal/wallet"
 	"github.com/Toflex/directory_v2/pkg/verification"
 )
 
@@ -19,6 +22,9 @@ type Resolver struct {
 	AuthenticationService authentication.IService
 	VerificationService   verification.IService
 	BusinessService       business.IService
+	WalletService         wallet.IService
+	CurrencyService       currency.IService
+	TransactionService    transaction.IService
 }
 
 // Query returns generated.QueryResolver implementation.

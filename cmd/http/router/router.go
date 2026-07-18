@@ -23,6 +23,9 @@ import (
 	resolver "github.com/Toflex/directory_v2/graph/resolvers"
 	"github.com/Toflex/directory_v2/internal/authentication"
 	"github.com/Toflex/directory_v2/internal/business"
+	"github.com/Toflex/directory_v2/internal/currency"
+	"github.com/Toflex/directory_v2/internal/transaction"
+	"github.com/Toflex/directory_v2/internal/wallet"
 	"github.com/Toflex/directory_v2/middlewares"
 	rbac "github.com/Toflex/directory_v2/pkg/RBAC"
 	"github.com/Toflex/directory_v2/pkg/configuration"
@@ -203,6 +206,9 @@ func initalizeGQLRoute(engine *gin.Engine, basicAuth gin.HandlerFunc) {
 		AuthenticationService: do.MustInvoke[authentication.IService](runtime.Injector),
 		VerificationService:   verification.NewService(),
 		BusinessService:       do.MustInvoke[business.IService](runtime.Injector),
+		WalletService:         do.MustInvoke[wallet.IService](runtime.Injector),
+		CurrencyService:       do.MustInvoke[currency.IService](runtime.Injector),
+		TransactionService:    do.MustInvoke[transaction.IService](runtime.Injector),
 	}
 
 	c := generated.Config{Resolvers: &resolverStruct}
