@@ -17,6 +17,7 @@ import (
 	"github.com/Toflex/directory_v2/ent/businessfeature"
 	"github.com/Toflex/directory_v2/ent/businesslocation"
 	"github.com/Toflex/directory_v2/ent/businessservices"
+	"github.com/Toflex/directory_v2/ent/currency"
 	"github.com/Toflex/directory_v2/ent/kybdocument"
 	"github.com/Toflex/directory_v2/ent/kybmessage"
 	"github.com/Toflex/directory_v2/ent/manager"
@@ -30,6 +31,7 @@ import (
 	"github.com/Toflex/directory_v2/ent/user"
 	"github.com/Toflex/directory_v2/ent/userdocument"
 	"github.com/Toflex/directory_v2/ent/verification"
+	"github.com/Toflex/directory_v2/ent/wallet"
 )
 
 // ent aliases to avoid import conflicts in user's code.
@@ -95,6 +97,7 @@ func checkColumn(table, column string) error {
 			businessfeature.Table:     businessfeature.ValidColumn,
 			businesslocation.Table:    businesslocation.ValidColumn,
 			businessservices.Table:    businessservices.ValidColumn,
+			currency.Table:            currency.ValidColumn,
 			kybdocument.Table:         kybdocument.ValidColumn,
 			kybmessage.Table:          kybmessage.ValidColumn,
 			manager.Table:             manager.ValidColumn,
@@ -108,6 +111,7 @@ func checkColumn(table, column string) error {
 			user.Table:                user.ValidColumn,
 			userdocument.Table:        userdocument.ValidColumn,
 			verification.Table:        verification.ValidColumn,
+			wallet.Table:              wallet.ValidColumn,
 		})
 	})
 	return columnCheck(table, column)

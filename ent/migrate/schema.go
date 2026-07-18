@@ -25,9 +25,9 @@ var (
 		{Name: "email", Type: field.TypeString},
 		{Name: "website", Type: field.TypeString, Nullable: true},
 		{Name: "on_site", Type: field.TypeBool, Default: false},
-		{Name: "active", Type: field.TypeBool, Default: false},
+		{Name: "active", Type: field.TypeBool, Default: true},
 		{Name: "live", Type: field.TypeBool, Default: false},
-		{Name: "disabled", Type: field.TypeBool, Default: true},
+		{Name: "disabled", Type: field.TypeBool, Default: false},
 		{Name: "disabled_at", Type: field.TypeTime},
 		{Name: "disable_reason", Type: field.TypeString, Nullable: true},
 		{Name: "verification_status", Type: field.TypeEnum, Enums: []string{"UNVERIFIED", "IN_PROGRESS", "VERIFIED", "REJECTED"}, Default: "UNVERIFIED"},
@@ -155,6 +155,25 @@ var (
 				OnDelete:   schema.NoAction,
 			},
 		},
+	}
+	// CurrenciesColumns holds the columns for the "currencies" table.
+	CurrenciesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeString},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "deleted_at", Type: field.TypeTime, Nullable: true},
+		{Name: "name", Type: field.TypeString, Unique: true},
+		{Name: "symbol", Type: field.TypeString},
+		{Name: "code", Type: field.TypeString, Unique: true},
+		{Name: "is_fiat", Type: field.TypeBool, Default: true},
+		{Name: "active", Type: field.TypeBool, Default: true},
+		{Name: "multipler", Type: field.TypeInt64},
+	}
+	// CurrenciesTable holds the schema information for the "currencies" table.
+	CurrenciesTable = &schema.Table{
+		Name:       "currencies",
+		Columns:    CurrenciesColumns,
+		PrimaryKey: []*schema.Column{CurrenciesColumns[0]},
 	}
 	// KybDocumentsColumns holds the columns for the "kyb_documents" table.
 	KybDocumentsColumns = []*schema.Column{
@@ -482,6 +501,42 @@ var (
 			},
 		},
 	}
+	// WalletsColumns holds the columns for the "wallets" table.
+	WalletsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeString},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "deleted_at", Type: field.TypeTime, Nullable: true},
+		{Name: "type", Type: field.TypeEnum, Enums: []string{"TREASURY", "HOLDING"}, Default: "TREASURY"},
+		{Name: "available_balance", Type: field.TypeInt64, Default: 0},
+		{Name: "ledger_balance", Type: field.TypeInt64, Default: 0},
+		{Name: "holding_balance", Type: field.TypeInt64, Default: 0},
+		{Name: "owner", Type: field.TypeEnum, Enums: []string{"USER", "BUSINESS"}, Default: "USER"},
+		{Name: "identifier", Type: field.TypeString},
+		{Name: "active", Type: field.TypeBool, Default: true},
+		{Name: "currency_id", Type: field.TypeString},
+	}
+	// WalletsTable holds the schema information for the "wallets" table.
+	WalletsTable = &schema.Table{
+		Name:       "wallets",
+		Columns:    WalletsColumns,
+		PrimaryKey: []*schema.Column{WalletsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "wallets_currencies_wallets",
+				Columns:    []*schema.Column{WalletsColumns[11]},
+				RefColumns: []*schema.Column{CurrenciesColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "wallet_identifier_currency_id_type",
+				Unique:  true,
+				Columns: []*schema.Column{WalletsColumns[9], WalletsColumns[11], WalletsColumns[4]},
+			},
+		},
+	}
 	// KybDocumentKybDocumentsColumns holds the columns for the "kyb_document_kyb_documents" table.
 	KybDocumentKybDocumentsColumns = []*schema.Column{
 		{Name: "kyb_document_id", Type: field.TypeString},
@@ -614,6 +669,7 @@ var (
 		BusinessFeaturesTable,
 		BusinessLocationsTable,
 		BusinessServicesTable,
+		CurrenciesTable,
 		KybDocumentsTable,
 		KybMessagesTable,
 		ManagersTable,
@@ -627,6 +683,7 @@ var (
 		UsersTable,
 		UserDocumentsTable,
 		VerificationsTable,
+		WalletsTable,
 		KybDocumentKybDocumentsTable,
 		RequestVerificationUserTable,
 		RequestVerificationBusinessTable,
@@ -648,6 +705,7 @@ func init() {
 	RolePermissionsTable.ForeignKeys[1].RefTable = RolesTable
 	SocialsTable.ForeignKeys[0].RefTable = BusinessesTable
 	UserDocumentsTable.ForeignKeys[0].RefTable = UsersTable
+	WalletsTable.ForeignKeys[0].RefTable = CurrenciesTable
 	KybDocumentKybDocumentsTable.ForeignKeys[0].RefTable = KybDocumentsTable
 	KybDocumentKybDocumentsTable.ForeignKeys[1].RefTable = BusinessDocumentsTable
 	RequestVerificationUserTable.ForeignKeys[0].RefTable = RequestVerificationsTable

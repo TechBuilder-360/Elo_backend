@@ -7,8 +7,6 @@ enum Role {
     MANAGER
 }
 
-scalar Upload
-
 type Business {
   id: ID!
   name: String!
@@ -53,11 +51,6 @@ input RegisterBusinessInput {
 input role {
   authorized_representative: Boolean!
   authorized_representative_email: String
-}
-
-input Document {
-  description: String! # should be a dropdown
-  file: Upload!
 }
 
 input BusinessAddress {
