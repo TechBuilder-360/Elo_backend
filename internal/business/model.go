@@ -72,12 +72,19 @@ type MyBusinessResult struct {
 }
 
 type BusinessResult struct {
-	ID       string   `json:"id"`
-	Name     string   `json:"name"`
-	Logo     *string  `json:"logo,omitempty"`
-	Email    *string  `json:"email,omitempty"`
-	About    *string  `json:"about,omitempty"`
-	Services []string `json:"services"`
+	ID                      string   `json:"id"`
+	Name                    string   `json:"name"`
+	OnSite                  bool     `json:"on_site"`
+	Logo                    *string  `json:"logo,omitempty"`
+	Email                   *string  `json:"email,omitempty"`
+	About                   *string  `json:"about,omitempty"`
+	Services                []string `json:"services"`
+	Industry                string   `json:"industry"`
+	Number                  string   `json:"number"`
+	CountryOfIncorporation  string   `json:"country_of_incorporation"`
+	DateOfIncorporation     string   `json:"date_of_incorporation"`
+	TaxIdentificationNumber string   `json:"tax_identification_number"`
+	Address                 BusinessAddress
 	// Socials  []*Social `json:"socials"`
 }
 

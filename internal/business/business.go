@@ -9,21 +9,39 @@ import (
 	biz "github.com/Toflex/directory_v2/pkg/business"
 	"github.com/Toflex/directory_v2/pkg/errors"
 	"github.com/Toflex/directory_v2/pkg/log"
+	"github.com/Toflex/directory_v2/pkg/util"
 )
 
 func (s *service) GetBusiness(ctx context.Context, user *ent.User, id string, logger log.Entry) (*BusinessResult, error) {
-	business, err := s.db.Business.Query().Where(business.IDEQ(id), business.HasManagesWith(manager.UserID(user.ID))).First(ctx)
+	business, err := s.db.Business.Query().Where(business.IDEQ(id), business.HasManagesWith(manager.UserID(user.ID))).WithLocations().First(ctx)
 	if err != nil {
 		logger.WithError(err).WithField("business_id", id).Error("failed to fetch business")
 		return nil, errors.New(errors.ErrNotFound, "not found")
 	}
 
+	address := BusinessAddress{}
+	if len(business.Edges.Locations) > 0 {
+		address = BusinessAddress{
+			City:    business.Edges.Locations[0].City,
+			Street:  business.Edges.Locations[0].Address,
+			State:   business.Edges.Locations[0].State,
+			Country: business.Edges.Locations[0].Country,
+			ZipCode: business.Edges.Locations[0].ZipCode,
+		}
+	}
+
 	return &BusinessResult{
-		ID:    business.ID,
-		Name:  business.Name,
-		Logo:  &business.Logo,
-		Email: &business.Email,
-		About: &business.About,
+		ID:                     business.ID,
+		Name:                   business.Name,
+		Logo:                   &business.Logo,
+		Email:                  &business.Email,
+		About:                  &business.About,
+		OnSite:                 business.OnSite,
+		Number:                 util.AddressToString(business.RegistrationNumber),
+		Industry:               business.Category,
+		CountryOfIncorporation: util.AddressToString(business.CountryOfIncorporation),
+		DateOfIncorporation:    util.AddressToString(business.DateOfIncorporation),
+		Address:                address,
 	}, nil
 }
 
