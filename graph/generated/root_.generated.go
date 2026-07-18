@@ -44,12 +44,28 @@ type DirectiveRoot struct {
 }
 
 type ComplexityRoot struct {
+	Address struct {
+		City    func(childComplexity int) int
+		Country func(childComplexity int) int
+		Number  func(childComplexity int) int
+		State   func(childComplexity int) int
+		Street  func(childComplexity int) int
+		ZipCode func(childComplexity int) int
+	}
+
 	Business struct {
-		About func(childComplexity int) int
-		Email func(childComplexity int) int
-		ID    func(childComplexity int) int
-		Logo  func(childComplexity int) int
-		Name  func(childComplexity int) int
+		About                   func(childComplexity int) int
+		Address                 func(childComplexity int) int
+		CountryOfIncorporation  func(childComplexity int) int
+		DateOfIncorporation     func(childComplexity int) int
+		Email                   func(childComplexity int) int
+		ID                      func(childComplexity int) int
+		Industry                func(childComplexity int) int
+		Logo                    func(childComplexity int) int
+		Name                    func(childComplexity int) int
+		Number                  func(childComplexity int) int
+		OnSite                  func(childComplexity int) int
+		TaxIdentificationNumber func(childComplexity int) int
 	}
 
 	Currency struct {
@@ -190,12 +206,75 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 	_ = ec
 	switch typeName + "." + field {
 
+	case "Address.city":
+		if e.complexity.Address.City == nil {
+			break
+		}
+
+		return e.complexity.Address.City(childComplexity), true
+
+	case "Address.country":
+		if e.complexity.Address.Country == nil {
+			break
+		}
+
+		return e.complexity.Address.Country(childComplexity), true
+
+	case "Address.number":
+		if e.complexity.Address.Number == nil {
+			break
+		}
+
+		return e.complexity.Address.Number(childComplexity), true
+
+	case "Address.state":
+		if e.complexity.Address.State == nil {
+			break
+		}
+
+		return e.complexity.Address.State(childComplexity), true
+
+	case "Address.street":
+		if e.complexity.Address.Street == nil {
+			break
+		}
+
+		return e.complexity.Address.Street(childComplexity), true
+
+	case "Address.zip_code":
+		if e.complexity.Address.ZipCode == nil {
+			break
+		}
+
+		return e.complexity.Address.ZipCode(childComplexity), true
+
 	case "Business.about":
 		if e.complexity.Business.About == nil {
 			break
 		}
 
 		return e.complexity.Business.About(childComplexity), true
+
+	case "Business.address":
+		if e.complexity.Business.Address == nil {
+			break
+		}
+
+		return e.complexity.Business.Address(childComplexity), true
+
+	case "Business.country_of_incorporation":
+		if e.complexity.Business.CountryOfIncorporation == nil {
+			break
+		}
+
+		return e.complexity.Business.CountryOfIncorporation(childComplexity), true
+
+	case "Business.date_of_incorporation":
+		if e.complexity.Business.DateOfIncorporation == nil {
+			break
+		}
+
+		return e.complexity.Business.DateOfIncorporation(childComplexity), true
 
 	case "Business.email":
 		if e.complexity.Business.Email == nil {
@@ -211,6 +290,13 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 
 		return e.complexity.Business.ID(childComplexity), true
 
+	case "Business.industry":
+		if e.complexity.Business.Industry == nil {
+			break
+		}
+
+		return e.complexity.Business.Industry(childComplexity), true
+
 	case "Business.logo":
 		if e.complexity.Business.Logo == nil {
 			break
@@ -224,6 +310,27 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.complexity.Business.Name(childComplexity), true
+
+	case "Business.number":
+		if e.complexity.Business.Number == nil {
+			break
+		}
+
+		return e.complexity.Business.Number(childComplexity), true
+
+	case "Business.on_site":
+		if e.complexity.Business.OnSite == nil {
+			break
+		}
+
+		return e.complexity.Business.OnSite(childComplexity), true
+
+	case "Business.tax_identification_number":
+		if e.complexity.Business.TaxIdentificationNumber == nil {
+			break
+		}
+
+		return e.complexity.Business.TaxIdentificationNumber(childComplexity), true
 
 	case "Currency.code":
 		if e.complexity.Currency.Code == nil {
@@ -943,8 +1050,8 @@ directive @hasRole(role: Role!) on FIELD_DEFINITION
 
 enum Role {
   SUPERADMIN
-    ADMIN
-    MANAGER
+  ADMIN
+  MANAGER
 }
 
 type Business {
@@ -952,9 +1059,25 @@ type Business {
   name: String!
   logo: String
   email: String
+  on_site: Boolean!
   about: String
+  industry: String!
+  number: String!
+  country_of_incorporation: String!
+  date_of_incorporation: String!
+  tax_identification_number: String!
+  address: Address!
   # services: [String!]!
   # socials: [Social!]!
+}
+
+type Address {
+  number: String
+  city: String!
+  street: String!
+  state: String!
+  country: String!
+  zip_code: String!
 }
 
 type myBusiness {
@@ -1033,7 +1156,7 @@ type businessDocument {
 }
 
 input businessDetail {
- registration_detail: BusinessRegistrationDetail
+  registration_detail: BusinessRegistrationDetail
   name: String
   about: String
   industry: String
@@ -1044,7 +1167,7 @@ extend type Query {
   myBusinesses: [myBusiness!] @authUser
   business(id: String!): Business @authUser
   getKYBDocuments: [kybDocument!] @authUser
-  getDocuments: [businessDocument!] @hasRole (role: ADMIN)
+  getDocuments: [businessDocument!] @hasRole(role: ADMIN)
   getCategories: [String!]! @authUser
   findBusiness(
     name: String
@@ -1055,7 +1178,7 @@ extend type Query {
 
 extend type Mutation {
   registerBusiness(input: RegisterBusinessInput!): Boolean! @authUser
-  uploadDocument(input: DocumentInput!): Boolean! @hasRole (role: ADMIN)
+  uploadDocument(input: DocumentInput!): Boolean! @hasRole(role: ADMIN)
   deleteDocument(input: RemoveDocumentInput!): Boolean! @hasRole(role: ADMIN)
   businessDetail(input: businessDetail!): Boolean! @hasRole(role: ADMIN)
 }
