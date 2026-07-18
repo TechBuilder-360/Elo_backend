@@ -3,8 +3,8 @@ directive @hasRole(role: Role!) on FIELD_DEFINITION
 
 enum Role {
   SUPERADMIN
-    ADMIN
-    MANAGER
+  ADMIN
+  MANAGER
 }
 
 type Business {
@@ -12,9 +12,25 @@ type Business {
   name: String!
   logo: String
   email: String
+  on_site: Boolean!
   about: String
+  industry: String!
+  number: String!
+  country_of_incorporation: String!
+  date_of_incorporation: String!
+  tax_identification_number: String!
+  address: Address!
   # services: [String!]!
   # socials: [Social!]!
+}
+
+type Address {
+  number: String
+  city: String!
+  street: String!
+  state: String!
+  country: String!
+  zip_code: String!
 }
 
 type myBusiness {
@@ -93,7 +109,7 @@ type businessDocument {
 }
 
 input businessDetail {
- registration_detail: BusinessRegistrationDetail
+  registration_detail: BusinessRegistrationDetail
   name: String
   about: String
   industry: String
@@ -104,7 +120,7 @@ extend type Query {
   myBusinesses: [myBusiness!] @authUser
   business(id: String!): Business @authUser
   getKYBDocuments: [kybDocument!] @authUser
-  getDocuments: [businessDocument!] @hasRole (role: ADMIN)
+  getDocuments: [businessDocument!] @hasRole(role: ADMIN)
   getCategories: [String!]! @authUser
   findBusiness(
     name: String
@@ -115,7 +131,7 @@ extend type Query {
 
 extend type Mutation {
   registerBusiness(input: RegisterBusinessInput!): Boolean! @authUser
-  uploadDocument(input: DocumentInput!): Boolean! @hasRole (role: ADMIN)
+  uploadDocument(input: DocumentInput!): Boolean! @hasRole(role: ADMIN)
   deleteDocument(input: RemoveDocumentInput!): Boolean! @hasRole(role: ADMIN)
   businessDetail(input: businessDetail!): Boolean! @hasRole(role: ADMIN)
 }

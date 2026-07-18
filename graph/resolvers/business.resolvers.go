@@ -34,11 +34,23 @@ func (r *queryResolver) Business(ctx context.Context, id string) (*model.Busines
 	}
 
 	return &model.Business{
-		ID:    result.ID,
-		Name:  result.Name,
-		Logo:  result.Logo,
-		Email: result.Email,
-		About: result.About,
+		ID:                     result.ID,
+		Name:                   result.Name,
+		Logo:                   result.Logo,
+		Email:                  result.Email,
+		About:                  result.About,
+		OnSite:                 result.OnSite,
+		Number:                 result.Number,
+		Industry:               result.Industry,
+		CountryOfIncorporation: result.CountryOfIncorporation,
+		DateOfIncorporation:    result.DateOfIncorporation,
+		Address: &model.Address{
+			City:    result.Address.City,
+			Street:  result.Address.Street,
+			State:   result.Address.State,
+			Country: result.Address.Country,
+			ZipCode: result.Address.ZipCode,
+		},
 	}, nil
 }
 

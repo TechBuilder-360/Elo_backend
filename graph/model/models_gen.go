@@ -13,12 +13,28 @@ type VerificationResponse interface {
 	IsVerificationResponse()
 }
 
+type Address struct {
+	Number  *string `json:"number,omitempty"`
+	City    string  `json:"city"`
+	Street  string  `json:"street"`
+	State   string  `json:"state"`
+	Country string  `json:"country"`
+	ZipCode string  `json:"zip_code"`
+}
+
 type Business struct {
-	ID    string  `json:"id"`
-	Name  string  `json:"name"`
-	Logo  *string `json:"logo,omitempty"`
-	Email *string `json:"email,omitempty"`
-	About *string `json:"about,omitempty"`
+	ID                      string   `json:"id"`
+	Name                    string   `json:"name"`
+	Logo                    *string  `json:"logo,omitempty"`
+	Email                   *string  `json:"email,omitempty"`
+	OnSite                  bool     `json:"on_site"`
+	About                   *string  `json:"about,omitempty"`
+	Industry                string   `json:"industry"`
+	Number                  string   `json:"number"`
+	CountryOfIncorporation  string   `json:"country_of_incorporation"`
+	DateOfIncorporation     string   `json:"date_of_incorporation"`
+	TaxIdentificationNumber string   `json:"tax_identification_number"`
+	Address                 *Address `json:"address"`
 }
 
 type BusinessAddress struct {
