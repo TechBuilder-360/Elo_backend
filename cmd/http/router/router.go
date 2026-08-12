@@ -33,6 +33,7 @@ import (
 	apperrors "github.com/Toflex/directory_v2/pkg/errors"
 	"github.com/Toflex/directory_v2/pkg/log"
 	"github.com/Toflex/directory_v2/pkg/providers/dojah"
+	"github.com/Toflex/directory_v2/pkg/providers/mapelrad"
 	"github.com/Toflex/directory_v2/pkg/verification"
 	"github.com/gin-gonic/gin"
 	"github.com/hibiken/asynq"
@@ -66,7 +67,7 @@ func authUserDirective(a authentication.IService) func(ctx context.Context, obj 
 			return nil, gqlerror.Errorf("unauthorized")
 		}
 
-		usr, err := database.DBInstance().User.Query().Where(user.IDEQ(userID)).First(ctx)
+		usr, err := database.DBInstance().User.Query().Where(user.IDEQ(userID)).WithOwner().First(ctx)
 		if err != nil || usr == nil {
 			logger.WithError(err).WithField("user_id", userID).Error("failed to fetch user")
 			return nil, gqlerror.Errorf("unauthorized")
@@ -112,7 +113,7 @@ func authBusinessDirective(a authentication.IService) func(ctx context.Context, 
 			return false, errors.New(errors.ErrFailed, "user is not verified")
 		}
 
-		b, err := database.DBInstance().Business.Query().Where(biz.IDEQ(businessHeader), biz.HasManagesWith(manager.UserID(usr.ID))).First(ctx)
+		b, err := database.DBInstance().Business.Query().Where(biz.IDEQ(businessHeader), biz.HasManagesWith(manager.UserID(usr.ID))).WithOwner().First(ctx)
 		if err != nil || b == nil {
 			logger.WithError(err).WithField("business_id", businessHeader).Error("failed to fetch business")
 			return nil, gqlerror.Errorf("unauthorized")
@@ -319,7 +320,8 @@ func initializeAsynqServer(engine *gin.Engine, basicAuth gin.HandlerFunc) {
 func initializeRestAPI(engine *gin.Engine) {
 	var (
 		// verificationController = verification.NewVerificationController(verification.NewService())
-		dojahController = dojah.New(runtime.Injector)
+		dojahController    = dojah.New(runtime.Injector)
+		mapleradController = mapelrad.New(runtime.Injector)
 	)
 
 	// ****************************************
@@ -331,5 +333,10 @@ func initializeRestAPI(engine *gin.Engine) {
 	// ********* Dojah Route ***********
 	// ****************************************
 	dojahController.RegisterRoutes(engine)
+
+	// ****************************************
+	// ********* Maplerad Route ***********
+	// ****************************************
+	mapleradController.RegisterRoutes(engine)
 
 }

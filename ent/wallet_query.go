@@ -4,6 +4,7 @@ package ent
 
 import (
 	"context"
+	"database/sql/driver"
 	"fmt"
 	"math"
 
@@ -12,18 +13,23 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/Toflex/directory_v2/ent/currency"
+	"github.com/Toflex/directory_v2/ent/nubanstaticaccount"
 	"github.com/Toflex/directory_v2/ent/predicate"
+	"github.com/Toflex/directory_v2/ent/vault"
 	"github.com/Toflex/directory_v2/ent/wallet"
 )
 
 // WalletQuery is the builder for querying Wallet entities.
 type WalletQuery struct {
 	config
-	ctx          *QueryContext
-	order        []wallet.OrderOption
-	inters       []Interceptor
-	predicates   []predicate.Wallet
-	withCurrency *CurrencyQuery
+	ctx                    *QueryContext
+	order                  []wallet.OrderOption
+	inters                 []Interceptor
+	predicates             []predicate.Wallet
+	withCurrency           *CurrencyQuery
+	withVault              *VaultQuery
+	withNubanStaticAccount *NubanStaticAccountQuery
+	withFKs                bool
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -75,6 +81,50 @@ func (wq *WalletQuery) QueryCurrency() *CurrencyQuery {
 			sqlgraph.From(wallet.Table, wallet.FieldID, selector),
 			sqlgraph.To(currency.Table, currency.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, true, wallet.CurrencyTable, wallet.CurrencyColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(wq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryVault chains the current query on the "vault" edge.
+func (wq *WalletQuery) QueryVault() *VaultQuery {
+	query := (&VaultClient{config: wq.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := wq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := wq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(wallet.Table, wallet.FieldID, selector),
+			sqlgraph.To(vault.Table, vault.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, wallet.VaultTable, wallet.VaultColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(wq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryNubanStaticAccount chains the current query on the "nuban_static_account" edge.
+func (wq *WalletQuery) QueryNubanStaticAccount() *NubanStaticAccountQuery {
+	query := (&NubanStaticAccountClient{config: wq.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := wq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := wq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(wallet.Table, wallet.FieldID, selector),
+			sqlgraph.To(nubanstaticaccount.Table, nubanstaticaccount.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, wallet.NubanStaticAccountTable, wallet.NubanStaticAccountColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(wq.driver.Dialect(), step)
 		return fromU, nil
@@ -269,12 +319,14 @@ func (wq *WalletQuery) Clone() *WalletQuery {
 		return nil
 	}
 	return &WalletQuery{
-		config:       wq.config,
-		ctx:          wq.ctx.Clone(),
-		order:        append([]wallet.OrderOption{}, wq.order...),
-		inters:       append([]Interceptor{}, wq.inters...),
-		predicates:   append([]predicate.Wallet{}, wq.predicates...),
-		withCurrency: wq.withCurrency.Clone(),
+		config:                 wq.config,
+		ctx:                    wq.ctx.Clone(),
+		order:                  append([]wallet.OrderOption{}, wq.order...),
+		inters:                 append([]Interceptor{}, wq.inters...),
+		predicates:             append([]predicate.Wallet{}, wq.predicates...),
+		withCurrency:           wq.withCurrency.Clone(),
+		withVault:              wq.withVault.Clone(),
+		withNubanStaticAccount: wq.withNubanStaticAccount.Clone(),
 		// clone intermediate query.
 		sql:  wq.sql.Clone(),
 		path: wq.path,
@@ -289,6 +341,28 @@ func (wq *WalletQuery) WithCurrency(opts ...func(*CurrencyQuery)) *WalletQuery {
 		opt(query)
 	}
 	wq.withCurrency = query
+	return wq
+}
+
+// WithVault tells the query-builder to eager-load the nodes that are connected to
+// the "vault" edge. The optional arguments are used to configure the query builder of the edge.
+func (wq *WalletQuery) WithVault(opts ...func(*VaultQuery)) *WalletQuery {
+	query := (&VaultClient{config: wq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	wq.withVault = query
+	return wq
+}
+
+// WithNubanStaticAccount tells the query-builder to eager-load the nodes that are connected to
+// the "nuban_static_account" edge. The optional arguments are used to configure the query builder of the edge.
+func (wq *WalletQuery) WithNubanStaticAccount(opts ...func(*NubanStaticAccountQuery)) *WalletQuery {
+	query := (&NubanStaticAccountClient{config: wq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	wq.withNubanStaticAccount = query
 	return wq
 }
 
@@ -369,11 +443,20 @@ func (wq *WalletQuery) prepareQuery(ctx context.Context) error {
 func (wq *WalletQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Wallet, error) {
 	var (
 		nodes       = []*Wallet{}
+		withFKs     = wq.withFKs
 		_spec       = wq.querySpec()
-		loadedTypes = [1]bool{
+		loadedTypes = [3]bool{
 			wq.withCurrency != nil,
+			wq.withVault != nil,
+			wq.withNubanStaticAccount != nil,
 		}
 	)
+	if wq.withVault != nil {
+		withFKs = true
+	}
+	if withFKs {
+		_spec.Node.Columns = append(_spec.Node.Columns, wallet.ForeignKeys...)
+	}
 	_spec.ScanValues = func(columns []string) ([]any, error) {
 		return (*Wallet).scanValues(nil, columns)
 	}
@@ -395,6 +478,21 @@ func (wq *WalletQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Walle
 	if query := wq.withCurrency; query != nil {
 		if err := wq.loadCurrency(ctx, query, nodes, nil,
 			func(n *Wallet, e *Currency) { n.Edges.Currency = e }); err != nil {
+			return nil, err
+		}
+	}
+	if query := wq.withVault; query != nil {
+		if err := wq.loadVault(ctx, query, nodes, nil,
+			func(n *Wallet, e *Vault) { n.Edges.Vault = e }); err != nil {
+			return nil, err
+		}
+	}
+	if query := wq.withNubanStaticAccount; query != nil {
+		if err := wq.loadNubanStaticAccount(ctx, query, nodes,
+			func(n *Wallet) { n.Edges.NubanStaticAccount = []*NubanStaticAccount{} },
+			func(n *Wallet, e *NubanStaticAccount) {
+				n.Edges.NubanStaticAccount = append(n.Edges.NubanStaticAccount, e)
+			}); err != nil {
 			return nil, err
 		}
 	}
@@ -427,6 +525,69 @@ func (wq *WalletQuery) loadCurrency(ctx context.Context, query *CurrencyQuery, n
 		for i := range nodes {
 			assign(nodes[i], n)
 		}
+	}
+	return nil
+}
+func (wq *WalletQuery) loadVault(ctx context.Context, query *VaultQuery, nodes []*Wallet, init func(*Wallet), assign func(*Wallet, *Vault)) error {
+	ids := make([]string, 0, len(nodes))
+	nodeids := make(map[string][]*Wallet)
+	for i := range nodes {
+		if nodes[i].vault_wallets == nil {
+			continue
+		}
+		fk := *nodes[i].vault_wallets
+		if _, ok := nodeids[fk]; !ok {
+			ids = append(ids, fk)
+		}
+		nodeids[fk] = append(nodeids[fk], nodes[i])
+	}
+	if len(ids) == 0 {
+		return nil
+	}
+	query.Where(vault.IDIn(ids...))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		nodes, ok := nodeids[n.ID]
+		if !ok {
+			return fmt.Errorf(`unexpected foreign-key "vault_wallets" returned %v`, n.ID)
+		}
+		for i := range nodes {
+			assign(nodes[i], n)
+		}
+	}
+	return nil
+}
+func (wq *WalletQuery) loadNubanStaticAccount(ctx context.Context, query *NubanStaticAccountQuery, nodes []*Wallet, init func(*Wallet), assign func(*Wallet, *NubanStaticAccount)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[string]*Wallet)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	query.withFKs = true
+	query.Where(predicate.NubanStaticAccount(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(wallet.NubanStaticAccountColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.wallet_nuban_static_account
+		if fk == nil {
+			return fmt.Errorf(`foreign-key "wallet_nuban_static_account" is nil for node %v`, n.ID)
+		}
+		node, ok := nodeids[*fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "wallet_nuban_static_account" returned %v for node %v`, *fk, n.ID)
+		}
+		assign(node, n)
 	}
 	return nil
 }

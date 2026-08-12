@@ -12,6 +12,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/Toflex/directory_v2/ent/business"
+	"github.com/Toflex/directory_v2/ent/ledgerowner"
 	"github.com/Toflex/directory_v2/ent/manager"
 	"github.com/Toflex/directory_v2/ent/predicate"
 	"github.com/Toflex/directory_v2/ent/requestverification"
@@ -372,6 +373,17 @@ func (uu *UserUpdate) AddRequestVerifications(r ...*RequestVerification) *UserUp
 	return uu.AddRequestVerificationIDs(ids...)
 }
 
+// SetOwnerID sets the "owner" edge to the LedgerOwner entity by ID.
+func (uu *UserUpdate) SetOwnerID(id string) *UserUpdate {
+	uu.mutation.SetOwnerID(id)
+	return uu
+}
+
+// SetOwner sets the "owner" edge to the LedgerOwner entity.
+func (uu *UserUpdate) SetOwner(l *LedgerOwner) *UserUpdate {
+	return uu.SetOwnerID(l.ID)
+}
+
 // Mutation returns the UserMutation object of the builder.
 func (uu *UserUpdate) Mutation() *UserMutation {
 	return uu.mutation
@@ -482,6 +494,12 @@ func (uu *UserUpdate) RemoveRequestVerifications(r ...*RequestVerification) *Use
 	return uu.RemoveRequestVerificationIDs(ids...)
 }
 
+// ClearOwner clears the "owner" edge to the LedgerOwner entity.
+func (uu *UserUpdate) ClearOwner() *UserUpdate {
+	uu.mutation.ClearOwner()
+	return uu
+}
+
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (uu *UserUpdate) Save(ctx context.Context) (int, error) {
 	uu.defaults()
@@ -544,6 +562,9 @@ func (uu *UserUpdate) check() error {
 		if err := user.PhoneNumberValidator(v); err != nil {
 			return &ValidationError{Name: "phone_number", err: fmt.Errorf(`ent: validator failed for field "User.phone_number": %w`, err)}
 		}
+	}
+	if uu.mutation.OwnerCleared() && len(uu.mutation.OwnerIDs()) > 0 {
+		return errors.New(`ent: clearing a required unique edge "User.owner"`)
 	}
 	return nil
 }
@@ -850,6 +871,35 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(requestverification.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if uu.mutation.OwnerCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2O,
+			Inverse: false,
+			Table:   user.OwnerTable,
+			Columns: []string{user.OwnerColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(ledgerowner.FieldID, field.TypeString),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := uu.mutation.OwnerIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2O,
+			Inverse: false,
+			Table:   user.OwnerTable,
+			Columns: []string{user.OwnerColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(ledgerowner.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {
@@ -1216,6 +1266,17 @@ func (uuo *UserUpdateOne) AddRequestVerifications(r ...*RequestVerification) *Us
 	return uuo.AddRequestVerificationIDs(ids...)
 }
 
+// SetOwnerID sets the "owner" edge to the LedgerOwner entity by ID.
+func (uuo *UserUpdateOne) SetOwnerID(id string) *UserUpdateOne {
+	uuo.mutation.SetOwnerID(id)
+	return uuo
+}
+
+// SetOwner sets the "owner" edge to the LedgerOwner entity.
+func (uuo *UserUpdateOne) SetOwner(l *LedgerOwner) *UserUpdateOne {
+	return uuo.SetOwnerID(l.ID)
+}
+
 // Mutation returns the UserMutation object of the builder.
 func (uuo *UserUpdateOne) Mutation() *UserMutation {
 	return uuo.mutation
@@ -1326,6 +1387,12 @@ func (uuo *UserUpdateOne) RemoveRequestVerifications(r ...*RequestVerification) 
 	return uuo.RemoveRequestVerificationIDs(ids...)
 }
 
+// ClearOwner clears the "owner" edge to the LedgerOwner entity.
+func (uuo *UserUpdateOne) ClearOwner() *UserUpdateOne {
+	uuo.mutation.ClearOwner()
+	return uuo
+}
+
 // Where appends a list predicates to the UserUpdate builder.
 func (uuo *UserUpdateOne) Where(ps ...predicate.User) *UserUpdateOne {
 	uuo.mutation.Where(ps...)
@@ -1401,6 +1468,9 @@ func (uuo *UserUpdateOne) check() error {
 		if err := user.PhoneNumberValidator(v); err != nil {
 			return &ValidationError{Name: "phone_number", err: fmt.Errorf(`ent: validator failed for field "User.phone_number": %w`, err)}
 		}
+	}
+	if uuo.mutation.OwnerCleared() && len(uuo.mutation.OwnerIDs()) > 0 {
+		return errors.New(`ent: clearing a required unique edge "User.owner"`)
 	}
 	return nil
 }
@@ -1724,6 +1794,35 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(requestverification.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if uuo.mutation.OwnerCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2O,
+			Inverse: false,
+			Table:   user.OwnerTable,
+			Columns: []string{user.OwnerColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(ledgerowner.FieldID, field.TypeString),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := uuo.mutation.OwnerIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2O,
+			Inverse: false,
+			Table:   user.OwnerTable,
+			Columns: []string{user.OwnerColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(ledgerowner.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {

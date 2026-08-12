@@ -95,11 +95,6 @@ func HoldingBalance(v int64) predicate.Wallet {
 	return predicate.Wallet(sql.FieldEQ(FieldHoldingBalance, v))
 }
 
-// Identifier applies equality check predicate on the "identifier" field. It's identical to IdentifierEQ.
-func Identifier(v string) predicate.Wallet {
-	return predicate.Wallet(sql.FieldEQ(FieldIdentifier, v))
-}
-
 // CurrencyID applies equality check predicate on the "currency_id" field. It's identical to CurrencyIDEQ.
 func CurrencyID(v string) predicate.Wallet {
 	return predicate.Wallet(sql.FieldEQ(FieldCurrencyID, v))
@@ -380,91 +375,6 @@ func HoldingBalanceLTE(v int64) predicate.Wallet {
 	return predicate.Wallet(sql.FieldLTE(FieldHoldingBalance, v))
 }
 
-// OwnerEQ applies the EQ predicate on the "owner" field.
-func OwnerEQ(v Owner) predicate.Wallet {
-	return predicate.Wallet(sql.FieldEQ(FieldOwner, v))
-}
-
-// OwnerNEQ applies the NEQ predicate on the "owner" field.
-func OwnerNEQ(v Owner) predicate.Wallet {
-	return predicate.Wallet(sql.FieldNEQ(FieldOwner, v))
-}
-
-// OwnerIn applies the In predicate on the "owner" field.
-func OwnerIn(vs ...Owner) predicate.Wallet {
-	return predicate.Wallet(sql.FieldIn(FieldOwner, vs...))
-}
-
-// OwnerNotIn applies the NotIn predicate on the "owner" field.
-func OwnerNotIn(vs ...Owner) predicate.Wallet {
-	return predicate.Wallet(sql.FieldNotIn(FieldOwner, vs...))
-}
-
-// IdentifierEQ applies the EQ predicate on the "identifier" field.
-func IdentifierEQ(v string) predicate.Wallet {
-	return predicate.Wallet(sql.FieldEQ(FieldIdentifier, v))
-}
-
-// IdentifierNEQ applies the NEQ predicate on the "identifier" field.
-func IdentifierNEQ(v string) predicate.Wallet {
-	return predicate.Wallet(sql.FieldNEQ(FieldIdentifier, v))
-}
-
-// IdentifierIn applies the In predicate on the "identifier" field.
-func IdentifierIn(vs ...string) predicate.Wallet {
-	return predicate.Wallet(sql.FieldIn(FieldIdentifier, vs...))
-}
-
-// IdentifierNotIn applies the NotIn predicate on the "identifier" field.
-func IdentifierNotIn(vs ...string) predicate.Wallet {
-	return predicate.Wallet(sql.FieldNotIn(FieldIdentifier, vs...))
-}
-
-// IdentifierGT applies the GT predicate on the "identifier" field.
-func IdentifierGT(v string) predicate.Wallet {
-	return predicate.Wallet(sql.FieldGT(FieldIdentifier, v))
-}
-
-// IdentifierGTE applies the GTE predicate on the "identifier" field.
-func IdentifierGTE(v string) predicate.Wallet {
-	return predicate.Wallet(sql.FieldGTE(FieldIdentifier, v))
-}
-
-// IdentifierLT applies the LT predicate on the "identifier" field.
-func IdentifierLT(v string) predicate.Wallet {
-	return predicate.Wallet(sql.FieldLT(FieldIdentifier, v))
-}
-
-// IdentifierLTE applies the LTE predicate on the "identifier" field.
-func IdentifierLTE(v string) predicate.Wallet {
-	return predicate.Wallet(sql.FieldLTE(FieldIdentifier, v))
-}
-
-// IdentifierContains applies the Contains predicate on the "identifier" field.
-func IdentifierContains(v string) predicate.Wallet {
-	return predicate.Wallet(sql.FieldContains(FieldIdentifier, v))
-}
-
-// IdentifierHasPrefix applies the HasPrefix predicate on the "identifier" field.
-func IdentifierHasPrefix(v string) predicate.Wallet {
-	return predicate.Wallet(sql.FieldHasPrefix(FieldIdentifier, v))
-}
-
-// IdentifierHasSuffix applies the HasSuffix predicate on the "identifier" field.
-func IdentifierHasSuffix(v string) predicate.Wallet {
-	return predicate.Wallet(sql.FieldHasSuffix(FieldIdentifier, v))
-}
-
-// IdentifierEqualFold applies the EqualFold predicate on the "identifier" field.
-func IdentifierEqualFold(v string) predicate.Wallet {
-	return predicate.Wallet(sql.FieldEqualFold(FieldIdentifier, v))
-}
-
-// IdentifierContainsFold applies the ContainsFold predicate on the "identifier" field.
-func IdentifierContainsFold(v string) predicate.Wallet {
-	return predicate.Wallet(sql.FieldContainsFold(FieldIdentifier, v))
-}
-
 // CurrencyIDEQ applies the EQ predicate on the "currency_id" field.
 func CurrencyIDEQ(v string) predicate.Wallet {
 	return predicate.Wallet(sql.FieldEQ(FieldCurrencyID, v))
@@ -555,6 +465,52 @@ func HasCurrency() predicate.Wallet {
 func HasCurrencyWith(preds ...predicate.Currency) predicate.Wallet {
 	return predicate.Wallet(func(s *sql.Selector) {
 		step := newCurrencyStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasVault applies the HasEdge predicate on the "vault" edge.
+func HasVault() predicate.Wallet {
+	return predicate.Wallet(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, VaultTable, VaultColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasVaultWith applies the HasEdge predicate on the "vault" edge with a given conditions (other predicates).
+func HasVaultWith(preds ...predicate.Vault) predicate.Wallet {
+	return predicate.Wallet(func(s *sql.Selector) {
+		step := newVaultStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasNubanStaticAccount applies the HasEdge predicate on the "nuban_static_account" edge.
+func HasNubanStaticAccount() predicate.Wallet {
+	return predicate.Wallet(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, NubanStaticAccountTable, NubanStaticAccountColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasNubanStaticAccountWith applies the HasEdge predicate on the "nuban_static_account" edge with a given conditions (other predicates).
+func HasNubanStaticAccountWith(preds ...predicate.NubanStaticAccount) predicate.Wallet {
+	return predicate.Wallet(func(s *sql.Selector) {
+		step := newNubanStaticAccountStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)

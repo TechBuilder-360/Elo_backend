@@ -71,6 +71,9 @@ func (Business) Edges() []ent.Edge {
 		edge.To("business_documents", BusinessDocument.Type),
 		edge.To("locations", BusinessLocation.Type),
 		edge.To("kyb_messages", KYBMessage.Type),
+		edge.To("owner", LedgerOwner.Type).
+			Unique().
+			Required(),
 	}
 }
 

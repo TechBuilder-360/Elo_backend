@@ -21,13 +21,13 @@ enum WalletType {
 }
 
 type Wallet {
-    type: String!
     available_balance: Float!
     ledger_balance: Float!
     holding_balance: Float!
     id: String!
     currency: String!
     active: Boolean!
+    is_fiat: Boolean!
 }
 
 extend type Query {

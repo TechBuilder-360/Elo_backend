@@ -30,8 +30,8 @@ const (
 	FieldIsFiat = "is_fiat"
 	// FieldActive holds the string denoting the active field in the database.
 	FieldActive = "active"
-	// FieldMultipler holds the string denoting the multipler field in the database.
-	FieldMultipler = "multipler"
+	// FieldMultiplier holds the string denoting the multiplier field in the database.
+	FieldMultiplier = "multiplier"
 	// EdgeWallets holds the string denoting the wallets edge name in mutations.
 	EdgeWallets = "wallets"
 	// Table holds the table name of the currency in the database.
@@ -56,7 +56,7 @@ var Columns = []string{
 	FieldCode,
 	FieldIsFiat,
 	FieldActive,
-	FieldMultipler,
+	FieldMultiplier,
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -138,9 +138,9 @@ func ByActive(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldActive, opts...).ToFunc()
 }
 
-// ByMultipler orders the results by the multipler field.
-func ByMultipler(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldMultipler, opts...).ToFunc()
+// ByMultiplier orders the results by the multiplier field.
+func ByMultiplier(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldMultiplier, opts...).ToFunc()
 }
 
 // ByWalletsCount orders the results by wallets count.

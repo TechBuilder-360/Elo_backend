@@ -13,6 +13,8 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/Toflex/directory_v2/ent/currency"
+	"github.com/Toflex/directory_v2/ent/nubanstaticaccount"
+	"github.com/Toflex/directory_v2/ent/vault"
 	"github.com/Toflex/directory_v2/ent/wallet"
 )
 
@@ -122,26 +124,6 @@ func (wc *WalletCreate) SetNillableHoldingBalance(i *int64) *WalletCreate {
 	return wc
 }
 
-// SetOwner sets the "owner" field.
-func (wc *WalletCreate) SetOwner(w wallet.Owner) *WalletCreate {
-	wc.mutation.SetOwner(w)
-	return wc
-}
-
-// SetNillableOwner sets the "owner" field if the given value is not nil.
-func (wc *WalletCreate) SetNillableOwner(w *wallet.Owner) *WalletCreate {
-	if w != nil {
-		wc.SetOwner(*w)
-	}
-	return wc
-}
-
-// SetIdentifier sets the "identifier" field.
-func (wc *WalletCreate) SetIdentifier(s string) *WalletCreate {
-	wc.mutation.SetIdentifier(s)
-	return wc
-}
-
 // SetCurrencyID sets the "currency_id" field.
 func (wc *WalletCreate) SetCurrencyID(s string) *WalletCreate {
 	wc.mutation.SetCurrencyID(s)
@@ -179,6 +161,32 @@ func (wc *WalletCreate) SetNillableID(s *string) *WalletCreate {
 // SetCurrency sets the "currency" edge to the Currency entity.
 func (wc *WalletCreate) SetCurrency(c *Currency) *WalletCreate {
 	return wc.SetCurrencyID(c.ID)
+}
+
+// SetVaultID sets the "vault" edge to the Vault entity by ID.
+func (wc *WalletCreate) SetVaultID(id string) *WalletCreate {
+	wc.mutation.SetVaultID(id)
+	return wc
+}
+
+// SetVault sets the "vault" edge to the Vault entity.
+func (wc *WalletCreate) SetVault(v *Vault) *WalletCreate {
+	return wc.SetVaultID(v.ID)
+}
+
+// AddNubanStaticAccountIDs adds the "nuban_static_account" edge to the NubanStaticAccount entity by IDs.
+func (wc *WalletCreate) AddNubanStaticAccountIDs(ids ...string) *WalletCreate {
+	wc.mutation.AddNubanStaticAccountIDs(ids...)
+	return wc
+}
+
+// AddNubanStaticAccount adds the "nuban_static_account" edges to the NubanStaticAccount entity.
+func (wc *WalletCreate) AddNubanStaticAccount(n ...*NubanStaticAccount) *WalletCreate {
+	ids := make([]string, len(n))
+	for i := range n {
+		ids[i] = n[i].ID
+	}
+	return wc.AddNubanStaticAccountIDs(ids...)
 }
 
 // Mutation returns the WalletMutation object of the builder.
@@ -240,10 +248,6 @@ func (wc *WalletCreate) defaults() {
 		v := wallet.DefaultHoldingBalance
 		wc.mutation.SetHoldingBalance(v)
 	}
-	if _, ok := wc.mutation.Owner(); !ok {
-		v := wallet.DefaultOwner
-		wc.mutation.SetOwner(v)
-	}
 	if _, ok := wc.mutation.Active(); !ok {
 		v := wallet.DefaultActive
 		wc.mutation.SetActive(v)
@@ -279,17 +283,6 @@ func (wc *WalletCreate) check() error {
 	if _, ok := wc.mutation.HoldingBalance(); !ok {
 		return &ValidationError{Name: "holding_balance", err: errors.New(`ent: missing required field "Wallet.holding_balance"`)}
 	}
-	if _, ok := wc.mutation.Owner(); !ok {
-		return &ValidationError{Name: "owner", err: errors.New(`ent: missing required field "Wallet.owner"`)}
-	}
-	if v, ok := wc.mutation.Owner(); ok {
-		if err := wallet.OwnerValidator(v); err != nil {
-			return &ValidationError{Name: "owner", err: fmt.Errorf(`ent: validator failed for field "Wallet.owner": %w`, err)}
-		}
-	}
-	if _, ok := wc.mutation.Identifier(); !ok {
-		return &ValidationError{Name: "identifier", err: errors.New(`ent: missing required field "Wallet.identifier"`)}
-	}
 	if _, ok := wc.mutation.CurrencyID(); !ok {
 		return &ValidationError{Name: "currency_id", err: errors.New(`ent: missing required field "Wallet.currency_id"`)}
 	}
@@ -303,6 +296,9 @@ func (wc *WalletCreate) check() error {
 	}
 	if len(wc.mutation.CurrencyIDs()) == 0 {
 		return &ValidationError{Name: "currency", err: errors.New(`ent: missing required edge "Wallet.currency"`)}
+	}
+	if len(wc.mutation.VaultIDs()) == 0 {
+		return &ValidationError{Name: "vault", err: errors.New(`ent: missing required edge "Wallet.vault"`)}
 	}
 	return nil
 }
@@ -368,14 +364,6 @@ func (wc *WalletCreate) createSpec() (*Wallet, *sqlgraph.CreateSpec) {
 		_spec.SetField(wallet.FieldHoldingBalance, field.TypeInt64, value)
 		_node.HoldingBalance = value
 	}
-	if value, ok := wc.mutation.Owner(); ok {
-		_spec.SetField(wallet.FieldOwner, field.TypeEnum, value)
-		_node.Owner = value
-	}
-	if value, ok := wc.mutation.Identifier(); ok {
-		_spec.SetField(wallet.FieldIdentifier, field.TypeString, value)
-		_node.Identifier = value
-	}
 	if value, ok := wc.mutation.Active(); ok {
 		_spec.SetField(wallet.FieldActive, field.TypeBool, value)
 		_node.Active = value
@@ -395,6 +383,39 @@ func (wc *WalletCreate) createSpec() (*Wallet, *sqlgraph.CreateSpec) {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_node.CurrencyID = nodes[0]
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := wc.mutation.VaultIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   wallet.VaultTable,
+			Columns: []string{wallet.VaultColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(vault.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_node.vault_wallets = &nodes[0]
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := wc.mutation.NubanStaticAccountIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   wallet.NubanStaticAccountTable,
+			Columns: []string{wallet.NubanStaticAccountColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(nubanstaticaccount.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec
@@ -542,30 +563,6 @@ func (u *WalletUpsert) UpdateHoldingBalance() *WalletUpsert {
 // AddHoldingBalance adds v to the "holding_balance" field.
 func (u *WalletUpsert) AddHoldingBalance(v int64) *WalletUpsert {
 	u.Add(wallet.FieldHoldingBalance, v)
-	return u
-}
-
-// SetOwner sets the "owner" field.
-func (u *WalletUpsert) SetOwner(v wallet.Owner) *WalletUpsert {
-	u.Set(wallet.FieldOwner, v)
-	return u
-}
-
-// UpdateOwner sets the "owner" field to the value that was provided on create.
-func (u *WalletUpsert) UpdateOwner() *WalletUpsert {
-	u.SetExcluded(wallet.FieldOwner)
-	return u
-}
-
-// SetIdentifier sets the "identifier" field.
-func (u *WalletUpsert) SetIdentifier(v string) *WalletUpsert {
-	u.Set(wallet.FieldIdentifier, v)
-	return u
-}
-
-// UpdateIdentifier sets the "identifier" field to the value that was provided on create.
-func (u *WalletUpsert) UpdateIdentifier() *WalletUpsert {
-	u.SetExcluded(wallet.FieldIdentifier)
 	return u
 }
 
@@ -753,34 +750,6 @@ func (u *WalletUpsertOne) AddHoldingBalance(v int64) *WalletUpsertOne {
 func (u *WalletUpsertOne) UpdateHoldingBalance() *WalletUpsertOne {
 	return u.Update(func(s *WalletUpsert) {
 		s.UpdateHoldingBalance()
-	})
-}
-
-// SetOwner sets the "owner" field.
-func (u *WalletUpsertOne) SetOwner(v wallet.Owner) *WalletUpsertOne {
-	return u.Update(func(s *WalletUpsert) {
-		s.SetOwner(v)
-	})
-}
-
-// UpdateOwner sets the "owner" field to the value that was provided on create.
-func (u *WalletUpsertOne) UpdateOwner() *WalletUpsertOne {
-	return u.Update(func(s *WalletUpsert) {
-		s.UpdateOwner()
-	})
-}
-
-// SetIdentifier sets the "identifier" field.
-func (u *WalletUpsertOne) SetIdentifier(v string) *WalletUpsertOne {
-	return u.Update(func(s *WalletUpsert) {
-		s.SetIdentifier(v)
-	})
-}
-
-// UpdateIdentifier sets the "identifier" field to the value that was provided on create.
-func (u *WalletUpsertOne) UpdateIdentifier() *WalletUpsertOne {
-	return u.Update(func(s *WalletUpsert) {
-		s.UpdateIdentifier()
 	})
 }
 
@@ -1139,34 +1108,6 @@ func (u *WalletUpsertBulk) AddHoldingBalance(v int64) *WalletUpsertBulk {
 func (u *WalletUpsertBulk) UpdateHoldingBalance() *WalletUpsertBulk {
 	return u.Update(func(s *WalletUpsert) {
 		s.UpdateHoldingBalance()
-	})
-}
-
-// SetOwner sets the "owner" field.
-func (u *WalletUpsertBulk) SetOwner(v wallet.Owner) *WalletUpsertBulk {
-	return u.Update(func(s *WalletUpsert) {
-		s.SetOwner(v)
-	})
-}
-
-// UpdateOwner sets the "owner" field to the value that was provided on create.
-func (u *WalletUpsertBulk) UpdateOwner() *WalletUpsertBulk {
-	return u.Update(func(s *WalletUpsert) {
-		s.UpdateOwner()
-	})
-}
-
-// SetIdentifier sets the "identifier" field.
-func (u *WalletUpsertBulk) SetIdentifier(v string) *WalletUpsertBulk {
-	return u.Update(func(s *WalletUpsert) {
-		s.SetIdentifier(v)
-	})
-}
-
-// UpdateIdentifier sets the "identifier" field to the value that was provided on create.
-func (u *WalletUpsertBulk) UpdateIdentifier() *WalletUpsertBulk {
-	return u.Update(func(s *WalletUpsert) {
-		s.UpdateIdentifier()
 	})
 }
 

@@ -413,6 +413,7 @@ func (cq *CurrencyQuery) loadWallets(ctx context.Context, query *WalletQuery, no
 			init(nodes[i])
 		}
 	}
+	query.withFKs = true
 	if len(query.ctx.Fields) > 0 {
 		query.ctx.AppendFieldOnce(wallet.FieldCurrencyID)
 	}

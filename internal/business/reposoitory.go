@@ -21,6 +21,8 @@ type IRepository interface {
 	UpdateDcument(ctx context.Context, bixID, documentID, url string) error
 	KYBDocumentByID(ctx context.Context, id string) (*ent.KYBDocument, error)
 	KYBDOcuments(ctx context.Context) ([]*ent.KYBDocument, error)
+	GetOwner(ctx context.Context, b *ent.Business) (*ent.LedgerOwner, error)
+	CreateOwner(ctx context.Context, b *ent.Business) (*ent.LedgerOwner, error)
 	WithTransaction(tx *ent.Tx) IRepository
 }
 

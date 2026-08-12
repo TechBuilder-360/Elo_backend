@@ -10,6 +10,7 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"github.com/Toflex/directory_v2/ent/business"
+	"github.com/Toflex/directory_v2/ent/ledgerowner"
 	"github.com/Toflex/directory_v2/ent/user"
 )
 
@@ -90,9 +91,11 @@ type BusinessEdges struct {
 	Locations []*BusinessLocation `json:"locations,omitempty"`
 	// KybMessages holds the value of the kyb_messages edge.
 	KybMessages []*KYBMessage `json:"kyb_messages,omitempty"`
+	// Owner holds the value of the owner edge.
+	Owner *LedgerOwner `json:"owner,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [9]bool
+	loadedTypes [10]bool
 }
 
 // SocialsOrErr returns the Socials value or an error if the edge
@@ -176,6 +179,17 @@ func (e BusinessEdges) KybMessagesOrErr() ([]*KYBMessage, error) {
 		return e.KybMessages, nil
 	}
 	return nil, &NotLoadedError{edge: "kyb_messages"}
+}
+
+// OwnerOrErr returns the Owner value or an error if the edge
+// was not loaded in eager-loading, or loaded but was not found.
+func (e BusinessEdges) OwnerOrErr() (*LedgerOwner, error) {
+	if e.Owner != nil {
+		return e.Owner, nil
+	} else if e.loadedTypes[9] {
+		return nil, &NotFoundError{label: ledgerowner.Label}
+	}
+	return nil, &NotLoadedError{edge: "owner"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -409,6 +423,11 @@ func (b *Business) QueryLocations() *BusinessLocationQuery {
 // QueryKybMessages queries the "kyb_messages" edge of the Business entity.
 func (b *Business) QueryKybMessages() *KYBMessageQuery {
 	return NewBusinessClient(b.config).QueryKybMessages(b)
+}
+
+// QueryOwner queries the "owner" edge of the Business entity.
+func (b *Business) QueryOwner() *LedgerOwnerQuery {
+	return NewBusinessClient(b.config).QueryOwner(b)
 }
 
 // Update returns a builder for updating this Business.

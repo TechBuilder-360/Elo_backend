@@ -9,6 +9,7 @@ import (
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
+	"github.com/Toflex/directory_v2/ent/ledgerowner"
 	"github.com/Toflex/directory_v2/ent/user"
 )
 
@@ -69,9 +70,11 @@ type UserEdges struct {
 	Verifications []*Verification `json:"verifications,omitempty"`
 	// RequestVerifications holds the value of the request_verifications edge.
 	RequestVerifications []*RequestVerification `json:"request_verifications,omitempty"`
+	// Owner holds the value of the owner edge.
+	Owner *LedgerOwner `json:"owner,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [5]bool
+	loadedTypes [6]bool
 }
 
 // ManagesOrErr returns the Manages value or an error if the edge
@@ -117,6 +120,17 @@ func (e UserEdges) RequestVerificationsOrErr() ([]*RequestVerification, error) {
 		return e.RequestVerifications, nil
 	}
 	return nil, &NotLoadedError{edge: "request_verifications"}
+}
+
+// OwnerOrErr returns the Owner value or an error if the edge
+// was not loaded in eager-loading, or loaded but was not found.
+func (e UserEdges) OwnerOrErr() (*LedgerOwner, error) {
+	if e.Owner != nil {
+		return e.Owner, nil
+	} else if e.loadedTypes[5] {
+		return nil, &NotFoundError{label: ledgerowner.Label}
+	}
+	return nil, &NotLoadedError{edge: "owner"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -293,6 +307,11 @@ func (u *User) QueryVerifications() *VerificationQuery {
 // QueryRequestVerifications queries the "request_verifications" edge of the User entity.
 func (u *User) QueryRequestVerifications() *RequestVerificationQuery {
 	return NewUserClient(u.config).QueryRequestVerifications(u)
+}
+
+// QueryOwner queries the "owner" edge of the User entity.
+func (u *User) QueryOwner() *LedgerOwnerQuery {
+	return NewUserClient(u.config).QueryOwner(u)
 }
 
 // Update returns a builder for updating this User.

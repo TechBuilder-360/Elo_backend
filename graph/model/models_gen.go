@@ -169,6 +169,7 @@ type Wallet struct {
 	ID               string  `json:"id"`
 	Currency         string  `json:"currency"`
 	Active           bool    `json:"active"`
+	IsFiat           bool    `json:"is_fiat"`
 }
 
 type BusinessDetail struct {

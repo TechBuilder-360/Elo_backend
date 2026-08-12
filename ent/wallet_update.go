@@ -12,7 +12,9 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/Toflex/directory_v2/ent/currency"
+	"github.com/Toflex/directory_v2/ent/nubanstaticaccount"
 	"github.com/Toflex/directory_v2/ent/predicate"
+	"github.com/Toflex/directory_v2/ent/vault"
 	"github.com/Toflex/directory_v2/ent/wallet"
 )
 
@@ -132,34 +134,6 @@ func (wu *WalletUpdate) AddHoldingBalance(i int64) *WalletUpdate {
 	return wu
 }
 
-// SetOwner sets the "owner" field.
-func (wu *WalletUpdate) SetOwner(w wallet.Owner) *WalletUpdate {
-	wu.mutation.SetOwner(w)
-	return wu
-}
-
-// SetNillableOwner sets the "owner" field if the given value is not nil.
-func (wu *WalletUpdate) SetNillableOwner(w *wallet.Owner) *WalletUpdate {
-	if w != nil {
-		wu.SetOwner(*w)
-	}
-	return wu
-}
-
-// SetIdentifier sets the "identifier" field.
-func (wu *WalletUpdate) SetIdentifier(s string) *WalletUpdate {
-	wu.mutation.SetIdentifier(s)
-	return wu
-}
-
-// SetNillableIdentifier sets the "identifier" field if the given value is not nil.
-func (wu *WalletUpdate) SetNillableIdentifier(s *string) *WalletUpdate {
-	if s != nil {
-		wu.SetIdentifier(*s)
-	}
-	return wu
-}
-
 // SetCurrencyID sets the "currency_id" field.
 func (wu *WalletUpdate) SetCurrencyID(s string) *WalletUpdate {
 	wu.mutation.SetCurrencyID(s)
@@ -193,6 +167,32 @@ func (wu *WalletUpdate) SetCurrency(c *Currency) *WalletUpdate {
 	return wu.SetCurrencyID(c.ID)
 }
 
+// SetVaultID sets the "vault" edge to the Vault entity by ID.
+func (wu *WalletUpdate) SetVaultID(id string) *WalletUpdate {
+	wu.mutation.SetVaultID(id)
+	return wu
+}
+
+// SetVault sets the "vault" edge to the Vault entity.
+func (wu *WalletUpdate) SetVault(v *Vault) *WalletUpdate {
+	return wu.SetVaultID(v.ID)
+}
+
+// AddNubanStaticAccountIDs adds the "nuban_static_account" edge to the NubanStaticAccount entity by IDs.
+func (wu *WalletUpdate) AddNubanStaticAccountIDs(ids ...string) *WalletUpdate {
+	wu.mutation.AddNubanStaticAccountIDs(ids...)
+	return wu
+}
+
+// AddNubanStaticAccount adds the "nuban_static_account" edges to the NubanStaticAccount entity.
+func (wu *WalletUpdate) AddNubanStaticAccount(n ...*NubanStaticAccount) *WalletUpdate {
+	ids := make([]string, len(n))
+	for i := range n {
+		ids[i] = n[i].ID
+	}
+	return wu.AddNubanStaticAccountIDs(ids...)
+}
+
 // Mutation returns the WalletMutation object of the builder.
 func (wu *WalletUpdate) Mutation() *WalletMutation {
 	return wu.mutation
@@ -202,6 +202,33 @@ func (wu *WalletUpdate) Mutation() *WalletMutation {
 func (wu *WalletUpdate) ClearCurrency() *WalletUpdate {
 	wu.mutation.ClearCurrency()
 	return wu
+}
+
+// ClearVault clears the "vault" edge to the Vault entity.
+func (wu *WalletUpdate) ClearVault() *WalletUpdate {
+	wu.mutation.ClearVault()
+	return wu
+}
+
+// ClearNubanStaticAccount clears all "nuban_static_account" edges to the NubanStaticAccount entity.
+func (wu *WalletUpdate) ClearNubanStaticAccount() *WalletUpdate {
+	wu.mutation.ClearNubanStaticAccount()
+	return wu
+}
+
+// RemoveNubanStaticAccountIDs removes the "nuban_static_account" edge to NubanStaticAccount entities by IDs.
+func (wu *WalletUpdate) RemoveNubanStaticAccountIDs(ids ...string) *WalletUpdate {
+	wu.mutation.RemoveNubanStaticAccountIDs(ids...)
+	return wu
+}
+
+// RemoveNubanStaticAccount removes "nuban_static_account" edges to NubanStaticAccount entities.
+func (wu *WalletUpdate) RemoveNubanStaticAccount(n ...*NubanStaticAccount) *WalletUpdate {
+	ids := make([]string, len(n))
+	for i := range n {
+		ids[i] = n[i].ID
+	}
+	return wu.RemoveNubanStaticAccountIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -247,11 +274,6 @@ func (wu *WalletUpdate) check() error {
 			return &ValidationError{Name: "type", err: fmt.Errorf(`ent: validator failed for field "Wallet.type": %w`, err)}
 		}
 	}
-	if v, ok := wu.mutation.Owner(); ok {
-		if err := wallet.OwnerValidator(v); err != nil {
-			return &ValidationError{Name: "owner", err: fmt.Errorf(`ent: validator failed for field "Wallet.owner": %w`, err)}
-		}
-	}
 	if v, ok := wu.mutation.CurrencyID(); ok {
 		if err := wallet.CurrencyIDValidator(v); err != nil {
 			return &ValidationError{Name: "currency_id", err: fmt.Errorf(`ent: validator failed for field "Wallet.currency_id": %w`, err)}
@@ -259,6 +281,9 @@ func (wu *WalletUpdate) check() error {
 	}
 	if wu.mutation.CurrencyCleared() && len(wu.mutation.CurrencyIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "Wallet.currency"`)
+	}
+	if wu.mutation.VaultCleared() && len(wu.mutation.VaultIDs()) > 0 {
+		return errors.New(`ent: clearing a required unique edge "Wallet.vault"`)
 	}
 	return nil
 }
@@ -305,12 +330,6 @@ func (wu *WalletUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if value, ok := wu.mutation.AddedHoldingBalance(); ok {
 		_spec.AddField(wallet.FieldHoldingBalance, field.TypeInt64, value)
 	}
-	if value, ok := wu.mutation.Owner(); ok {
-		_spec.SetField(wallet.FieldOwner, field.TypeEnum, value)
-	}
-	if value, ok := wu.mutation.Identifier(); ok {
-		_spec.SetField(wallet.FieldIdentifier, field.TypeString, value)
-	}
 	if value, ok := wu.mutation.Active(); ok {
 		_spec.SetField(wallet.FieldActive, field.TypeBool, value)
 	}
@@ -336,6 +355,80 @@ func (wu *WalletUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(currency.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if wu.mutation.VaultCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   wallet.VaultTable,
+			Columns: []string{wallet.VaultColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(vault.FieldID, field.TypeString),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := wu.mutation.VaultIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   wallet.VaultTable,
+			Columns: []string{wallet.VaultColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(vault.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if wu.mutation.NubanStaticAccountCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   wallet.NubanStaticAccountTable,
+			Columns: []string{wallet.NubanStaticAccountColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(nubanstaticaccount.FieldID, field.TypeString),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := wu.mutation.RemovedNubanStaticAccountIDs(); len(nodes) > 0 && !wu.mutation.NubanStaticAccountCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   wallet.NubanStaticAccountTable,
+			Columns: []string{wallet.NubanStaticAccountColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(nubanstaticaccount.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := wu.mutation.NubanStaticAccountIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   wallet.NubanStaticAccountTable,
+			Columns: []string{wallet.NubanStaticAccountColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(nubanstaticaccount.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {
@@ -466,34 +559,6 @@ func (wuo *WalletUpdateOne) AddHoldingBalance(i int64) *WalletUpdateOne {
 	return wuo
 }
 
-// SetOwner sets the "owner" field.
-func (wuo *WalletUpdateOne) SetOwner(w wallet.Owner) *WalletUpdateOne {
-	wuo.mutation.SetOwner(w)
-	return wuo
-}
-
-// SetNillableOwner sets the "owner" field if the given value is not nil.
-func (wuo *WalletUpdateOne) SetNillableOwner(w *wallet.Owner) *WalletUpdateOne {
-	if w != nil {
-		wuo.SetOwner(*w)
-	}
-	return wuo
-}
-
-// SetIdentifier sets the "identifier" field.
-func (wuo *WalletUpdateOne) SetIdentifier(s string) *WalletUpdateOne {
-	wuo.mutation.SetIdentifier(s)
-	return wuo
-}
-
-// SetNillableIdentifier sets the "identifier" field if the given value is not nil.
-func (wuo *WalletUpdateOne) SetNillableIdentifier(s *string) *WalletUpdateOne {
-	if s != nil {
-		wuo.SetIdentifier(*s)
-	}
-	return wuo
-}
-
 // SetCurrencyID sets the "currency_id" field.
 func (wuo *WalletUpdateOne) SetCurrencyID(s string) *WalletUpdateOne {
 	wuo.mutation.SetCurrencyID(s)
@@ -527,6 +592,32 @@ func (wuo *WalletUpdateOne) SetCurrency(c *Currency) *WalletUpdateOne {
 	return wuo.SetCurrencyID(c.ID)
 }
 
+// SetVaultID sets the "vault" edge to the Vault entity by ID.
+func (wuo *WalletUpdateOne) SetVaultID(id string) *WalletUpdateOne {
+	wuo.mutation.SetVaultID(id)
+	return wuo
+}
+
+// SetVault sets the "vault" edge to the Vault entity.
+func (wuo *WalletUpdateOne) SetVault(v *Vault) *WalletUpdateOne {
+	return wuo.SetVaultID(v.ID)
+}
+
+// AddNubanStaticAccountIDs adds the "nuban_static_account" edge to the NubanStaticAccount entity by IDs.
+func (wuo *WalletUpdateOne) AddNubanStaticAccountIDs(ids ...string) *WalletUpdateOne {
+	wuo.mutation.AddNubanStaticAccountIDs(ids...)
+	return wuo
+}
+
+// AddNubanStaticAccount adds the "nuban_static_account" edges to the NubanStaticAccount entity.
+func (wuo *WalletUpdateOne) AddNubanStaticAccount(n ...*NubanStaticAccount) *WalletUpdateOne {
+	ids := make([]string, len(n))
+	for i := range n {
+		ids[i] = n[i].ID
+	}
+	return wuo.AddNubanStaticAccountIDs(ids...)
+}
+
 // Mutation returns the WalletMutation object of the builder.
 func (wuo *WalletUpdateOne) Mutation() *WalletMutation {
 	return wuo.mutation
@@ -536,6 +627,33 @@ func (wuo *WalletUpdateOne) Mutation() *WalletMutation {
 func (wuo *WalletUpdateOne) ClearCurrency() *WalletUpdateOne {
 	wuo.mutation.ClearCurrency()
 	return wuo
+}
+
+// ClearVault clears the "vault" edge to the Vault entity.
+func (wuo *WalletUpdateOne) ClearVault() *WalletUpdateOne {
+	wuo.mutation.ClearVault()
+	return wuo
+}
+
+// ClearNubanStaticAccount clears all "nuban_static_account" edges to the NubanStaticAccount entity.
+func (wuo *WalletUpdateOne) ClearNubanStaticAccount() *WalletUpdateOne {
+	wuo.mutation.ClearNubanStaticAccount()
+	return wuo
+}
+
+// RemoveNubanStaticAccountIDs removes the "nuban_static_account" edge to NubanStaticAccount entities by IDs.
+func (wuo *WalletUpdateOne) RemoveNubanStaticAccountIDs(ids ...string) *WalletUpdateOne {
+	wuo.mutation.RemoveNubanStaticAccountIDs(ids...)
+	return wuo
+}
+
+// RemoveNubanStaticAccount removes "nuban_static_account" edges to NubanStaticAccount entities.
+func (wuo *WalletUpdateOne) RemoveNubanStaticAccount(n ...*NubanStaticAccount) *WalletUpdateOne {
+	ids := make([]string, len(n))
+	for i := range n {
+		ids[i] = n[i].ID
+	}
+	return wuo.RemoveNubanStaticAccountIDs(ids...)
 }
 
 // Where appends a list predicates to the WalletUpdate builder.
@@ -594,11 +712,6 @@ func (wuo *WalletUpdateOne) check() error {
 			return &ValidationError{Name: "type", err: fmt.Errorf(`ent: validator failed for field "Wallet.type": %w`, err)}
 		}
 	}
-	if v, ok := wuo.mutation.Owner(); ok {
-		if err := wallet.OwnerValidator(v); err != nil {
-			return &ValidationError{Name: "owner", err: fmt.Errorf(`ent: validator failed for field "Wallet.owner": %w`, err)}
-		}
-	}
 	if v, ok := wuo.mutation.CurrencyID(); ok {
 		if err := wallet.CurrencyIDValidator(v); err != nil {
 			return &ValidationError{Name: "currency_id", err: fmt.Errorf(`ent: validator failed for field "Wallet.currency_id": %w`, err)}
@@ -606,6 +719,9 @@ func (wuo *WalletUpdateOne) check() error {
 	}
 	if wuo.mutation.CurrencyCleared() && len(wuo.mutation.CurrencyIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "Wallet.currency"`)
+	}
+	if wuo.mutation.VaultCleared() && len(wuo.mutation.VaultIDs()) > 0 {
+		return errors.New(`ent: clearing a required unique edge "Wallet.vault"`)
 	}
 	return nil
 }
@@ -669,12 +785,6 @@ func (wuo *WalletUpdateOne) sqlSave(ctx context.Context) (_node *Wallet, err err
 	if value, ok := wuo.mutation.AddedHoldingBalance(); ok {
 		_spec.AddField(wallet.FieldHoldingBalance, field.TypeInt64, value)
 	}
-	if value, ok := wuo.mutation.Owner(); ok {
-		_spec.SetField(wallet.FieldOwner, field.TypeEnum, value)
-	}
-	if value, ok := wuo.mutation.Identifier(); ok {
-		_spec.SetField(wallet.FieldIdentifier, field.TypeString, value)
-	}
 	if value, ok := wuo.mutation.Active(); ok {
 		_spec.SetField(wallet.FieldActive, field.TypeBool, value)
 	}
@@ -700,6 +810,80 @@ func (wuo *WalletUpdateOne) sqlSave(ctx context.Context) (_node *Wallet, err err
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(currency.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if wuo.mutation.VaultCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   wallet.VaultTable,
+			Columns: []string{wallet.VaultColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(vault.FieldID, field.TypeString),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := wuo.mutation.VaultIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   wallet.VaultTable,
+			Columns: []string{wallet.VaultColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(vault.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if wuo.mutation.NubanStaticAccountCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   wallet.NubanStaticAccountTable,
+			Columns: []string{wallet.NubanStaticAccountColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(nubanstaticaccount.FieldID, field.TypeString),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := wuo.mutation.RemovedNubanStaticAccountIDs(); len(nodes) > 0 && !wuo.mutation.NubanStaticAccountCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   wallet.NubanStaticAccountTable,
+			Columns: []string{wallet.NubanStaticAccountColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(nubanstaticaccount.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := wuo.mutation.NubanStaticAccountIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   wallet.NubanStaticAccountTable,
+			Columns: []string{wallet.NubanStaticAccountColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(nubanstaticaccount.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {

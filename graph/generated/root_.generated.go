@@ -162,6 +162,7 @@ type ComplexityRoot struct {
 		Currency         func(childComplexity int) int
 		HoldingBalance   func(childComplexity int) int
 		ID               func(childComplexity int) int
+		IsFiat           func(childComplexity int) int
 		LedgerBalance    func(childComplexity int) int
 		Type             func(childComplexity int) int
 	}
@@ -796,6 +797,13 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 
 		return e.complexity.Wallet.ID(childComplexity), true
 
+	case "Wallet.is_fiat":
+		if e.complexity.Wallet.IsFiat == nil {
+			break
+		}
+
+		return e.complexity.Wallet.IsFiat(childComplexity), true
+
 	case "Wallet.ledger_balance":
 		if e.complexity.Wallet.LedgerBalance == nil {
 			break
@@ -1274,6 +1282,7 @@ type Wallet {
     id: String!
     currency: String!
     active: Boolean!
+    is_fiat: Boolean!
 }
 
 extend type Query {

@@ -10,7 +10,7 @@ migrate-schema:
       --to "ent://ent/schema" \
       --dev-url "docker://postgres/latest/test?search_path=public"
 
-migration-compute_hash:
+migration-compute-hash:
 	atlas migrate hash \
 	 	--dir "file://ent/migrate/migrations"
 

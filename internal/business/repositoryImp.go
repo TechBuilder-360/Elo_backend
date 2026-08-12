@@ -7,6 +7,7 @@ import (
 	"github.com/Toflex/directory_v2/ent/business"
 	"github.com/Toflex/directory_v2/ent/businessdocument"
 	"github.com/Toflex/directory_v2/ent/kybdocument"
+	"github.com/Toflex/directory_v2/ent/ledgerowner"
 	"github.com/Toflex/directory_v2/ent/manager"
 	"github.com/Toflex/directory_v2/ent/user"
 	"github.com/Toflex/directory_v2/pkg/util"
@@ -214,6 +215,35 @@ func (r *repository) Update(ctx context.Context, b *ent.Business, payload Update
 	_, err := query.Save(ctx)
 
 	return err
+}
+
+func (r *repository) GetOwner(ctx context.Context, b *ent.Business) (*ent.LedgerOwner, error) {
+	owner, err := r.db.LedgerOwner.
+		Query().
+		Where(ledgerowner.HasBusinessWith(business.IDEQ(b.ID))).
+		WithVaults().
+		First(ctx)
+	if err != nil {
+		if ent.IsNotFound(err) {
+			return nil, nil
+		}
+		return nil, err
+	}
+
+	return owner, err
+}
+
+func (r *repository) CreateOwner(ctx context.Context, b *ent.Business) (*ent.LedgerOwner, error) {
+	owner, err := r.db.LedgerOwner.Create().
+		SetBusiness(b).
+		SetType(ledgerowner.TypeBUSINESS).
+		Save(ctx)
+
+	if err != nil || owner == nil {
+		return nil, err
+	}
+
+	return owner, err
 }
 
 func (r *repository) WithTransaction(tx *ent.Tx) IRepository {

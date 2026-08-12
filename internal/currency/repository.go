@@ -16,7 +16,7 @@ type repository struct {
 	db *ent.Client
 }
 
-func Newrepository(db *ent.Client) IRepository {
+func newrepository(db *ent.Client) IRepository {
 	return &repository{
 		db: db,
 	}

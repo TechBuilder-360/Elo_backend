@@ -25,7 +25,7 @@ func (Currency) Fields() []ent.Field {
 		field.String("code").NotEmpty().Unique(),
 		field.Bool("is_fiat").Default(true),
 		field.Bool("active").Default(true),
-		field.Int64("multipler"),
+		field.Int64("multiplier"),
 	}
 }
 

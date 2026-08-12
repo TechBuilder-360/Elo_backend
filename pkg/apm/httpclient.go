@@ -11,6 +11,6 @@ func instrumentedRoundTripper() http.RoundTripper {
 	return sentry.ClientOpt().HTTPTransport
 }
 
-func HTTPClientRequest() *resty.Request {
-	return resty.New().SetTransport(instrumentedRoundTripper()).R()
+func HTTPClient() *resty.Client {
+	return resty.New().SetTransport(instrumentedRoundTripper())
 }

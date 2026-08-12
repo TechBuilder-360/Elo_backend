@@ -2,7 +2,7 @@ package wallet
 
 import "strings"
 
-func getWalletType(wt string) WalletType {
+func GetWalletType(wt string) WalletType {
 	switch strings.ToUpper(wt) {
 	case string(TreasuryWalletType):
 		return TreasuryWalletType
@@ -11,7 +11,7 @@ func getWalletType(wt string) WalletType {
 	}
 }
 
-func validateWalletType(wt string) bool {
+func ValidateWalletType(wt string) bool {
 	switch strings.ToUpper(wt) {
 	case string(TreasuryWalletType):
 		return true

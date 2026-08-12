@@ -8,6 +8,8 @@ type EntityType string
 type VerificationStatus string
 type DocumentType string
 type CurrencyCode string
+type LedgerOwner string
+
 type ToMinor struct {
 	Amount    float64
 	Precision uint

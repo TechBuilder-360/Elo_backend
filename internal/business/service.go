@@ -4,7 +4,10 @@ import (
 	"context"
 
 	"github.com/Toflex/directory_v2/ent"
+	"github.com/Toflex/directory_v2/graph/model"
 	"github.com/Toflex/directory_v2/internal/manager"
+	"github.com/Toflex/directory_v2/internal/vault"
+	"github.com/Toflex/directory_v2/internal/wallet"
 	rbac "github.com/Toflex/directory_v2/pkg/RBAC"
 	"github.com/Toflex/directory_v2/pkg/log"
 	"github.com/Toflex/directory_v2/pkg/providers/cloudinary"
@@ -21,6 +24,7 @@ type IService interface {
 	GetDocuments(ctx context.Context) ([]DocumentResult, error)
 	GetKYBDocuments(ctx context.Context, b *ent.Business) ([]KYBDocument, error)
 	GetCategory(ctx context.Context) []string
+	GetBusinessWallets(ctx context.Context, b *ent.Business, walletType string) ([]*model.Wallet, error)
 }
 
 type service struct {
@@ -29,15 +33,20 @@ type service struct {
 	managerRepository manager.IRepository
 	cloudinary        *cloudinary.Cloud
 	rbacRepository    rbac.IRepository
+	walletService     wallet.IService
+	vaultService      vault.IService
 }
 
 func NewService(i do.Injector) IService {
 	db := do.MustInvoke[*ent.Client](i)
+	wallet := do.MustInvoke[wallet.IService](i)
 	return &service{
 		db:                db,
 		repo:              Newrepository(db),
 		managerRepository: manager.NewRepository(db),
 		cloudinary:        cloudinary.New(),
 		rbacRepository:    rbac.NewRepository(db),
+		walletService:     wallet,
+		vaultService:      vault.NewService(db),
 	}
 }

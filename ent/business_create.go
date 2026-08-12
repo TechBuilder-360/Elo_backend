@@ -17,6 +17,7 @@ import (
 	"github.com/Toflex/directory_v2/ent/businesslocation"
 	"github.com/Toflex/directory_v2/ent/businessservices"
 	"github.com/Toflex/directory_v2/ent/kybmessage"
+	"github.com/Toflex/directory_v2/ent/ledgerowner"
 	"github.com/Toflex/directory_v2/ent/manager"
 	"github.com/Toflex/directory_v2/ent/requestverification"
 	"github.com/Toflex/directory_v2/ent/social"
@@ -483,6 +484,17 @@ func (bc *BusinessCreate) AddKybMessages(k ...*KYBMessage) *BusinessCreate {
 	return bc.AddKybMessageIDs(ids...)
 }
 
+// SetOwnerID sets the "owner" edge to the LedgerOwner entity by ID.
+func (bc *BusinessCreate) SetOwnerID(id string) *BusinessCreate {
+	bc.mutation.SetOwnerID(id)
+	return bc
+}
+
+// SetOwner sets the "owner" edge to the LedgerOwner entity.
+func (bc *BusinessCreate) SetOwner(l *LedgerOwner) *BusinessCreate {
+	return bc.SetOwnerID(l.ID)
+}
+
 // Mutation returns the BusinessMutation object of the builder.
 func (bc *BusinessCreate) Mutation() *BusinessMutation {
 	return bc.mutation
@@ -629,6 +641,9 @@ func (bc *BusinessCreate) check() error {
 	}
 	if _, ok := bc.mutation.Verified(); !ok {
 		return &ValidationError{Name: "verified", err: errors.New(`ent: missing required field "Business.verified"`)}
+	}
+	if len(bc.mutation.OwnerIDs()) == 0 {
+		return &ValidationError{Name: "owner", err: errors.New(`ent: missing required edge "Business.owner"`)}
 	}
 	return nil
 }
@@ -892,6 +907,22 @@ func (bc *BusinessCreate) createSpec() (*Business, *sqlgraph.CreateSpec) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(kybmessage.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := bc.mutation.OwnerIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2O,
+			Inverse: false,
+			Table:   business.OwnerTable,
+			Columns: []string{business.OwnerColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(ledgerowner.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {

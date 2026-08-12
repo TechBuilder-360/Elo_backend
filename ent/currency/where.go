@@ -105,9 +105,9 @@ func Active(v bool) predicate.Currency {
 	return predicate.Currency(sql.FieldEQ(FieldActive, v))
 }
 
-// Multipler applies equality check predicate on the "multipler" field. It's identical to MultiplerEQ.
-func Multipler(v int64) predicate.Currency {
-	return predicate.Currency(sql.FieldEQ(FieldMultipler, v))
+// Multiplier applies equality check predicate on the "multiplier" field. It's identical to MultiplierEQ.
+func Multiplier(v int64) predicate.Currency {
+	return predicate.Currency(sql.FieldEQ(FieldMultiplier, v))
 }
 
 // CreatedAtEQ applies the EQ predicate on the "created_at" field.
@@ -455,44 +455,44 @@ func ActiveNEQ(v bool) predicate.Currency {
 	return predicate.Currency(sql.FieldNEQ(FieldActive, v))
 }
 
-// MultiplerEQ applies the EQ predicate on the "multipler" field.
-func MultiplerEQ(v int64) predicate.Currency {
-	return predicate.Currency(sql.FieldEQ(FieldMultipler, v))
+// MultiplierEQ applies the EQ predicate on the "multiplier" field.
+func MultiplierEQ(v int64) predicate.Currency {
+	return predicate.Currency(sql.FieldEQ(FieldMultiplier, v))
 }
 
-// MultiplerNEQ applies the NEQ predicate on the "multipler" field.
-func MultiplerNEQ(v int64) predicate.Currency {
-	return predicate.Currency(sql.FieldNEQ(FieldMultipler, v))
+// MultiplierNEQ applies the NEQ predicate on the "multiplier" field.
+func MultiplierNEQ(v int64) predicate.Currency {
+	return predicate.Currency(sql.FieldNEQ(FieldMultiplier, v))
 }
 
-// MultiplerIn applies the In predicate on the "multipler" field.
-func MultiplerIn(vs ...int64) predicate.Currency {
-	return predicate.Currency(sql.FieldIn(FieldMultipler, vs...))
+// MultiplierIn applies the In predicate on the "multiplier" field.
+func MultiplierIn(vs ...int64) predicate.Currency {
+	return predicate.Currency(sql.FieldIn(FieldMultiplier, vs...))
 }
 
-// MultiplerNotIn applies the NotIn predicate on the "multipler" field.
-func MultiplerNotIn(vs ...int64) predicate.Currency {
-	return predicate.Currency(sql.FieldNotIn(FieldMultipler, vs...))
+// MultiplierNotIn applies the NotIn predicate on the "multiplier" field.
+func MultiplierNotIn(vs ...int64) predicate.Currency {
+	return predicate.Currency(sql.FieldNotIn(FieldMultiplier, vs...))
 }
 
-// MultiplerGT applies the GT predicate on the "multipler" field.
-func MultiplerGT(v int64) predicate.Currency {
-	return predicate.Currency(sql.FieldGT(FieldMultipler, v))
+// MultiplierGT applies the GT predicate on the "multiplier" field.
+func MultiplierGT(v int64) predicate.Currency {
+	return predicate.Currency(sql.FieldGT(FieldMultiplier, v))
 }
 
-// MultiplerGTE applies the GTE predicate on the "multipler" field.
-func MultiplerGTE(v int64) predicate.Currency {
-	return predicate.Currency(sql.FieldGTE(FieldMultipler, v))
+// MultiplierGTE applies the GTE predicate on the "multiplier" field.
+func MultiplierGTE(v int64) predicate.Currency {
+	return predicate.Currency(sql.FieldGTE(FieldMultiplier, v))
 }
 
-// MultiplerLT applies the LT predicate on the "multipler" field.
-func MultiplerLT(v int64) predicate.Currency {
-	return predicate.Currency(sql.FieldLT(FieldMultipler, v))
+// MultiplierLT applies the LT predicate on the "multiplier" field.
+func MultiplierLT(v int64) predicate.Currency {
+	return predicate.Currency(sql.FieldLT(FieldMultiplier, v))
 }
 
-// MultiplerLTE applies the LTE predicate on the "multipler" field.
-func MultiplerLTE(v int64) predicate.Currency {
-	return predicate.Currency(sql.FieldLTE(FieldMultipler, v))
+// MultiplierLTE applies the LTE predicate on the "multiplier" field.
+func MultiplierLTE(v int64) predicate.Currency {
+	return predicate.Currency(sql.FieldLTE(FieldMultiplier, v))
 }
 
 // HasWallets applies the HasEdge predicate on the "wallets" edge.

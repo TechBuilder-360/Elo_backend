@@ -112,9 +112,9 @@ func (cc *CurrencyCreate) SetNillableActive(b *bool) *CurrencyCreate {
 	return cc
 }
 
-// SetMultipler sets the "multipler" field.
-func (cc *CurrencyCreate) SetMultipler(i int64) *CurrencyCreate {
-	cc.mutation.SetMultipler(i)
+// SetMultiplier sets the "multiplier" field.
+func (cc *CurrencyCreate) SetMultiplier(i int64) *CurrencyCreate {
+	cc.mutation.SetMultiplier(i)
 	return cc
 }
 
@@ -242,8 +242,8 @@ func (cc *CurrencyCreate) check() error {
 	if _, ok := cc.mutation.Active(); !ok {
 		return &ValidationError{Name: "active", err: errors.New(`ent: missing required field "Currency.active"`)}
 	}
-	if _, ok := cc.mutation.Multipler(); !ok {
-		return &ValidationError{Name: "multipler", err: errors.New(`ent: missing required field "Currency.multipler"`)}
+	if _, ok := cc.mutation.Multiplier(); !ok {
+		return &ValidationError{Name: "multiplier", err: errors.New(`ent: missing required field "Currency.multiplier"`)}
 	}
 	return nil
 }
@@ -313,9 +313,9 @@ func (cc *CurrencyCreate) createSpec() (*Currency, *sqlgraph.CreateSpec) {
 		_spec.SetField(currency.FieldActive, field.TypeBool, value)
 		_node.Active = value
 	}
-	if value, ok := cc.mutation.Multipler(); ok {
-		_spec.SetField(currency.FieldMultipler, field.TypeInt64, value)
-		_node.Multipler = value
+	if value, ok := cc.mutation.Multiplier(); ok {
+		_spec.SetField(currency.FieldMultiplier, field.TypeInt64, value)
+		_node.Multiplier = value
 	}
 	if nodes := cc.mutation.WalletsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
@@ -475,21 +475,21 @@ func (u *CurrencyUpsert) UpdateActive() *CurrencyUpsert {
 	return u
 }
 
-// SetMultipler sets the "multipler" field.
-func (u *CurrencyUpsert) SetMultipler(v int64) *CurrencyUpsert {
-	u.Set(currency.FieldMultipler, v)
+// SetMultiplier sets the "multiplier" field.
+func (u *CurrencyUpsert) SetMultiplier(v int64) *CurrencyUpsert {
+	u.Set(currency.FieldMultiplier, v)
 	return u
 }
 
-// UpdateMultipler sets the "multipler" field to the value that was provided on create.
-func (u *CurrencyUpsert) UpdateMultipler() *CurrencyUpsert {
-	u.SetExcluded(currency.FieldMultipler)
+// UpdateMultiplier sets the "multiplier" field to the value that was provided on create.
+func (u *CurrencyUpsert) UpdateMultiplier() *CurrencyUpsert {
+	u.SetExcluded(currency.FieldMultiplier)
 	return u
 }
 
-// AddMultipler adds v to the "multipler" field.
-func (u *CurrencyUpsert) AddMultipler(v int64) *CurrencyUpsert {
-	u.Add(currency.FieldMultipler, v)
+// AddMultiplier adds v to the "multiplier" field.
+func (u *CurrencyUpsert) AddMultiplier(v int64) *CurrencyUpsert {
+	u.Add(currency.FieldMultiplier, v)
 	return u
 }
 
@@ -649,24 +649,24 @@ func (u *CurrencyUpsertOne) UpdateActive() *CurrencyUpsertOne {
 	})
 }
 
-// SetMultipler sets the "multipler" field.
-func (u *CurrencyUpsertOne) SetMultipler(v int64) *CurrencyUpsertOne {
+// SetMultiplier sets the "multiplier" field.
+func (u *CurrencyUpsertOne) SetMultiplier(v int64) *CurrencyUpsertOne {
 	return u.Update(func(s *CurrencyUpsert) {
-		s.SetMultipler(v)
+		s.SetMultiplier(v)
 	})
 }
 
-// AddMultipler adds v to the "multipler" field.
-func (u *CurrencyUpsertOne) AddMultipler(v int64) *CurrencyUpsertOne {
+// AddMultiplier adds v to the "multiplier" field.
+func (u *CurrencyUpsertOne) AddMultiplier(v int64) *CurrencyUpsertOne {
 	return u.Update(func(s *CurrencyUpsert) {
-		s.AddMultipler(v)
+		s.AddMultiplier(v)
 	})
 }
 
-// UpdateMultipler sets the "multipler" field to the value that was provided on create.
-func (u *CurrencyUpsertOne) UpdateMultipler() *CurrencyUpsertOne {
+// UpdateMultiplier sets the "multiplier" field to the value that was provided on create.
+func (u *CurrencyUpsertOne) UpdateMultiplier() *CurrencyUpsertOne {
 	return u.Update(func(s *CurrencyUpsert) {
-		s.UpdateMultipler()
+		s.UpdateMultiplier()
 	})
 }
 
@@ -993,24 +993,24 @@ func (u *CurrencyUpsertBulk) UpdateActive() *CurrencyUpsertBulk {
 	})
 }
 
-// SetMultipler sets the "multipler" field.
-func (u *CurrencyUpsertBulk) SetMultipler(v int64) *CurrencyUpsertBulk {
+// SetMultiplier sets the "multiplier" field.
+func (u *CurrencyUpsertBulk) SetMultiplier(v int64) *CurrencyUpsertBulk {
 	return u.Update(func(s *CurrencyUpsert) {
-		s.SetMultipler(v)
+		s.SetMultiplier(v)
 	})
 }
 
-// AddMultipler adds v to the "multipler" field.
-func (u *CurrencyUpsertBulk) AddMultipler(v int64) *CurrencyUpsertBulk {
+// AddMultiplier adds v to the "multiplier" field.
+func (u *CurrencyUpsertBulk) AddMultiplier(v int64) *CurrencyUpsertBulk {
 	return u.Update(func(s *CurrencyUpsert) {
-		s.AddMultipler(v)
+		s.AddMultiplier(v)
 	})
 }
 
-// UpdateMultipler sets the "multipler" field to the value that was provided on create.
-func (u *CurrencyUpsertBulk) UpdateMultipler() *CurrencyUpsertBulk {
+// UpdateMultiplier sets the "multiplier" field to the value that was provided on create.
+func (u *CurrencyUpsertBulk) UpdateMultiplier() *CurrencyUpsertBulk {
 	return u.Update(func(s *CurrencyUpsert) {
-		s.UpdateMultipler()
+		s.UpdateMultiplier()
 	})
 }
 

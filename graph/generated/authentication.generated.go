@@ -769,6 +769,8 @@ func (ec *executionContext) fieldContext_Mutation_add_wallet(ctx context.Context
 				return ec.fieldContext_Wallet_currency(ctx, field)
 			case "active":
 				return ec.fieldContext_Wallet_active(ctx, field)
+			case "is_fiat":
+				return ec.fieldContext_Wallet_is_fiat(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Wallet", field.Name)
 		},
