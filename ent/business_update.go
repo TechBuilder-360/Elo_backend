@@ -226,6 +226,26 @@ func (bu *BusinessUpdate) ClearRegistrationNumber() *BusinessUpdate {
 	return bu
 }
 
+// SetTaxIdentificationNumber sets the "tax_identification_number" field.
+func (bu *BusinessUpdate) SetTaxIdentificationNumber(s string) *BusinessUpdate {
+	bu.mutation.SetTaxIdentificationNumber(s)
+	return bu
+}
+
+// SetNillableTaxIdentificationNumber sets the "tax_identification_number" field if the given value is not nil.
+func (bu *BusinessUpdate) SetNillableTaxIdentificationNumber(s *string) *BusinessUpdate {
+	if s != nil {
+		bu.SetTaxIdentificationNumber(*s)
+	}
+	return bu
+}
+
+// ClearTaxIdentificationNumber clears the value of the "tax_identification_number" field.
+func (bu *BusinessUpdate) ClearTaxIdentificationNumber() *BusinessUpdate {
+	bu.mutation.ClearTaxIdentificationNumber()
+	return bu
+}
+
 // SetEmail sets the "email" field.
 func (bu *BusinessUpdate) SetEmail(s string) *BusinessUpdate {
 	bu.mutation.SetEmail(s)
@@ -861,6 +881,12 @@ func (bu *BusinessUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if bu.mutation.RegistrationNumberCleared() {
 		_spec.ClearField(business.FieldRegistrationNumber, field.TypeString)
+	}
+	if value, ok := bu.mutation.TaxIdentificationNumber(); ok {
+		_spec.SetField(business.FieldTaxIdentificationNumber, field.TypeString, value)
+	}
+	if bu.mutation.TaxIdentificationNumberCleared() {
+		_spec.ClearField(business.FieldTaxIdentificationNumber, field.TypeString)
 	}
 	if value, ok := bu.mutation.Email(); ok {
 		_spec.SetField(business.FieldEmail, field.TypeString, value)
@@ -1530,6 +1556,26 @@ func (buo *BusinessUpdateOne) ClearRegistrationNumber() *BusinessUpdateOne {
 	return buo
 }
 
+// SetTaxIdentificationNumber sets the "tax_identification_number" field.
+func (buo *BusinessUpdateOne) SetTaxIdentificationNumber(s string) *BusinessUpdateOne {
+	buo.mutation.SetTaxIdentificationNumber(s)
+	return buo
+}
+
+// SetNillableTaxIdentificationNumber sets the "tax_identification_number" field if the given value is not nil.
+func (buo *BusinessUpdateOne) SetNillableTaxIdentificationNumber(s *string) *BusinessUpdateOne {
+	if s != nil {
+		buo.SetTaxIdentificationNumber(*s)
+	}
+	return buo
+}
+
+// ClearTaxIdentificationNumber clears the value of the "tax_identification_number" field.
+func (buo *BusinessUpdateOne) ClearTaxIdentificationNumber() *BusinessUpdateOne {
+	buo.mutation.ClearTaxIdentificationNumber()
+	return buo
+}
+
 // SetEmail sets the "email" field.
 func (buo *BusinessUpdateOne) SetEmail(s string) *BusinessUpdateOne {
 	buo.mutation.SetEmail(s)
@@ -2195,6 +2241,12 @@ func (buo *BusinessUpdateOne) sqlSave(ctx context.Context) (_node *Business, err
 	}
 	if buo.mutation.RegistrationNumberCleared() {
 		_spec.ClearField(business.FieldRegistrationNumber, field.TypeString)
+	}
+	if value, ok := buo.mutation.TaxIdentificationNumber(); ok {
+		_spec.SetField(business.FieldTaxIdentificationNumber, field.TypeString, value)
+	}
+	if buo.mutation.TaxIdentificationNumberCleared() {
+		_spec.ClearField(business.FieldTaxIdentificationNumber, field.TypeString)
 	}
 	if value, ok := buo.mutation.Email(); ok {
 		_spec.SetField(business.FieldEmail, field.TypeString, value)

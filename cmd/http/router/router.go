@@ -83,9 +83,9 @@ func authBusinessDirective(a authentication.IService) func(ctx context.Context, 
 		logger := log.LoggerInContext(ctx)
 		opCtx := graphql.GetOperationContext(ctx)
 		authHeader := opCtx.Headers.Get("Authorization")
-		businessHeader := opCtx.Headers.Get("x-business-id")
+		businessID := opCtx.Headers.Get("x-business-id")
 
-		if businessHeader == "" {
+		if businessID == "" {
 			logger.Error("business ID missing in request header")
 			return false, errors.New(errors.ErrUnauthorized, string(errors.ErrUnauthorized))
 		}
@@ -113,9 +113,9 @@ func authBusinessDirective(a authentication.IService) func(ctx context.Context, 
 			return false, errors.New(errors.ErrFailed, "user is not verified")
 		}
 
-		b, err := database.DBInstance().Business.Query().Where(biz.IDEQ(businessHeader), biz.HasManagesWith(manager.UserID(usr.ID))).WithOwner().First(ctx)
+		b, err := database.DBInstance().Business.Query().Where(biz.IDEQ(businessID), biz.HasManagesWith(manager.UserID(usr.ID))).WithOwner().First(ctx)
 		if err != nil || b == nil {
-			logger.WithError(err).WithField("business_id", businessHeader).Error("failed to fetch business")
+			logger.WithError(err).WithField("business_id", businessID).Error("failed to fetch business")
 			return nil, gqlerror.Errorf("unauthorized")
 		}
 

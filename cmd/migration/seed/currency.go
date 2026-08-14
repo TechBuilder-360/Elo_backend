@@ -14,34 +14,34 @@ func SeedCurrencies(ctx context.Context, db *ent.Client) error {
 			SetCode("NGN").
 			SetName("Naira").
 			SetSymbol("₦").
-			SetMultipler(100).
+			SetMultiplier(100).
 			SetIsFiat(true),
 		db.Currency.Create().
 			SetCode("USD").
 			SetName("US Dollar").
 			SetSymbol("$").
-			SetMultipler(100).
+			SetMultiplier(100).
 			SetIsFiat(true),
 		db.Currency.Create().
 			SetCode("USDC").
 			SetName("USD Coin").
 			SetSymbol("USDC").
-			SetMultipler(1000000).
+			SetMultiplier(1000000).
 			SetIsFiat(false),
 		db.Currency.Create().
 			SetCode("USDT").
 			SetName("Tether USD").
 			SetSymbol("USDT").
-			SetMultipler(1000000).
+			SetMultiplier(1000000).
 			SetIsFiat(false),
 		db.Currency.Create().
 			SetCode("PYUSD").
 			SetName("PayPal USD").
 			SetSymbol("PYUSD").
-			SetMultipler(1000000).
+			SetMultiplier(1000000).
 			SetIsFiat(false),
 	).OnConflict(
-		sql.ConflictColumns(currency.FieldName),
+		sql.ConflictColumns(currency.FieldCode),
 		sql.DoNothing(),
 	).Exec(ctx)
 }

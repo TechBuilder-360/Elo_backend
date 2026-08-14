@@ -34,16 +34,18 @@ func (r *queryResolver) Business(ctx context.Context, id string) (*model.Busines
 	}
 
 	return &model.Business{
-		ID:                     result.ID,
-		Name:                   result.Name,
-		Logo:                   result.Logo,
-		Email:                  result.Email,
-		About:                  result.About,
-		OnSite:                 result.OnSite,
-		Number:                 result.Number,
-		Industry:               result.Industry,
-		CountryOfIncorporation: result.CountryOfIncorporation,
-		DateOfIncorporation:    result.DateOfIncorporation,
+		ID:                      result.ID,
+		Name:                    result.Name,
+		Logo:                    result.Logo,
+		Email:                   result.Email,
+		About:                   result.About,
+		OnSite:                  result.OnSite,
+		Website:                 util.AddressToString(result.Website),
+		TaxIdentificationNumber: result.TaxIdentificationNumber,
+		Number:                  result.Number,
+		Industry:                result.Industry,
+		CountryOfIncorporation:  result.CountryOfIncorporation,
+		DateOfIncorporation:     result.DateOfIncorporation,
 		Address: &model.Address{
 			City:    result.Address.City,
 			Street:  result.Address.Street,
@@ -237,11 +239,12 @@ func (r *mutationResolver) BusinessDetail(ctx context.Context, input model.Busin
 	}
 
 	payload := b.BusinessDetailRequest{
-		RegistrationDetail: registrationDetail,
-		Name:               input.Name,
-		Industry:           input.Industry,
-		About:              input.About,
-		Website:            input.Website,
+		RegistrationDetail:      registrationDetail,
+		Name:                    input.Name,
+		Industry:                input.Industry,
+		About:                   input.About,
+		Website:                 input.Website,
+		TaxIdentificationNumber: input.TaxIdentificationNumber,
 	}
 
 	err = payload.Validate()

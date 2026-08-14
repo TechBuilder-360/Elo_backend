@@ -10,7 +10,7 @@ import (
 )
 
 type IService interface {
-	GetCurrencies(ctx context.Context) ([]*model.Currency, error)
+	GetCurrencies(ctx context.Context, filter *model.CurrencyFilter) ([]*model.Currency, error)
 	GetCurrencyByCode(ctx context.Context, code types.CurrencyCode) (*Currency, error)
 }
 

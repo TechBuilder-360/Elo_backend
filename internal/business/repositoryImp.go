@@ -6,6 +6,7 @@ import (
 	"github.com/Toflex/directory_v2/ent"
 	"github.com/Toflex/directory_v2/ent/business"
 	"github.com/Toflex/directory_v2/ent/businessdocument"
+	"github.com/Toflex/directory_v2/ent/businesslocation"
 	"github.com/Toflex/directory_v2/ent/kybdocument"
 	"github.com/Toflex/directory_v2/ent/ledgerowner"
 	"github.com/Toflex/directory_v2/ent/manager"
@@ -212,6 +213,10 @@ func (r *repository) Update(ctx context.Context, b *ent.Business, payload Update
 		query.SetWebsite(util.AddressToString(payload.Website))
 	}
 
+	if payload.TaxIdentificationNumber != nil {
+		query.SetTaxIdentificationNumber(util.AddressToString(payload.TaxIdentificationNumber))
+	}
+
 	_, err := query.Save(ctx)
 
 	return err
@@ -244,6 +249,19 @@ func (r *repository) CreateOwner(ctx context.Context, b *ent.Business) (*ent.Led
 	}
 
 	return owner, err
+}
+
+func (r *repository) UpdateBusinessLocation(ctx context.Context, b *ent.Business, address BusinessAddress) error {
+	_, err := r.db.BusinessLocation.
+		Update().
+		Where(businesslocation.HasBusinessWith(business.IDEQ(b.ID))).
+		SetAddress(address.Street).
+		SetCity(address.City).
+		SetState(address.State).
+		SetCountry(address.Country).
+		SetZipCode(address.ZipCode).
+		Save(ctx)
+	return err
 }
 
 func (r *repository) WithTransaction(tx *ent.Tx) IRepository {

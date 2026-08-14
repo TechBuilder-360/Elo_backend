@@ -125,6 +125,11 @@ func RegistrationNumber(v string) predicate.Business {
 	return predicate.Business(sql.FieldEQ(FieldRegistrationNumber, v))
 }
 
+// TaxIdentificationNumber applies equality check predicate on the "tax_identification_number" field. It's identical to TaxIdentificationNumberEQ.
+func TaxIdentificationNumber(v string) predicate.Business {
+	return predicate.Business(sql.FieldEQ(FieldTaxIdentificationNumber, v))
+}
+
 // Email applies equality check predicate on the "email" field. It's identical to EmailEQ.
 func Email(v string) predicate.Business {
 	return predicate.Business(sql.FieldEQ(FieldEmail, v))
@@ -948,6 +953,81 @@ func RegistrationNumberEqualFold(v string) predicate.Business {
 // RegistrationNumberContainsFold applies the ContainsFold predicate on the "registration_number" field.
 func RegistrationNumberContainsFold(v string) predicate.Business {
 	return predicate.Business(sql.FieldContainsFold(FieldRegistrationNumber, v))
+}
+
+// TaxIdentificationNumberEQ applies the EQ predicate on the "tax_identification_number" field.
+func TaxIdentificationNumberEQ(v string) predicate.Business {
+	return predicate.Business(sql.FieldEQ(FieldTaxIdentificationNumber, v))
+}
+
+// TaxIdentificationNumberNEQ applies the NEQ predicate on the "tax_identification_number" field.
+func TaxIdentificationNumberNEQ(v string) predicate.Business {
+	return predicate.Business(sql.FieldNEQ(FieldTaxIdentificationNumber, v))
+}
+
+// TaxIdentificationNumberIn applies the In predicate on the "tax_identification_number" field.
+func TaxIdentificationNumberIn(vs ...string) predicate.Business {
+	return predicate.Business(sql.FieldIn(FieldTaxIdentificationNumber, vs...))
+}
+
+// TaxIdentificationNumberNotIn applies the NotIn predicate on the "tax_identification_number" field.
+func TaxIdentificationNumberNotIn(vs ...string) predicate.Business {
+	return predicate.Business(sql.FieldNotIn(FieldTaxIdentificationNumber, vs...))
+}
+
+// TaxIdentificationNumberGT applies the GT predicate on the "tax_identification_number" field.
+func TaxIdentificationNumberGT(v string) predicate.Business {
+	return predicate.Business(sql.FieldGT(FieldTaxIdentificationNumber, v))
+}
+
+// TaxIdentificationNumberGTE applies the GTE predicate on the "tax_identification_number" field.
+func TaxIdentificationNumberGTE(v string) predicate.Business {
+	return predicate.Business(sql.FieldGTE(FieldTaxIdentificationNumber, v))
+}
+
+// TaxIdentificationNumberLT applies the LT predicate on the "tax_identification_number" field.
+func TaxIdentificationNumberLT(v string) predicate.Business {
+	return predicate.Business(sql.FieldLT(FieldTaxIdentificationNumber, v))
+}
+
+// TaxIdentificationNumberLTE applies the LTE predicate on the "tax_identification_number" field.
+func TaxIdentificationNumberLTE(v string) predicate.Business {
+	return predicate.Business(sql.FieldLTE(FieldTaxIdentificationNumber, v))
+}
+
+// TaxIdentificationNumberContains applies the Contains predicate on the "tax_identification_number" field.
+func TaxIdentificationNumberContains(v string) predicate.Business {
+	return predicate.Business(sql.FieldContains(FieldTaxIdentificationNumber, v))
+}
+
+// TaxIdentificationNumberHasPrefix applies the HasPrefix predicate on the "tax_identification_number" field.
+func TaxIdentificationNumberHasPrefix(v string) predicate.Business {
+	return predicate.Business(sql.FieldHasPrefix(FieldTaxIdentificationNumber, v))
+}
+
+// TaxIdentificationNumberHasSuffix applies the HasSuffix predicate on the "tax_identification_number" field.
+func TaxIdentificationNumberHasSuffix(v string) predicate.Business {
+	return predicate.Business(sql.FieldHasSuffix(FieldTaxIdentificationNumber, v))
+}
+
+// TaxIdentificationNumberIsNil applies the IsNil predicate on the "tax_identification_number" field.
+func TaxIdentificationNumberIsNil() predicate.Business {
+	return predicate.Business(sql.FieldIsNull(FieldTaxIdentificationNumber))
+}
+
+// TaxIdentificationNumberNotNil applies the NotNil predicate on the "tax_identification_number" field.
+func TaxIdentificationNumberNotNil() predicate.Business {
+	return predicate.Business(sql.FieldNotNull(FieldTaxIdentificationNumber))
+}
+
+// TaxIdentificationNumberEqualFold applies the EqualFold predicate on the "tax_identification_number" field.
+func TaxIdentificationNumberEqualFold(v string) predicate.Business {
+	return predicate.Business(sql.FieldEqualFold(FieldTaxIdentificationNumber, v))
+}
+
+// TaxIdentificationNumberContainsFold applies the ContainsFold predicate on the "tax_identification_number" field.
+func TaxIdentificationNumberContainsFold(v string) predicate.Business {
+	return predicate.Business(sql.FieldContainsFold(FieldTaxIdentificationNumber, v))
 }
 
 // EmailEQ applies the EQ predicate on the "email" field.

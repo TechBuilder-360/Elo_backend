@@ -20,9 +20,15 @@ func (s *service) GetBusinessWallets(ctx context.Context, b *ent.Business, walle
 		return nil, errors.New(errors.ErrInvalidInput, "invalid wallet type")
 	}
 
+	owner, err := b.QueryOwner().First(ctx)
+	if err != nil {
+		logger.WithError(err).Error("failed to fetch business owner in context")
+		return nil, errors.New(errors.ErrFailed, "something went wrong")
+	}
+
 	// if business owner is yet to be created
 	// Create Owner and Vault in a background job
-	if b.Edges.Owner == nil {
+	if owner == nil {
 		saferoutine.Run(func() {
 			ctx, cancel := context.WithTimeout(context.Background(), time.Second*20)
 			defer cancel()
@@ -33,12 +39,19 @@ func (s *service) GetBusinessWallets(ctx context.Context, b *ent.Business, walle
 		return []*model.Wallet{}, nil
 	}
 
-	return s.walletService.GetWallets(ctx, b, walletType)
+	ownerID := owner.ID
+
+	return s.walletService.GetWallets(ctx, ownerID, walletType)
 }
 
 func (s *service) createBusinessOwner(ctx context.Context, b *ent.Business, walletType string) {
 	logger := log.LoggerInContext(ctx)
-	owner := b.Edges.Owner
+	owner, err := b.QueryOwner().First(ctx)
+	if err != nil {
+		logger.WithError(err).Error("failed to fetch business owner in context")
+		return
+	}
+
 	if owner == nil {
 		owner, err := s.repo.CreateOwner(ctx, b)
 		if err != nil || owner == nil {
@@ -57,4 +70,36 @@ func (s *service) createBusinessOwner(ctx context.Context, b *ent.Business, wall
 			logger.WithError(err).Error("failed to create vault")
 		}
 	}
+}
+
+func (s *service) GetBusinessWallet(ctx context.Context, b *ent.Business, walletType string, currencyCode string) (*model.Wallet, error) {
+	logger := log.LoggerInContext(ctx)
+
+	if !wallet.ValidateWalletType(walletType) {
+		logger.WithField("wallet_type", walletType).Error("unable to validate wallet type")
+		return nil, errors.New(errors.ErrInvalidInput, "invalid wallet type")
+	}
+
+	owner, err := b.QueryOwner().First(ctx)
+	if err != nil {
+		logger.WithError(err).Error("failed to fetch business owner in context")
+		return nil, errors.New(errors.ErrFailed, "something went wrong")
+	}
+
+	// if business owner is yet to be created
+	// Create Owner and Vault in a background job
+	if owner == nil {
+		saferoutine.Run(func() {
+			ctx, cancel := context.WithTimeout(context.Background(), time.Second*20)
+			defer cancel()
+
+			s.createBusinessOwner(ctx, b, walletType)
+		})
+
+		return nil, nil
+	}
+
+	ownerID := owner.ID
+
+	return s.walletService.GetWallet(ctx, ownerID, walletType, currencyCode)
 }

@@ -2,24 +2,18 @@ package business
 
 import (
 	"context"
-	"fmt"
-	"strconv"
 
 	"github.com/Toflex/directory_v2/internal/manager"
 	unitofwork "github.com/Toflex/directory_v2/internal/unit_of_work"
 	rbac "github.com/Toflex/directory_v2/pkg/RBAC"
 	"github.com/Toflex/directory_v2/pkg/errors"
 	"github.com/Toflex/directory_v2/pkg/log"
-	"github.com/Toflex/directory_v2/pkg/util"
 )
 
 func (s *service) CreateBusiness(ctx context.Context, payload CreateBusinessRequest, logger log.Entry) error {
 	if !payload.User.Verified {
 		return errors.New(errors.ErrFailed, "user not verified, please present a valid means of identification")
 	}
-
-	// Add random string to business name until they gets verified
-	payload.Name = fmt.Sprintf("%s_%s", payload.Name, strconv.Itoa(util.RandomInt()))
 
 	uw := unitofwork.NewUnitOfWorkRepository(s.db)
 	tx, err := uw.Begin(ctx)

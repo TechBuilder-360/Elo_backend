@@ -57,11 +57,13 @@ type UploadDocumentRequest struct {
 }
 
 type BusinessDetailRequest struct {
-	RegistrationDetail *RegistrationDetail `json:"registration_detail,omitempty"`
-	Name               *string             `json:"name,omitempty"`
-	About              *string             `json:"about,omitempty"`
-	Industry           *string             `json:"industry,omitempty"`
-	Website            *string             `json:"website,omitempty"`
+	RegistrationDetail      *RegistrationDetail `json:"registration_detail,omitempty"`
+	Name                    *string             `json:"name,omitempty"`
+	About                   *string             `json:"about,omitempty"`
+	Industry                *string             `json:"industry,omitempty"`
+	Website                 *string             `json:"website,omitempty"`
+	TaxIdentificationNumber *string             `json:"tax_identification_number,omitempty"`
+	Address                 *BusinessAddress    `json:"address,omitempty"`
 }
 
 type MyBusinessResult struct {
@@ -78,6 +80,7 @@ type BusinessResult struct {
 	Logo                    *string  `json:"logo,omitempty"`
 	Email                   *string  `json:"email,omitempty"`
 	About                   *string  `json:"about,omitempty"`
+	Website                 *string  `json:"website,omitempty"`
 	Services                []string `json:"services"`
 	Industry                string   `json:"industry"`
 	Number                  string   `json:"number"`
@@ -102,13 +105,14 @@ type KYBDocument struct {
 }
 
 type UpdateBusiness struct {
-	Name                   *string
-	About                  *string
-	Industry               *string
-	Website                *string
-	Number                 *string
-	CountryOfIncorporation *string
-	DateOfIncorporation    *string
+	Name                    *string
+	About                   *string
+	Industry                *string
+	Website                 *string
+	Number                  *string
+	CountryOfIncorporation  *string
+	DateOfIncorporation     *string
+	TaxIdentificationNumber *string
 }
 
 type CategoryRequest struct {

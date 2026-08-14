@@ -185,6 +185,20 @@ func (bc *BusinessCreate) SetNillableRegistrationNumber(s *string) *BusinessCrea
 	return bc
 }
 
+// SetTaxIdentificationNumber sets the "tax_identification_number" field.
+func (bc *BusinessCreate) SetTaxIdentificationNumber(s string) *BusinessCreate {
+	bc.mutation.SetTaxIdentificationNumber(s)
+	return bc
+}
+
+// SetNillableTaxIdentificationNumber sets the "tax_identification_number" field if the given value is not nil.
+func (bc *BusinessCreate) SetNillableTaxIdentificationNumber(s *string) *BusinessCreate {
+	if s != nil {
+		bc.SetTaxIdentificationNumber(*s)
+	}
+	return bc
+}
+
 // SetEmail sets the "email" field.
 func (bc *BusinessCreate) SetEmail(s string) *BusinessCreate {
 	bc.mutation.SetEmail(s)
@@ -725,6 +739,10 @@ func (bc *BusinessCreate) createSpec() (*Business, *sqlgraph.CreateSpec) {
 		_spec.SetField(business.FieldRegistrationNumber, field.TypeString, value)
 		_node.RegistrationNumber = &value
 	}
+	if value, ok := bc.mutation.TaxIdentificationNumber(); ok {
+		_spec.SetField(business.FieldTaxIdentificationNumber, field.TypeString, value)
+		_node.TaxIdentificationNumber = &value
+	}
 	if value, ok := bc.mutation.Email(); ok {
 		_spec.SetField(business.FieldEmail, field.TypeString, value)
 		_node.Email = value
@@ -1156,6 +1174,24 @@ func (u *BusinessUpsert) ClearRegistrationNumber() *BusinessUpsert {
 	return u
 }
 
+// SetTaxIdentificationNumber sets the "tax_identification_number" field.
+func (u *BusinessUpsert) SetTaxIdentificationNumber(v string) *BusinessUpsert {
+	u.Set(business.FieldTaxIdentificationNumber, v)
+	return u
+}
+
+// UpdateTaxIdentificationNumber sets the "tax_identification_number" field to the value that was provided on create.
+func (u *BusinessUpsert) UpdateTaxIdentificationNumber() *BusinessUpsert {
+	u.SetExcluded(business.FieldTaxIdentificationNumber)
+	return u
+}
+
+// ClearTaxIdentificationNumber clears the value of the "tax_identification_number" field.
+func (u *BusinessUpsert) ClearTaxIdentificationNumber() *BusinessUpsert {
+	u.SetNull(business.FieldTaxIdentificationNumber)
+	return u
+}
+
 // SetEmail sets the "email" field.
 func (u *BusinessUpsert) SetEmail(v string) *BusinessUpsert {
 	u.Set(business.FieldEmail, v)
@@ -1557,6 +1593,27 @@ func (u *BusinessUpsertOne) UpdateRegistrationNumber() *BusinessUpsertOne {
 func (u *BusinessUpsertOne) ClearRegistrationNumber() *BusinessUpsertOne {
 	return u.Update(func(s *BusinessUpsert) {
 		s.ClearRegistrationNumber()
+	})
+}
+
+// SetTaxIdentificationNumber sets the "tax_identification_number" field.
+func (u *BusinessUpsertOne) SetTaxIdentificationNumber(v string) *BusinessUpsertOne {
+	return u.Update(func(s *BusinessUpsert) {
+		s.SetTaxIdentificationNumber(v)
+	})
+}
+
+// UpdateTaxIdentificationNumber sets the "tax_identification_number" field to the value that was provided on create.
+func (u *BusinessUpsertOne) UpdateTaxIdentificationNumber() *BusinessUpsertOne {
+	return u.Update(func(s *BusinessUpsert) {
+		s.UpdateTaxIdentificationNumber()
+	})
+}
+
+// ClearTaxIdentificationNumber clears the value of the "tax_identification_number" field.
+func (u *BusinessUpsertOne) ClearTaxIdentificationNumber() *BusinessUpsertOne {
+	return u.Update(func(s *BusinessUpsert) {
+		s.ClearTaxIdentificationNumber()
 	})
 }
 
@@ -2153,6 +2210,27 @@ func (u *BusinessUpsertBulk) UpdateRegistrationNumber() *BusinessUpsertBulk {
 func (u *BusinessUpsertBulk) ClearRegistrationNumber() *BusinessUpsertBulk {
 	return u.Update(func(s *BusinessUpsert) {
 		s.ClearRegistrationNumber()
+	})
+}
+
+// SetTaxIdentificationNumber sets the "tax_identification_number" field.
+func (u *BusinessUpsertBulk) SetTaxIdentificationNumber(v string) *BusinessUpsertBulk {
+	return u.Update(func(s *BusinessUpsert) {
+		s.SetTaxIdentificationNumber(v)
+	})
+}
+
+// UpdateTaxIdentificationNumber sets the "tax_identification_number" field to the value that was provided on create.
+func (u *BusinessUpsertBulk) UpdateTaxIdentificationNumber() *BusinessUpsertBulk {
+	return u.Update(func(s *BusinessUpsert) {
+		s.UpdateTaxIdentificationNumber()
+	})
+}
+
+// ClearTaxIdentificationNumber clears the value of the "tax_identification_number" field.
+func (u *BusinessUpsertBulk) ClearTaxIdentificationNumber() *BusinessUpsertBulk {
+	return u.Update(func(s *BusinessUpsert) {
+		s.ClearTaxIdentificationNumber()
 	})
 }
 

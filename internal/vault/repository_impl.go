@@ -68,6 +68,9 @@ func (r *repository) GetByOwner(ctx context.Context, ownerID, vaultType string) 
 			vault.TypeEQ(vault.Type(vaultType))).
 		First(ctx)
 	if err != nil || v == nil {
+		if ent.IsNotFound(err) {
+			return nil, nil
+		}
 		return nil, err
 	}
 

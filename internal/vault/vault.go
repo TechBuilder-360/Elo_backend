@@ -48,6 +48,10 @@ func (s *Service) GetOwnerVault(ctx context.Context, ownerID, vaultType string) 
 		return nil, errors.New(errors.ErrFailed, "something went wrong")
 	}
 
+	if vault == nil {
+		return s.CreateVault(ctx, ownerID)
+	}
+
 	return &Vault{
 		ID:     vault.ID,
 		Type:   string(vault.Type),

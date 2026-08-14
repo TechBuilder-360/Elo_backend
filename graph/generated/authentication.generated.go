@@ -26,14 +26,14 @@ type MutationResolver interface {
 	DeleteDocument(ctx context.Context, input model.RemoveDocumentInput) (bool, error)
 	BusinessDetail(ctx context.Context, input model.BusinessDetail) (bool, error)
 	RequestUserVerification(ctx context.Context, input model.VerificationPayload) (model.VerificationResponse, error)
-	AddWallet(ctx context.Context, currencyCode string, walletType model.WalletType) (*model.Wallet, error)
+	AddBusinessWallet(ctx context.Context, currencyCode string, walletType model.WalletType) (*model.Wallet, error)
 }
 
 // endregion ************************** generated!.gotpl **************************
 
 // region    ***************************** args.gotpl *****************************
 
-func (ec *executionContext) field_Mutation_add_wallet_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+func (ec *executionContext) field_Mutation_add_business_wallet_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
 	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "currency_code", ec.unmarshalNString2string)
@@ -712,15 +712,15 @@ func (ec *executionContext) fieldContext_Mutation_requestUserVerification(ctx co
 	return fc, nil
 }
 
-func (ec *executionContext) _Mutation_add_wallet(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+func (ec *executionContext) _Mutation_add_business_wallet(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Mutation_add_wallet,
+		ec.fieldContext_Mutation_add_business_wallet,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Mutation().AddWallet(ctx, fc.Args["currency_code"].(string), fc.Args["wallet_type"].(model.WalletType))
+			return ec.resolvers.Mutation().AddBusinessWallet(ctx, fc.Args["currency_code"].(string), fc.Args["wallet_type"].(model.WalletType))
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			directive0 := next
@@ -747,7 +747,7 @@ func (ec *executionContext) _Mutation_add_wallet(ctx context.Context, field grap
 	)
 }
 
-func (ec *executionContext) fieldContext_Mutation_add_wallet(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Mutation_add_business_wallet(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Mutation",
 		Field:      field,
@@ -755,8 +755,6 @@ func (ec *executionContext) fieldContext_Mutation_add_wallet(ctx context.Context
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
-			case "type":
-				return ec.fieldContext_Wallet_type(ctx, field)
 			case "available_balance":
 				return ec.fieldContext_Wallet_available_balance(ctx, field)
 			case "ledger_balance":
@@ -782,7 +780,7 @@ func (ec *executionContext) fieldContext_Mutation_add_wallet(ctx context.Context
 		}
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Mutation_add_wallet_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+	if fc.Args, err = ec.field_Mutation_add_business_wallet_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
 	}
@@ -1106,9 +1104,9 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
-		case "add_wallet":
+		case "add_business_wallet":
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
-				return ec._Mutation_add_wallet(ctx, field)
+				return ec._Mutation_add_business_wallet(ctx, field)
 			})
 			if out.Values[i] == graphql.Null {
 				out.Invalids++

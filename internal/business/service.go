@@ -25,6 +25,7 @@ type IService interface {
 	GetKYBDocuments(ctx context.Context, b *ent.Business) ([]KYBDocument, error)
 	GetCategory(ctx context.Context) []string
 	GetBusinessWallets(ctx context.Context, b *ent.Business, walletType string) ([]*model.Wallet, error)
+	GetBusinessWallet(ctx context.Context, b *ent.Business, walletType string, currencyCode string) (*model.Wallet, error)
 }
 
 type service struct {

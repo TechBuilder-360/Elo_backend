@@ -43,6 +43,8 @@ type Business struct {
 	DateOfIncorporation *string `json:"date_of_incorporation,omitempty"`
 	// RegistrationNumber holds the value of the "registration_number" field.
 	RegistrationNumber *string `json:"registration_number,omitempty"`
+	// TaxIdentificationNumber holds the value of the "tax_identification_number" field.
+	TaxIdentificationNumber *string `json:"tax_identification_number,omitempty"`
 	// Email holds the value of the "email" field.
 	Email string `json:"email,omitempty"`
 	// Website holds the value of the "website" field.
@@ -199,7 +201,7 @@ func (*Business) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case business.FieldOnSite, business.FieldActive, business.FieldLive, business.FieldDisabled, business.FieldVerified:
 			values[i] = new(sql.NullBool)
-		case business.FieldID, business.FieldCategory, business.FieldName, business.FieldAbout, business.FieldLogo, business.FieldCoverImage, business.FieldRegisteredBy, business.FieldCountryOfIncorporation, business.FieldDateOfIncorporation, business.FieldRegistrationNumber, business.FieldEmail, business.FieldWebsite, business.FieldDisableReason, business.FieldVerificationStatus:
+		case business.FieldID, business.FieldCategory, business.FieldName, business.FieldAbout, business.FieldLogo, business.FieldCoverImage, business.FieldRegisteredBy, business.FieldCountryOfIncorporation, business.FieldDateOfIncorporation, business.FieldRegistrationNumber, business.FieldTaxIdentificationNumber, business.FieldEmail, business.FieldWebsite, business.FieldDisableReason, business.FieldVerificationStatus:
 			values[i] = new(sql.NullString)
 		case business.FieldCreatedAt, business.FieldUpdatedAt, business.FieldDeletedAt, business.FieldDisabledAt, business.FieldVerifiedAt:
 			values[i] = new(sql.NullTime)
@@ -300,6 +302,13 @@ func (b *Business) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				b.RegistrationNumber = new(string)
 				*b.RegistrationNumber = value.String
+			}
+		case business.FieldTaxIdentificationNumber:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field tax_identification_number", values[i])
+			} else if value.Valid {
+				b.TaxIdentificationNumber = new(string)
+				*b.TaxIdentificationNumber = value.String
 			}
 		case business.FieldEmail:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -496,6 +505,11 @@ func (b *Business) String() string {
 	builder.WriteString(", ")
 	if v := b.RegistrationNumber; v != nil {
 		builder.WriteString("registration_number=")
+		builder.WriteString(*v)
+	}
+	builder.WriteString(", ")
+	if v := b.TaxIdentificationNumber; v != nil {
+		builder.WriteString("tax_identification_number=")
 		builder.WriteString(*v)
 	}
 	builder.WriteString(", ")

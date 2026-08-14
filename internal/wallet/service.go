@@ -6,13 +6,14 @@ import (
 	"github.com/Toflex/directory_v2/ent"
 	"github.com/Toflex/directory_v2/graph/model"
 	"github.com/Toflex/directory_v2/internal/currency"
+	"github.com/Toflex/directory_v2/internal/vault"
 	"github.com/Toflex/directory_v2/pkg/types"
 	"github.com/Toflex/directory_v2/pkg/util"
 	"github.com/samber/do/v2"
 )
 
 type IService interface {
-	GetWallets(ctx context.Context, b *ent.Business, walletType string) ([]*model.Wallet, error)
+	GetWallets(ctx context.Context, ownerID, walletType string) ([]*model.Wallet, error)
 	GetWallet(ctx context.Context, ownerID, walletType, currencyCode string) (*model.Wallet, error)
 	AddWallet(ctx context.Context, ownerID, walletType, currencyCode string) (*model.Wallet, error)
 }
@@ -20,6 +21,7 @@ type IService interface {
 type service struct {
 	db              *ent.Client
 	repo            IRepository
+	vaultService    vault.IService
 	currencyService currency.IService
 }
 
@@ -29,6 +31,7 @@ func Newservice(i do.Injector) IService {
 	return &service{
 		db:              db,
 		repo:            Newrepository(db),
+		vaultService:    vault.NewService(db),
 		currencyService: currency,
 	}
 }

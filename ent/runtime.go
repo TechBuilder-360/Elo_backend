@@ -63,7 +63,7 @@ func init() {
 	// business.AboutValidator is a validator for the "about" field. It is called by the builders before save.
 	business.AboutValidator = businessDescAbout.Validators[0].(func(string) error)
 	// businessDescEmail is the schema descriptor for email field.
-	businessDescEmail := businessFields[9].Descriptor()
+	businessDescEmail := businessFields[10].Descriptor()
 	// business.EmailValidator is a validator for the "email" field. It is called by the builders before save.
 	business.EmailValidator = func() func(string) error {
 		validators := businessDescEmail.Validators
@@ -81,31 +81,31 @@ func init() {
 		}
 	}()
 	// businessDescWebsite is the schema descriptor for website field.
-	businessDescWebsite := businessFields[10].Descriptor()
+	businessDescWebsite := businessFields[11].Descriptor()
 	// business.WebsiteValidator is a validator for the "website" field. It is called by the builders before save.
 	business.WebsiteValidator = businessDescWebsite.Validators[0].(func(string) error)
 	// businessDescOnSite is the schema descriptor for on_site field.
-	businessDescOnSite := businessFields[11].Descriptor()
+	businessDescOnSite := businessFields[12].Descriptor()
 	// business.DefaultOnSite holds the default value on creation for the on_site field.
 	business.DefaultOnSite = businessDescOnSite.Default.(bool)
 	// businessDescActive is the schema descriptor for active field.
-	businessDescActive := businessFields[12].Descriptor()
+	businessDescActive := businessFields[13].Descriptor()
 	// business.DefaultActive holds the default value on creation for the active field.
 	business.DefaultActive = businessDescActive.Default.(bool)
 	// businessDescLive is the schema descriptor for live field.
-	businessDescLive := businessFields[13].Descriptor()
+	businessDescLive := businessFields[14].Descriptor()
 	// business.DefaultLive holds the default value on creation for the live field.
 	business.DefaultLive = businessDescLive.Default.(bool)
 	// businessDescDisabled is the schema descriptor for disabled field.
-	businessDescDisabled := businessFields[14].Descriptor()
+	businessDescDisabled := businessFields[15].Descriptor()
 	// business.DefaultDisabled holds the default value on creation for the disabled field.
 	business.DefaultDisabled = businessDescDisabled.Default.(bool)
 	// businessDescDisabledAt is the schema descriptor for disabled_at field.
-	businessDescDisabledAt := businessFields[15].Descriptor()
+	businessDescDisabledAt := businessFields[16].Descriptor()
 	// business.DefaultDisabledAt holds the default value on creation for the disabled_at field.
 	business.DefaultDisabledAt = businessDescDisabledAt.Default.(func() time.Time)
 	// businessDescVerified is the schema descriptor for verified field.
-	businessDescVerified := businessFields[18].Descriptor()
+	businessDescVerified := businessFields[19].Descriptor()
 	// business.DefaultVerified holds the default value on creation for the verified field.
 	business.DefaultVerified = businessDescVerified.Default.(bool)
 	// businessDescID is the schema descriptor for id field.

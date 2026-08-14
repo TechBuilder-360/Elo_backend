@@ -21,5 +21,6 @@ type WalletResponse struct {
 }
 
 type createWallet struct {
+	VaultID  string
 	Currency *currency.Currency
 }

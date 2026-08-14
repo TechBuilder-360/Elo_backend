@@ -33,6 +33,7 @@ func (Business) Fields() []ent.Field {
 		field.String("country_of_incorporation").Nillable().Optional(),
 		field.String("date_of_incorporation").Nillable().Optional(),
 		field.String("registration_number").Nillable().Optional(),
+		field.String("tax_identification_number").Nillable().Optional(),
 		field.String("email").NotEmpty().
 			Validate(util.ValidateEmail),
 		field.String("website").Optional().

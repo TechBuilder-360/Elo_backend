@@ -89,6 +89,7 @@ type BusinessMutation struct {
 	country_of_incorporation     *string
 	date_of_incorporation        *string
 	registration_number          *string
+	tax_identification_number    *string
 	email                        *string
 	website                      *string
 	on_site                      *bool
@@ -759,6 +760,55 @@ func (m *BusinessMutation) RegistrationNumberCleared() bool {
 func (m *BusinessMutation) ResetRegistrationNumber() {
 	m.registration_number = nil
 	delete(m.clearedFields, business.FieldRegistrationNumber)
+}
+
+// SetTaxIdentificationNumber sets the "tax_identification_number" field.
+func (m *BusinessMutation) SetTaxIdentificationNumber(s string) {
+	m.tax_identification_number = &s
+}
+
+// TaxIdentificationNumber returns the value of the "tax_identification_number" field in the mutation.
+func (m *BusinessMutation) TaxIdentificationNumber() (r string, exists bool) {
+	v := m.tax_identification_number
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldTaxIdentificationNumber returns the old "tax_identification_number" field's value of the Business entity.
+// If the Business object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *BusinessMutation) OldTaxIdentificationNumber(ctx context.Context) (v *string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldTaxIdentificationNumber is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldTaxIdentificationNumber requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldTaxIdentificationNumber: %w", err)
+	}
+	return oldValue.TaxIdentificationNumber, nil
+}
+
+// ClearTaxIdentificationNumber clears the value of the "tax_identification_number" field.
+func (m *BusinessMutation) ClearTaxIdentificationNumber() {
+	m.tax_identification_number = nil
+	m.clearedFields[business.FieldTaxIdentificationNumber] = struct{}{}
+}
+
+// TaxIdentificationNumberCleared returns if the "tax_identification_number" field was cleared in this mutation.
+func (m *BusinessMutation) TaxIdentificationNumberCleared() bool {
+	_, ok := m.clearedFields[business.FieldTaxIdentificationNumber]
+	return ok
+}
+
+// ResetTaxIdentificationNumber resets all changes to the "tax_identification_number" field.
+func (m *BusinessMutation) ResetTaxIdentificationNumber() {
+	m.tax_identification_number = nil
+	delete(m.clearedFields, business.FieldTaxIdentificationNumber)
 }
 
 // SetEmail sets the "email" field.
@@ -1741,7 +1791,7 @@ func (m *BusinessMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *BusinessMutation) Fields() []string {
-	fields := make([]string, 0, 23)
+	fields := make([]string, 0, 24)
 	if m.created_at != nil {
 		fields = append(fields, business.FieldCreatedAt)
 	}
@@ -1777,6 +1827,9 @@ func (m *BusinessMutation) Fields() []string {
 	}
 	if m.registration_number != nil {
 		fields = append(fields, business.FieldRegistrationNumber)
+	}
+	if m.tax_identification_number != nil {
+		fields = append(fields, business.FieldTaxIdentificationNumber)
 	}
 	if m.email != nil {
 		fields = append(fields, business.FieldEmail)
@@ -1843,6 +1896,8 @@ func (m *BusinessMutation) Field(name string) (ent.Value, bool) {
 		return m.DateOfIncorporation()
 	case business.FieldRegistrationNumber:
 		return m.RegistrationNumber()
+	case business.FieldTaxIdentificationNumber:
+		return m.TaxIdentificationNumber()
 	case business.FieldEmail:
 		return m.Email()
 	case business.FieldWebsite:
@@ -1898,6 +1953,8 @@ func (m *BusinessMutation) OldField(ctx context.Context, name string) (ent.Value
 		return m.OldDateOfIncorporation(ctx)
 	case business.FieldRegistrationNumber:
 		return m.OldRegistrationNumber(ctx)
+	case business.FieldTaxIdentificationNumber:
+		return m.OldTaxIdentificationNumber(ctx)
 	case business.FieldEmail:
 		return m.OldEmail(ctx)
 	case business.FieldWebsite:
@@ -2012,6 +2069,13 @@ func (m *BusinessMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetRegistrationNumber(v)
+		return nil
+	case business.FieldTaxIdentificationNumber:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetTaxIdentificationNumber(v)
 		return nil
 	case business.FieldEmail:
 		v, ok := value.(string)
@@ -2141,6 +2205,9 @@ func (m *BusinessMutation) ClearedFields() []string {
 	if m.FieldCleared(business.FieldRegistrationNumber) {
 		fields = append(fields, business.FieldRegistrationNumber)
 	}
+	if m.FieldCleared(business.FieldTaxIdentificationNumber) {
+		fields = append(fields, business.FieldTaxIdentificationNumber)
+	}
 	if m.FieldCleared(business.FieldWebsite) {
 		fields = append(fields, business.FieldWebsite)
 	}
@@ -2184,6 +2251,9 @@ func (m *BusinessMutation) ClearField(name string) error {
 		return nil
 	case business.FieldRegistrationNumber:
 		m.ClearRegistrationNumber()
+		return nil
+	case business.FieldTaxIdentificationNumber:
+		m.ClearTaxIdentificationNumber()
 		return nil
 	case business.FieldWebsite:
 		m.ClearWebsite()
@@ -2237,6 +2307,9 @@ func (m *BusinessMutation) ResetField(name string) error {
 		return nil
 	case business.FieldRegistrationNumber:
 		m.ResetRegistrationNumber()
+		return nil
+	case business.FieldTaxIdentificationNumber:
+		m.ResetTaxIdentificationNumber()
 		return nil
 	case business.FieldEmail:
 		m.ResetEmail()

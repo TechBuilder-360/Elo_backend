@@ -31,10 +31,10 @@ type Wallet {
 }
 
 extend type Query {
-  wallets(wallet_type: WalletType!=TREASURY): [Wallet!]!  @hasRole (role: ADMIN)
-  wallet(currencyCode: String!, wallet_type: WalletType!=TREASURY): Wallet!  @hasRole (role: ADMIN)
+  business_wallets(wallet_type: WalletType!=TREASURY): [Wallet!]!  @hasRole (role: ADMIN)
+  business_wallet(currencyCode: String!, wallet_type: WalletType!=TREASURY): Wallet  @hasRole (role: ADMIN)
 }
 
 extend type Mutation {
-  add_wallet(currency_code: String!, wallet_type: WalletType!=TREASURY): Wallet!  @hasRole (role: ADMIN)
+  add_business_wallet(currency_code: String!, wallet_type: WalletType!=TREASURY): Wallet!  @hasRole (role: ADMIN)
 }

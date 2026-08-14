@@ -10,9 +10,11 @@ import (
 )
 
 // GetCurrencies implements [IService].
-func (s *service) GetCurrencies(ctx context.Context) ([]*model.Currency, error) {
+func (s *service) GetCurrencies(ctx context.Context, filter *model.CurrencyFilter) ([]*model.Currency, error) {
 	logger := log.LoggerInContext(ctx)
-	currencies, err := s.repo.Currencyies(ctx)
+	currencies, err := s.repo.Currencies(ctx, &CurrencyFilter{
+		IsFiat: filter.IsFiat,
+	})
 	if err != nil {
 		logger.WithError(err).Error("failed to fetch currencies")
 		return nil, errors.New(errors.ErrFailed, "request failed")

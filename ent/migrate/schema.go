@@ -22,6 +22,7 @@ var (
 		{Name: "country_of_incorporation", Type: field.TypeString, Nullable: true},
 		{Name: "date_of_incorporation", Type: field.TypeString, Nullable: true},
 		{Name: "registration_number", Type: field.TypeString, Nullable: true},
+		{Name: "tax_identification_number", Type: field.TypeString, Nullable: true},
 		{Name: "email", Type: field.TypeString},
 		{Name: "website", Type: field.TypeString, Nullable: true},
 		{Name: "on_site", Type: field.TypeBool, Default: false},
@@ -43,7 +44,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "businesses_users_registered_businesses",
-				Columns:    []*schema.Column{BusinessesColumns[23]},
+				Columns:    []*schema.Column{BusinessesColumns[24]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
@@ -174,6 +175,13 @@ var (
 		Name:       "currencies",
 		Columns:    CurrenciesColumns,
 		PrimaryKey: []*schema.Column{CurrenciesColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "currency_name_code",
+				Unique:  true,
+				Columns: []*schema.Column{CurrenciesColumns[4], CurrenciesColumns[6]},
+			},
+		},
 	}
 	// KybDocumentsColumns holds the columns for the "kyb_documents" table.
 	KybDocumentsColumns = []*schema.Column{

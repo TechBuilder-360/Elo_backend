@@ -8,3 +8,7 @@ type Currency struct {
 	Multiplier int64
 	IsFiat     bool
 }
+
+type CurrencyFilter struct {
+	IsFiat bool
+}

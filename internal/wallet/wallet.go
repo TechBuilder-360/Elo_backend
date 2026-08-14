@@ -3,7 +3,6 @@ package wallet
 import (
 	"context"
 
-	"github.com/Toflex/directory_v2/ent"
 	"github.com/Toflex/directory_v2/graph/model"
 	"github.com/Toflex/directory_v2/pkg/errors"
 	"github.com/Toflex/directory_v2/pkg/log"
@@ -11,9 +10,9 @@ import (
 )
 
 // GetWallets implements [IService].
-func (s *service) GetWallets(ctx context.Context, b *ent.Business, walletType string) ([]*model.Wallet, error) {
+func (s *service) GetWallets(ctx context.Context, ownerID, walletType string) ([]*model.Wallet, error) {
 	logger := log.LoggerInContext(ctx)
-	result, err := s.repo.GetWallets(ctx, b.ID, GetWalletType(walletType))
+	result, err := s.repo.GetWallets(ctx, ownerID, GetWalletType(walletType))
 	if err != nil {
 		logger.WithError(err).Error("failed to fetch wallets")
 		return nil, errors.New(errors.ErrFailed, "request failed")
@@ -32,7 +31,7 @@ func (s *service) GetWallets(ctx context.Context, b *ent.Business, walletType st
 // GetWallet implements [IService].
 func (s *service) GetWallet(ctx context.Context, ownerID, walletType, currencyCode string) (*model.Wallet, error) {
 	logger := log.LoggerInContext(ctx)
-	wallet, err := s.repo.GetWallet(ctx, walletType, ownerID)
+	wallet, err := s.repo.GetWalletWithCurrency(ctx, ownerID, walletType, types.CurrencyCode(currencyCode))
 	if err != nil {
 		logger.WithError(err).Error("failed to fetch wallet")
 		return nil, errors.New(errors.ErrFailed, "request failed")
@@ -61,6 +60,7 @@ func (s *service) AddWallet(ctx context.Context, ownerID, walletType, currencyCo
 		return nil, errors.New(errors.ErrFailed, "request failed")
 	}
 
+	// check if wallet already exists for the owner with the given currency code
 	wallet, err := s.repo.GetWalletWithCurrency(ctx, ownerID, walletType, types.CurrencyCode(currencyCode))
 	if err != nil {
 		logger.WithError(err).Error("wallet could not be retrived")
@@ -74,7 +74,14 @@ func (s *service) AddWallet(ctx context.Context, ownerID, walletType, currencyCo
 		return &result, nil
 	}
 
+	vault, err := s.vaultService.GetOwnerVault(ctx, ownerID, walletType)
+	if err != nil {
+		logger.WithError(err).Error("unable to fetch vault")
+		return nil, errors.New(errors.ErrFailed, "request failed")
+	}
+
 	w := &createWallet{
+		VaultID:  vault.ID,
 		Currency: currency,
 	}
 

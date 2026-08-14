@@ -16,11 +16,13 @@ func (r *repository) GetWallets(ctx context.Context, ownerID string, walletType 
 		Where(vault.HasOwnerWith(ledgerowner.IDEQ(ownerID)),
 			vault.TypeEQ(vault.Type(walletType))).
 		WithWallets(func(q *ent.WalletQuery) {
-			q.WithCurrency().
-				Select(
+			q.WithCurrency(func(cq *ent.CurrencyQuery) {
+				cq.Select(
+					currency.FieldID,
 					currency.FieldCode,
 					currency.FieldMultiplier,
 				)
+			})
 		}).
 		First(ctx)
 	if err != nil {
@@ -46,24 +48,25 @@ func (r *repository) GetWallets(ctx context.Context, ownerID string, walletType 
 	return resp, nil
 }
 
-func (r *repository) GetWallet(ctx context.Context, walletID, ownerID string) (*WalletResponse, error) {
-	w, err := r.db.Wallet.Query().
-		Where(
-			wallet.IDEQ(walletID),
-			wallet.HasVaultWith(vault.HasOwnerWith(ledgerowner.IDEQ(ownerID))),
-		).
-		WithCurrency(func(q *ent.CurrencyQuery) {
-			q.Select(
-				currency.FieldCode,
-				currency.FieldMultiplier,
-			)
-		}).First(ctx)
+func (r *repository) GetWallet(ctx context.Context, walletType, ownerID string) (*WalletResponse, error) {
+	v, err := r.db.Vault.Query().
+		Where(vault.HasOwnerWith(ledgerowner.IDEQ(ownerID)),
+			vault.TypeEQ(vault.Type(walletType))).
+		WithWallets(func(q *ent.WalletQuery) {
+			q.WithCurrency(func(cq *ent.CurrencyQuery) {
+				cq.Select(
+					currency.FieldID,
+					currency.FieldCode,
+					currency.FieldMultiplier,
+				)
+			})
+		}).
+		First(ctx)
 	if err != nil {
-		if ent.IsNotFound(err) {
-			return nil, nil
-		}
 		return nil, err
 	}
+
+	w := v.Edges.Wallets[0]
 
 	return &WalletResponse{
 		ID:               w.ID,
@@ -86,6 +89,7 @@ func (r *repository) Create(ctx context.Context, payload *createWallet) (*Wallet
 	w, err := r.db.Wallet.Create().
 		SetCurrencyID(payload.Currency.ID).
 		SetType(walletType).
+		SetVaultID(payload.VaultID).
 		Save(ctx)
 	if err != nil {
 		return nil, err
@@ -113,6 +117,7 @@ func (r *repository) GetWalletWithCurrency(ctx context.Context, ownerID string, 
 		).
 		WithCurrency(func(q *ent.CurrencyQuery) {
 			q.Select(
+				currency.FieldID,
 				currency.FieldCode,
 				currency.FieldMultiplier,
 			)

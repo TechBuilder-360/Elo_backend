@@ -39,6 +39,8 @@ const (
 	FieldDateOfIncorporation = "date_of_incorporation"
 	// FieldRegistrationNumber holds the string denoting the registration_number field in the database.
 	FieldRegistrationNumber = "registration_number"
+	// FieldTaxIdentificationNumber holds the string denoting the tax_identification_number field in the database.
+	FieldTaxIdentificationNumber = "tax_identification_number"
 	// FieldEmail holds the string denoting the email field in the database.
 	FieldEmail = "email"
 	// FieldWebsite holds the string denoting the website field in the database.
@@ -166,6 +168,7 @@ var Columns = []string{
 	FieldCountryOfIncorporation,
 	FieldDateOfIncorporation,
 	FieldRegistrationNumber,
+	FieldTaxIdentificationNumber,
 	FieldEmail,
 	FieldWebsite,
 	FieldOnSite,
@@ -325,6 +328,11 @@ func ByDateOfIncorporation(opts ...sql.OrderTermOption) OrderOption {
 // ByRegistrationNumber orders the results by the registration_number field.
 func ByRegistrationNumber(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldRegistrationNumber, opts...).ToFunc()
+}
+
+// ByTaxIdentificationNumber orders the results by the tax_identification_number field.
+func ByTaxIdentificationNumber(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldTaxIdentificationNumber, opts...).ToFunc()
 }
 
 // ByEmail orders the results by the email field.
