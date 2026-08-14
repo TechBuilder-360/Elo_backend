@@ -125,24 +125,24 @@ func (cu *CurrencyUpdate) SetNillableActive(b *bool) *CurrencyUpdate {
 	return cu
 }
 
-// SetMultipler sets the "multipler" field.
-func (cu *CurrencyUpdate) SetMultipler(i int64) *CurrencyUpdate {
-	cu.mutation.ResetMultipler()
-	cu.mutation.SetMultipler(i)
+// SetMultiplier sets the "multiplier" field.
+func (cu *CurrencyUpdate) SetMultiplier(i int64) *CurrencyUpdate {
+	cu.mutation.ResetMultiplier()
+	cu.mutation.SetMultiplier(i)
 	return cu
 }
 
-// SetNillableMultipler sets the "multipler" field if the given value is not nil.
-func (cu *CurrencyUpdate) SetNillableMultipler(i *int64) *CurrencyUpdate {
+// SetNillableMultiplier sets the "multiplier" field if the given value is not nil.
+func (cu *CurrencyUpdate) SetNillableMultiplier(i *int64) *CurrencyUpdate {
 	if i != nil {
-		cu.SetMultipler(*i)
+		cu.SetMultiplier(*i)
 	}
 	return cu
 }
 
-// AddMultipler adds i to the "multipler" field.
-func (cu *CurrencyUpdate) AddMultipler(i int64) *CurrencyUpdate {
-	cu.mutation.AddMultipler(i)
+// AddMultiplier adds i to the "multiplier" field.
+func (cu *CurrencyUpdate) AddMultiplier(i int64) *CurrencyUpdate {
+	cu.mutation.AddMultiplier(i)
 	return cu
 }
 
@@ -279,11 +279,11 @@ func (cu *CurrencyUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if value, ok := cu.mutation.Active(); ok {
 		_spec.SetField(currency.FieldActive, field.TypeBool, value)
 	}
-	if value, ok := cu.mutation.Multipler(); ok {
-		_spec.SetField(currency.FieldMultipler, field.TypeInt64, value)
+	if value, ok := cu.mutation.Multiplier(); ok {
+		_spec.SetField(currency.FieldMultiplier, field.TypeInt64, value)
 	}
-	if value, ok := cu.mutation.AddedMultipler(); ok {
-		_spec.AddField(currency.FieldMultipler, field.TypeInt64, value)
+	if value, ok := cu.mutation.AddedMultiplier(); ok {
+		_spec.AddField(currency.FieldMultiplier, field.TypeInt64, value)
 	}
 	if cu.mutation.WalletsCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -446,24 +446,24 @@ func (cuo *CurrencyUpdateOne) SetNillableActive(b *bool) *CurrencyUpdateOne {
 	return cuo
 }
 
-// SetMultipler sets the "multipler" field.
-func (cuo *CurrencyUpdateOne) SetMultipler(i int64) *CurrencyUpdateOne {
-	cuo.mutation.ResetMultipler()
-	cuo.mutation.SetMultipler(i)
+// SetMultiplier sets the "multiplier" field.
+func (cuo *CurrencyUpdateOne) SetMultiplier(i int64) *CurrencyUpdateOne {
+	cuo.mutation.ResetMultiplier()
+	cuo.mutation.SetMultiplier(i)
 	return cuo
 }
 
-// SetNillableMultipler sets the "multipler" field if the given value is not nil.
-func (cuo *CurrencyUpdateOne) SetNillableMultipler(i *int64) *CurrencyUpdateOne {
+// SetNillableMultiplier sets the "multiplier" field if the given value is not nil.
+func (cuo *CurrencyUpdateOne) SetNillableMultiplier(i *int64) *CurrencyUpdateOne {
 	if i != nil {
-		cuo.SetMultipler(*i)
+		cuo.SetMultiplier(*i)
 	}
 	return cuo
 }
 
-// AddMultipler adds i to the "multipler" field.
-func (cuo *CurrencyUpdateOne) AddMultipler(i int64) *CurrencyUpdateOne {
-	cuo.mutation.AddMultipler(i)
+// AddMultiplier adds i to the "multiplier" field.
+func (cuo *CurrencyUpdateOne) AddMultiplier(i int64) *CurrencyUpdateOne {
+	cuo.mutation.AddMultiplier(i)
 	return cuo
 }
 
@@ -630,11 +630,11 @@ func (cuo *CurrencyUpdateOne) sqlSave(ctx context.Context) (_node *Currency, err
 	if value, ok := cuo.mutation.Active(); ok {
 		_spec.SetField(currency.FieldActive, field.TypeBool, value)
 	}
-	if value, ok := cuo.mutation.Multipler(); ok {
-		_spec.SetField(currency.FieldMultipler, field.TypeInt64, value)
+	if value, ok := cuo.mutation.Multiplier(); ok {
+		_spec.SetField(currency.FieldMultiplier, field.TypeInt64, value)
 	}
-	if value, ok := cuo.mutation.AddedMultipler(); ok {
-		_spec.AddField(currency.FieldMultipler, field.TypeInt64, value)
+	if value, ok := cuo.mutation.AddedMultiplier(); ok {
+		_spec.AddField(currency.FieldMultiplier, field.TypeInt64, value)
 	}
 	if cuo.mutation.WalletsCleared() {
 		edge := &sqlgraph.EdgeSpec{

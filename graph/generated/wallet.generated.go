@@ -28,35 +28,6 @@ import (
 
 // region    **************************** field.gotpl *****************************
 
-func (ec *executionContext) _Wallet_type(ctx context.Context, field graphql.CollectedField, obj *model.Wallet) (ret graphql.Marshaler) {
-	return graphql.ResolveField(
-		ctx,
-		ec.OperationContext,
-		field,
-		ec.fieldContext_Wallet_type,
-		func(ctx context.Context) (any, error) {
-			return obj.Type, nil
-		},
-		nil,
-		ec.marshalNString2string,
-		true,
-		true,
-	)
-}
-
-func (ec *executionContext) fieldContext_Wallet_type(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Wallet",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
 func (ec *executionContext) _Wallet_available_balance(ctx context.Context, field graphql.CollectedField, obj *model.Wallet) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
@@ -231,6 +202,35 @@ func (ec *executionContext) fieldContext_Wallet_active(_ context.Context, field 
 	return fc, nil
 }
 
+func (ec *executionContext) _Wallet_is_fiat(ctx context.Context, field graphql.CollectedField, obj *model.Wallet) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Wallet_is_fiat,
+		func(ctx context.Context) (any, error) {
+			return obj.IsFiat, nil
+		},
+		nil,
+		ec.marshalNBoolean2bool,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Wallet_is_fiat(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Wallet",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Boolean does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
 // endregion **************************** field.gotpl *****************************
 
 // region    **************************** input.gotpl *****************************
@@ -254,11 +254,6 @@ func (ec *executionContext) _Wallet(ctx context.Context, sel ast.SelectionSet, o
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("Wallet")
-		case "type":
-			out.Values[i] = ec._Wallet_type(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
 		case "available_balance":
 			out.Values[i] = ec._Wallet_available_balance(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
@@ -286,6 +281,11 @@ func (ec *executionContext) _Wallet(ctx context.Context, sel ast.SelectionSet, o
 			}
 		case "active":
 			out.Values[i] = ec._Wallet_active(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "is_fiat":
+			out.Values[i] = ec._Wallet_is_fiat(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
@@ -382,6 +382,13 @@ func (ec *executionContext) unmarshalNWalletType2githubᚗcomᚋToflexᚋdirecto
 
 func (ec *executionContext) marshalNWalletType2githubᚗcomᚋToflexᚋdirectory_v2ᚋgraphᚋmodelᚐWalletType(ctx context.Context, sel ast.SelectionSet, v model.WalletType) graphql.Marshaler {
 	return v
+}
+
+func (ec *executionContext) marshalOWallet2ᚖgithubᚗcomᚋToflexᚋdirectory_v2ᚋgraphᚋmodelᚐWallet(ctx context.Context, sel ast.SelectionSet, v *model.Wallet) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._Wallet(ctx, sel, v)
 }
 
 // endregion ***************************** type.gotpl *****************************

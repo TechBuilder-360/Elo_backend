@@ -105,6 +105,18 @@ func (f KYBMessageFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, 
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.KYBMessageMutation", m)
 }
 
+// The LedgerOwnerFunc type is an adapter to allow the use of ordinary
+// function as LedgerOwner mutator.
+type LedgerOwnerFunc func(context.Context, *ent.LedgerOwnerMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f LedgerOwnerFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.LedgerOwnerMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.LedgerOwnerMutation", m)
+}
+
 // The ManagerFunc type is an adapter to allow the use of ordinary
 // function as Manager mutator.
 type ManagerFunc func(context.Context, *ent.ManagerMutation) (ent.Value, error)
@@ -115,6 +127,18 @@ func (f ManagerFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, err
 		return f(ctx, mv)
 	}
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.ManagerMutation", m)
+}
+
+// The NubanStaticAccountFunc type is an adapter to allow the use of ordinary
+// function as NubanStaticAccount mutator.
+type NubanStaticAccountFunc func(context.Context, *ent.NubanStaticAccountMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f NubanStaticAccountFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.NubanStaticAccountMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.NubanStaticAccountMutation", m)
 }
 
 // The PermissionFunc type is an adapter to allow the use of ordinary
@@ -223,6 +247,18 @@ func (f UserDocumentFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value
 		return f(ctx, mv)
 	}
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.UserDocumentMutation", m)
+}
+
+// The VaultFunc type is an adapter to allow the use of ordinary
+// function as Vault mutator.
+type VaultFunc func(context.Context, *ent.VaultMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f VaultFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.VaultMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.VaultMutation", m)
 }
 
 // The VerificationFunc type is an adapter to allow the use of ordinary

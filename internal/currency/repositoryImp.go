@@ -16,8 +16,12 @@ func (r *repository) GetCurrencyByCode(ctx context.Context, currencyCode types.C
 }
 
 // GetCurrencyByCode implements [IRepository].
-func (r *repository) Currencyies(ctx context.Context) ([]*ent.Currency, error) {
-	return r.db.Currency.Query().
-		Where(currency.ActiveEQ(true)).
-		All(ctx)
+func (r *repository) Currencies(ctx context.Context, filter *CurrencyFilter) ([]*ent.Currency, error) {
+	query := r.db.Currency.Query().Where(currency.ActiveEQ(true))
+
+	if filter != nil {
+		query = query.Where(currency.IsFiatEQ(filter.IsFiat))
+	}
+
+	return query.All(ctx)
 }

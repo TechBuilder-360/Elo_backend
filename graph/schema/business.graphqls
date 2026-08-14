@@ -15,6 +15,7 @@ type Business {
   on_site: Boolean!
   about: String
   industry: String!
+  website: String!
   number: String!
   country_of_incorporation: String!
   date_of_incorporation: String!
@@ -114,6 +115,7 @@ input businessDetail {
   about: String
   industry: String
   website: String
+  tax_identification_number: String
 }
 
 extend type Query {

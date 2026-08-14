@@ -10,6 +10,7 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"github.com/Toflex/directory_v2/ent/currency"
+	"github.com/Toflex/directory_v2/ent/vault"
 	"github.com/Toflex/directory_v2/ent/wallet"
 )
 
@@ -32,27 +33,28 @@ type Wallet struct {
 	LedgerBalance int64 `json:"ledger_balance,omitempty"`
 	// HoldingBalance holds the value of the "holding_balance" field.
 	HoldingBalance int64 `json:"holding_balance,omitempty"`
-	// Owner holds the value of the "owner" field.
-	Owner wallet.Owner `json:"owner,omitempty"`
-	// These field avoids the use of fk, by using naming convension 'user-user_id' of 'business-business_id'
-	Identifier string `json:"identifier,omitempty"`
 	// CurrencyID holds the value of the "currency_id" field.
 	CurrencyID string `json:"currency_id,omitempty"`
 	// Active holds the value of the "active" field.
 	Active bool `json:"active,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the WalletQuery when eager-loading is set.
-	Edges        WalletEdges `json:"edges"`
-	selectValues sql.SelectValues
+	Edges         WalletEdges `json:"edges"`
+	vault_wallets *string
+	selectValues  sql.SelectValues
 }
 
 // WalletEdges holds the relations/edges for other nodes in the graph.
 type WalletEdges struct {
 	// Currency holds the value of the currency edge.
 	Currency *Currency `json:"currency,omitempty"`
+	// Vault holds the value of the vault edge.
+	Vault *Vault `json:"vault,omitempty"`
+	// NubanStaticAccount holds the value of the nuban_static_account edge.
+	NubanStaticAccount []*NubanStaticAccount `json:"nuban_static_account,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [1]bool
+	loadedTypes [3]bool
 }
 
 // CurrencyOrErr returns the Currency value or an error if the edge
@@ -66,6 +68,26 @@ func (e WalletEdges) CurrencyOrErr() (*Currency, error) {
 	return nil, &NotLoadedError{edge: "currency"}
 }
 
+// VaultOrErr returns the Vault value or an error if the edge
+// was not loaded in eager-loading, or loaded but was not found.
+func (e WalletEdges) VaultOrErr() (*Vault, error) {
+	if e.Vault != nil {
+		return e.Vault, nil
+	} else if e.loadedTypes[1] {
+		return nil, &NotFoundError{label: vault.Label}
+	}
+	return nil, &NotLoadedError{edge: "vault"}
+}
+
+// NubanStaticAccountOrErr returns the NubanStaticAccount value or an error if the edge
+// was not loaded in eager-loading.
+func (e WalletEdges) NubanStaticAccountOrErr() ([]*NubanStaticAccount, error) {
+	if e.loadedTypes[2] {
+		return e.NubanStaticAccount, nil
+	}
+	return nil, &NotLoadedError{edge: "nuban_static_account"}
+}
+
 // scanValues returns the types for scanning values from sql.Rows.
 func (*Wallet) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
@@ -75,10 +97,12 @@ func (*Wallet) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullBool)
 		case wallet.FieldAvailableBalance, wallet.FieldLedgerBalance, wallet.FieldHoldingBalance:
 			values[i] = new(sql.NullInt64)
-		case wallet.FieldID, wallet.FieldType, wallet.FieldOwner, wallet.FieldIdentifier, wallet.FieldCurrencyID:
+		case wallet.FieldID, wallet.FieldType, wallet.FieldCurrencyID:
 			values[i] = new(sql.NullString)
 		case wallet.FieldCreatedAt, wallet.FieldUpdatedAt, wallet.FieldDeletedAt:
 			values[i] = new(sql.NullTime)
+		case wallet.ForeignKeys[0]: // vault_wallets
+			values[i] = new(sql.NullString)
 		default:
 			values[i] = new(sql.UnknownType)
 		}
@@ -143,18 +167,6 @@ func (w *Wallet) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				w.HoldingBalance = value.Int64
 			}
-		case wallet.FieldOwner:
-			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field owner", values[i])
-			} else if value.Valid {
-				w.Owner = wallet.Owner(value.String)
-			}
-		case wallet.FieldIdentifier:
-			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field identifier", values[i])
-			} else if value.Valid {
-				w.Identifier = value.String
-			}
 		case wallet.FieldCurrencyID:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field currency_id", values[i])
@@ -166,6 +178,13 @@ func (w *Wallet) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field active", values[i])
 			} else if value.Valid {
 				w.Active = value.Bool
+			}
+		case wallet.ForeignKeys[0]:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field vault_wallets", values[i])
+			} else if value.Valid {
+				w.vault_wallets = new(string)
+				*w.vault_wallets = value.String
 			}
 		default:
 			w.selectValues.Set(columns[i], values[i])
@@ -183,6 +202,16 @@ func (w *Wallet) Value(name string) (ent.Value, error) {
 // QueryCurrency queries the "currency" edge of the Wallet entity.
 func (w *Wallet) QueryCurrency() *CurrencyQuery {
 	return NewWalletClient(w.config).QueryCurrency(w)
+}
+
+// QueryVault queries the "vault" edge of the Wallet entity.
+func (w *Wallet) QueryVault() *VaultQuery {
+	return NewWalletClient(w.config).QueryVault(w)
+}
+
+// QueryNubanStaticAccount queries the "nuban_static_account" edge of the Wallet entity.
+func (w *Wallet) QueryNubanStaticAccount() *NubanStaticAccountQuery {
+	return NewWalletClient(w.config).QueryNubanStaticAccount(w)
 }
 
 // Update returns a builder for updating this Wallet.
@@ -230,12 +259,6 @@ func (w *Wallet) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("holding_balance=")
 	builder.WriteString(fmt.Sprintf("%v", w.HoldingBalance))
-	builder.WriteString(", ")
-	builder.WriteString("owner=")
-	builder.WriteString(fmt.Sprintf("%v", w.Owner))
-	builder.WriteString(", ")
-	builder.WriteString("identifier=")
-	builder.WriteString(w.Identifier)
 	builder.WriteString(", ")
 	builder.WriteString("currency_id=")
 	builder.WriteString(w.CurrencyID)

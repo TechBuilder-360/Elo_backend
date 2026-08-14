@@ -2,45 +2,45 @@ package wallet
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/Toflex/directory_v2/ent"
 	"github.com/Toflex/directory_v2/ent/currency"
+	"github.com/Toflex/directory_v2/ent/ledgerowner"
+	"github.com/Toflex/directory_v2/ent/vault"
 	"github.com/Toflex/directory_v2/ent/wallet"
 	"github.com/Toflex/directory_v2/pkg/types"
 )
 
-func getIdentifier(id string) string {
-	return fmt.Sprintf("identifier:%s", id)
-}
-
-func (r *repository) GetWallets(ctx context.Context, identifier string, walletType WalletType) ([]WalletResponse, error) {
-	wallets, err := r.db.Wallet.Query().
-		Where(wallet.IdentifierEQ(getIdentifier(identifier)),
-			wallet.TypeEQ(wallet.Type(walletType))).
-		WithCurrency(func(q *ent.CurrencyQuery) {
-			q.Select(
-				currency.FieldCode,
-				currency.FieldMultipler,
-			)
+func (r *repository) GetWallets(ctx context.Context, ownerID string, walletType WalletType) ([]WalletResponse, error) {
+	v, err := r.db.Vault.Query().
+		Where(vault.HasOwnerWith(ledgerowner.IDEQ(ownerID)),
+			vault.TypeEQ(vault.Type(walletType))).
+		WithWallets(func(q *ent.WalletQuery) {
+			q.WithCurrency(func(cq *ent.CurrencyQuery) {
+				cq.Select(
+					currency.FieldID,
+					currency.FieldCode,
+					currency.FieldMultiplier,
+				)
+			})
 		}).
-		All(ctx)
+		First(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	resp := make([]WalletResponse, 0, len(wallets))
+	resp := make([]WalletResponse, 0, len(v.Edges.Wallets))
 
-	for _, w := range wallets {
+	for _, w := range v.Edges.Wallets {
 		wr := WalletResponse{
 			ID:               w.ID,
-			Type:             string(w.Type),
 			AvailableBalance: w.AvailableBalance,
-			Owner:            w.Owner.String(),
-			Identifier:       w.Identifier,
+			LedgerBalance:    w.LedgerBalance,
+			HoldingBalance:   w.HoldingBalance,
 			Active:           w.Active,
 			Currency:         types.CurrencyCode(w.Edges.Currency.Code),
-			Multiplier:       w.Edges.Currency.Multipler,
+			Multiplier:       w.Edges.Currency.Multiplier,
+			IsFiat:           w.Edges.Currency.IsFiat,
 		}
 		resp = append(resp, wr)
 	}
@@ -48,15 +48,78 @@ func (r *repository) GetWallets(ctx context.Context, identifier string, walletTy
 	return resp, nil
 }
 
-func (r *repository) GetWallet(ctx context.Context, identifier string, walletType WalletType, currencyCode types.CurrencyCode) (*WalletResponse, error) {
+func (r *repository) GetWallet(ctx context.Context, walletType, ownerID string) (*WalletResponse, error) {
+	v, err := r.db.Vault.Query().
+		Where(vault.HasOwnerWith(ledgerowner.IDEQ(ownerID)),
+			vault.TypeEQ(vault.Type(walletType))).
+		WithWallets(func(q *ent.WalletQuery) {
+			q.WithCurrency(func(cq *ent.CurrencyQuery) {
+				cq.Select(
+					currency.FieldID,
+					currency.FieldCode,
+					currency.FieldMultiplier,
+				)
+			})
+		}).
+		First(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	w := v.Edges.Wallets[0]
+
+	return &WalletResponse{
+		ID:               w.ID,
+		AvailableBalance: w.AvailableBalance,
+		LedgerBalance:    w.LedgerBalance,
+		HoldingBalance:   w.HoldingBalance,
+		Active:           w.Active,
+		Currency:         types.CurrencyCode(w.Edges.Currency.Code),
+		Multiplier:       w.Edges.Currency.Multiplier,
+		IsFiat:           w.Edges.Currency.IsFiat,
+	}, nil
+}
+
+func (r *repository) Create(ctx context.Context, payload *createWallet) (*WalletResponse, error) {
+	walletType := wallet.TypeCRYPTO
+	if payload.Currency.IsFiat {
+		walletType = wallet.TypeFIAT
+	}
+
+	w, err := r.db.Wallet.Create().
+		SetCurrencyID(payload.Currency.ID).
+		SetType(walletType).
+		SetVaultID(payload.VaultID).
+		Save(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	return &WalletResponse{
+		ID:               w.ID,
+		AvailableBalance: w.AvailableBalance,
+		LedgerBalance:    w.LedgerBalance,
+		HoldingBalance:   w.HoldingBalance,
+		Active:           w.Active,
+		Currency:         types.CurrencyCode(payload.Currency.Code),
+		Multiplier:       payload.Currency.Multiplier,
+		IsFiat:           payload.Currency.IsFiat,
+	}, nil
+}
+
+// GetWalletWithCurrency implements [IRepository].
+func (r *repository) GetWalletWithCurrency(ctx context.Context, ownerID string, walletType string, currencyCode types.CurrencyCode) (*WalletResponse, error) {
 	w, err := r.db.Wallet.Query().
-		Where(wallet.IdentifierEQ(getIdentifier(identifier)),
-			wallet.TypeEQ(wallet.Type(walletType)),
-			wallet.HasCurrencyWith(currency.CodeEQ(currencyCode.Capitalize().ToString()))).
+		Where(
+			wallet.HasCurrencyWith(currency.CodeEQ(string(currencyCode.Capitalize()))),
+			wallet.HasVaultWith(vault.HasOwnerWith(ledgerowner.IDEQ(ownerID)),
+				vault.TypeEQ(vault.Type(walletType))),
+		).
 		WithCurrency(func(q *ent.CurrencyQuery) {
 			q.Select(
+				currency.FieldID,
 				currency.FieldCode,
-				currency.FieldMultipler,
+				currency.FieldMultiplier,
 			)
 		}).First(ctx)
 	if err != nil {
@@ -68,40 +131,12 @@ func (r *repository) GetWallet(ctx context.Context, identifier string, walletTyp
 
 	return &WalletResponse{
 		ID:               w.ID,
-		Type:             string(w.Type),
 		AvailableBalance: w.AvailableBalance,
-		Owner:            w.Owner.String(),
-		Identifier:       w.Identifier,
+		LedgerBalance:    w.LedgerBalance,
+		HoldingBalance:   w.HoldingBalance,
 		Active:           w.Active,
 		Currency:         types.CurrencyCode(w.Edges.Currency.Code),
-		Multiplier:       w.Edges.Currency.Multipler,
-	}, nil
-}
-
-func (r *repository) Create(ctx context.Context, payload *createWallet) (*WalletResponse, error) {
-	owner := wallet.OwnerUSER
-	if payload.IsBusiness {
-		owner = wallet.OwnerBUSINESS
-	}
-
-	w, err := r.db.Wallet.Create().
-		SetCurrency(payload.Currency).
-		SetIdentifier(getIdentifier(payload.Identifier)).
-		SetOwner(owner).
-		SetType(wallet.Type(payload.Type)).
-		Save(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	return &WalletResponse{
-		ID:               w.ID,
-		Type:             string(w.Type),
-		AvailableBalance: w.AvailableBalance,
-		Owner:            w.Owner.String(),
-		Identifier:       w.Identifier,
-		Active:           w.Active,
-		Currency:         types.CurrencyCode(payload.Currency.Code),
-		Multiplier:       payload.Currency.Multipler,
+		Multiplier:       w.Edges.Currency.Multiplier,
+		IsFiat:           w.Edges.Currency.IsFiat,
 	}, nil
 }

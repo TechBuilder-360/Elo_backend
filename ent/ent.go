@@ -20,7 +20,9 @@ import (
 	"github.com/Toflex/directory_v2/ent/currency"
 	"github.com/Toflex/directory_v2/ent/kybdocument"
 	"github.com/Toflex/directory_v2/ent/kybmessage"
+	"github.com/Toflex/directory_v2/ent/ledgerowner"
 	"github.com/Toflex/directory_v2/ent/manager"
+	"github.com/Toflex/directory_v2/ent/nubanstaticaccount"
 	"github.com/Toflex/directory_v2/ent/permission"
 	"github.com/Toflex/directory_v2/ent/provider"
 	"github.com/Toflex/directory_v2/ent/requestverification"
@@ -30,6 +32,7 @@ import (
 	"github.com/Toflex/directory_v2/ent/social"
 	"github.com/Toflex/directory_v2/ent/user"
 	"github.com/Toflex/directory_v2/ent/userdocument"
+	"github.com/Toflex/directory_v2/ent/vault"
 	"github.com/Toflex/directory_v2/ent/verification"
 	"github.com/Toflex/directory_v2/ent/wallet"
 )
@@ -100,7 +103,9 @@ func checkColumn(table, column string) error {
 			currency.Table:            currency.ValidColumn,
 			kybdocument.Table:         kybdocument.ValidColumn,
 			kybmessage.Table:          kybmessage.ValidColumn,
+			ledgerowner.Table:         ledgerowner.ValidColumn,
 			manager.Table:             manager.ValidColumn,
+			nubanstaticaccount.Table:  nubanstaticaccount.ValidColumn,
 			permission.Table:          permission.ValidColumn,
 			provider.Table:            provider.ValidColumn,
 			requestverification.Table: requestverification.ValidColumn,
@@ -110,6 +115,7 @@ func checkColumn(table, column string) error {
 			social.Table:              social.ValidColumn,
 			user.Table:                user.ValidColumn,
 			userdocument.Table:        userdocument.ValidColumn,
+			vault.Table:               vault.ValidColumn,
 			verification.Table:        verification.ValidColumn,
 			wallet.Table:              wallet.ValidColumn,
 		})

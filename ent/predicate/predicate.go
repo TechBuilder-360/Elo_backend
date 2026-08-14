@@ -30,8 +30,14 @@ type KYBDocument func(*sql.Selector)
 // KYBMessage is the predicate function for kybmessage builders.
 type KYBMessage func(*sql.Selector)
 
+// LedgerOwner is the predicate function for ledgerowner builders.
+type LedgerOwner func(*sql.Selector)
+
 // Manager is the predicate function for manager builders.
 type Manager func(*sql.Selector)
+
+// NubanStaticAccount is the predicate function for nubanstaticaccount builders.
+type NubanStaticAccount func(*sql.Selector)
 
 // Permission is the predicate function for permission builders.
 type Permission func(*sql.Selector)
@@ -59,6 +65,9 @@ type User func(*sql.Selector)
 
 // UserDocument is the predicate function for userdocument builders.
 type UserDocument func(*sql.Selector)
+
+// Vault is the predicate function for vault builders.
+type Vault func(*sql.Selector)
 
 // Verification is the predicate function for verification builders.
 type Verification func(*sql.Selector)

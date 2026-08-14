@@ -8,8 +8,9 @@ import (
 )
 
 type IRepository interface {
-	GetWallets(ctx context.Context, identifier string, walletType WalletType) ([]WalletResponse, error)
-	GetWallet(ctx context.Context, identifier string, walletType WalletType, currencyCode types.CurrencyCode) (*WalletResponse, error)
+	GetWallets(ctx context.Context, ownerID string, walletType WalletType) ([]WalletResponse, error)
+	GetWallet(ctx context.Context, walletType, ownerID string) (*WalletResponse, error)
+	GetWalletWithCurrency(ctx context.Context, ownerID, walletType string, currencyCode types.CurrencyCode) (*WalletResponse, error)
 	Create(ctx context.Context, payload *createWallet) (*WalletResponse, error)
 }
 

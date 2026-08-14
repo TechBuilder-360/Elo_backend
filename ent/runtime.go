@@ -13,7 +13,9 @@ import (
 	"github.com/Toflex/directory_v2/ent/currency"
 	"github.com/Toflex/directory_v2/ent/kybdocument"
 	"github.com/Toflex/directory_v2/ent/kybmessage"
+	"github.com/Toflex/directory_v2/ent/ledgerowner"
 	"github.com/Toflex/directory_v2/ent/manager"
+	"github.com/Toflex/directory_v2/ent/nubanstaticaccount"
 	"github.com/Toflex/directory_v2/ent/permission"
 	"github.com/Toflex/directory_v2/ent/provider"
 	"github.com/Toflex/directory_v2/ent/requestverification"
@@ -24,6 +26,7 @@ import (
 	"github.com/Toflex/directory_v2/ent/social"
 	"github.com/Toflex/directory_v2/ent/user"
 	"github.com/Toflex/directory_v2/ent/userdocument"
+	"github.com/Toflex/directory_v2/ent/vault"
 	"github.com/Toflex/directory_v2/ent/verification"
 	"github.com/Toflex/directory_v2/ent/wallet"
 )
@@ -60,7 +63,7 @@ func init() {
 	// business.AboutValidator is a validator for the "about" field. It is called by the builders before save.
 	business.AboutValidator = businessDescAbout.Validators[0].(func(string) error)
 	// businessDescEmail is the schema descriptor for email field.
-	businessDescEmail := businessFields[9].Descriptor()
+	businessDescEmail := businessFields[10].Descriptor()
 	// business.EmailValidator is a validator for the "email" field. It is called by the builders before save.
 	business.EmailValidator = func() func(string) error {
 		validators := businessDescEmail.Validators
@@ -78,31 +81,31 @@ func init() {
 		}
 	}()
 	// businessDescWebsite is the schema descriptor for website field.
-	businessDescWebsite := businessFields[10].Descriptor()
+	businessDescWebsite := businessFields[11].Descriptor()
 	// business.WebsiteValidator is a validator for the "website" field. It is called by the builders before save.
 	business.WebsiteValidator = businessDescWebsite.Validators[0].(func(string) error)
 	// businessDescOnSite is the schema descriptor for on_site field.
-	businessDescOnSite := businessFields[11].Descriptor()
+	businessDescOnSite := businessFields[12].Descriptor()
 	// business.DefaultOnSite holds the default value on creation for the on_site field.
 	business.DefaultOnSite = businessDescOnSite.Default.(bool)
 	// businessDescActive is the schema descriptor for active field.
-	businessDescActive := businessFields[12].Descriptor()
+	businessDescActive := businessFields[13].Descriptor()
 	// business.DefaultActive holds the default value on creation for the active field.
 	business.DefaultActive = businessDescActive.Default.(bool)
 	// businessDescLive is the schema descriptor for live field.
-	businessDescLive := businessFields[13].Descriptor()
+	businessDescLive := businessFields[14].Descriptor()
 	// business.DefaultLive holds the default value on creation for the live field.
 	business.DefaultLive = businessDescLive.Default.(bool)
 	// businessDescDisabled is the schema descriptor for disabled field.
-	businessDescDisabled := businessFields[14].Descriptor()
+	businessDescDisabled := businessFields[15].Descriptor()
 	// business.DefaultDisabled holds the default value on creation for the disabled field.
 	business.DefaultDisabled = businessDescDisabled.Default.(bool)
 	// businessDescDisabledAt is the schema descriptor for disabled_at field.
-	businessDescDisabledAt := businessFields[15].Descriptor()
+	businessDescDisabledAt := businessFields[16].Descriptor()
 	// business.DefaultDisabledAt holds the default value on creation for the disabled_at field.
 	business.DefaultDisabledAt = businessDescDisabledAt.Default.(func() time.Time)
 	// businessDescVerified is the schema descriptor for verified field.
-	businessDescVerified := businessFields[18].Descriptor()
+	businessDescVerified := businessFields[19].Descriptor()
 	// business.DefaultVerified holds the default value on creation for the verified field.
 	business.DefaultVerified = businessDescVerified.Default.(bool)
 	// businessDescID is the schema descriptor for id field.
@@ -341,6 +344,25 @@ func init() {
 	kybmessageDescID := kybmessageMixinFields0[0].Descriptor()
 	// kybmessage.DefaultID holds the default value on creation for the id field.
 	kybmessage.DefaultID = kybmessageDescID.Default.(func() string)
+	ledgerownerMixin := schema.LedgerOwner{}.Mixin()
+	ledgerownerMixinFields0 := ledgerownerMixin[0].Fields()
+	_ = ledgerownerMixinFields0
+	ledgerownerFields := schema.LedgerOwner{}.Fields()
+	_ = ledgerownerFields
+	// ledgerownerDescCreatedAt is the schema descriptor for created_at field.
+	ledgerownerDescCreatedAt := ledgerownerMixinFields0[1].Descriptor()
+	// ledgerowner.DefaultCreatedAt holds the default value on creation for the created_at field.
+	ledgerowner.DefaultCreatedAt = ledgerownerDescCreatedAt.Default.(func() time.Time)
+	// ledgerownerDescUpdatedAt is the schema descriptor for updated_at field.
+	ledgerownerDescUpdatedAt := ledgerownerMixinFields0[2].Descriptor()
+	// ledgerowner.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	ledgerowner.DefaultUpdatedAt = ledgerownerDescUpdatedAt.Default.(func() time.Time)
+	// ledgerowner.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	ledgerowner.UpdateDefaultUpdatedAt = ledgerownerDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// ledgerownerDescID is the schema descriptor for id field.
+	ledgerownerDescID := ledgerownerMixinFields0[0].Descriptor()
+	// ledgerowner.DefaultID holds the default value on creation for the id field.
+	ledgerowner.DefaultID = ledgerownerDescID.Default.(func() string)
 	managerMixin := schema.Manager{}.Mixin()
 	managerMixinFields0 := managerMixin[0].Fields()
 	_ = managerMixinFields0
@@ -372,6 +394,41 @@ func init() {
 	managerDescID := managerMixinFields0[0].Descriptor()
 	// manager.DefaultID holds the default value on creation for the id field.
 	manager.DefaultID = managerDescID.Default.(func() string)
+	nubanstaticaccountMixin := schema.NubanStaticAccount{}.Mixin()
+	nubanstaticaccountMixinFields0 := nubanstaticaccountMixin[0].Fields()
+	_ = nubanstaticaccountMixinFields0
+	nubanstaticaccountFields := schema.NubanStaticAccount{}.Fields()
+	_ = nubanstaticaccountFields
+	// nubanstaticaccountDescCreatedAt is the schema descriptor for created_at field.
+	nubanstaticaccountDescCreatedAt := nubanstaticaccountMixinFields0[1].Descriptor()
+	// nubanstaticaccount.DefaultCreatedAt holds the default value on creation for the created_at field.
+	nubanstaticaccount.DefaultCreatedAt = nubanstaticaccountDescCreatedAt.Default.(func() time.Time)
+	// nubanstaticaccountDescUpdatedAt is the schema descriptor for updated_at field.
+	nubanstaticaccountDescUpdatedAt := nubanstaticaccountMixinFields0[2].Descriptor()
+	// nubanstaticaccount.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	nubanstaticaccount.DefaultUpdatedAt = nubanstaticaccountDescUpdatedAt.Default.(func() time.Time)
+	// nubanstaticaccount.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	nubanstaticaccount.UpdateDefaultUpdatedAt = nubanstaticaccountDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// nubanstaticaccountDescAccountNumber is the schema descriptor for account_number field.
+	nubanstaticaccountDescAccountNumber := nubanstaticaccountFields[2].Descriptor()
+	// nubanstaticaccount.AccountNumberValidator is a validator for the "account_number" field. It is called by the builders before save.
+	nubanstaticaccount.AccountNumberValidator = nubanstaticaccountDescAccountNumber.Validators[0].(func(string) error)
+	// nubanstaticaccountDescAccountName is the schema descriptor for account_name field.
+	nubanstaticaccountDescAccountName := nubanstaticaccountFields[3].Descriptor()
+	// nubanstaticaccount.AccountNameValidator is a validator for the "account_name" field. It is called by the builders before save.
+	nubanstaticaccount.AccountNameValidator = nubanstaticaccountDescAccountName.Validators[0].(func(string) error)
+	// nubanstaticaccountDescBankName is the schema descriptor for bank_name field.
+	nubanstaticaccountDescBankName := nubanstaticaccountFields[4].Descriptor()
+	// nubanstaticaccount.BankNameValidator is a validator for the "bank_name" field. It is called by the builders before save.
+	nubanstaticaccount.BankNameValidator = nubanstaticaccountDescBankName.Validators[0].(func(string) error)
+	// nubanstaticaccountDescBankCode is the schema descriptor for bank_code field.
+	nubanstaticaccountDescBankCode := nubanstaticaccountFields[5].Descriptor()
+	// nubanstaticaccount.BankCodeValidator is a validator for the "bank_code" field. It is called by the builders before save.
+	nubanstaticaccount.BankCodeValidator = nubanstaticaccountDescBankCode.Validators[0].(func(string) error)
+	// nubanstaticaccountDescID is the schema descriptor for id field.
+	nubanstaticaccountDescID := nubanstaticaccountMixinFields0[0].Descriptor()
+	// nubanstaticaccount.DefaultID holds the default value on creation for the id field.
+	nubanstaticaccount.DefaultID = nubanstaticaccountDescID.Default.(func() string)
 	permissionMixin := schema.Permission{}.Mixin()
 	permissionMixinFields0 := permissionMixin[0].Fields()
 	_ = permissionMixinFields0
@@ -678,6 +735,25 @@ func init() {
 	userdocumentDescURL := userdocumentFields[2].Descriptor()
 	// userdocument.URLValidator is a validator for the "url" field. It is called by the builders before save.
 	userdocument.URLValidator = userdocumentDescURL.Validators[0].(func(string) error)
+	vaultMixin := schema.Vault{}.Mixin()
+	vaultMixinFields0 := vaultMixin[0].Fields()
+	_ = vaultMixinFields0
+	vaultFields := schema.Vault{}.Fields()
+	_ = vaultFields
+	// vaultDescCreatedAt is the schema descriptor for created_at field.
+	vaultDescCreatedAt := vaultMixinFields0[1].Descriptor()
+	// vault.DefaultCreatedAt holds the default value on creation for the created_at field.
+	vault.DefaultCreatedAt = vaultDescCreatedAt.Default.(func() time.Time)
+	// vaultDescUpdatedAt is the schema descriptor for updated_at field.
+	vaultDescUpdatedAt := vaultMixinFields0[2].Descriptor()
+	// vault.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	vault.DefaultUpdatedAt = vaultDescUpdatedAt.Default.(func() time.Time)
+	// vault.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	vault.UpdateDefaultUpdatedAt = vaultDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// vaultDescID is the schema descriptor for id field.
+	vaultDescID := vaultMixinFields0[0].Descriptor()
+	// vault.DefaultID holds the default value on creation for the id field.
+	vault.DefaultID = vaultDescID.Default.(func() string)
 	verificationMixin := schema.Verification{}.Mixin()
 	verificationMixinFields0 := verificationMixin[0].Fields()
 	_ = verificationMixinFields0
@@ -745,11 +821,11 @@ func init() {
 	// wallet.DefaultHoldingBalance holds the default value on creation for the holding_balance field.
 	wallet.DefaultHoldingBalance = walletDescHoldingBalance.Default.(int64)
 	// walletDescCurrencyID is the schema descriptor for currency_id field.
-	walletDescCurrencyID := walletFields[6].Descriptor()
+	walletDescCurrencyID := walletFields[4].Descriptor()
 	// wallet.CurrencyIDValidator is a validator for the "currency_id" field. It is called by the builders before save.
 	wallet.CurrencyIDValidator = walletDescCurrencyID.Validators[0].(func(string) error)
 	// walletDescActive is the schema descriptor for active field.
-	walletDescActive := walletFields[7].Descriptor()
+	walletDescActive := walletFields[5].Descriptor()
 	// wallet.DefaultActive holds the default value on creation for the active field.
 	wallet.DefaultActive = walletDescActive.Default.(bool)
 	// walletDescID is the schema descriptor for id field.

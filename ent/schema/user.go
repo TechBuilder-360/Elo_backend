@@ -48,5 +48,8 @@ func (User) Edges() []ent.Edge {
 			Ref("user"),
 		edge.From("request_verifications", RequestVerification.Type).
 			Ref("user"),
+		edge.To("owner", LedgerOwner.Type).
+			Unique().
+			Required(),
 	}
 }

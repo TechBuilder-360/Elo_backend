@@ -39,6 +39,8 @@ const (
 	FieldDateOfIncorporation = "date_of_incorporation"
 	// FieldRegistrationNumber holds the string denoting the registration_number field in the database.
 	FieldRegistrationNumber = "registration_number"
+	// FieldTaxIdentificationNumber holds the string denoting the tax_identification_number field in the database.
+	FieldTaxIdentificationNumber = "tax_identification_number"
 	// FieldEmail holds the string denoting the email field in the database.
 	FieldEmail = "email"
 	// FieldWebsite holds the string denoting the website field in the database.
@@ -79,6 +81,8 @@ const (
 	EdgeLocations = "locations"
 	// EdgeKybMessages holds the string denoting the kyb_messages edge name in mutations.
 	EdgeKybMessages = "kyb_messages"
+	// EdgeOwner holds the string denoting the owner edge name in mutations.
+	EdgeOwner = "owner"
 	// Table holds the table name of the business in the database.
 	Table = "businesses"
 	// SocialsTable is the table that holds the socials relation/edge.
@@ -140,6 +144,13 @@ const (
 	KybMessagesInverseTable = "kyb_messages"
 	// KybMessagesColumn is the table column denoting the kyb_messages relation/edge.
 	KybMessagesColumn = "business_kyb_messages"
+	// OwnerTable is the table that holds the owner relation/edge.
+	OwnerTable = "ledger_owners"
+	// OwnerInverseTable is the table name for the LedgerOwner entity.
+	// It exists in this package in order to avoid circular dependency with the "ledgerowner" package.
+	OwnerInverseTable = "ledger_owners"
+	// OwnerColumn is the table column denoting the owner relation/edge.
+	OwnerColumn = "business_owner"
 )
 
 // Columns holds all SQL columns for business fields.
@@ -157,6 +168,7 @@ var Columns = []string{
 	FieldCountryOfIncorporation,
 	FieldDateOfIncorporation,
 	FieldRegistrationNumber,
+	FieldTaxIdentificationNumber,
 	FieldEmail,
 	FieldWebsite,
 	FieldOnSite,
@@ -316,6 +328,11 @@ func ByDateOfIncorporation(opts ...sql.OrderTermOption) OrderOption {
 // ByRegistrationNumber orders the results by the registration_number field.
 func ByRegistrationNumber(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldRegistrationNumber, opts...).ToFunc()
+}
+
+// ByTaxIdentificationNumber orders the results by the tax_identification_number field.
+func ByTaxIdentificationNumber(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldTaxIdentificationNumber, opts...).ToFunc()
 }
 
 // ByEmail orders the results by the email field.
@@ -491,6 +508,13 @@ func ByKybMessages(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 		sqlgraph.OrderByNeighborTerms(s, newKybMessagesStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
+
+// ByOwnerField orders the results by owner field.
+func ByOwnerField(field string, opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newOwnerStep(), sql.OrderByField(field, opts...))
+	}
+}
 func newSocialsStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
@@ -552,5 +576,12 @@ func newKybMessagesStep() *sqlgraph.Step {
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(KybMessagesInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.O2M, false, KybMessagesTable, KybMessagesColumn),
+	)
+}
+func newOwnerStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(OwnerInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2O, false, OwnerTable, OwnerColumn),
 	)
 }

@@ -13,6 +13,7 @@ const (
 	TaskTypeIdentityVerification string = "identity:verification"
 	TaskUserVerification         string = "user:verification"
 	TaskKYBDocument              string = "kyb:document"
+	TaskDafaultWallet            string = "wallet:default"
 )
 
 // Verification Types
@@ -31,4 +32,9 @@ const (
 	PDF  types.DocumentType = "pdf"
 	JPEG types.DocumentType = "jpeg"
 	JPG  types.DocumentType = "jpg"
+)
+
+const (
+	Business types.LedgerOwner = "BUSINESS"
+	User     types.LedgerOwner = "USER"
 )

@@ -16,6 +16,7 @@ import (
 	"github.com/Toflex/directory_v2/ent/businesslocation"
 	"github.com/Toflex/directory_v2/ent/businessservices"
 	"github.com/Toflex/directory_v2/ent/kybmessage"
+	"github.com/Toflex/directory_v2/ent/ledgerowner"
 	"github.com/Toflex/directory_v2/ent/manager"
 	"github.com/Toflex/directory_v2/ent/predicate"
 	"github.com/Toflex/directory_v2/ent/requestverification"
@@ -222,6 +223,26 @@ func (bu *BusinessUpdate) SetNillableRegistrationNumber(s *string) *BusinessUpda
 // ClearRegistrationNumber clears the value of the "registration_number" field.
 func (bu *BusinessUpdate) ClearRegistrationNumber() *BusinessUpdate {
 	bu.mutation.ClearRegistrationNumber()
+	return bu
+}
+
+// SetTaxIdentificationNumber sets the "tax_identification_number" field.
+func (bu *BusinessUpdate) SetTaxIdentificationNumber(s string) *BusinessUpdate {
+	bu.mutation.SetTaxIdentificationNumber(s)
+	return bu
+}
+
+// SetNillableTaxIdentificationNumber sets the "tax_identification_number" field if the given value is not nil.
+func (bu *BusinessUpdate) SetNillableTaxIdentificationNumber(s *string) *BusinessUpdate {
+	if s != nil {
+		bu.SetTaxIdentificationNumber(*s)
+	}
+	return bu
+}
+
+// ClearTaxIdentificationNumber clears the value of the "tax_identification_number" field.
+func (bu *BusinessUpdate) ClearTaxIdentificationNumber() *BusinessUpdate {
+	bu.mutation.ClearTaxIdentificationNumber()
 	return bu
 }
 
@@ -536,6 +557,17 @@ func (bu *BusinessUpdate) AddKybMessages(k ...*KYBMessage) *BusinessUpdate {
 	return bu.AddKybMessageIDs(ids...)
 }
 
+// SetOwnerID sets the "owner" edge to the LedgerOwner entity by ID.
+func (bu *BusinessUpdate) SetOwnerID(id string) *BusinessUpdate {
+	bu.mutation.SetOwnerID(id)
+	return bu
+}
+
+// SetOwner sets the "owner" edge to the LedgerOwner entity.
+func (bu *BusinessUpdate) SetOwner(l *LedgerOwner) *BusinessUpdate {
+	return bu.SetOwnerID(l.ID)
+}
+
 // Mutation returns the BusinessMutation object of the builder.
 func (bu *BusinessUpdate) Mutation() *BusinessMutation {
 	return bu.mutation
@@ -715,6 +747,12 @@ func (bu *BusinessUpdate) RemoveKybMessages(k ...*KYBMessage) *BusinessUpdate {
 	return bu.RemoveKybMessageIDs(ids...)
 }
 
+// ClearOwner clears the "owner" edge to the LedgerOwner entity.
+func (bu *BusinessUpdate) ClearOwner() *BusinessUpdate {
+	bu.mutation.ClearOwner()
+	return bu
+}
+
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (bu *BusinessUpdate) Save(ctx context.Context) (int, error) {
 	bu.defaults()
@@ -778,6 +816,9 @@ func (bu *BusinessUpdate) check() error {
 			return &ValidationError{Name: "verification_status", err: fmt.Errorf(`ent: validator failed for field "Business.verification_status": %w`, err)}
 		}
 	}
+	if bu.mutation.OwnerCleared() && len(bu.mutation.OwnerIDs()) > 0 {
+		return errors.New(`ent: clearing a required unique edge "Business.owner"`)
+	}
 	return nil
 }
 
@@ -840,6 +881,12 @@ func (bu *BusinessUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if bu.mutation.RegistrationNumberCleared() {
 		_spec.ClearField(business.FieldRegistrationNumber, field.TypeString)
+	}
+	if value, ok := bu.mutation.TaxIdentificationNumber(); ok {
+		_spec.SetField(business.FieldTaxIdentificationNumber, field.TypeString, value)
+	}
+	if bu.mutation.TaxIdentificationNumberCleared() {
+		_spec.ClearField(business.FieldTaxIdentificationNumber, field.TypeString)
 	}
 	if value, ok := bu.mutation.Email(); ok {
 		_spec.SetField(business.FieldEmail, field.TypeString, value)
@@ -1272,6 +1319,35 @@ func (bu *BusinessUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	if bu.mutation.OwnerCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2O,
+			Inverse: false,
+			Table:   business.OwnerTable,
+			Columns: []string{business.OwnerColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(ledgerowner.FieldID, field.TypeString),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := bu.mutation.OwnerIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2O,
+			Inverse: false,
+			Table:   business.OwnerTable,
+			Columns: []string{business.OwnerColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(ledgerowner.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
 	if n, err = sqlgraph.UpdateNodes(ctx, bu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{business.Label}
@@ -1477,6 +1553,26 @@ func (buo *BusinessUpdateOne) SetNillableRegistrationNumber(s *string) *Business
 // ClearRegistrationNumber clears the value of the "registration_number" field.
 func (buo *BusinessUpdateOne) ClearRegistrationNumber() *BusinessUpdateOne {
 	buo.mutation.ClearRegistrationNumber()
+	return buo
+}
+
+// SetTaxIdentificationNumber sets the "tax_identification_number" field.
+func (buo *BusinessUpdateOne) SetTaxIdentificationNumber(s string) *BusinessUpdateOne {
+	buo.mutation.SetTaxIdentificationNumber(s)
+	return buo
+}
+
+// SetNillableTaxIdentificationNumber sets the "tax_identification_number" field if the given value is not nil.
+func (buo *BusinessUpdateOne) SetNillableTaxIdentificationNumber(s *string) *BusinessUpdateOne {
+	if s != nil {
+		buo.SetTaxIdentificationNumber(*s)
+	}
+	return buo
+}
+
+// ClearTaxIdentificationNumber clears the value of the "tax_identification_number" field.
+func (buo *BusinessUpdateOne) ClearTaxIdentificationNumber() *BusinessUpdateOne {
+	buo.mutation.ClearTaxIdentificationNumber()
 	return buo
 }
 
@@ -1791,6 +1887,17 @@ func (buo *BusinessUpdateOne) AddKybMessages(k ...*KYBMessage) *BusinessUpdateOn
 	return buo.AddKybMessageIDs(ids...)
 }
 
+// SetOwnerID sets the "owner" edge to the LedgerOwner entity by ID.
+func (buo *BusinessUpdateOne) SetOwnerID(id string) *BusinessUpdateOne {
+	buo.mutation.SetOwnerID(id)
+	return buo
+}
+
+// SetOwner sets the "owner" edge to the LedgerOwner entity.
+func (buo *BusinessUpdateOne) SetOwner(l *LedgerOwner) *BusinessUpdateOne {
+	return buo.SetOwnerID(l.ID)
+}
+
 // Mutation returns the BusinessMutation object of the builder.
 func (buo *BusinessUpdateOne) Mutation() *BusinessMutation {
 	return buo.mutation
@@ -1970,6 +2077,12 @@ func (buo *BusinessUpdateOne) RemoveKybMessages(k ...*KYBMessage) *BusinessUpdat
 	return buo.RemoveKybMessageIDs(ids...)
 }
 
+// ClearOwner clears the "owner" edge to the LedgerOwner entity.
+func (buo *BusinessUpdateOne) ClearOwner() *BusinessUpdateOne {
+	buo.mutation.ClearOwner()
+	return buo
+}
+
 // Where appends a list predicates to the BusinessUpdate builder.
 func (buo *BusinessUpdateOne) Where(ps ...predicate.Business) *BusinessUpdateOne {
 	buo.mutation.Where(ps...)
@@ -2045,6 +2158,9 @@ func (buo *BusinessUpdateOne) check() error {
 		if err := business.VerificationStatusValidator(v); err != nil {
 			return &ValidationError{Name: "verification_status", err: fmt.Errorf(`ent: validator failed for field "Business.verification_status": %w`, err)}
 		}
+	}
+	if buo.mutation.OwnerCleared() && len(buo.mutation.OwnerIDs()) > 0 {
+		return errors.New(`ent: clearing a required unique edge "Business.owner"`)
 	}
 	return nil
 }
@@ -2125,6 +2241,12 @@ func (buo *BusinessUpdateOne) sqlSave(ctx context.Context) (_node *Business, err
 	}
 	if buo.mutation.RegistrationNumberCleared() {
 		_spec.ClearField(business.FieldRegistrationNumber, field.TypeString)
+	}
+	if value, ok := buo.mutation.TaxIdentificationNumber(); ok {
+		_spec.SetField(business.FieldTaxIdentificationNumber, field.TypeString, value)
+	}
+	if buo.mutation.TaxIdentificationNumberCleared() {
+		_spec.ClearField(business.FieldTaxIdentificationNumber, field.TypeString)
 	}
 	if value, ok := buo.mutation.Email(); ok {
 		_spec.SetField(business.FieldEmail, field.TypeString, value)
@@ -2550,6 +2672,35 @@ func (buo *BusinessUpdateOne) sqlSave(ctx context.Context) (_node *Business, err
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(kybmessage.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if buo.mutation.OwnerCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2O,
+			Inverse: false,
+			Table:   business.OwnerTable,
+			Columns: []string{business.OwnerColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(ledgerowner.FieldID, field.TypeString),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := buo.mutation.OwnerIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2O,
+			Inverse: false,
+			Table:   business.OwnerTable,
+			Columns: []string{business.OwnerColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(ledgerowner.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {

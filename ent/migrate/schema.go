@@ -22,6 +22,7 @@ var (
 		{Name: "country_of_incorporation", Type: field.TypeString, Nullable: true},
 		{Name: "date_of_incorporation", Type: field.TypeString, Nullable: true},
 		{Name: "registration_number", Type: field.TypeString, Nullable: true},
+		{Name: "tax_identification_number", Type: field.TypeString, Nullable: true},
 		{Name: "email", Type: field.TypeString},
 		{Name: "website", Type: field.TypeString, Nullable: true},
 		{Name: "on_site", Type: field.TypeBool, Default: false},
@@ -43,7 +44,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "businesses_users_registered_businesses",
-				Columns:    []*schema.Column{BusinessesColumns[23]},
+				Columns:    []*schema.Column{BusinessesColumns[24]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
@@ -167,13 +168,20 @@ var (
 		{Name: "code", Type: field.TypeString, Unique: true},
 		{Name: "is_fiat", Type: field.TypeBool, Default: true},
 		{Name: "active", Type: field.TypeBool, Default: true},
-		{Name: "multipler", Type: field.TypeInt64},
+		{Name: "multiplier", Type: field.TypeInt64},
 	}
 	// CurrenciesTable holds the schema information for the "currencies" table.
 	CurrenciesTable = &schema.Table{
 		Name:       "currencies",
 		Columns:    CurrenciesColumns,
 		PrimaryKey: []*schema.Column{CurrenciesColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "currency_name_code",
+				Unique:  true,
+				Columns: []*schema.Column{CurrenciesColumns[4], CurrenciesColumns[6]},
+			},
+		},
 	}
 	// KybDocumentsColumns holds the columns for the "kyb_documents" table.
 	KybDocumentsColumns = []*schema.Column{
@@ -212,6 +220,37 @@ var (
 				Columns:    []*schema.Column{KybMessagesColumns[6]},
 				RefColumns: []*schema.Column{BusinessesColumns[0]},
 				OnDelete:   schema.NoAction,
+			},
+		},
+	}
+	// LedgerOwnersColumns holds the columns for the "ledger_owners" table.
+	LedgerOwnersColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeString},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "deleted_at", Type: field.TypeTime, Nullable: true},
+		{Name: "type", Type: field.TypeEnum, Enums: []string{"BUSINESS", "USER"}},
+		{Name: "status", Type: field.TypeEnum, Enums: []string{"ACTIVE", "SUSPENDED", "CLOSED"}, Default: "ACTIVE"},
+		{Name: "business_owner", Type: field.TypeString, Unique: true, Nullable: true},
+		{Name: "user_owner", Type: field.TypeString, Unique: true, Nullable: true},
+	}
+	// LedgerOwnersTable holds the schema information for the "ledger_owners" table.
+	LedgerOwnersTable = &schema.Table{
+		Name:       "ledger_owners",
+		Columns:    LedgerOwnersColumns,
+		PrimaryKey: []*schema.Column{LedgerOwnersColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "ledger_owners_businesses_owner",
+				Columns:    []*schema.Column{LedgerOwnersColumns[6]},
+				RefColumns: []*schema.Column{BusinessesColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+			{
+				Symbol:     "ledger_owners_users_owner",
+				Columns:    []*schema.Column{LedgerOwnersColumns[7]},
+				RefColumns: []*schema.Column{UsersColumns[0]},
+				OnDelete:   schema.SetNull,
 			},
 		},
 	}
@@ -259,6 +298,36 @@ var (
 				Name:    "manager_user_id_business_id_role_id",
 				Unique:  true,
 				Columns: []*schema.Column{ManagersColumns[10], ManagersColumns[8], ManagersColumns[9]},
+			},
+		},
+	}
+	// NubanStaticAccountsColumns holds the columns for the "nuban_static_accounts" table.
+	NubanStaticAccountsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeString},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "deleted_at", Type: field.TypeTime, Nullable: true},
+		{Name: "provider", Type: field.TypeString},
+		{Name: "provider_reference", Type: field.TypeString},
+		{Name: "account_number", Type: field.TypeString},
+		{Name: "account_name", Type: field.TypeString},
+		{Name: "bank_name", Type: field.TypeString},
+		{Name: "bank_code", Type: field.TypeString},
+		{Name: "address", Type: field.TypeString, Nullable: true},
+		{Name: "state", Type: field.TypeEnum, Enums: []string{"OPEN", "SUSPENDED", "CLOSED"}, Default: "OPEN"},
+		{Name: "wallet_nuban_static_account", Type: field.TypeString},
+	}
+	// NubanStaticAccountsTable holds the schema information for the "nuban_static_accounts" table.
+	NubanStaticAccountsTable = &schema.Table{
+		Name:       "nuban_static_accounts",
+		Columns:    NubanStaticAccountsColumns,
+		PrimaryKey: []*schema.Column{NubanStaticAccountsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "nuban_static_accounts_wallets_nuban_static_account",
+				Columns:    []*schema.Column{NubanStaticAccountsColumns[12]},
+				RefColumns: []*schema.Column{WalletsColumns[0]},
+				OnDelete:   schema.NoAction,
 			},
 		},
 	}
@@ -471,6 +540,31 @@ var (
 			},
 		},
 	}
+	// VaultsColumns holds the columns for the "vaults" table.
+	VaultsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeString},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "deleted_at", Type: field.TypeTime, Nullable: true},
+		{Name: "type", Type: field.TypeEnum, Enums: []string{"TREASURY"}, Default: "TREASURY"},
+		{Name: "status", Type: field.TypeEnum, Enums: []string{"ACTIVE", "SUSPENDED", "CLOSED"}, Default: "ACTIVE"},
+		{Name: "metadata", Type: field.TypeJSON, Nullable: true},
+		{Name: "ledger_owner_vaults", Type: field.TypeString},
+	}
+	// VaultsTable holds the schema information for the "vaults" table.
+	VaultsTable = &schema.Table{
+		Name:       "vaults",
+		Columns:    VaultsColumns,
+		PrimaryKey: []*schema.Column{VaultsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "vaults_ledger_owners_vaults",
+				Columns:    []*schema.Column{VaultsColumns[7]},
+				RefColumns: []*schema.Column{LedgerOwnersColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+		},
+	}
 	// VerificationsColumns holds the columns for the "verifications" table.
 	VerificationsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeString},
@@ -507,14 +601,13 @@ var (
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "updated_at", Type: field.TypeTime},
 		{Name: "deleted_at", Type: field.TypeTime, Nullable: true},
-		{Name: "type", Type: field.TypeEnum, Enums: []string{"TREASURY", "HOLDING"}, Default: "TREASURY"},
+		{Name: "type", Type: field.TypeEnum, Enums: []string{"FIAT", "CRYPTO"}, Default: "FIAT"},
 		{Name: "available_balance", Type: field.TypeInt64, Default: 0},
 		{Name: "ledger_balance", Type: field.TypeInt64, Default: 0},
 		{Name: "holding_balance", Type: field.TypeInt64, Default: 0},
-		{Name: "owner", Type: field.TypeEnum, Enums: []string{"USER", "BUSINESS"}, Default: "USER"},
-		{Name: "identifier", Type: field.TypeString},
 		{Name: "active", Type: field.TypeBool, Default: true},
 		{Name: "currency_id", Type: field.TypeString},
+		{Name: "vault_wallets", Type: field.TypeString},
 	}
 	// WalletsTable holds the schema information for the "wallets" table.
 	WalletsTable = &schema.Table{
@@ -524,16 +617,22 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "wallets_currencies_wallets",
-				Columns:    []*schema.Column{WalletsColumns[11]},
+				Columns:    []*schema.Column{WalletsColumns[9]},
 				RefColumns: []*schema.Column{CurrenciesColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+			{
+				Symbol:     "wallets_vaults_wallets",
+				Columns:    []*schema.Column{WalletsColumns[10]},
+				RefColumns: []*schema.Column{VaultsColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
 		},
 		Indexes: []*schema.Index{
 			{
-				Name:    "wallet_identifier_currency_id_type",
+				Name:    "wallet_currency_id_vault_wallets",
 				Unique:  true,
-				Columns: []*schema.Column{WalletsColumns[9], WalletsColumns[11], WalletsColumns[4]},
+				Columns: []*schema.Column{WalletsColumns[9], WalletsColumns[10]},
 			},
 		},
 	}
@@ -672,7 +771,9 @@ var (
 		CurrenciesTable,
 		KybDocumentsTable,
 		KybMessagesTable,
+		LedgerOwnersTable,
 		ManagersTable,
+		NubanStaticAccountsTable,
 		PermissionsTable,
 		ProvidersTable,
 		RequestVerificationsTable,
@@ -682,6 +783,7 @@ var (
 		SocialsTable,
 		UsersTable,
 		UserDocumentsTable,
+		VaultsTable,
 		VerificationsTable,
 		WalletsTable,
 		KybDocumentKybDocumentsTable,
@@ -698,14 +800,19 @@ func init() {
 	BusinessLocationsTable.ForeignKeys[0].RefTable = BusinessesTable
 	BusinessServicesTable.ForeignKeys[0].RefTable = BusinessesTable
 	KybMessagesTable.ForeignKeys[0].RefTable = BusinessesTable
+	LedgerOwnersTable.ForeignKeys[0].RefTable = BusinessesTable
+	LedgerOwnersTable.ForeignKeys[1].RefTable = UsersTable
 	ManagersTable.ForeignKeys[0].RefTable = BusinessesTable
 	ManagersTable.ForeignKeys[1].RefTable = RolesTable
 	ManagersTable.ForeignKeys[2].RefTable = UsersTable
+	NubanStaticAccountsTable.ForeignKeys[0].RefTable = WalletsTable
 	RolePermissionsTable.ForeignKeys[0].RefTable = PermissionsTable
 	RolePermissionsTable.ForeignKeys[1].RefTable = RolesTable
 	SocialsTable.ForeignKeys[0].RefTable = BusinessesTable
 	UserDocumentsTable.ForeignKeys[0].RefTable = UsersTable
+	VaultsTable.ForeignKeys[0].RefTable = LedgerOwnersTable
 	WalletsTable.ForeignKeys[0].RefTable = CurrenciesTable
+	WalletsTable.ForeignKeys[1].RefTable = VaultsTable
 	KybDocumentKybDocumentsTable.ForeignKeys[0].RefTable = KybDocumentsTable
 	KybDocumentKybDocumentsTable.ForeignKeys[1].RefTable = BusinessDocumentsTable
 	RequestVerificationUserTable.ForeignKeys[0].RefTable = RequestVerificationsTable

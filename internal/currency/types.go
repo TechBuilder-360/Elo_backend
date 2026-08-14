@@ -1,7 +1,14 @@
 package currency
 
 type Currency struct {
-	Name   string
-	Code   string
-	Symbol string
+	ID         string
+	Name       string
+	Code       string
+	Symbol     string
+	Multiplier int64
+	IsFiat     bool
+}
+
+type CurrencyFilter struct {
+	IsFiat bool
 }

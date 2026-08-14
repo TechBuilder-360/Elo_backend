@@ -13,6 +13,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/Toflex/directory_v2/ent/business"
+	"github.com/Toflex/directory_v2/ent/ledgerowner"
 	"github.com/Toflex/directory_v2/ent/manager"
 	"github.com/Toflex/directory_v2/ent/predicate"
 	"github.com/Toflex/directory_v2/ent/requestverification"
@@ -33,6 +34,7 @@ type UserQuery struct {
 	withRegisteredBusinesses *BusinessQuery
 	withVerifications        *VerificationQuery
 	withRequestVerifications *RequestVerificationQuery
+	withOwner                *LedgerOwnerQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -172,6 +174,28 @@ func (uq *UserQuery) QueryRequestVerifications() *RequestVerificationQuery {
 			sqlgraph.From(user.Table, user.FieldID, selector),
 			sqlgraph.To(requestverification.Table, requestverification.FieldID),
 			sqlgraph.Edge(sqlgraph.M2M, true, user.RequestVerificationsTable, user.RequestVerificationsPrimaryKey...),
+		)
+		fromU = sqlgraph.SetNeighbors(uq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryOwner chains the current query on the "owner" edge.
+func (uq *UserQuery) QueryOwner() *LedgerOwnerQuery {
+	query := (&LedgerOwnerClient{config: uq.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := uq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := uq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, selector),
+			sqlgraph.To(ledgerowner.Table, ledgerowner.FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, false, user.OwnerTable, user.OwnerColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(uq.driver.Dialect(), step)
 		return fromU, nil
@@ -376,6 +400,7 @@ func (uq *UserQuery) Clone() *UserQuery {
 		withRegisteredBusinesses: uq.withRegisteredBusinesses.Clone(),
 		withVerifications:        uq.withVerifications.Clone(),
 		withRequestVerifications: uq.withRequestVerifications.Clone(),
+		withOwner:                uq.withOwner.Clone(),
 		// clone intermediate query.
 		sql:  uq.sql.Clone(),
 		path: uq.path,
@@ -434,6 +459,17 @@ func (uq *UserQuery) WithRequestVerifications(opts ...func(*RequestVerificationQ
 		opt(query)
 	}
 	uq.withRequestVerifications = query
+	return uq
+}
+
+// WithOwner tells the query-builder to eager-load the nodes that are connected to
+// the "owner" edge. The optional arguments are used to configure the query builder of the edge.
+func (uq *UserQuery) WithOwner(opts ...func(*LedgerOwnerQuery)) *UserQuery {
+	query := (&LedgerOwnerClient{config: uq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	uq.withOwner = query
 	return uq
 }
 
@@ -515,12 +551,13 @@ func (uq *UserQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*User, e
 	var (
 		nodes       = []*User{}
 		_spec       = uq.querySpec()
-		loadedTypes = [5]bool{
+		loadedTypes = [6]bool{
 			uq.withManages != nil,
 			uq.withUserDocuments != nil,
 			uq.withRegisteredBusinesses != nil,
 			uq.withVerifications != nil,
 			uq.withRequestVerifications != nil,
+			uq.withOwner != nil,
 		}
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
@@ -575,6 +612,12 @@ func (uq *UserQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*User, e
 			func(n *User, e *RequestVerification) {
 				n.Edges.RequestVerifications = append(n.Edges.RequestVerifications, e)
 			}); err != nil {
+			return nil, err
+		}
+	}
+	if query := uq.withOwner; query != nil {
+		if err := uq.loadOwner(ctx, query, nodes, nil,
+			func(n *User, e *LedgerOwner) { n.Edges.Owner = e }); err != nil {
 			return nil, err
 		}
 	}
@@ -794,6 +837,34 @@ func (uq *UserQuery) loadRequestVerifications(ctx context.Context, query *Reques
 		for kn := range nodes {
 			assign(kn, n)
 		}
+	}
+	return nil
+}
+func (uq *UserQuery) loadOwner(ctx context.Context, query *LedgerOwnerQuery, nodes []*User, init func(*User), assign func(*User, *LedgerOwner)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[string]*User)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+	}
+	query.withFKs = true
+	query.Where(predicate.LedgerOwner(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(user.OwnerColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.user_owner
+		if fk == nil {
+			return fmt.Errorf(`foreign-key "user_owner" is nil for node %v`, n.ID)
+		}
+		node, ok := nodeids[*fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "user_owner" returned %v for node %v`, *fk, n.ID)
+		}
+		assign(node, n)
 	}
 	return nil
 }

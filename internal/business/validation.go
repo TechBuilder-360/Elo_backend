@@ -189,9 +189,18 @@ func (b *BusinessDetailRequest) Validate() error {
 		}
 	}
 
-	err = b.RegistrationDetail.Validate()
-	if err != nil {
-		return err
+	if b.RegistrationDetail != nil {
+		err = b.RegistrationDetail.Validate()
+		if err != nil {
+			return err
+		}
+	}
+
+	if b.Address != nil {
+		err = b.Address.Validate()
+		if err != nil {
+			return err
+		}
 	}
 
 	return nil

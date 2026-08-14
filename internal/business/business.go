@@ -31,17 +31,19 @@ func (s *service) GetBusiness(ctx context.Context, user *ent.User, id string, lo
 	}
 
 	return &BusinessResult{
-		ID:                     business.ID,
-		Name:                   business.Name,
-		Logo:                   &business.Logo,
-		Email:                  &business.Email,
-		About:                  &business.About,
-		OnSite:                 business.OnSite,
-		Number:                 util.AddressToString(business.RegistrationNumber),
-		Industry:               business.Category,
-		CountryOfIncorporation: util.AddressToString(business.CountryOfIncorporation),
-		DateOfIncorporation:    util.AddressToString(business.DateOfIncorporation),
-		Address:                address,
+		ID:                      business.ID,
+		Name:                    business.Name,
+		Logo:                    &business.Logo,
+		Email:                   &business.Email,
+		About:                   &business.About,
+		OnSite:                  business.OnSite,
+		Website:                 &business.Website,
+		TaxIdentificationNumber: util.AddressToString(business.TaxIdentificationNumber),
+		Number:                  util.AddressToString(business.RegistrationNumber),
+		Industry:                business.Category,
+		CountryOfIncorporation:  util.AddressToString(business.CountryOfIncorporation),
+		DateOfIncorporation:     util.AddressToString(business.DateOfIncorporation),
+		Address:                 address,
 	}, nil
 }
 

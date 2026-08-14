@@ -7,5 +7,6 @@ const (
 	SendGrid   types.Provider = "sendgrid"
 	Brevo      types.Provider = "brevo"
 	Dojah      types.Provider = "dojah"
+	Maplerad   types.Provider = "maplerad"
 	Cloudinary types.Provider = "cloudinary"
 )

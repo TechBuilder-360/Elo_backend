@@ -17,6 +17,7 @@ import (
 	"github.com/Toflex/directory_v2/ent/businesslocation"
 	"github.com/Toflex/directory_v2/ent/businessservices"
 	"github.com/Toflex/directory_v2/ent/kybmessage"
+	"github.com/Toflex/directory_v2/ent/ledgerowner"
 	"github.com/Toflex/directory_v2/ent/manager"
 	"github.com/Toflex/directory_v2/ent/predicate"
 	"github.com/Toflex/directory_v2/ent/requestverification"
@@ -41,6 +42,7 @@ type BusinessQuery struct {
 	withBusinessDocuments    *BusinessDocumentQuery
 	withLocations            *BusinessLocationQuery
 	withKybMessages          *KYBMessageQuery
+	withOwner                *LedgerOwnerQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -275,6 +277,28 @@ func (bq *BusinessQuery) QueryKybMessages() *KYBMessageQuery {
 	return query
 }
 
+// QueryOwner chains the current query on the "owner" edge.
+func (bq *BusinessQuery) QueryOwner() *LedgerOwnerQuery {
+	query := (&LedgerOwnerClient{config: bq.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := bq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := bq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(business.Table, business.FieldID, selector),
+			sqlgraph.To(ledgerowner.Table, ledgerowner.FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, false, business.OwnerTable, business.OwnerColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(bq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
 // First returns the first Business entity from the query.
 // Returns a *NotFoundError when no Business was found.
 func (bq *BusinessQuery) First(ctx context.Context) (*Business, error) {
@@ -476,6 +500,7 @@ func (bq *BusinessQuery) Clone() *BusinessQuery {
 		withBusinessDocuments:    bq.withBusinessDocuments.Clone(),
 		withLocations:            bq.withLocations.Clone(),
 		withKybMessages:          bq.withKybMessages.Clone(),
+		withOwner:                bq.withOwner.Clone(),
 		// clone intermediate query.
 		sql:  bq.sql.Clone(),
 		path: bq.path,
@@ -581,6 +606,17 @@ func (bq *BusinessQuery) WithKybMessages(opts ...func(*KYBMessageQuery)) *Busine
 	return bq
 }
 
+// WithOwner tells the query-builder to eager-load the nodes that are connected to
+// the "owner" edge. The optional arguments are used to configure the query builder of the edge.
+func (bq *BusinessQuery) WithOwner(opts ...func(*LedgerOwnerQuery)) *BusinessQuery {
+	query := (&LedgerOwnerClient{config: bq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	bq.withOwner = query
+	return bq
+}
+
 // GroupBy is used to group vertices by one or more fields/columns.
 // It is often used with aggregate functions, like: count, max, mean, min, sum.
 //
@@ -659,7 +695,7 @@ func (bq *BusinessQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Bus
 	var (
 		nodes       = []*Business{}
 		_spec       = bq.querySpec()
-		loadedTypes = [9]bool{
+		loadedTypes = [10]bool{
 			bq.withSocials != nil,
 			bq.withServices != nil,
 			bq.withManages != nil,
@@ -669,6 +705,7 @@ func (bq *BusinessQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Bus
 			bq.withBusinessDocuments != nil,
 			bq.withLocations != nil,
 			bq.withKybMessages != nil,
+			bq.withOwner != nil,
 		}
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
@@ -752,6 +789,12 @@ func (bq *BusinessQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Bus
 		if err := bq.loadKybMessages(ctx, query, nodes,
 			func(n *Business) { n.Edges.KybMessages = []*KYBMessage{} },
 			func(n *Business, e *KYBMessage) { n.Edges.KybMessages = append(n.Edges.KybMessages, e) }); err != nil {
+			return nil, err
+		}
+	}
+	if query := bq.withOwner; query != nil {
+		if err := bq.loadOwner(ctx, query, nodes, nil,
+			func(n *Business, e *LedgerOwner) { n.Edges.Owner = e }); err != nil {
 			return nil, err
 		}
 	}
@@ -1090,6 +1133,34 @@ func (bq *BusinessQuery) loadKybMessages(ctx context.Context, query *KYBMessageQ
 		node, ok := nodeids[*fk]
 		if !ok {
 			return fmt.Errorf(`unexpected referenced foreign-key "business_kyb_messages" returned %v for node %v`, *fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (bq *BusinessQuery) loadOwner(ctx context.Context, query *LedgerOwnerQuery, nodes []*Business, init func(*Business), assign func(*Business, *LedgerOwner)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[string]*Business)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+	}
+	query.withFKs = true
+	query.Where(predicate.LedgerOwner(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(business.OwnerColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.business_owner
+		if fk == nil {
+			return fmt.Errorf(`foreign-key "business_owner" is nil for node %v`, n.ID)
+		}
+		node, ok := nodeids[*fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "business_owner" returned %v for node %v`, *fk, n.ID)
 		}
 		assign(node, n)
 	}

@@ -4,6 +4,7 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
+	"entgo.io/ent/schema/index"
 )
 
 // Currency holds the schema definition for the Currency entity.
@@ -25,7 +26,7 @@ func (Currency) Fields() []ent.Field {
 		field.String("code").NotEmpty().Unique(),
 		field.Bool("is_fiat").Default(true),
 		field.Bool("active").Default(true),
-		field.Int64("multipler"),
+		field.Int64("multiplier"),
 	}
 }
 
@@ -33,5 +34,12 @@ func (Currency) Fields() []ent.Field {
 func (Currency) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.To("wallets", Wallet.Type),
+	}
+}
+
+func (Currency) Indexes() []ent.Index {
+	return []ent.Index{
+		index.Fields("name", "code").
+			Unique(),
 	}
 }

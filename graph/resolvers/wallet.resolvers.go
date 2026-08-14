@@ -13,8 +13,8 @@ import (
 	"github.com/Toflex/directory_v2/pkg/log"
 )
 
-// Wallets is the resolver for the wallets field.
-func (r *queryResolver) Wallets(ctx context.Context, wt model.WalletType) ([]*model.Wallet, error) {
+// BusinessWallets is the resolver for the business_wallets field.
+func (r *queryResolver) BusinessWallets(ctx context.Context, wt model.WalletType) ([]*model.Wallet, error) {
 	logger := log.LoggerInContext(ctx)
 
 	b, err := middlewares.BusinessFromContext(ctx)
@@ -23,7 +23,7 @@ func (r *queryResolver) Wallets(ctx context.Context, wt model.WalletType) ([]*mo
 		return nil, err
 	}
 
-	response, err := r.WalletService.GetWallets(ctx, b, wt.String())
+	response, err := r.BusinessService.GetBusinessWallets(ctx, b, wt.String())
 	if err != nil {
 		logger.WithError(err).Error("failed to fetch wallets")
 		return nil, err
@@ -32,8 +32,8 @@ func (r *queryResolver) Wallets(ctx context.Context, wt model.WalletType) ([]*mo
 	return response, nil
 }
 
-// Wallet is the resolver for the wallet field.
-func (r *queryResolver) Wallet(ctx context.Context, currencyCode string, wt model.WalletType) (*model.Wallet, error) {
+// BusinessWallet is the resolver for the business_wallet field.
+func (r *queryResolver) BusinessWallet(ctx context.Context, currencyCode string, wt model.WalletType) (*model.Wallet, error) {
 	logger := log.LoggerInContext(ctx)
 
 	b, err := middlewares.BusinessFromContext(ctx)
@@ -42,7 +42,7 @@ func (r *queryResolver) Wallet(ctx context.Context, currencyCode string, wt mode
 		return nil, err
 	}
 
-	response, err := r.WalletService.GetWallet(ctx, b, wt.String(), currencyCode)
+	response, err := r.BusinessService.GetBusinessWallet(ctx, b, wt.String(), currencyCode)
 	if err != nil {
 		logger.WithError(err).Error("failed to fetch wallet")
 		return nil, err
@@ -51,8 +51,8 @@ func (r *queryResolver) Wallet(ctx context.Context, currencyCode string, wt mode
 	return response, nil
 }
 
-// AddWallet implements [generated.MutationResolver].
-func (r *mutationResolver) AddWallet(ctx context.Context, currencyCode string, walletType model.WalletType) (*model.Wallet, error) {
+// AddBusinessWallet implements [generated.MutationResolver].
+func (r *mutationResolver) AddBusinessWallet(ctx context.Context, currencyCode string, walletType model.WalletType) (*model.Wallet, error) {
 	logger := log.LoggerInContext(ctx)
 
 	b, err := middlewares.BusinessFromContext(ctx)
@@ -61,7 +61,16 @@ func (r *mutationResolver) AddWallet(ctx context.Context, currencyCode string, w
 		return nil, err
 	}
 
-	response, err := r.WalletService.AddWallet(ctx, b, walletType.String(), currencyCode)
+	owner, err := b.QueryOwner().Only(ctx)
+	if err != nil {
+		logger.WithError(err).Error("failed to fetch business owner in context")
+		return nil, err
+	}
+
+	// get owner ID from the business object
+	ownerID := owner.ID
+
+	response, err := r.WalletService.AddWallet(ctx, ownerID, walletType.String(), currencyCode)
 	if err != nil {
 		logger.WithError(err).Error("wallet creation failed")
 		return nil, err

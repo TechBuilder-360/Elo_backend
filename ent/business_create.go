@@ -17,6 +17,7 @@ import (
 	"github.com/Toflex/directory_v2/ent/businesslocation"
 	"github.com/Toflex/directory_v2/ent/businessservices"
 	"github.com/Toflex/directory_v2/ent/kybmessage"
+	"github.com/Toflex/directory_v2/ent/ledgerowner"
 	"github.com/Toflex/directory_v2/ent/manager"
 	"github.com/Toflex/directory_v2/ent/requestverification"
 	"github.com/Toflex/directory_v2/ent/social"
@@ -180,6 +181,20 @@ func (bc *BusinessCreate) SetRegistrationNumber(s string) *BusinessCreate {
 func (bc *BusinessCreate) SetNillableRegistrationNumber(s *string) *BusinessCreate {
 	if s != nil {
 		bc.SetRegistrationNumber(*s)
+	}
+	return bc
+}
+
+// SetTaxIdentificationNumber sets the "tax_identification_number" field.
+func (bc *BusinessCreate) SetTaxIdentificationNumber(s string) *BusinessCreate {
+	bc.mutation.SetTaxIdentificationNumber(s)
+	return bc
+}
+
+// SetNillableTaxIdentificationNumber sets the "tax_identification_number" field if the given value is not nil.
+func (bc *BusinessCreate) SetNillableTaxIdentificationNumber(s *string) *BusinessCreate {
+	if s != nil {
+		bc.SetTaxIdentificationNumber(*s)
 	}
 	return bc
 }
@@ -483,6 +498,17 @@ func (bc *BusinessCreate) AddKybMessages(k ...*KYBMessage) *BusinessCreate {
 	return bc.AddKybMessageIDs(ids...)
 }
 
+// SetOwnerID sets the "owner" edge to the LedgerOwner entity by ID.
+func (bc *BusinessCreate) SetOwnerID(id string) *BusinessCreate {
+	bc.mutation.SetOwnerID(id)
+	return bc
+}
+
+// SetOwner sets the "owner" edge to the LedgerOwner entity.
+func (bc *BusinessCreate) SetOwner(l *LedgerOwner) *BusinessCreate {
+	return bc.SetOwnerID(l.ID)
+}
+
 // Mutation returns the BusinessMutation object of the builder.
 func (bc *BusinessCreate) Mutation() *BusinessMutation {
 	return bc.mutation
@@ -630,6 +656,9 @@ func (bc *BusinessCreate) check() error {
 	if _, ok := bc.mutation.Verified(); !ok {
 		return &ValidationError{Name: "verified", err: errors.New(`ent: missing required field "Business.verified"`)}
 	}
+	if len(bc.mutation.OwnerIDs()) == 0 {
+		return &ValidationError{Name: "owner", err: errors.New(`ent: missing required edge "Business.owner"`)}
+	}
 	return nil
 }
 
@@ -709,6 +738,10 @@ func (bc *BusinessCreate) createSpec() (*Business, *sqlgraph.CreateSpec) {
 	if value, ok := bc.mutation.RegistrationNumber(); ok {
 		_spec.SetField(business.FieldRegistrationNumber, field.TypeString, value)
 		_node.RegistrationNumber = &value
+	}
+	if value, ok := bc.mutation.TaxIdentificationNumber(); ok {
+		_spec.SetField(business.FieldTaxIdentificationNumber, field.TypeString, value)
+		_node.TaxIdentificationNumber = &value
 	}
 	if value, ok := bc.mutation.Email(); ok {
 		_spec.SetField(business.FieldEmail, field.TypeString, value)
@@ -892,6 +925,22 @@ func (bc *BusinessCreate) createSpec() (*Business, *sqlgraph.CreateSpec) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(kybmessage.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := bc.mutation.OwnerIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2O,
+			Inverse: false,
+			Table:   business.OwnerTable,
+			Columns: []string{business.OwnerColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(ledgerowner.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {
@@ -1122,6 +1171,24 @@ func (u *BusinessUpsert) UpdateRegistrationNumber() *BusinessUpsert {
 // ClearRegistrationNumber clears the value of the "registration_number" field.
 func (u *BusinessUpsert) ClearRegistrationNumber() *BusinessUpsert {
 	u.SetNull(business.FieldRegistrationNumber)
+	return u
+}
+
+// SetTaxIdentificationNumber sets the "tax_identification_number" field.
+func (u *BusinessUpsert) SetTaxIdentificationNumber(v string) *BusinessUpsert {
+	u.Set(business.FieldTaxIdentificationNumber, v)
+	return u
+}
+
+// UpdateTaxIdentificationNumber sets the "tax_identification_number" field to the value that was provided on create.
+func (u *BusinessUpsert) UpdateTaxIdentificationNumber() *BusinessUpsert {
+	u.SetExcluded(business.FieldTaxIdentificationNumber)
+	return u
+}
+
+// ClearTaxIdentificationNumber clears the value of the "tax_identification_number" field.
+func (u *BusinessUpsert) ClearTaxIdentificationNumber() *BusinessUpsert {
+	u.SetNull(business.FieldTaxIdentificationNumber)
 	return u
 }
 
@@ -1526,6 +1593,27 @@ func (u *BusinessUpsertOne) UpdateRegistrationNumber() *BusinessUpsertOne {
 func (u *BusinessUpsertOne) ClearRegistrationNumber() *BusinessUpsertOne {
 	return u.Update(func(s *BusinessUpsert) {
 		s.ClearRegistrationNumber()
+	})
+}
+
+// SetTaxIdentificationNumber sets the "tax_identification_number" field.
+func (u *BusinessUpsertOne) SetTaxIdentificationNumber(v string) *BusinessUpsertOne {
+	return u.Update(func(s *BusinessUpsert) {
+		s.SetTaxIdentificationNumber(v)
+	})
+}
+
+// UpdateTaxIdentificationNumber sets the "tax_identification_number" field to the value that was provided on create.
+func (u *BusinessUpsertOne) UpdateTaxIdentificationNumber() *BusinessUpsertOne {
+	return u.Update(func(s *BusinessUpsert) {
+		s.UpdateTaxIdentificationNumber()
+	})
+}
+
+// ClearTaxIdentificationNumber clears the value of the "tax_identification_number" field.
+func (u *BusinessUpsertOne) ClearTaxIdentificationNumber() *BusinessUpsertOne {
+	return u.Update(func(s *BusinessUpsert) {
+		s.ClearTaxIdentificationNumber()
 	})
 }
 
@@ -2122,6 +2210,27 @@ func (u *BusinessUpsertBulk) UpdateRegistrationNumber() *BusinessUpsertBulk {
 func (u *BusinessUpsertBulk) ClearRegistrationNumber() *BusinessUpsertBulk {
 	return u.Update(func(s *BusinessUpsert) {
 		s.ClearRegistrationNumber()
+	})
+}
+
+// SetTaxIdentificationNumber sets the "tax_identification_number" field.
+func (u *BusinessUpsertBulk) SetTaxIdentificationNumber(v string) *BusinessUpsertBulk {
+	return u.Update(func(s *BusinessUpsert) {
+		s.SetTaxIdentificationNumber(v)
+	})
+}
+
+// UpdateTaxIdentificationNumber sets the "tax_identification_number" field to the value that was provided on create.
+func (u *BusinessUpsertBulk) UpdateTaxIdentificationNumber() *BusinessUpsertBulk {
+	return u.Update(func(s *BusinessUpsert) {
+		s.UpdateTaxIdentificationNumber()
+	})
+}
+
+// ClearTaxIdentificationNumber clears the value of the "tax_identification_number" field.
+func (u *BusinessUpsertBulk) ClearTaxIdentificationNumber() *BusinessUpsertBulk {
+	return u.Update(func(s *BusinessUpsert) {
+		s.ClearTaxIdentificationNumber()
 	})
 }
 

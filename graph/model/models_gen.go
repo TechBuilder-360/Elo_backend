@@ -30,6 +30,7 @@ type Business struct {
 	OnSite                  bool     `json:"on_site"`
 	About                   *string  `json:"about,omitempty"`
 	Industry                string   `json:"industry"`
+	Website                 string   `json:"website"`
 	Number                  string   `json:"number"`
 	CountryOfIncorporation  string   `json:"country_of_incorporation"`
 	DateOfIncorporation     string   `json:"date_of_incorporation"`
@@ -59,6 +60,10 @@ type Currency struct {
 	Name   string `json:"name"`
 	Symbol string `json:"symbol"`
 	IsFiat bool   `json:"is_fiat"`
+}
+
+type CurrencyFilter struct {
+	IsFiat bool `json:"is_fiat"`
 }
 
 type DocumentInput struct {
@@ -162,21 +167,22 @@ type VerificationSuccess struct {
 func (VerificationSuccess) IsVerificationResponse() {}
 
 type Wallet struct {
-	Type             string  `json:"type"`
 	AvailableBalance float64 `json:"available_balance"`
 	LedgerBalance    float64 `json:"ledger_balance"`
 	HoldingBalance   float64 `json:"holding_balance"`
 	ID               string  `json:"id"`
 	Currency         string  `json:"currency"`
 	Active           bool    `json:"active"`
+	IsFiat           bool    `json:"is_fiat"`
 }
 
 type BusinessDetail struct {
-	RegistrationDetail *BusinessRegistrationDetail `json:"registration_detail,omitempty"`
-	Name               *string                     `json:"name,omitempty"`
-	About              *string                     `json:"about,omitempty"`
-	Industry           *string                     `json:"industry,omitempty"`
-	Website            *string                     `json:"website,omitempty"`
+	RegistrationDetail      *BusinessRegistrationDetail `json:"registration_detail,omitempty"`
+	Name                    *string                     `json:"name,omitempty"`
+	About                   *string                     `json:"about,omitempty"`
+	Industry                *string                     `json:"industry,omitempty"`
+	Website                 *string                     `json:"website,omitempty"`
+	TaxIdentificationNumber *string                     `json:"tax_identification_number,omitempty"`
 }
 
 type BusinessDocument struct {

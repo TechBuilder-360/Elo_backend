@@ -28,8 +28,12 @@ type Tx struct {
 	KYBDocument *KYBDocumentClient
 	// KYBMessage is the client for interacting with the KYBMessage builders.
 	KYBMessage *KYBMessageClient
+	// LedgerOwner is the client for interacting with the LedgerOwner builders.
+	LedgerOwner *LedgerOwnerClient
 	// Manager is the client for interacting with the Manager builders.
 	Manager *ManagerClient
+	// NubanStaticAccount is the client for interacting with the NubanStaticAccount builders.
+	NubanStaticAccount *NubanStaticAccountClient
 	// Permission is the client for interacting with the Permission builders.
 	Permission *PermissionClient
 	// Provider is the client for interacting with the Provider builders.
@@ -48,6 +52,8 @@ type Tx struct {
 	User *UserClient
 	// UserDocument is the client for interacting with the UserDocument builders.
 	UserDocument *UserDocumentClient
+	// Vault is the client for interacting with the Vault builders.
+	Vault *VaultClient
 	// Verification is the client for interacting with the Verification builders.
 	Verification *VerificationClient
 	// Wallet is the client for interacting with the Wallet builders.
@@ -191,7 +197,9 @@ func (tx *Tx) init() {
 	tx.Currency = NewCurrencyClient(tx.config)
 	tx.KYBDocument = NewKYBDocumentClient(tx.config)
 	tx.KYBMessage = NewKYBMessageClient(tx.config)
+	tx.LedgerOwner = NewLedgerOwnerClient(tx.config)
 	tx.Manager = NewManagerClient(tx.config)
+	tx.NubanStaticAccount = NewNubanStaticAccountClient(tx.config)
 	tx.Permission = NewPermissionClient(tx.config)
 	tx.Provider = NewProviderClient(tx.config)
 	tx.RequestVerification = NewRequestVerificationClient(tx.config)
@@ -201,6 +209,7 @@ func (tx *Tx) init() {
 	tx.Social = NewSocialClient(tx.config)
 	tx.User = NewUserClient(tx.config)
 	tx.UserDocument = NewUserDocumentClient(tx.config)
+	tx.Vault = NewVaultClient(tx.config)
 	tx.Verification = NewVerificationClient(tx.config)
 	tx.Wallet = NewWalletClient(tx.config)
 }

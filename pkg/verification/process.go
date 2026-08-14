@@ -289,6 +289,7 @@ func (s *Service) processFailedVerification(ctx context.Context, payload *Verifi
 	return uw.Commit(tx)
 }
 
+// TODO: verify user information against known information
 func (s *Service) verifyUserInformation() {
 
 }

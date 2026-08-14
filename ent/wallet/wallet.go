@@ -29,16 +29,16 @@ const (
 	FieldLedgerBalance = "ledger_balance"
 	// FieldHoldingBalance holds the string denoting the holding_balance field in the database.
 	FieldHoldingBalance = "holding_balance"
-	// FieldOwner holds the string denoting the owner field in the database.
-	FieldOwner = "owner"
-	// FieldIdentifier holds the string denoting the identifier field in the database.
-	FieldIdentifier = "identifier"
 	// FieldCurrencyID holds the string denoting the currency_id field in the database.
 	FieldCurrencyID = "currency_id"
 	// FieldActive holds the string denoting the active field in the database.
 	FieldActive = "active"
 	// EdgeCurrency holds the string denoting the currency edge name in mutations.
 	EdgeCurrency = "currency"
+	// EdgeVault holds the string denoting the vault edge name in mutations.
+	EdgeVault = "vault"
+	// EdgeNubanStaticAccount holds the string denoting the nuban_static_account edge name in mutations.
+	EdgeNubanStaticAccount = "nuban_static_account"
 	// Table holds the table name of the wallet in the database.
 	Table = "wallets"
 	// CurrencyTable is the table that holds the currency relation/edge.
@@ -48,6 +48,20 @@ const (
 	CurrencyInverseTable = "currencies"
 	// CurrencyColumn is the table column denoting the currency relation/edge.
 	CurrencyColumn = "currency_id"
+	// VaultTable is the table that holds the vault relation/edge.
+	VaultTable = "wallets"
+	// VaultInverseTable is the table name for the Vault entity.
+	// It exists in this package in order to avoid circular dependency with the "vault" package.
+	VaultInverseTable = "vaults"
+	// VaultColumn is the table column denoting the vault relation/edge.
+	VaultColumn = "vault_wallets"
+	// NubanStaticAccountTable is the table that holds the nuban_static_account relation/edge.
+	NubanStaticAccountTable = "nuban_static_accounts"
+	// NubanStaticAccountInverseTable is the table name for the NubanStaticAccount entity.
+	// It exists in this package in order to avoid circular dependency with the "nubanstaticaccount" package.
+	NubanStaticAccountInverseTable = "nuban_static_accounts"
+	// NubanStaticAccountColumn is the table column denoting the nuban_static_account relation/edge.
+	NubanStaticAccountColumn = "wallet_nuban_static_account"
 )
 
 // Columns holds all SQL columns for wallet fields.
@@ -60,16 +74,25 @@ var Columns = []string{
 	FieldAvailableBalance,
 	FieldLedgerBalance,
 	FieldHoldingBalance,
-	FieldOwner,
-	FieldIdentifier,
 	FieldCurrencyID,
 	FieldActive,
+}
+
+// ForeignKeys holds the SQL foreign-keys that are owned by the "wallets"
+// table and are not defined as standalone fields in the schema.
+var ForeignKeys = []string{
+	"vault_wallets",
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
 func ValidColumn(column string) bool {
 	for i := range Columns {
 		if column == Columns[i] {
+			return true
+		}
+	}
+	for i := range ForeignKeys {
+		if column == ForeignKeys[i] {
 			return true
 		}
 	}
@@ -100,13 +123,13 @@ var (
 // Type defines the type for the "type" enum field.
 type Type string
 
-// TypeTREASURY is the default value of the Type enum.
-const DefaultType = TypeTREASURY
+// TypeFIAT is the default value of the Type enum.
+const DefaultType = TypeFIAT
 
 // Type values.
 const (
-	TypeTREASURY Type = "TREASURY"
-	TypeHOLDING  Type = "HOLDING"
+	TypeFIAT   Type = "FIAT"
+	TypeCRYPTO Type = "CRYPTO"
 )
 
 func (_type Type) String() string {
@@ -116,36 +139,10 @@ func (_type Type) String() string {
 // TypeValidator is a validator for the "type" field enum values. It is called by the builders before save.
 func TypeValidator(_type Type) error {
 	switch _type {
-	case TypeTREASURY, TypeHOLDING:
+	case TypeFIAT, TypeCRYPTO:
 		return nil
 	default:
 		return fmt.Errorf("wallet: invalid enum value for type field: %q", _type)
-	}
-}
-
-// Owner defines the type for the "owner" enum field.
-type Owner string
-
-// OwnerUSER is the default value of the Owner enum.
-const DefaultOwner = OwnerUSER
-
-// Owner values.
-const (
-	OwnerUSER     Owner = "USER"
-	OwnerBUSINESS Owner = "BUSINESS"
-)
-
-func (o Owner) String() string {
-	return string(o)
-}
-
-// OwnerValidator is a validator for the "owner" field enum values. It is called by the builders before save.
-func OwnerValidator(o Owner) error {
-	switch o {
-	case OwnerUSER, OwnerBUSINESS:
-		return nil
-	default:
-		return fmt.Errorf("wallet: invalid enum value for owner field: %q", o)
 	}
 }
 
@@ -192,16 +189,6 @@ func ByHoldingBalance(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldHoldingBalance, opts...).ToFunc()
 }
 
-// ByOwner orders the results by the owner field.
-func ByOwner(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldOwner, opts...).ToFunc()
-}
-
-// ByIdentifier orders the results by the identifier field.
-func ByIdentifier(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldIdentifier, opts...).ToFunc()
-}
-
 // ByCurrencyID orders the results by the currency_id field.
 func ByCurrencyID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldCurrencyID, opts...).ToFunc()
@@ -218,10 +205,45 @@ func ByCurrencyField(field string, opts ...sql.OrderTermOption) OrderOption {
 		sqlgraph.OrderByNeighborTerms(s, newCurrencyStep(), sql.OrderByField(field, opts...))
 	}
 }
+
+// ByVaultField orders the results by vault field.
+func ByVaultField(field string, opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newVaultStep(), sql.OrderByField(field, opts...))
+	}
+}
+
+// ByNubanStaticAccountCount orders the results by nuban_static_account count.
+func ByNubanStaticAccountCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newNubanStaticAccountStep(), opts...)
+	}
+}
+
+// ByNubanStaticAccount orders the results by nuban_static_account terms.
+func ByNubanStaticAccount(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newNubanStaticAccountStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
 func newCurrencyStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(CurrencyInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.M2O, true, CurrencyTable, CurrencyColumn),
+	)
+}
+func newVaultStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(VaultInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.M2O, true, VaultTable, VaultColumn),
+	)
+}
+func newNubanStaticAccountStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(NubanStaticAccountInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, NubanStaticAccountTable, NubanStaticAccountColumn),
 	)
 }

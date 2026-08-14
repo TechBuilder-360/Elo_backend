@@ -10,6 +10,7 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"github.com/Toflex/directory_v2/ent/business"
+	"github.com/Toflex/directory_v2/ent/ledgerowner"
 	"github.com/Toflex/directory_v2/ent/user"
 )
 
@@ -42,6 +43,8 @@ type Business struct {
 	DateOfIncorporation *string `json:"date_of_incorporation,omitempty"`
 	// RegistrationNumber holds the value of the "registration_number" field.
 	RegistrationNumber *string `json:"registration_number,omitempty"`
+	// TaxIdentificationNumber holds the value of the "tax_identification_number" field.
+	TaxIdentificationNumber *string `json:"tax_identification_number,omitempty"`
 	// Email holds the value of the "email" field.
 	Email string `json:"email,omitempty"`
 	// Website holds the value of the "website" field.
@@ -90,9 +93,11 @@ type BusinessEdges struct {
 	Locations []*BusinessLocation `json:"locations,omitempty"`
 	// KybMessages holds the value of the kyb_messages edge.
 	KybMessages []*KYBMessage `json:"kyb_messages,omitempty"`
+	// Owner holds the value of the owner edge.
+	Owner *LedgerOwner `json:"owner,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [9]bool
+	loadedTypes [10]bool
 }
 
 // SocialsOrErr returns the Socials value or an error if the edge
@@ -178,6 +183,17 @@ func (e BusinessEdges) KybMessagesOrErr() ([]*KYBMessage, error) {
 	return nil, &NotLoadedError{edge: "kyb_messages"}
 }
 
+// OwnerOrErr returns the Owner value or an error if the edge
+// was not loaded in eager-loading, or loaded but was not found.
+func (e BusinessEdges) OwnerOrErr() (*LedgerOwner, error) {
+	if e.Owner != nil {
+		return e.Owner, nil
+	} else if e.loadedTypes[9] {
+		return nil, &NotFoundError{label: ledgerowner.Label}
+	}
+	return nil, &NotLoadedError{edge: "owner"}
+}
+
 // scanValues returns the types for scanning values from sql.Rows.
 func (*Business) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
@@ -185,7 +201,7 @@ func (*Business) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case business.FieldOnSite, business.FieldActive, business.FieldLive, business.FieldDisabled, business.FieldVerified:
 			values[i] = new(sql.NullBool)
-		case business.FieldID, business.FieldCategory, business.FieldName, business.FieldAbout, business.FieldLogo, business.FieldCoverImage, business.FieldRegisteredBy, business.FieldCountryOfIncorporation, business.FieldDateOfIncorporation, business.FieldRegistrationNumber, business.FieldEmail, business.FieldWebsite, business.FieldDisableReason, business.FieldVerificationStatus:
+		case business.FieldID, business.FieldCategory, business.FieldName, business.FieldAbout, business.FieldLogo, business.FieldCoverImage, business.FieldRegisteredBy, business.FieldCountryOfIncorporation, business.FieldDateOfIncorporation, business.FieldRegistrationNumber, business.FieldTaxIdentificationNumber, business.FieldEmail, business.FieldWebsite, business.FieldDisableReason, business.FieldVerificationStatus:
 			values[i] = new(sql.NullString)
 		case business.FieldCreatedAt, business.FieldUpdatedAt, business.FieldDeletedAt, business.FieldDisabledAt, business.FieldVerifiedAt:
 			values[i] = new(sql.NullTime)
@@ -286,6 +302,13 @@ func (b *Business) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				b.RegistrationNumber = new(string)
 				*b.RegistrationNumber = value.String
+			}
+		case business.FieldTaxIdentificationNumber:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field tax_identification_number", values[i])
+			} else if value.Valid {
+				b.TaxIdentificationNumber = new(string)
+				*b.TaxIdentificationNumber = value.String
 			}
 		case business.FieldEmail:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -411,6 +434,11 @@ func (b *Business) QueryKybMessages() *KYBMessageQuery {
 	return NewBusinessClient(b.config).QueryKybMessages(b)
 }
 
+// QueryOwner queries the "owner" edge of the Business entity.
+func (b *Business) QueryOwner() *LedgerOwnerQuery {
+	return NewBusinessClient(b.config).QueryOwner(b)
+}
+
 // Update returns a builder for updating this Business.
 // Note that you need to call Business.Unwrap() before calling this method if this Business
 // was returned from a transaction, and the transaction was committed or rolled back.
@@ -477,6 +505,11 @@ func (b *Business) String() string {
 	builder.WriteString(", ")
 	if v := b.RegistrationNumber; v != nil {
 		builder.WriteString("registration_number=")
+		builder.WriteString(*v)
+	}
+	builder.WriteString(", ")
+	if v := b.TaxIdentificationNumber; v != nil {
+		builder.WriteString("tax_identification_number=")
 		builder.WriteString(*v)
 	}
 	builder.WriteString(", ")

@@ -33,6 +33,7 @@ func (Business) Fields() []ent.Field {
 		field.String("country_of_incorporation").Nillable().Optional(),
 		field.String("date_of_incorporation").Nillable().Optional(),
 		field.String("registration_number").Nillable().Optional(),
+		field.String("tax_identification_number").Nillable().Optional(),
 		field.String("email").NotEmpty().
 			Validate(util.ValidateEmail),
 		field.String("website").Optional().
@@ -71,6 +72,9 @@ func (Business) Edges() []ent.Edge {
 		edge.To("business_documents", BusinessDocument.Type),
 		edge.To("locations", BusinessLocation.Type),
 		edge.To("kyb_messages", KYBMessage.Type),
+		edge.To("owner", LedgerOwner.Type).
+			Unique().
+			Required(),
 	}
 }
 

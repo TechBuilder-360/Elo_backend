@@ -2,8 +2,6 @@ package business
 
 import (
 	"context"
-	"fmt"
-	"strconv"
 
 	"github.com/Toflex/directory_v2/ent"
 	kyb "github.com/Toflex/directory_v2/pkg/business"
@@ -104,20 +102,15 @@ func (s *service) DeleteDocument(ctx context.Context, business *ent.Business, do
 }
 
 func (s *service) BusinessDetail(ctx context.Context, user *ent.User, business *ent.Business, payload *BusinessDetailRequest, logger log.Entry) error {
-	// Add random string to business name until they gets verified
-	if payload.Name != nil {
-		name := fmt.Sprintf("%s_%s", util.AddressToString(payload.Name), strconv.Itoa(util.RandomInt()))
-		payload.Name = &name
-	}
-
 	err := s.repo.Update(ctx, business, UpdateBusiness{
-		Name:                   payload.Name,
-		About:                  payload.About,
-		Industry:               payload.Industry,
-		Website:                payload.Website,
-		Number:                 &payload.RegistrationDetail.Number,
-		CountryOfIncorporation: &payload.RegistrationDetail.CountryOfIncorporation,
-		DateOfIncorporation:    &payload.RegistrationDetail.DateOfIncorporation,
+		Name:                    payload.Name,
+		About:                   payload.About,
+		Industry:                payload.Industry,
+		Website:                 payload.Website,
+		TaxIdentificationNumber: payload.TaxIdentificationNumber,
+		Number:                  &payload.RegistrationDetail.Number,
+		CountryOfIncorporation:  &payload.RegistrationDetail.CountryOfIncorporation,
+		DateOfIncorporation:     &payload.RegistrationDetail.DateOfIncorporation,
 	})
 	if err != nil {
 		logger.WithError(err).WithField("business", business.ID).Error("failed to update business detail")

@@ -52,7 +52,7 @@ func (b *brevo) Send(ctx context.Context, payload email.MailPayload) error {
 		},
 	}
 
-	resp, err := apm.HTTPClientRequest().
+	resp, err := apm.HTTPClient().R().
 		SetContext(ctx).
 		SetHeader("api-key", b.config.ApiKey).
 		SetHeader("Content-Type", "application/json").

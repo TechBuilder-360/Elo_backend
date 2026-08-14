@@ -23,7 +23,9 @@ import (
 	"github.com/Toflex/directory_v2/ent/currency"
 	"github.com/Toflex/directory_v2/ent/kybdocument"
 	"github.com/Toflex/directory_v2/ent/kybmessage"
+	"github.com/Toflex/directory_v2/ent/ledgerowner"
 	"github.com/Toflex/directory_v2/ent/manager"
+	"github.com/Toflex/directory_v2/ent/nubanstaticaccount"
 	"github.com/Toflex/directory_v2/ent/permission"
 	"github.com/Toflex/directory_v2/ent/provider"
 	"github.com/Toflex/directory_v2/ent/requestverification"
@@ -33,6 +35,7 @@ import (
 	"github.com/Toflex/directory_v2/ent/social"
 	"github.com/Toflex/directory_v2/ent/user"
 	"github.com/Toflex/directory_v2/ent/userdocument"
+	"github.com/Toflex/directory_v2/ent/vault"
 	"github.com/Toflex/directory_v2/ent/verification"
 	"github.com/Toflex/directory_v2/ent/wallet"
 )
@@ -58,8 +61,12 @@ type Client struct {
 	KYBDocument *KYBDocumentClient
 	// KYBMessage is the client for interacting with the KYBMessage builders.
 	KYBMessage *KYBMessageClient
+	// LedgerOwner is the client for interacting with the LedgerOwner builders.
+	LedgerOwner *LedgerOwnerClient
 	// Manager is the client for interacting with the Manager builders.
 	Manager *ManagerClient
+	// NubanStaticAccount is the client for interacting with the NubanStaticAccount builders.
+	NubanStaticAccount *NubanStaticAccountClient
 	// Permission is the client for interacting with the Permission builders.
 	Permission *PermissionClient
 	// Provider is the client for interacting with the Provider builders.
@@ -78,6 +85,8 @@ type Client struct {
 	User *UserClient
 	// UserDocument is the client for interacting with the UserDocument builders.
 	UserDocument *UserDocumentClient
+	// Vault is the client for interacting with the Vault builders.
+	Vault *VaultClient
 	// Verification is the client for interacting with the Verification builders.
 	Verification *VerificationClient
 	// Wallet is the client for interacting with the Wallet builders.
@@ -101,7 +110,9 @@ func (c *Client) init() {
 	c.Currency = NewCurrencyClient(c.config)
 	c.KYBDocument = NewKYBDocumentClient(c.config)
 	c.KYBMessage = NewKYBMessageClient(c.config)
+	c.LedgerOwner = NewLedgerOwnerClient(c.config)
 	c.Manager = NewManagerClient(c.config)
+	c.NubanStaticAccount = NewNubanStaticAccountClient(c.config)
 	c.Permission = NewPermissionClient(c.config)
 	c.Provider = NewProviderClient(c.config)
 	c.RequestVerification = NewRequestVerificationClient(c.config)
@@ -111,6 +122,7 @@ func (c *Client) init() {
 	c.Social = NewSocialClient(c.config)
 	c.User = NewUserClient(c.config)
 	c.UserDocument = NewUserDocumentClient(c.config)
+	c.Vault = NewVaultClient(c.config)
 	c.Verification = NewVerificationClient(c.config)
 	c.Wallet = NewWalletClient(c.config)
 }
@@ -213,7 +225,9 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		Currency:            NewCurrencyClient(cfg),
 		KYBDocument:         NewKYBDocumentClient(cfg),
 		KYBMessage:          NewKYBMessageClient(cfg),
+		LedgerOwner:         NewLedgerOwnerClient(cfg),
 		Manager:             NewManagerClient(cfg),
+		NubanStaticAccount:  NewNubanStaticAccountClient(cfg),
 		Permission:          NewPermissionClient(cfg),
 		Provider:            NewProviderClient(cfg),
 		RequestVerification: NewRequestVerificationClient(cfg),
@@ -223,6 +237,7 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		Social:              NewSocialClient(cfg),
 		User:                NewUserClient(cfg),
 		UserDocument:        NewUserDocumentClient(cfg),
+		Vault:               NewVaultClient(cfg),
 		Verification:        NewVerificationClient(cfg),
 		Wallet:              NewWalletClient(cfg),
 	}, nil
@@ -252,7 +267,9 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		Currency:            NewCurrencyClient(cfg),
 		KYBDocument:         NewKYBDocumentClient(cfg),
 		KYBMessage:          NewKYBMessageClient(cfg),
+		LedgerOwner:         NewLedgerOwnerClient(cfg),
 		Manager:             NewManagerClient(cfg),
+		NubanStaticAccount:  NewNubanStaticAccountClient(cfg),
 		Permission:          NewPermissionClient(cfg),
 		Provider:            NewProviderClient(cfg),
 		RequestVerification: NewRequestVerificationClient(cfg),
@@ -262,6 +279,7 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		Social:              NewSocialClient(cfg),
 		User:                NewUserClient(cfg),
 		UserDocument:        NewUserDocumentClient(cfg),
+		Vault:               NewVaultClient(cfg),
 		Verification:        NewVerificationClient(cfg),
 		Wallet:              NewWalletClient(cfg),
 	}, nil
@@ -294,9 +312,10 @@ func (c *Client) Close() error {
 func (c *Client) Use(hooks ...Hook) {
 	for _, n := range []interface{ Use(...Hook) }{
 		c.Business, c.BusinessDocument, c.BusinessFeature, c.BusinessLocation,
-		c.BusinessServices, c.Currency, c.KYBDocument, c.KYBMessage, c.Manager,
-		c.Permission, c.Provider, c.RequestVerification, c.Role, c.RolePermission,
-		c.Service, c.Social, c.User, c.UserDocument, c.Verification, c.Wallet,
+		c.BusinessServices, c.Currency, c.KYBDocument, c.KYBMessage, c.LedgerOwner,
+		c.Manager, c.NubanStaticAccount, c.Permission, c.Provider,
+		c.RequestVerification, c.Role, c.RolePermission, c.Service, c.Social, c.User,
+		c.UserDocument, c.Vault, c.Verification, c.Wallet,
 	} {
 		n.Use(hooks...)
 	}
@@ -307,9 +326,10 @@ func (c *Client) Use(hooks ...Hook) {
 func (c *Client) Intercept(interceptors ...Interceptor) {
 	for _, n := range []interface{ Intercept(...Interceptor) }{
 		c.Business, c.BusinessDocument, c.BusinessFeature, c.BusinessLocation,
-		c.BusinessServices, c.Currency, c.KYBDocument, c.KYBMessage, c.Manager,
-		c.Permission, c.Provider, c.RequestVerification, c.Role, c.RolePermission,
-		c.Service, c.Social, c.User, c.UserDocument, c.Verification, c.Wallet,
+		c.BusinessServices, c.Currency, c.KYBDocument, c.KYBMessage, c.LedgerOwner,
+		c.Manager, c.NubanStaticAccount, c.Permission, c.Provider,
+		c.RequestVerification, c.Role, c.RolePermission, c.Service, c.Social, c.User,
+		c.UserDocument, c.Vault, c.Verification, c.Wallet,
 	} {
 		n.Intercept(interceptors...)
 	}
@@ -334,8 +354,12 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.KYBDocument.mutate(ctx, m)
 	case *KYBMessageMutation:
 		return c.KYBMessage.mutate(ctx, m)
+	case *LedgerOwnerMutation:
+		return c.LedgerOwner.mutate(ctx, m)
 	case *ManagerMutation:
 		return c.Manager.mutate(ctx, m)
+	case *NubanStaticAccountMutation:
+		return c.NubanStaticAccount.mutate(ctx, m)
 	case *PermissionMutation:
 		return c.Permission.mutate(ctx, m)
 	case *ProviderMutation:
@@ -354,6 +378,8 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.User.mutate(ctx, m)
 	case *UserDocumentMutation:
 		return c.UserDocument.mutate(ctx, m)
+	case *VaultMutation:
+		return c.Vault.mutate(ctx, m)
 	case *VerificationMutation:
 		return c.Verification.mutate(ctx, m)
 	case *WalletMutation:
@@ -608,6 +634,22 @@ func (c *BusinessClient) QueryKybMessages(b *Business) *KYBMessageQuery {
 			sqlgraph.From(business.Table, business.FieldID, id),
 			sqlgraph.To(kybmessage.Table, kybmessage.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, business.KybMessagesTable, business.KybMessagesColumn),
+		)
+		fromV = sqlgraph.Neighbors(b.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryOwner queries the owner edge of a Business.
+func (c *BusinessClient) QueryOwner(b *Business) *LedgerOwnerQuery {
+	query := (&LedgerOwnerClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := b.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(business.Table, business.FieldID, id),
+			sqlgraph.To(ledgerowner.Table, ledgerowner.FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, false, business.OwnerTable, business.OwnerColumn),
 		)
 		fromV = sqlgraph.Neighbors(b.driver.Dialect(), step)
 		return fromV, nil
@@ -1683,6 +1725,187 @@ func (c *KYBMessageClient) mutate(ctx context.Context, m *KYBMessageMutation) (V
 	}
 }
 
+// LedgerOwnerClient is a client for the LedgerOwner schema.
+type LedgerOwnerClient struct {
+	config
+}
+
+// NewLedgerOwnerClient returns a client for the LedgerOwner from the given config.
+func NewLedgerOwnerClient(c config) *LedgerOwnerClient {
+	return &LedgerOwnerClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `ledgerowner.Hooks(f(g(h())))`.
+func (c *LedgerOwnerClient) Use(hooks ...Hook) {
+	c.hooks.LedgerOwner = append(c.hooks.LedgerOwner, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `ledgerowner.Intercept(f(g(h())))`.
+func (c *LedgerOwnerClient) Intercept(interceptors ...Interceptor) {
+	c.inters.LedgerOwner = append(c.inters.LedgerOwner, interceptors...)
+}
+
+// Create returns a builder for creating a LedgerOwner entity.
+func (c *LedgerOwnerClient) Create() *LedgerOwnerCreate {
+	mutation := newLedgerOwnerMutation(c.config, OpCreate)
+	return &LedgerOwnerCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of LedgerOwner entities.
+func (c *LedgerOwnerClient) CreateBulk(builders ...*LedgerOwnerCreate) *LedgerOwnerCreateBulk {
+	return &LedgerOwnerCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *LedgerOwnerClient) MapCreateBulk(slice any, setFunc func(*LedgerOwnerCreate, int)) *LedgerOwnerCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &LedgerOwnerCreateBulk{err: fmt.Errorf("calling to LedgerOwnerClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*LedgerOwnerCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &LedgerOwnerCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for LedgerOwner.
+func (c *LedgerOwnerClient) Update() *LedgerOwnerUpdate {
+	mutation := newLedgerOwnerMutation(c.config, OpUpdate)
+	return &LedgerOwnerUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *LedgerOwnerClient) UpdateOne(lo *LedgerOwner) *LedgerOwnerUpdateOne {
+	mutation := newLedgerOwnerMutation(c.config, OpUpdateOne, withLedgerOwner(lo))
+	return &LedgerOwnerUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *LedgerOwnerClient) UpdateOneID(id string) *LedgerOwnerUpdateOne {
+	mutation := newLedgerOwnerMutation(c.config, OpUpdateOne, withLedgerOwnerID(id))
+	return &LedgerOwnerUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for LedgerOwner.
+func (c *LedgerOwnerClient) Delete() *LedgerOwnerDelete {
+	mutation := newLedgerOwnerMutation(c.config, OpDelete)
+	return &LedgerOwnerDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *LedgerOwnerClient) DeleteOne(lo *LedgerOwner) *LedgerOwnerDeleteOne {
+	return c.DeleteOneID(lo.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *LedgerOwnerClient) DeleteOneID(id string) *LedgerOwnerDeleteOne {
+	builder := c.Delete().Where(ledgerowner.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &LedgerOwnerDeleteOne{builder}
+}
+
+// Query returns a query builder for LedgerOwner.
+func (c *LedgerOwnerClient) Query() *LedgerOwnerQuery {
+	return &LedgerOwnerQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeLedgerOwner},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a LedgerOwner entity by its id.
+func (c *LedgerOwnerClient) Get(ctx context.Context, id string) (*LedgerOwner, error) {
+	return c.Query().Where(ledgerowner.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *LedgerOwnerClient) GetX(ctx context.Context, id string) *LedgerOwner {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryVaults queries the vaults edge of a LedgerOwner.
+func (c *LedgerOwnerClient) QueryVaults(lo *LedgerOwner) *VaultQuery {
+	query := (&VaultClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := lo.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(ledgerowner.Table, ledgerowner.FieldID, id),
+			sqlgraph.To(vault.Table, vault.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, ledgerowner.VaultsTable, ledgerowner.VaultsColumn),
+		)
+		fromV = sqlgraph.Neighbors(lo.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryBusiness queries the business edge of a LedgerOwner.
+func (c *LedgerOwnerClient) QueryBusiness(lo *LedgerOwner) *BusinessQuery {
+	query := (&BusinessClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := lo.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(ledgerowner.Table, ledgerowner.FieldID, id),
+			sqlgraph.To(business.Table, business.FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, true, ledgerowner.BusinessTable, ledgerowner.BusinessColumn),
+		)
+		fromV = sqlgraph.Neighbors(lo.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryUser queries the user edge of a LedgerOwner.
+func (c *LedgerOwnerClient) QueryUser(lo *LedgerOwner) *UserQuery {
+	query := (&UserClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := lo.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(ledgerowner.Table, ledgerowner.FieldID, id),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, true, ledgerowner.UserTable, ledgerowner.UserColumn),
+		)
+		fromV = sqlgraph.Neighbors(lo.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *LedgerOwnerClient) Hooks() []Hook {
+	return c.hooks.LedgerOwner
+}
+
+// Interceptors returns the client interceptors.
+func (c *LedgerOwnerClient) Interceptors() []Interceptor {
+	return c.inters.LedgerOwner
+}
+
+func (c *LedgerOwnerClient) mutate(ctx context.Context, m *LedgerOwnerMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&LedgerOwnerCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&LedgerOwnerUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&LedgerOwnerUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&LedgerOwnerDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown LedgerOwner mutation op: %q", m.Op())
+	}
+}
+
 // ManagerClient is a client for the Manager schema.
 type ManagerClient struct {
 	config
@@ -1861,6 +2084,155 @@ func (c *ManagerClient) mutate(ctx context.Context, m *ManagerMutation) (Value, 
 		return (&ManagerDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
 	default:
 		return nil, fmt.Errorf("ent: unknown Manager mutation op: %q", m.Op())
+	}
+}
+
+// NubanStaticAccountClient is a client for the NubanStaticAccount schema.
+type NubanStaticAccountClient struct {
+	config
+}
+
+// NewNubanStaticAccountClient returns a client for the NubanStaticAccount from the given config.
+func NewNubanStaticAccountClient(c config) *NubanStaticAccountClient {
+	return &NubanStaticAccountClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `nubanstaticaccount.Hooks(f(g(h())))`.
+func (c *NubanStaticAccountClient) Use(hooks ...Hook) {
+	c.hooks.NubanStaticAccount = append(c.hooks.NubanStaticAccount, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `nubanstaticaccount.Intercept(f(g(h())))`.
+func (c *NubanStaticAccountClient) Intercept(interceptors ...Interceptor) {
+	c.inters.NubanStaticAccount = append(c.inters.NubanStaticAccount, interceptors...)
+}
+
+// Create returns a builder for creating a NubanStaticAccount entity.
+func (c *NubanStaticAccountClient) Create() *NubanStaticAccountCreate {
+	mutation := newNubanStaticAccountMutation(c.config, OpCreate)
+	return &NubanStaticAccountCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of NubanStaticAccount entities.
+func (c *NubanStaticAccountClient) CreateBulk(builders ...*NubanStaticAccountCreate) *NubanStaticAccountCreateBulk {
+	return &NubanStaticAccountCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *NubanStaticAccountClient) MapCreateBulk(slice any, setFunc func(*NubanStaticAccountCreate, int)) *NubanStaticAccountCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &NubanStaticAccountCreateBulk{err: fmt.Errorf("calling to NubanStaticAccountClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*NubanStaticAccountCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &NubanStaticAccountCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for NubanStaticAccount.
+func (c *NubanStaticAccountClient) Update() *NubanStaticAccountUpdate {
+	mutation := newNubanStaticAccountMutation(c.config, OpUpdate)
+	return &NubanStaticAccountUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *NubanStaticAccountClient) UpdateOne(nsa *NubanStaticAccount) *NubanStaticAccountUpdateOne {
+	mutation := newNubanStaticAccountMutation(c.config, OpUpdateOne, withNubanStaticAccount(nsa))
+	return &NubanStaticAccountUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *NubanStaticAccountClient) UpdateOneID(id string) *NubanStaticAccountUpdateOne {
+	mutation := newNubanStaticAccountMutation(c.config, OpUpdateOne, withNubanStaticAccountID(id))
+	return &NubanStaticAccountUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for NubanStaticAccount.
+func (c *NubanStaticAccountClient) Delete() *NubanStaticAccountDelete {
+	mutation := newNubanStaticAccountMutation(c.config, OpDelete)
+	return &NubanStaticAccountDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *NubanStaticAccountClient) DeleteOne(nsa *NubanStaticAccount) *NubanStaticAccountDeleteOne {
+	return c.DeleteOneID(nsa.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *NubanStaticAccountClient) DeleteOneID(id string) *NubanStaticAccountDeleteOne {
+	builder := c.Delete().Where(nubanstaticaccount.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &NubanStaticAccountDeleteOne{builder}
+}
+
+// Query returns a query builder for NubanStaticAccount.
+func (c *NubanStaticAccountClient) Query() *NubanStaticAccountQuery {
+	return &NubanStaticAccountQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeNubanStaticAccount},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a NubanStaticAccount entity by its id.
+func (c *NubanStaticAccountClient) Get(ctx context.Context, id string) (*NubanStaticAccount, error) {
+	return c.Query().Where(nubanstaticaccount.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *NubanStaticAccountClient) GetX(ctx context.Context, id string) *NubanStaticAccount {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryWallet queries the wallet edge of a NubanStaticAccount.
+func (c *NubanStaticAccountClient) QueryWallet(nsa *NubanStaticAccount) *WalletQuery {
+	query := (&WalletClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := nsa.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(nubanstaticaccount.Table, nubanstaticaccount.FieldID, id),
+			sqlgraph.To(wallet.Table, wallet.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, nubanstaticaccount.WalletTable, nubanstaticaccount.WalletColumn),
+		)
+		fromV = sqlgraph.Neighbors(nsa.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *NubanStaticAccountClient) Hooks() []Hook {
+	return c.hooks.NubanStaticAccount
+}
+
+// Interceptors returns the client interceptors.
+func (c *NubanStaticAccountClient) Interceptors() []Interceptor {
+	return c.inters.NubanStaticAccount
+}
+
+func (c *NubanStaticAccountClient) mutate(ctx context.Context, m *NubanStaticAccountMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&NubanStaticAccountCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&NubanStaticAccountUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&NubanStaticAccountUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&NubanStaticAccountDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown NubanStaticAccount mutation op: %q", m.Op())
 	}
 }
 
@@ -3111,6 +3483,22 @@ func (c *UserClient) QueryRequestVerifications(u *User) *RequestVerificationQuer
 	return query
 }
 
+// QueryOwner queries the owner edge of a User.
+func (c *UserClient) QueryOwner(u *User) *LedgerOwnerQuery {
+	query := (&LedgerOwnerClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := u.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, id),
+			sqlgraph.To(ledgerowner.Table, ledgerowner.FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, false, user.OwnerTable, user.OwnerColumn),
+		)
+		fromV = sqlgraph.Neighbors(u.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // Hooks returns the client hooks.
 func (c *UserClient) Hooks() []Hook {
 	return c.hooks.User
@@ -3282,6 +3670,171 @@ func (c *UserDocumentClient) mutate(ctx context.Context, m *UserDocumentMutation
 		return (&UserDocumentDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
 	default:
 		return nil, fmt.Errorf("ent: unknown UserDocument mutation op: %q", m.Op())
+	}
+}
+
+// VaultClient is a client for the Vault schema.
+type VaultClient struct {
+	config
+}
+
+// NewVaultClient returns a client for the Vault from the given config.
+func NewVaultClient(c config) *VaultClient {
+	return &VaultClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `vault.Hooks(f(g(h())))`.
+func (c *VaultClient) Use(hooks ...Hook) {
+	c.hooks.Vault = append(c.hooks.Vault, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `vault.Intercept(f(g(h())))`.
+func (c *VaultClient) Intercept(interceptors ...Interceptor) {
+	c.inters.Vault = append(c.inters.Vault, interceptors...)
+}
+
+// Create returns a builder for creating a Vault entity.
+func (c *VaultClient) Create() *VaultCreate {
+	mutation := newVaultMutation(c.config, OpCreate)
+	return &VaultCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of Vault entities.
+func (c *VaultClient) CreateBulk(builders ...*VaultCreate) *VaultCreateBulk {
+	return &VaultCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *VaultClient) MapCreateBulk(slice any, setFunc func(*VaultCreate, int)) *VaultCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &VaultCreateBulk{err: fmt.Errorf("calling to VaultClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*VaultCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &VaultCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for Vault.
+func (c *VaultClient) Update() *VaultUpdate {
+	mutation := newVaultMutation(c.config, OpUpdate)
+	return &VaultUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *VaultClient) UpdateOne(v *Vault) *VaultUpdateOne {
+	mutation := newVaultMutation(c.config, OpUpdateOne, withVault(v))
+	return &VaultUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *VaultClient) UpdateOneID(id string) *VaultUpdateOne {
+	mutation := newVaultMutation(c.config, OpUpdateOne, withVaultID(id))
+	return &VaultUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for Vault.
+func (c *VaultClient) Delete() *VaultDelete {
+	mutation := newVaultMutation(c.config, OpDelete)
+	return &VaultDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *VaultClient) DeleteOne(v *Vault) *VaultDeleteOne {
+	return c.DeleteOneID(v.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *VaultClient) DeleteOneID(id string) *VaultDeleteOne {
+	builder := c.Delete().Where(vault.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &VaultDeleteOne{builder}
+}
+
+// Query returns a query builder for Vault.
+func (c *VaultClient) Query() *VaultQuery {
+	return &VaultQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeVault},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a Vault entity by its id.
+func (c *VaultClient) Get(ctx context.Context, id string) (*Vault, error) {
+	return c.Query().Where(vault.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *VaultClient) GetX(ctx context.Context, id string) *Vault {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryOwner queries the owner edge of a Vault.
+func (c *VaultClient) QueryOwner(v *Vault) *LedgerOwnerQuery {
+	query := (&LedgerOwnerClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := v.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(vault.Table, vault.FieldID, id),
+			sqlgraph.To(ledgerowner.Table, ledgerowner.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, vault.OwnerTable, vault.OwnerColumn),
+		)
+		fromV = sqlgraph.Neighbors(v.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryWallets queries the wallets edge of a Vault.
+func (c *VaultClient) QueryWallets(v *Vault) *WalletQuery {
+	query := (&WalletClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := v.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(vault.Table, vault.FieldID, id),
+			sqlgraph.To(wallet.Table, wallet.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, vault.WalletsTable, vault.WalletsColumn),
+		)
+		fromV = sqlgraph.Neighbors(v.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *VaultClient) Hooks() []Hook {
+	return c.hooks.Vault
+}
+
+// Interceptors returns the client interceptors.
+func (c *VaultClient) Interceptors() []Interceptor {
+	return c.inters.Vault
+}
+
+func (c *VaultClient) mutate(ctx context.Context, m *VaultMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&VaultCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&VaultUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&VaultUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&VaultDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown Vault mutation op: %q", m.Op())
 	}
 }
 
@@ -3574,6 +4127,38 @@ func (c *WalletClient) QueryCurrency(w *Wallet) *CurrencyQuery {
 	return query
 }
 
+// QueryVault queries the vault edge of a Wallet.
+func (c *WalletClient) QueryVault(w *Wallet) *VaultQuery {
+	query := (&VaultClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := w.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(wallet.Table, wallet.FieldID, id),
+			sqlgraph.To(vault.Table, vault.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, wallet.VaultTable, wallet.VaultColumn),
+		)
+		fromV = sqlgraph.Neighbors(w.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryNubanStaticAccount queries the nuban_static_account edge of a Wallet.
+func (c *WalletClient) QueryNubanStaticAccount(w *Wallet) *NubanStaticAccountQuery {
+	query := (&NubanStaticAccountClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := w.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(wallet.Table, wallet.FieldID, id),
+			sqlgraph.To(nubanstaticaccount.Table, nubanstaticaccount.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, wallet.NubanStaticAccountTable, wallet.NubanStaticAccountColumn),
+		)
+		fromV = sqlgraph.Neighbors(w.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // Hooks returns the client hooks.
 func (c *WalletClient) Hooks() []Hook {
 	return c.hooks.Wallet
@@ -3603,14 +4188,14 @@ func (c *WalletClient) mutate(ctx context.Context, m *WalletMutation) (Value, er
 type (
 	hooks struct {
 		Business, BusinessDocument, BusinessFeature, BusinessLocation, BusinessServices,
-		Currency, KYBDocument, KYBMessage, Manager, Permission, Provider,
-		RequestVerification, Role, RolePermission, Service, Social, User, UserDocument,
-		Verification, Wallet []ent.Hook
+		Currency, KYBDocument, KYBMessage, LedgerOwner, Manager, NubanStaticAccount,
+		Permission, Provider, RequestVerification, Role, RolePermission, Service,
+		Social, User, UserDocument, Vault, Verification, Wallet []ent.Hook
 	}
 	inters struct {
 		Business, BusinessDocument, BusinessFeature, BusinessLocation, BusinessServices,
-		Currency, KYBDocument, KYBMessage, Manager, Permission, Provider,
-		RequestVerification, Role, RolePermission, Service, Social, User, UserDocument,
-		Verification, Wallet []ent.Interceptor
+		Currency, KYBDocument, KYBMessage, LedgerOwner, Manager, NubanStaticAccount,
+		Permission, Provider, RequestVerification, Role, RolePermission, Service,
+		Social, User, UserDocument, Vault, Verification, Wallet []ent.Interceptor
 	}
 )
