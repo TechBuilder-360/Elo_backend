@@ -12,7 +12,7 @@ import (
 	"github.com/Toflex/directory_v2/pkg/saferoutine"
 )
 
-func (s *service) GetBusinessWallets(ctx context.Context, b *ent.Business, walletType string, filter *model.WalletFilter) ([]*model.Wallet, error) {
+func (s *service) GetBusinessWallets(ctx context.Context, b *ent.Business, walletType string) ([]*model.Wallet, error) {
 	logger := log.LoggerInContext(ctx)
 
 	if !wallet.ValidateWalletType(walletType) {
@@ -32,7 +32,7 @@ func (s *service) GetBusinessWallets(ctx context.Context, b *ent.Business, walle
 		return []*model.Wallet{}, nil
 	}
 
-	return s.walletService.GetWallets(ctx, owner.ID, walletType, filter)
+	return s.walletService.GetWallets(ctx, owner.ID, walletType)
 }
 
 func (s *service) createBusinessOwner(ctx context.Context, b *ent.Business, walletType string) {
