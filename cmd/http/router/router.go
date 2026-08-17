@@ -171,7 +171,7 @@ func hasRoleDirective(a authentication.IService) func(
 			return false, errors.New(errors.ErrFailed, "user is not verified")
 		}
 
-		b, err := database.DBInstance().Business.Query().Where(biz.IDEQ(businessHeader), biz.HasManagesWith(manager.UserID(usr.ID))).First(ctx)
+		b, err := database.DBInstance().Business.Query().Where(biz.IDEQ(businessHeader), biz.HasManagesWith(manager.UserID(usr.ID))).WithOwner().First(ctx)
 		if err != nil || b == nil {
 			logger.WithError(err).WithField("business_id", businessHeader).Error("failed to fetch business")
 			return false, gqlerror.Errorf("unauthorized")

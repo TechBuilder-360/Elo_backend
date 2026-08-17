@@ -2,21 +2,41 @@ package business
 
 import (
 	"context"
+	"time"
 
 	"github.com/Toflex/directory_v2/ent"
 	"github.com/Toflex/directory_v2/ent/business"
+	"github.com/Toflex/directory_v2/ent/businesslocation"
 	"github.com/Toflex/directory_v2/ent/manager"
+	"github.com/Toflex/directory_v2/internal/wallet"
 	biz "github.com/Toflex/directory_v2/pkg/business"
 	"github.com/Toflex/directory_v2/pkg/errors"
 	"github.com/Toflex/directory_v2/pkg/log"
+	"github.com/Toflex/directory_v2/pkg/saferoutine"
 	"github.com/Toflex/directory_v2/pkg/util"
 )
 
 func (s *service) GetBusiness(ctx context.Context, user *ent.User, id string, logger log.Entry) (*BusinessResult, error) {
-	business, err := s.db.Business.Query().Where(business.IDEQ(id), business.HasManagesWith(manager.UserID(user.ID))).WithLocations().First(ctx)
+	business, err := s.db.Business.Query().Where(business.IDEQ(id), business.HasManagesWith(manager.UserID(user.ID))).
+		WithLocations(func(q *ent.BusinessLocationQuery) {
+			q.Where(
+				businesslocation.ActiveEQ(true),
+				businesslocation.IsHeadOfficeEQ(true),
+			).Limit(1)
+		}).WithOwner().First(ctx)
 	if err != nil {
 		logger.WithError(err).WithField("business_id", id).Error("failed to fetch business")
 		return nil, errors.New(errors.ErrNotFound, "not found")
+	}
+
+	owner := business.Edges.Owner
+	if owner == nil {
+		saferoutine.Run(func() {
+			ctx, cancel := context.WithTimeout(context.Background(), time.Second*20)
+			defer cancel()
+
+			s.createBusinessOwner(ctx, business, string(wallet.TreasuryWalletType))
+		})
 	}
 
 	address := BusinessAddress{}
