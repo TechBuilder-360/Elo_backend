@@ -176,10 +176,6 @@ type Wallet struct {
 	IsFiat           bool    `json:"is_fiat"`
 }
 
-type WalletFilter struct {
-	IsFiat bool `json:"is_fiat"`
-}
-
 type BusinessDetail struct {
 	RegistrationDetail      *BusinessRegistrationDetail `json:"registration_detail,omitempty"`
 	Name                    *string                     `json:"name,omitempty"`

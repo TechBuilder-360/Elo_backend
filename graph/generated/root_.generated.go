@@ -103,7 +103,7 @@ type ComplexityRoot struct {
 	Query struct {
 		Business         func(childComplexity int, id string) int
 		BusinessWallet   func(childComplexity int, currencyCode string, walletType model.WalletType) int
-		BusinessWallets  func(childComplexity int, walletType model.WalletType, filter *model.WalletFilter) int
+		BusinessWallets  func(childComplexity int, walletType model.WalletType) int
 		Currencies       func(childComplexity int, filter *model.CurrencyFilter) int
 		FindBusiness     func(childComplexity int, name *string, service *string, limit *int32) int
 		GetCategories    func(childComplexity int) int
@@ -552,7 +552,7 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Query.BusinessWallets(childComplexity, args["wallet_type"].(model.WalletType), args["filter"].(*model.WalletFilter)), true
+		return e.complexity.Query.BusinessWallets(childComplexity, args["wallet_type"].(model.WalletType)), true
 
 	case "Query.currencies":
 		if e.complexity.Query.Currencies == nil {
@@ -917,7 +917,6 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 		ec.unmarshalInputRegistration,
 		ec.unmarshalInputRemoveDocumentInput,
 		ec.unmarshalInputRequestOTP,
-		ec.unmarshalInputWalletFilter,
 		ec.unmarshalInputbusinessDetail,
 		ec.unmarshalInputrole,
 		ec.unmarshalInputverificationPayload,
@@ -1297,12 +1296,8 @@ type Wallet {
     is_fiat: Boolean!
 }
 
-input WalletFilter {
-    is_fiat: Boolean!
-}
-
 extend type Query {
-  business_wallets(wallet_type: WalletType!=TREASURY, filter: WalletFilter): [Wallet!]!  @hasRole (role: ADMIN)
+  business_wallets(wallet_type: WalletType!=TREASURY): [Wallet!]!  @hasRole (role: ADMIN)
   business_wallet(currencyCode: String!, wallet_type: WalletType!=TREASURY): Wallet  @hasRole (role: ADMIN)
 }
 
