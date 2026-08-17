@@ -13,7 +13,7 @@ import (
 )
 
 type IService interface {
-	GetWallets(ctx context.Context, ownerID, walletType string) ([]*model.Wallet, error)
+	GetWallets(ctx context.Context, ownerID, walletType string, filter *model.WalletFilter) ([]*model.Wallet, error)
 	GetWallet(ctx context.Context, ownerID, walletType, currencyCode string) (*model.Wallet, error)
 	AddWallet(ctx context.Context, ownerID, walletType, currencyCode string) (*model.Wallet, error)
 }
