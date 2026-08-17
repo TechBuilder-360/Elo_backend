@@ -30,12 +30,8 @@ type Wallet {
     is_fiat: Boolean!
 }
 
-input WalletFilter {
-    is_fiat: Boolean!
-}
-
 extend type Query {
-  business_wallets(wallet_type: WalletType!=TREASURY, filter: WalletFilter): [Wallet!]!  @hasRole (role: ADMIN)
+  business_wallets(wallet_type: WalletType!=TREASURY): [Wallet!]!  @hasRole (role: ADMIN)
   business_wallet(currencyCode: String!, wallet_type: WalletType!=TREASURY): Wallet  @hasRole (role: ADMIN)
 }
 

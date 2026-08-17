@@ -27,7 +27,7 @@ type QueryResolver interface {
 	Currencies(ctx context.Context, filter *model.CurrencyFilter) ([]*model.Currency, error)
 	Me(ctx context.Context) (*model.User, error)
 	GetUserBusinsses(ctx context.Context) ([]*model.UserBusiness, error)
-	BusinessWallets(ctx context.Context, walletType model.WalletType, filter *model.WalletFilter) ([]*model.Wallet, error)
+	BusinessWallets(ctx context.Context, walletType model.WalletType) ([]*model.Wallet, error)
 	BusinessWallet(ctx context.Context, currencyCode string, walletType model.WalletType) (*model.Wallet, error)
 }
 
@@ -92,11 +92,6 @@ func (ec *executionContext) field_Query_business_wallets_args(ctx context.Contex
 		return nil, err
 	}
 	args["wallet_type"] = arg0
-	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "filter", ec.unmarshalOWalletFilter2ᚖgithubᚗcomᚋToflexᚋdirectory_v2ᚋgraphᚋmodelᚐWalletFilter)
-	if err != nil {
-		return nil, err
-	}
-	args["filter"] = arg1
 	return args, nil
 }
 
@@ -1197,7 +1192,7 @@ func (ec *executionContext) _Query_business_wallets(ctx context.Context, field g
 		ec.fieldContext_Query_business_wallets,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Query().BusinessWallets(ctx, fc.Args["wallet_type"].(model.WalletType), fc.Args["filter"].(*model.WalletFilter))
+			return ec.resolvers.Query().BusinessWallets(ctx, fc.Args["wallet_type"].(model.WalletType))
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			directive0 := next
