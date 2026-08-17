@@ -426,4 +426,20 @@ func (ec *executionContext) unmarshalOWalletFilter2ᚖgithubᚗcomᚋToflexᚋdi
 	return &res, graphql.ErrorOnPath(ctx, err)
 }
 
+func (ec *executionContext) unmarshalOWalletType2ᚖgithubᚗcomᚋToflexᚋdirectory_v2ᚋgraphᚋmodelᚐWalletType(ctx context.Context, v any) (*model.WalletType, error) {
+	if v == nil {
+		return nil, nil
+	}
+	var res = new(model.WalletType)
+	err := res.UnmarshalGQL(v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalOWalletType2ᚖgithubᚗcomᚋToflexᚋdirectory_v2ᚋgraphᚋmodelᚐWalletType(ctx context.Context, sel ast.SelectionSet, v *model.WalletType) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return v
+}
+
 // endregion ***************************** type.gotpl *****************************

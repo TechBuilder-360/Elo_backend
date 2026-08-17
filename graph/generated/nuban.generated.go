@@ -520,20 +520,6 @@ func (ec *executionContext) _StaticNubanAccountDetail(ctx context.Context, sel a
 
 // region    ***************************** type.gotpl *****************************
 
-func (ec *executionContext) marshalNDynamicNubanAccountDetail2githubᚗcomᚋToflexᚋdirectory_v2ᚋgraphᚋmodelᚐDynamicNubanAccountDetail(ctx context.Context, sel ast.SelectionSet, v model.DynamicNubanAccountDetail) graphql.Marshaler {
-	return ec._DynamicNubanAccountDetail(ctx, sel, &v)
-}
-
-func (ec *executionContext) marshalNDynamicNubanAccountDetail2ᚖgithubᚗcomᚋToflexᚋdirectory_v2ᚋgraphᚋmodelᚐDynamicNubanAccountDetail(ctx context.Context, sel ast.SelectionSet, v *model.DynamicNubanAccountDetail) graphql.Marshaler {
-	if v == nil {
-		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
-		}
-		return graphql.Null
-	}
-	return ec._DynamicNubanAccountDetail(ctx, sel, v)
-}
-
 func (ec *executionContext) marshalNStaticNubanAccountDetail2githubᚗcomᚋToflexᚋdirectory_v2ᚋgraphᚋmodelᚐStaticNubanAccountDetail(ctx context.Context, sel ast.SelectionSet, v model.StaticNubanAccountDetail) graphql.Marshaler {
 	return ec._StaticNubanAccountDetail(ctx, sel, &v)
 }

@@ -15,7 +15,7 @@ import (
 )
 
 // GenerateStaticNubanAccount is the resolver for the generateStaticNubanAccount field.
-func (r *mutationResolver) GenerateStaticNubanAccount(ctx context.Context) (*model.StaticNubanAccountDetail, error) {
+func (r *mutationResolver) GenerateStaticNubanAccount(ctx context.Context, walletType *model.WalletType) (*model.StaticNubanAccountDetail, error) {
 	return nil, fmt.Errorf("not implemented: GenerateStaticNubanAccount - generateStaticNubanAccount")
 	logger := log.LoggerInContext(ctx)
 
