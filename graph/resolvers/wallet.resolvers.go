@@ -14,7 +14,7 @@ import (
 )
 
 // BusinessWallets is the resolver for the business_wallets field.
-func (r *queryResolver) BusinessWallets(ctx context.Context, wt model.WalletType, filter *model.WalletFilter) ([]*model.Wallet, error) {
+func (r *queryResolver) BusinessWallets(ctx context.Context, wt model.WalletType) ([]*model.Wallet, error) {
 	logger := log.LoggerInContext(ctx)
 
 	b, err := middlewares.BusinessFromContext(ctx)
@@ -23,7 +23,7 @@ func (r *queryResolver) BusinessWallets(ctx context.Context, wt model.WalletType
 		return nil, err
 	}
 
-	response, err := r.Services.BusinessService.GetBusinessWallets(ctx, b, wt.String(), filter)
+	response, err := r.Services.BusinessService.GetBusinessWallets(ctx, b, wt.String())
 	if err != nil {
 		logger.WithError(err).Error("failed to fetch wallets")
 		return nil, err

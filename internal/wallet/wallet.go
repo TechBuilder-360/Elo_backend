@@ -10,11 +10,9 @@ import (
 )
 
 // GetWallets implements [IService].
-func (s *service) GetWallets(ctx context.Context, ownerID, walletType string, filter *model.WalletFilter) ([]*model.Wallet, error) {
+func (s *service) GetWallets(ctx context.Context, ownerID, walletType string) ([]*model.Wallet, error) {
 	logger := log.LoggerInContext(ctx)
-	result, err := s.repo.GetWallets(ctx, ownerID, GetWalletType(walletType), &WalletFilter{
-		IsFiat: &filter.IsFiat,
-	})
+	result, err := s.repo.GetWallets(ctx, ownerID, GetWalletType(walletType))
 	if err != nil {
 		logger.WithError(err).Error("failed to fetch wallets")
 		return nil, errors.New(errors.ErrFailed, "request failed")
