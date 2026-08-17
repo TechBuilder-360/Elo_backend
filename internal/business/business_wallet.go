@@ -20,14 +20,7 @@ func (s *service) GetBusinessWallets(ctx context.Context, b *ent.Business, walle
 		return nil, errors.New(errors.ErrInvalidInput, "invalid wallet type")
 	}
 
-	owner, err := b.QueryOwner().First(ctx)
-	if err != nil {
-		logger.WithError(err).Error("failed to fetch business owner in context")
-		return nil, errors.New(errors.ErrFailed, "something went wrong")
-	}
-
-	// if business owner is yet to be created
-	// Create Owner and Vault in a background job
+	owner := b.Edges.Owner
 	if owner == nil {
 		saferoutine.Run(func() {
 			ctx, cancel := context.WithTimeout(context.Background(), time.Second*20)
@@ -39,15 +32,13 @@ func (s *service) GetBusinessWallets(ctx context.Context, b *ent.Business, walle
 		return []*model.Wallet{}, nil
 	}
 
-	ownerID := owner.ID
-
-	return s.walletService.GetWallets(ctx, ownerID, walletType)
+	return s.walletService.GetWallets(ctx, owner.ID, walletType)
 }
 
 func (s *service) createBusinessOwner(ctx context.Context, b *ent.Business, walletType string) {
 	logger := log.LoggerInContext(ctx)
 	owner, err := b.QueryOwner().First(ctx)
-	if err != nil {
+	if !ent.IsNotFound(err) {
 		logger.WithError(err).Error("failed to fetch business owner in context")
 		return
 	}
@@ -80,14 +71,7 @@ func (s *service) GetBusinessWallet(ctx context.Context, b *ent.Business, wallet
 		return nil, errors.New(errors.ErrInvalidInput, "invalid wallet type")
 	}
 
-	owner, err := b.QueryOwner().First(ctx)
-	if err != nil {
-		logger.WithError(err).Error("failed to fetch business owner in context")
-		return nil, errors.New(errors.ErrFailed, "something went wrong")
-	}
-
-	// if business owner is yet to be created
-	// Create Owner and Vault in a background job
+	owner := b.Edges.Owner
 	if owner == nil {
 		saferoutine.Run(func() {
 			ctx, cancel := context.WithTimeout(context.Background(), time.Second*20)
@@ -96,10 +80,8 @@ func (s *service) GetBusinessWallet(ctx context.Context, b *ent.Business, wallet
 			s.createBusinessOwner(ctx, b, walletType)
 		})
 
-		return nil, nil
+		return &model.Wallet{}, nil
 	}
 
-	ownerID := owner.ID
-
-	return s.walletService.GetWallet(ctx, ownerID, walletType, currencyCode)
+	return s.walletService.GetWallet(ctx, owner.ID, walletType, currencyCode)
 }
