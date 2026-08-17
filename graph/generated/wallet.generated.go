@@ -235,6 +235,33 @@ func (ec *executionContext) fieldContext_Wallet_is_fiat(_ context.Context, field
 
 // region    **************************** input.gotpl *****************************
 
+func (ec *executionContext) unmarshalInputWalletFilter(ctx context.Context, obj any) (model.WalletFilter, error) {
+	var it model.WalletFilter
+	asMap := map[string]any{}
+	for k, v := range obj.(map[string]any) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"is_fiat"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "is_fiat":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("is_fiat"))
+			data, err := ec.unmarshalNBoolean2bool(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.IsFiat = data
+		}
+	}
+
+	return it, nil
+}
+
 // endregion **************************** input.gotpl *****************************
 
 // region    ************************** interface.gotpl ***************************
@@ -391,6 +418,7 @@ func (ec *executionContext) marshalOWallet2ᚖgithubᚗcomᚋToflexᚋdirectory_
 	return ec._Wallet(ctx, sel, v)
 }
 
+<<<<<<< HEAD
 func (ec *executionContext) unmarshalOWalletType2ᚖgithubᚗcomᚋToflexᚋdirectory_v2ᚋgraphᚋmodelᚐWalletType(ctx context.Context, v any) (*model.WalletType, error) {
 	if v == nil {
 		return nil, nil
@@ -405,6 +433,14 @@ func (ec *executionContext) marshalOWalletType2ᚖgithubᚗcomᚋToflexᚋdirect
 		return graphql.Null
 	}
 	return v
+=======
+func (ec *executionContext) unmarshalOWalletFilter2ᚖgithubᚗcomᚋToflexᚋdirectory_v2ᚋgraphᚋmodelᚐWalletFilter(ctx context.Context, v any) (*model.WalletFilter, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := ec.unmarshalInputWalletFilter(ctx, v)
+	return &res, graphql.ErrorOnPath(ctx, err)
+>>>>>>> 05ee9d0 (Added filter to wallets (#66))
 }
 
 // endregion ***************************** type.gotpl *****************************

@@ -11,20 +11,45 @@ import (
 	"github.com/Toflex/directory_v2/pkg/types"
 )
 
-func (r *repository) GetWallets(ctx context.Context, ownerID string, walletType WalletType) ([]WalletResponse, error) {
-	v, err := r.db.Vault.Query().
-		Where(vault.HasOwnerWith(ledgerowner.IDEQ(ownerID)),
-			vault.TypeEQ(vault.Type(walletType))).
-		WithWallets(func(q *ent.WalletQuery) {
-			q.WithCurrency(func(cq *ent.CurrencyQuery) {
-				cq.Select(
-					currency.FieldID,
-					currency.FieldCode,
-					currency.FieldMultiplier,
-				)
-			})
-		}).
-		First(ctx)
+func (r *repository) GetWallets(
+	ctx context.Context,
+	ownerID string,
+	walletType WalletType,
+	filter *WalletFilter,
+) ([]WalletResponse, error) {
+
+	query := r.db.Vault.
+		Query().
+		Where(
+			vault.HasOwnerWith(
+				ledgerowner.IDEQ(ownerID),
+			),
+			vault.TypeEQ(vault.Type(walletType)),
+		)
+
+	query = query.WithWallets(func(q *ent.WalletQuery) {
+
+		// Apply wallet filters
+		if filter != nil && filter.IsFiat != nil {
+			q.Where(
+				wallet.HasCurrencyWith(
+					currency.IsFiatEQ(*filter.IsFiat),
+				),
+			)
+		}
+
+		// Load only the currency fields we need
+		q.WithCurrency(func(cq *ent.CurrencyQuery) {
+			cq.Select(
+				currency.FieldID,
+				currency.FieldCode,
+				currency.FieldMultiplier,
+				currency.FieldIsFiat,
+			)
+		})
+	})
+
+	v, err := query.First(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -32,17 +57,18 @@ func (r *repository) GetWallets(ctx context.Context, ownerID string, walletType 
 	resp := make([]WalletResponse, 0, len(v.Edges.Wallets))
 
 	for _, w := range v.Edges.Wallets {
-		wr := WalletResponse{
+		currency := w.Edges.Currency
+
+		resp = append(resp, WalletResponse{
 			ID:               w.ID,
 			AvailableBalance: w.AvailableBalance,
 			LedgerBalance:    w.LedgerBalance,
 			HoldingBalance:   w.HoldingBalance,
 			Active:           w.Active,
-			Currency:         types.CurrencyCode(w.Edges.Currency.Code),
-			Multiplier:       w.Edges.Currency.Multiplier,
-			IsFiat:           w.Edges.Currency.IsFiat,
-		}
-		resp = append(resp, wr)
+			Currency:         types.CurrencyCode(currency.Code),
+			Multiplier:       currency.Multiplier,
+			IsFiat:           currency.IsFiat,
+		})
 	}
 
 	return resp, nil
@@ -58,6 +84,7 @@ func (r *repository) GetWallet(ctx context.Context, walletType, ownerID string) 
 					currency.FieldID,
 					currency.FieldCode,
 					currency.FieldMultiplier,
+					currency.FieldIsFiat,
 				)
 			})
 		}).
@@ -120,6 +147,7 @@ func (r *repository) GetWalletWithCurrency(ctx context.Context, ownerID string, 
 				currency.FieldID,
 				currency.FieldCode,
 				currency.FieldMultiplier,
+				currency.FieldIsFiat,
 			)
 		}).First(ctx)
 	if err != nil {

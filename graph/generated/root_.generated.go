@@ -113,6 +113,7 @@ type ComplexityRoot struct {
 	}
 
 	Query struct {
+<<<<<<< HEAD
 		Business              func(childComplexity int, id string) int
 		BusinessNubanAccounts func(childComplexity int) int
 		BusinessStablecoins   func(childComplexity int, filter *model.StablecoinFilter) int
@@ -126,6 +127,19 @@ type ComplexityRoot struct {
 		GetUserBusinsses      func(childComplexity int) int
 		Me                    func(childComplexity int) int
 		MyBusinesses          func(childComplexity int) int
+=======
+		Business         func(childComplexity int, id string) int
+		BusinessWallet   func(childComplexity int, currencyCode string, walletType model.WalletType) int
+		BusinessWallets  func(childComplexity int, walletType model.WalletType, filter *model.WalletFilter) int
+		Currencies       func(childComplexity int, filter *model.CurrencyFilter) int
+		FindBusiness     func(childComplexity int, name *string, service *string, limit *int32) int
+		GetCategories    func(childComplexity int) int
+		GetDocuments     func(childComplexity int) int
+		GetKYBDocuments  func(childComplexity int) int
+		GetUserBusinsses func(childComplexity int) int
+		Me               func(childComplexity int) int
+		MyBusinesses     func(childComplexity int) int
+>>>>>>> 05ee9d0 (Added filter to wallets (#66))
 	}
 
 	RegistrationResponse struct {
@@ -673,7 +687,7 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Query.BusinessWallets(childComplexity, args["wallet_type"].(model.WalletType)), true
+		return e.complexity.Query.BusinessWallets(childComplexity, args["wallet_type"].(model.WalletType), args["filter"].(*model.WalletFilter)), true
 
 	case "Query.currencies":
 		if e.complexity.Query.Currencies == nil {
@@ -1101,8 +1115,12 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 		ec.unmarshalInputRegistration,
 		ec.unmarshalInputRemoveDocumentInput,
 		ec.unmarshalInputRequestOTP,
+<<<<<<< HEAD
 		ec.unmarshalInputStablecoinFilter,
 		ec.unmarshalInputStablecoinInput,
+=======
+		ec.unmarshalInputWalletFilter,
+>>>>>>> 05ee9d0 (Added filter to wallets (#66))
 		ec.unmarshalInputbusinessDetail,
 		ec.unmarshalInputrole,
 		ec.unmarshalInputverificationPayload,
@@ -1533,8 +1551,12 @@ type Wallet {
     is_fiat: Boolean!
 }
 
+input WalletFilter {
+    is_fiat: Boolean!
+}
+
 extend type Query {
-  business_wallets(wallet_type: WalletType!=TREASURY): [Wallet!]!  @hasRole (role: ADMIN)
+  business_wallets(wallet_type: WalletType!=TREASURY, filter: WalletFilter): [Wallet!]!  @hasRole (role: ADMIN)
   business_wallet(currencyCode: String!, wallet_type: WalletType!=TREASURY): Wallet  @hasRole (role: ADMIN)
 }
 
