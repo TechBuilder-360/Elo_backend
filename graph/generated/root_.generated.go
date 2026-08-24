@@ -113,12 +113,11 @@ type ComplexityRoot struct {
 	}
 
 	Query struct {
-<<<<<<< HEAD
 		Business              func(childComplexity int, id string) int
 		BusinessNubanAccounts func(childComplexity int) int
 		BusinessStablecoins   func(childComplexity int, filter *model.StablecoinFilter) int
 		BusinessWallet        func(childComplexity int, currencyCode string, walletType model.WalletType) int
-		BusinessWallets       func(childComplexity int, walletType model.WalletType) int
+		BusinessWallets       func(childComplexity int, walletType model.WalletType, filter *model.WalletFilter) int
 		Currencies            func(childComplexity int, filter *model.CurrencyFilter) int
 		FindBusiness          func(childComplexity int, name *string, service *string, limit *int32) int
 		GetCategories         func(childComplexity int) int
@@ -127,19 +126,6 @@ type ComplexityRoot struct {
 		GetUserBusinsses      func(childComplexity int) int
 		Me                    func(childComplexity int) int
 		MyBusinesses          func(childComplexity int) int
-=======
-		Business         func(childComplexity int, id string) int
-		BusinessWallet   func(childComplexity int, currencyCode string, walletType model.WalletType) int
-		BusinessWallets  func(childComplexity int, walletType model.WalletType, filter *model.WalletFilter) int
-		Currencies       func(childComplexity int, filter *model.CurrencyFilter) int
-		FindBusiness     func(childComplexity int, name *string, service *string, limit *int32) int
-		GetCategories    func(childComplexity int) int
-		GetDocuments     func(childComplexity int) int
-		GetKYBDocuments  func(childComplexity int) int
-		GetUserBusinsses func(childComplexity int) int
-		Me               func(childComplexity int) int
-		MyBusinesses     func(childComplexity int) int
->>>>>>> 05ee9d0 (Added filter to wallets (#66))
 	}
 
 	RegistrationResponse struct {
@@ -1115,12 +1101,9 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 		ec.unmarshalInputRegistration,
 		ec.unmarshalInputRemoveDocumentInput,
 		ec.unmarshalInputRequestOTP,
-<<<<<<< HEAD
 		ec.unmarshalInputStablecoinFilter,
 		ec.unmarshalInputStablecoinInput,
-=======
 		ec.unmarshalInputWalletFilter,
->>>>>>> 05ee9d0 (Added filter to wallets (#66))
 		ec.unmarshalInputbusinessDetail,
 		ec.unmarshalInputrole,
 		ec.unmarshalInputverificationPayload,

@@ -418,7 +418,14 @@ func (ec *executionContext) marshalOWallet2ᚖgithubᚗcomᚋToflexᚋdirectory_
 	return ec._Wallet(ctx, sel, v)
 }
 
-<<<<<<< HEAD
+func (ec *executionContext) unmarshalOWalletFilter2ᚖgithubᚗcomᚋToflexᚋdirectory_v2ᚋgraphᚋmodelᚐWalletFilter(ctx context.Context, v any) (*model.WalletFilter, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := ec.unmarshalInputWalletFilter(ctx, v)
+	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
 func (ec *executionContext) unmarshalOWalletType2ᚖgithubᚗcomᚋToflexᚋdirectory_v2ᚋgraphᚋmodelᚐWalletType(ctx context.Context, v any) (*model.WalletType, error) {
 	if v == nil {
 		return nil, nil
@@ -433,14 +440,6 @@ func (ec *executionContext) marshalOWalletType2ᚖgithubᚗcomᚋToflexᚋdirect
 		return graphql.Null
 	}
 	return v
-=======
-func (ec *executionContext) unmarshalOWalletFilter2ᚖgithubᚗcomᚋToflexᚋdirectory_v2ᚋgraphᚋmodelᚐWalletFilter(ctx context.Context, v any) (*model.WalletFilter, error) {
-	if v == nil {
-		return nil, nil
-	}
-	res, err := ec.unmarshalInputWalletFilter(ctx, v)
-	return &res, graphql.ErrorOnPath(ctx, err)
->>>>>>> 05ee9d0 (Added filter to wallets (#66))
 }
 
 // endregion ***************************** type.gotpl *****************************
