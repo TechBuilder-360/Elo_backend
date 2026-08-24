@@ -96,3 +96,18 @@ func (s *service) AddWallet(ctx context.Context, ownerID, walletType, currencyCo
 	result = wallet.ToWallet()
 	return &result, nil
 }
+
+func (s *service) GetWalletOwnerWithID(ctx context.Context, ownerID, walletID string) (*model.Wallet, error) {
+	wallet, err := s.repo.GetWalletByOwnerID(ctx, walletID, ownerID)
+	if err != nil {
+		log.LoggerInContext(ctx).WithError(err).Error("Wallet not found")
+		return nil, errors.New(errors.ErrNotFound, "wallet not found")
+	}
+
+	if wallet == nil {
+		return nil, nil
+	}
+
+	result := wallet.ToWallet()
+	return &result, nil
+}

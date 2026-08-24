@@ -32,7 +32,7 @@ func (r *mutationResolver) Registration(ctx context.Context, input model.Registr
 		return nil, toGQLError(err)
 	}
 
-	userId, err := r.AuthenticationService.RegisterUser(ctx, payload, logger)
+	userId, err := r.Services.AuthenticationService.RegisterUser(ctx, payload, logger)
 	if err != nil {
 		logger.Error("Registration failed %+v", err)
 		return nil, toGQLError(err)
@@ -46,7 +46,7 @@ func (r *mutationResolver) Registration(ctx context.Context, input model.Registr
 // Login is the resolver for the login field.
 func (r *mutationResolver) Login(ctx context.Context, input model.Login) (*model.LoginResponse, error) {
 	logger := log.LoggerInContext(ctx)
-	response, err := r.AuthenticationService.Login(ctx, m.Login{
+	response, err := r.Services.AuthenticationService.Login(ctx, m.Login{
 		Otp:        input.Otp,
 		Identifier: input.Identifier,
 	}, logger)
@@ -62,7 +62,7 @@ func (r *mutationResolver) Login(ctx context.Context, input model.Login) (*model
 func (r *mutationResolver) RequestOtp(ctx context.Context, input *model.RequestOtp) (*model.OTPResponse, error) {
 	logger := log.LoggerInContext(ctx)
 
-	identifier, err := r.AuthenticationService.RequestOTP(ctx, m.OTPRequest{Email: input.EmailAddress, Password: input.Password}, logger)
+	identifier, err := r.Services.AuthenticationService.RequestOTP(ctx, m.OTPRequest{Email: input.EmailAddress, Password: input.Password}, logger)
 	if err != nil {
 		logger.Error("OTP Request failed %+v", err)
 		graphql.AddError(ctx, err)
@@ -82,7 +82,7 @@ func (r *mutationResolver) Logout(ctx context.Context) (bool, error) {
 		return false, nil
 	}
 
-	r.AuthenticationService.Logout(ctx, u)
+	r.Services.AuthenticationService.Logout(ctx, u)
 
 	return true, nil
 }

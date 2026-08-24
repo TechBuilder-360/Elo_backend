@@ -27,7 +27,7 @@ func (r *queryResolver) Business(ctx context.Context, id string) (*model.Busines
 		return nil, err
 	}
 
-	result, err := r.BusinessService.GetBusiness(ctx, u, id, logger)
+	result, err := r.Services.BusinessService.GetBusiness(ctx, u, id, logger)
 	if err != nil {
 		logger.WithError(err).WithField("id", id).Error("failed to business by id")
 		return nil, err
@@ -66,7 +66,7 @@ func (r *queryResolver) MyBusinesses(ctx context.Context) ([]*model.MyBusiness, 
 		return nil, err
 	}
 
-	result, err := r.BusinessService.Businesses(ctx, u, logger)
+	result, err := r.Services.BusinessService.Businesses(ctx, u, logger)
 	if err != nil {
 		logger.WithError(err).WithField("user", u.ID).Error("failed to businesses")
 		return nil, err
@@ -139,7 +139,7 @@ func (r *mutationResolver) RegisterBusiness(ctx context.Context, input model.Reg
 		return false, errors.New(errors.ErrValidation, err.Error())
 	}
 
-	err = r.BusinessService.CreateBusiness(ctx, payload, logger)
+	err = r.Services.BusinessService.CreateBusiness(ctx, payload, logger)
 	if err != nil {
 		logger.WithError(err).Error("business onboarding failed")
 		return false, err
@@ -167,7 +167,7 @@ func (r *mutationResolver) UploadDocument(ctx context.Context, input model.Docum
 		return false, errors.New(errors.ErrFailed, "business is already verified")
 	}
 
-	err = r.BusinessService.AddDocument(ctx, b.UploadDocumentRequest{
+	err = r.Services.BusinessService.AddDocument(ctx, b.UploadDocumentRequest{
 		User:        u,
 		Business:    biz,
 		DocumentID:  input.DocumentID,
@@ -201,7 +201,7 @@ func (r *mutationResolver) DeleteDocument(ctx context.Context, input model.Remov
 		return false, errors.New(errors.ErrFailed, "business is already verified")
 	}
 
-	err = r.BusinessService.DeleteDocument(ctx, biz, input.ID, logger)
+	err = r.Services.BusinessService.DeleteDocument(ctx, biz, input.ID, logger)
 	if err != nil {
 		logger.WithError(err).Error("failed to delete registration document")
 		return false, err
@@ -253,7 +253,7 @@ func (r *mutationResolver) BusinessDetail(ctx context.Context, input model.Busin
 		return false, errors.New(errors.ErrValidation, err.Error())
 	}
 
-	err = r.BusinessService.BusinessDetail(ctx, u, biz, &payload, logger)
+	err = r.Services.BusinessService.BusinessDetail(ctx, u, biz, &payload, logger)
 	if err != nil {
 		logger.WithError(err).Error("failed to update registration details")
 		return false, err
@@ -265,7 +265,7 @@ func (r *mutationResolver) BusinessDetail(ctx context.Context, input model.Busin
 func (r *queryResolver) GetKYBDocuments(ctx context.Context) ([]*model.KybDocument, error) {
 	logger := log.LoggerInContext(ctx)
 
-	docs, err := r.BusinessService.GetDocuments(ctx)
+	docs, err := r.Services.BusinessService.GetDocuments(ctx)
 	if err != nil {
 		logger.WithError(err).Error("failed to get KYB documents")
 		return nil, err
@@ -293,7 +293,7 @@ func (r *queryResolver) GetDocuments(ctx context.Context) ([]*model.BusinessDocu
 		return nil, err
 	}
 
-	result, err := r.BusinessService.GetKYBDocuments(ctx, b)
+	result, err := r.Services.BusinessService.GetKYBDocuments(ctx, b)
 	if err != nil {
 		logger.WithError(err).Error("failed to business documents")
 		return nil, err
@@ -315,5 +315,5 @@ func (r *queryResolver) GetDocuments(ctx context.Context) ([]*model.BusinessDocu
 
 // GetCategories is the resolver for the getBusiness field.
 func (r *queryResolver) GetCategories(ctx context.Context) ([]string, error) {
-	return r.BusinessService.GetCategory(ctx), nil
+	return r.Services.BusinessService.GetCategory(ctx), nil
 }

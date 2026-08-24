@@ -110,11 +110,6 @@ func BankCode(v string) predicate.NubanStaticAccount {
 	return predicate.NubanStaticAccount(sql.FieldEQ(FieldBankCode, v))
 }
 
-// Address applies equality check predicate on the "address" field. It's identical to AddressEQ.
-func Address(v string) predicate.NubanStaticAccount {
-	return predicate.NubanStaticAccount(sql.FieldEQ(FieldAddress, v))
-}
-
 // CreatedAtEQ applies the EQ predicate on the "created_at" field.
 func CreatedAtEQ(v time.Time) predicate.NubanStaticAccount {
 	return predicate.NubanStaticAccount(sql.FieldEQ(FieldCreatedAt, v))
@@ -633,81 +628,6 @@ func BankCodeEqualFold(v string) predicate.NubanStaticAccount {
 // BankCodeContainsFold applies the ContainsFold predicate on the "bank_code" field.
 func BankCodeContainsFold(v string) predicate.NubanStaticAccount {
 	return predicate.NubanStaticAccount(sql.FieldContainsFold(FieldBankCode, v))
-}
-
-// AddressEQ applies the EQ predicate on the "address" field.
-func AddressEQ(v string) predicate.NubanStaticAccount {
-	return predicate.NubanStaticAccount(sql.FieldEQ(FieldAddress, v))
-}
-
-// AddressNEQ applies the NEQ predicate on the "address" field.
-func AddressNEQ(v string) predicate.NubanStaticAccount {
-	return predicate.NubanStaticAccount(sql.FieldNEQ(FieldAddress, v))
-}
-
-// AddressIn applies the In predicate on the "address" field.
-func AddressIn(vs ...string) predicate.NubanStaticAccount {
-	return predicate.NubanStaticAccount(sql.FieldIn(FieldAddress, vs...))
-}
-
-// AddressNotIn applies the NotIn predicate on the "address" field.
-func AddressNotIn(vs ...string) predicate.NubanStaticAccount {
-	return predicate.NubanStaticAccount(sql.FieldNotIn(FieldAddress, vs...))
-}
-
-// AddressGT applies the GT predicate on the "address" field.
-func AddressGT(v string) predicate.NubanStaticAccount {
-	return predicate.NubanStaticAccount(sql.FieldGT(FieldAddress, v))
-}
-
-// AddressGTE applies the GTE predicate on the "address" field.
-func AddressGTE(v string) predicate.NubanStaticAccount {
-	return predicate.NubanStaticAccount(sql.FieldGTE(FieldAddress, v))
-}
-
-// AddressLT applies the LT predicate on the "address" field.
-func AddressLT(v string) predicate.NubanStaticAccount {
-	return predicate.NubanStaticAccount(sql.FieldLT(FieldAddress, v))
-}
-
-// AddressLTE applies the LTE predicate on the "address" field.
-func AddressLTE(v string) predicate.NubanStaticAccount {
-	return predicate.NubanStaticAccount(sql.FieldLTE(FieldAddress, v))
-}
-
-// AddressContains applies the Contains predicate on the "address" field.
-func AddressContains(v string) predicate.NubanStaticAccount {
-	return predicate.NubanStaticAccount(sql.FieldContains(FieldAddress, v))
-}
-
-// AddressHasPrefix applies the HasPrefix predicate on the "address" field.
-func AddressHasPrefix(v string) predicate.NubanStaticAccount {
-	return predicate.NubanStaticAccount(sql.FieldHasPrefix(FieldAddress, v))
-}
-
-// AddressHasSuffix applies the HasSuffix predicate on the "address" field.
-func AddressHasSuffix(v string) predicate.NubanStaticAccount {
-	return predicate.NubanStaticAccount(sql.FieldHasSuffix(FieldAddress, v))
-}
-
-// AddressIsNil applies the IsNil predicate on the "address" field.
-func AddressIsNil() predicate.NubanStaticAccount {
-	return predicate.NubanStaticAccount(sql.FieldIsNull(FieldAddress))
-}
-
-// AddressNotNil applies the NotNil predicate on the "address" field.
-func AddressNotNil() predicate.NubanStaticAccount {
-	return predicate.NubanStaticAccount(sql.FieldNotNull(FieldAddress))
-}
-
-// AddressEqualFold applies the EqualFold predicate on the "address" field.
-func AddressEqualFold(v string) predicate.NubanStaticAccount {
-	return predicate.NubanStaticAccount(sql.FieldEqualFold(FieldAddress, v))
-}
-
-// AddressContainsFold applies the ContainsFold predicate on the "address" field.
-func AddressContainsFold(v string) predicate.NubanStaticAccount {
-	return predicate.NubanStaticAccount(sql.FieldContainsFold(FieldAddress, v))
 }
 
 // StateEQ applies the EQ predicate on the "state" field.

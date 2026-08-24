@@ -28,12 +28,20 @@ type Tx struct {
 	KYBDocument *KYBDocumentClient
 	// KYBMessage is the client for interacting with the KYBMessage builders.
 	KYBMessage *KYBMessageClient
+	// Ledger is the client for interacting with the Ledger builders.
+	Ledger *LedgerClient
 	// LedgerOwner is the client for interacting with the LedgerOwner builders.
 	LedgerOwner *LedgerOwnerClient
 	// Manager is the client for interacting with the Manager builders.
 	Manager *ManagerClient
+	// NubanDeposit is the client for interacting with the NubanDeposit builders.
+	NubanDeposit *NubanDepositClient
+	// NubanDynamicAccount is the client for interacting with the NubanDynamicAccount builders.
+	NubanDynamicAccount *NubanDynamicAccountClient
 	// NubanStaticAccount is the client for interacting with the NubanStaticAccount builders.
 	NubanStaticAccount *NubanStaticAccountClient
+	// NubanTransfer is the client for interacting with the NubanTransfer builders.
+	NubanTransfer *NubanTransferClient
 	// Permission is the client for interacting with the Permission builders.
 	Permission *PermissionClient
 	// Provider is the client for interacting with the Provider builders.
@@ -48,6 +56,18 @@ type Tx struct {
 	Service *ServiceClient
 	// Social is the client for interacting with the Social builders.
 	Social *SocialClient
+	// StablecoinDeposit is the client for interacting with the StablecoinDeposit builders.
+	StablecoinDeposit *StablecoinDepositClient
+	// StablecoinNetwork is the client for interacting with the StablecoinNetwork builders.
+	StablecoinNetwork *StablecoinNetworkClient
+	// StablecoinSupportedNetwork is the client for interacting with the StablecoinSupportedNetwork builders.
+	StablecoinSupportedNetwork *StablecoinSupportedNetworkClient
+	// StablecoinWallet is the client for interacting with the StablecoinWallet builders.
+	StablecoinWallet *StablecoinWalletClient
+	// StablecoinWithdrawal is the client for interacting with the StablecoinWithdrawal builders.
+	StablecoinWithdrawal *StablecoinWithdrawalClient
+	// Transaction is the client for interacting with the Transaction builders.
+	Transaction *TransactionClient
 	// User is the client for interacting with the User builders.
 	User *UserClient
 	// UserDocument is the client for interacting with the UserDocument builders.
@@ -197,9 +217,13 @@ func (tx *Tx) init() {
 	tx.Currency = NewCurrencyClient(tx.config)
 	tx.KYBDocument = NewKYBDocumentClient(tx.config)
 	tx.KYBMessage = NewKYBMessageClient(tx.config)
+	tx.Ledger = NewLedgerClient(tx.config)
 	tx.LedgerOwner = NewLedgerOwnerClient(tx.config)
 	tx.Manager = NewManagerClient(tx.config)
+	tx.NubanDeposit = NewNubanDepositClient(tx.config)
+	tx.NubanDynamicAccount = NewNubanDynamicAccountClient(tx.config)
 	tx.NubanStaticAccount = NewNubanStaticAccountClient(tx.config)
+	tx.NubanTransfer = NewNubanTransferClient(tx.config)
 	tx.Permission = NewPermissionClient(tx.config)
 	tx.Provider = NewProviderClient(tx.config)
 	tx.RequestVerification = NewRequestVerificationClient(tx.config)
@@ -207,6 +231,12 @@ func (tx *Tx) init() {
 	tx.RolePermission = NewRolePermissionClient(tx.config)
 	tx.Service = NewServiceClient(tx.config)
 	tx.Social = NewSocialClient(tx.config)
+	tx.StablecoinDeposit = NewStablecoinDepositClient(tx.config)
+	tx.StablecoinNetwork = NewStablecoinNetworkClient(tx.config)
+	tx.StablecoinSupportedNetwork = NewStablecoinSupportedNetworkClient(tx.config)
+	tx.StablecoinWallet = NewStablecoinWalletClient(tx.config)
+	tx.StablecoinWithdrawal = NewStablecoinWithdrawalClient(tx.config)
+	tx.Transaction = NewTransactionClient(tx.config)
 	tx.User = NewUserClient(tx.config)
 	tx.UserDocument = NewUserDocumentClient(tx.config)
 	tx.Vault = NewVaultClient(tx.config)

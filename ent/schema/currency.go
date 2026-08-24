@@ -24,6 +24,7 @@ func (Currency) Fields() []ent.Field {
 		field.String("name").NotEmpty().Unique(),
 		field.String("symbol").NotEmpty(),
 		field.String("code").NotEmpty().Unique(),
+		field.String("logo").Optional().Nillable(),
 		field.Bool("is_fiat").Default(true),
 		field.Bool("active").Default(true),
 		field.Int64("multiplier"),
@@ -34,6 +35,8 @@ func (Currency) Fields() []ent.Field {
 func (Currency) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.To("wallets", Wallet.Type),
+		edge.To("stablecoin_supported_networks", StablecoinSupportedNetwork.Type),
+		edge.To("stablecoin_currencies", StablecoinWallet.Type),
 	}
 }
 

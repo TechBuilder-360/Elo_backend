@@ -166,6 +166,7 @@ var (
 		{Name: "name", Type: field.TypeString, Unique: true},
 		{Name: "symbol", Type: field.TypeString},
 		{Name: "code", Type: field.TypeString, Unique: true},
+		{Name: "logo", Type: field.TypeString, Nullable: true},
 		{Name: "is_fiat", Type: field.TypeBool, Default: true},
 		{Name: "active", Type: field.TypeBool, Default: true},
 		{Name: "multiplier", Type: field.TypeInt64},
@@ -219,6 +220,47 @@ var (
 				Symbol:     "kyb_messages_businesses_kyb_messages",
 				Columns:    []*schema.Column{KybMessagesColumns[6]},
 				RefColumns: []*schema.Column{BusinessesColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+		},
+	}
+	// LedgersColumns holds the columns for the "ledgers" table.
+	LedgersColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeString},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "deleted_at", Type: field.TypeTime, Nullable: true},
+		{Name: "debit", Type: field.TypeInt64, Default: 0},
+		{Name: "credit", Type: field.TypeInt64, Default: 0},
+		{Name: "current_balance", Type: field.TypeInt64, Default: 0},
+		{Name: "previous_balance", Type: field.TypeInt64, Default: 0},
+		{Name: "is_reversal", Type: field.TypeBool, Default: false},
+		{Name: "transaction_id", Type: field.TypeString},
+		{Name: "reversal_transaction_id", Type: field.TypeString, Nullable: true},
+		{Name: "wallet_id", Type: field.TypeString},
+	}
+	// LedgersTable holds the schema information for the "ledgers" table.
+	LedgersTable = &schema.Table{
+		Name:       "ledgers",
+		Columns:    LedgersColumns,
+		PrimaryKey: []*schema.Column{LedgersColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "ledgers_transactions_ledger_entries",
+				Columns:    []*schema.Column{LedgersColumns[9]},
+				RefColumns: []*schema.Column{TransactionsColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+			{
+				Symbol:     "ledgers_transactions_reversal_ledger_entries",
+				Columns:    []*schema.Column{LedgersColumns[10]},
+				RefColumns: []*schema.Column{TransactionsColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+			{
+				Symbol:     "ledgers_wallets_ledger_entries",
+				Columns:    []*schema.Column{LedgersColumns[11]},
+				RefColumns: []*schema.Column{WalletsColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
 		},
@@ -301,6 +343,70 @@ var (
 			},
 		},
 	}
+	// NubanDepositsColumns holds the columns for the "nuban_deposits" table.
+	NubanDepositsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeString},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "deleted_at", Type: field.TypeTime, Nullable: true},
+		{Name: "recipient_account_name", Type: field.TypeString},
+		{Name: "recipient_account_number", Type: field.TypeString},
+		{Name: "sender_account_name", Type: field.TypeString},
+		{Name: "sender_account_number", Type: field.TypeString},
+		{Name: "sender_bank_name", Type: field.TypeString},
+		{Name: "sender_bank_code", Type: field.TypeString},
+		{Name: "narration", Type: field.TypeString},
+		{Name: "amount", Type: field.TypeInt64, Default: 0},
+		{Name: "session_id", Type: field.TypeString},
+		{Name: "provider_reference", Type: field.TypeString},
+		{Name: "provider", Type: field.TypeString},
+		{Name: "type", Type: field.TypeEnum, Enums: []string{"DYNAMIC", "STATIC"}, Default: "STATIC"},
+		{Name: "transaction_id", Type: field.TypeString, Unique: true},
+	}
+	// NubanDepositsTable holds the schema information for the "nuban_deposits" table.
+	NubanDepositsTable = &schema.Table{
+		Name:       "nuban_deposits",
+		Columns:    NubanDepositsColumns,
+		PrimaryKey: []*schema.Column{NubanDepositsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "nuban_deposits_transactions_nuban_deposit",
+				Columns:    []*schema.Column{NubanDepositsColumns[16]},
+				RefColumns: []*schema.Column{TransactionsColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+		},
+	}
+	// NubanDynamicAccountsColumns holds the columns for the "nuban_dynamic_accounts" table.
+	NubanDynamicAccountsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeString},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "deleted_at", Type: field.TypeTime, Nullable: true},
+		{Name: "provider", Type: field.TypeString},
+		{Name: "provider_reference", Type: field.TypeString},
+		{Name: "account_number", Type: field.TypeString},
+		{Name: "account_name", Type: field.TypeString},
+		{Name: "bank_name", Type: field.TypeString},
+		{Name: "bank_code", Type: field.TypeString},
+		{Name: "expiration", Type: field.TypeTime},
+		{Name: "state", Type: field.TypeEnum, Enums: []string{"OPEN", "SUSPENDED", "CLOSED"}, Default: "OPEN"},
+		{Name: "wallet_nuban_dynamic_account", Type: field.TypeString},
+	}
+	// NubanDynamicAccountsTable holds the schema information for the "nuban_dynamic_accounts" table.
+	NubanDynamicAccountsTable = &schema.Table{
+		Name:       "nuban_dynamic_accounts",
+		Columns:    NubanDynamicAccountsColumns,
+		PrimaryKey: []*schema.Column{NubanDynamicAccountsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "nuban_dynamic_accounts_wallets_nuban_dynamic_account",
+				Columns:    []*schema.Column{NubanDynamicAccountsColumns[12]},
+				RefColumns: []*schema.Column{WalletsColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+		},
+	}
 	// NubanStaticAccountsColumns holds the columns for the "nuban_static_accounts" table.
 	NubanStaticAccountsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeString},
@@ -313,7 +419,6 @@ var (
 		{Name: "account_name", Type: field.TypeString},
 		{Name: "bank_name", Type: field.TypeString},
 		{Name: "bank_code", Type: field.TypeString},
-		{Name: "address", Type: field.TypeString, Nullable: true},
 		{Name: "state", Type: field.TypeEnum, Enums: []string{"OPEN", "SUSPENDED", "CLOSED"}, Default: "OPEN"},
 		{Name: "wallet_nuban_static_account", Type: field.TypeString},
 	}
@@ -325,8 +430,40 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "nuban_static_accounts_wallets_nuban_static_account",
-				Columns:    []*schema.Column{NubanStaticAccountsColumns[12]},
+				Columns:    []*schema.Column{NubanStaticAccountsColumns[11]},
 				RefColumns: []*schema.Column{WalletsColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+		},
+	}
+	// NubanTransfersColumns holds the columns for the "nuban_transfers" table.
+	NubanTransfersColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeString},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "deleted_at", Type: field.TypeTime, Nullable: true},
+		{Name: "recipient_account_name", Type: field.TypeString},
+		{Name: "recipient_account_number", Type: field.TypeString},
+		{Name: "sender_account_name", Type: field.TypeString},
+		{Name: "sender_account_number", Type: field.TypeString},
+		{Name: "sender_bank_name", Type: field.TypeString},
+		{Name: "sender_bank_code", Type: field.TypeString},
+		{Name: "amount", Type: field.TypeInt64, Default: 0},
+		{Name: "session_id", Type: field.TypeString},
+		{Name: "provider_reference", Type: field.TypeString},
+		{Name: "provider", Type: field.TypeString},
+		{Name: "transaction_nuban_transfer", Type: field.TypeString, Unique: true},
+	}
+	// NubanTransfersTable holds the schema information for the "nuban_transfers" table.
+	NubanTransfersTable = &schema.Table{
+		Name:       "nuban_transfers",
+		Columns:    NubanTransfersColumns,
+		PrimaryKey: []*schema.Column{NubanTransfersColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "nuban_transfers_transactions_nuban_transfer",
+				Columns:    []*schema.Column{NubanTransfersColumns[14]},
+				RefColumns: []*schema.Column{TransactionsColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
 		},
@@ -447,7 +584,7 @@ var (
 		{Name: "deleted_at", Type: field.TypeTime, Nullable: true},
 		{Name: "name", Type: field.TypeString, Unique: true},
 		{Name: "identifier", Type: field.TypeString, Unique: true},
-		{Name: "provider", Type: field.TypeString, Unique: true},
+		{Name: "provider", Type: field.TypeString},
 		{Name: "require_subscription", Type: field.TypeBool, Default: false},
 		{Name: "active", Type: field.TypeBool, Default: true},
 		{Name: "min", Type: field.TypeInt, Default: 0},
@@ -487,6 +624,198 @@ var (
 				Symbol:     "socials_businesses_socials",
 				Columns:    []*schema.Column{SocialsColumns[6]},
 				RefColumns: []*schema.Column{BusinessesColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+		},
+	}
+	// StablecoinDepositsColumns holds the columns for the "stablecoin_deposits" table.
+	StablecoinDepositsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeString},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "deleted_at", Type: field.TypeTime, Nullable: true},
+		{Name: "coin", Type: field.TypeString},
+		{Name: "network", Type: field.TypeString},
+		{Name: "address", Type: field.TypeString},
+		{Name: "provider_reference", Type: field.TypeString},
+		{Name: "provider", Type: field.TypeString},
+		{Name: "stablecoin_wallet_id", Type: field.TypeString},
+		{Name: "transaction_id", Type: field.TypeString, Unique: true},
+	}
+	// StablecoinDepositsTable holds the schema information for the "stablecoin_deposits" table.
+	StablecoinDepositsTable = &schema.Table{
+		Name:       "stablecoin_deposits",
+		Columns:    StablecoinDepositsColumns,
+		PrimaryKey: []*schema.Column{StablecoinDepositsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "stablecoin_deposits_stablecoin_wallets_stablecoin_deposits",
+				Columns:    []*schema.Column{StablecoinDepositsColumns[9]},
+				RefColumns: []*schema.Column{StablecoinWalletsColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+			{
+				Symbol:     "stablecoin_deposits_transactions_stablecoin_deposit",
+				Columns:    []*schema.Column{StablecoinDepositsColumns[10]},
+				RefColumns: []*schema.Column{TransactionsColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+		},
+	}
+	// StablecoinNetworksColumns holds the columns for the "stablecoin_networks" table.
+	StablecoinNetworksColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeString},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "deleted_at", Type: field.TypeTime, Nullable: true},
+		{Name: "name", Type: field.TypeString},
+		{Name: "slug", Type: field.TypeString, Unique: true},
+		{Name: "logo_url", Type: field.TypeString, Default: ""},
+		{Name: "active", Type: field.TypeBool, Default: true},
+	}
+	// StablecoinNetworksTable holds the schema information for the "stablecoin_networks" table.
+	StablecoinNetworksTable = &schema.Table{
+		Name:       "stablecoin_networks",
+		Columns:    StablecoinNetworksColumns,
+		PrimaryKey: []*schema.Column{StablecoinNetworksColumns[0]},
+	}
+	// StablecoinSupportedNetworksColumns holds the columns for the "stablecoin_supported_networks" table.
+	StablecoinSupportedNetworksColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeString},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "deleted_at", Type: field.TypeTime, Nullable: true},
+		{Name: "can_send", Type: field.TypeBool, Default: false},
+		{Name: "can_receive", Type: field.TypeBool, Default: true},
+		{Name: "active", Type: field.TypeBool, Default: true},
+		{Name: "coin_id", Type: field.TypeString},
+		{Name: "network_id", Type: field.TypeString},
+	}
+	// StablecoinSupportedNetworksTable holds the schema information for the "stablecoin_supported_networks" table.
+	StablecoinSupportedNetworksTable = &schema.Table{
+		Name:       "stablecoin_supported_networks",
+		Columns:    StablecoinSupportedNetworksColumns,
+		PrimaryKey: []*schema.Column{StablecoinSupportedNetworksColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "stablecoin_supported_networks_currencies_stablecoin_supported_networks",
+				Columns:    []*schema.Column{StablecoinSupportedNetworksColumns[7]},
+				RefColumns: []*schema.Column{CurrenciesColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+			{
+				Symbol:     "stablecoin_supported_networks_stablecoin_networks_stablecoin_supported_networks",
+				Columns:    []*schema.Column{StablecoinSupportedNetworksColumns[8]},
+				RefColumns: []*schema.Column{StablecoinNetworksColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "stablecoinsupportednetwork_network_id_coin_id",
+				Unique:  true,
+				Columns: []*schema.Column{StablecoinSupportedNetworksColumns[8], StablecoinSupportedNetworksColumns[7]},
+			},
+		},
+	}
+	// StablecoinWalletsColumns holds the columns for the "stablecoin_wallets" table.
+	StablecoinWalletsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeString},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "deleted_at", Type: field.TypeTime, Nullable: true},
+		{Name: "coin", Type: field.TypeString},
+		{Name: "network", Type: field.TypeString},
+		{Name: "address", Type: field.TypeString},
+		{Name: "provider_reference", Type: field.TypeString},
+		{Name: "provider", Type: field.TypeString},
+		{Name: "disabled", Type: field.TypeBool, Default: false},
+		{Name: "coin_id", Type: field.TypeString},
+		{Name: "network_id", Type: field.TypeString},
+		{Name: "wallet_stablecoin_wallets", Type: field.TypeString},
+	}
+	// StablecoinWalletsTable holds the schema information for the "stablecoin_wallets" table.
+	StablecoinWalletsTable = &schema.Table{
+		Name:       "stablecoin_wallets",
+		Columns:    StablecoinWalletsColumns,
+		PrimaryKey: []*schema.Column{StablecoinWalletsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "stablecoin_wallets_currencies_stablecoin_currencies",
+				Columns:    []*schema.Column{StablecoinWalletsColumns[10]},
+				RefColumns: []*schema.Column{CurrenciesColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+			{
+				Symbol:     "stablecoin_wallets_stablecoin_networks_stablecoin_networks",
+				Columns:    []*schema.Column{StablecoinWalletsColumns[11]},
+				RefColumns: []*schema.Column{StablecoinNetworksColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+			{
+				Symbol:     "stablecoin_wallets_wallets_stablecoin_wallets",
+				Columns:    []*schema.Column{StablecoinWalletsColumns[12]},
+				RefColumns: []*schema.Column{WalletsColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+		},
+	}
+	// StablecoinWithdrawalsColumns holds the columns for the "stablecoin_withdrawals" table.
+	StablecoinWithdrawalsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeString},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "deleted_at", Type: field.TypeTime, Nullable: true},
+		{Name: "coin", Type: field.TypeString},
+		{Name: "network", Type: field.TypeString},
+		{Name: "destination_address", Type: field.TypeString},
+		{Name: "amount", Type: field.TypeInt64, Default: 0},
+		{Name: "provider_reference", Type: field.TypeString, Nullable: true},
+		{Name: "provider", Type: field.TypeString},
+		{Name: "transaction_id", Type: field.TypeString, Unique: true},
+	}
+	// StablecoinWithdrawalsTable holds the schema information for the "stablecoin_withdrawals" table.
+	StablecoinWithdrawalsTable = &schema.Table{
+		Name:       "stablecoin_withdrawals",
+		Columns:    StablecoinWithdrawalsColumns,
+		PrimaryKey: []*schema.Column{StablecoinWithdrawalsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "stablecoin_withdrawals_transactions_stablecoin_withdrawal",
+				Columns:    []*schema.Column{StablecoinWithdrawalsColumns[10]},
+				RefColumns: []*schema.Column{TransactionsColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+		},
+	}
+	// TransactionsColumns holds the columns for the "transactions" table.
+	TransactionsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeString},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "deleted_at", Type: field.TypeTime, Nullable: true},
+		{Name: "reference", Type: field.TypeString, Unique: true},
+		{Name: "external_reference", Type: field.TypeString, Unique: true},
+		{Name: "type", Type: field.TypeEnum, Enums: []string{"DEPOSIT", "WITHDRAWAL", "TRANSFER", "PAYMENT", "REFUND", "REVERSAL", "FX", "FEE", "ADJUSTMENT"}},
+		{Name: "channel", Type: field.TypeEnum, Enums: []string{"CRYPTO", "BANK_TRANSFER", "INTERNAL"}},
+		{Name: "status", Type: field.TypeEnum, Enums: []string{"PENDING", "PROCESSING", "COMPLETED", "FAILED", "REVERSED", "CANCELLED"}, Default: "PENDING"},
+		{Name: "currency", Type: field.TypeString},
+		{Name: "summary", Type: field.TypeString, Nullable: true},
+		{Name: "provider", Type: field.TypeString, Nullable: true},
+		{Name: "amount", Type: field.TypeInt64, Default: 0},
+		{Name: "fee", Type: field.TypeInt64, Default: 0},
+		{Name: "transaction_wallet", Type: field.TypeString},
+	}
+	// TransactionsTable holds the schema information for the "transactions" table.
+	TransactionsTable = &schema.Table{
+		Name:       "transactions",
+		Columns:    TransactionsColumns,
+		PrimaryKey: []*schema.Column{TransactionsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "transactions_wallets_wallet",
+				Columns:    []*schema.Column{TransactionsColumns[14]},
+				RefColumns: []*schema.Column{WalletsColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
 		},
@@ -634,6 +963,11 @@ var (
 				Unique:  true,
 				Columns: []*schema.Column{WalletsColumns[9], WalletsColumns[10]},
 			},
+			{
+				Name:    "wallet_type",
+				Unique:  false,
+				Columns: []*schema.Column{WalletsColumns[4]},
+			},
 		},
 	}
 	// KybDocumentKybDocumentsColumns holds the columns for the "kyb_document_kyb_documents" table.
@@ -771,9 +1105,13 @@ var (
 		CurrenciesTable,
 		KybDocumentsTable,
 		KybMessagesTable,
+		LedgersTable,
 		LedgerOwnersTable,
 		ManagersTable,
+		NubanDepositsTable,
+		NubanDynamicAccountsTable,
 		NubanStaticAccountsTable,
+		NubanTransfersTable,
 		PermissionsTable,
 		ProvidersTable,
 		RequestVerificationsTable,
@@ -781,6 +1119,12 @@ var (
 		RolePermissionsTable,
 		ServicesTable,
 		SocialsTable,
+		StablecoinDepositsTable,
+		StablecoinNetworksTable,
+		StablecoinSupportedNetworksTable,
+		StablecoinWalletsTable,
+		StablecoinWithdrawalsTable,
+		TransactionsTable,
 		UsersTable,
 		UserDocumentsTable,
 		VaultsTable,
@@ -800,15 +1144,30 @@ func init() {
 	BusinessLocationsTable.ForeignKeys[0].RefTable = BusinessesTable
 	BusinessServicesTable.ForeignKeys[0].RefTable = BusinessesTable
 	KybMessagesTable.ForeignKeys[0].RefTable = BusinessesTable
+	LedgersTable.ForeignKeys[0].RefTable = TransactionsTable
+	LedgersTable.ForeignKeys[1].RefTable = TransactionsTable
+	LedgersTable.ForeignKeys[2].RefTable = WalletsTable
 	LedgerOwnersTable.ForeignKeys[0].RefTable = BusinessesTable
 	LedgerOwnersTable.ForeignKeys[1].RefTable = UsersTable
 	ManagersTable.ForeignKeys[0].RefTable = BusinessesTable
 	ManagersTable.ForeignKeys[1].RefTable = RolesTable
 	ManagersTable.ForeignKeys[2].RefTable = UsersTable
+	NubanDepositsTable.ForeignKeys[0].RefTable = TransactionsTable
+	NubanDynamicAccountsTable.ForeignKeys[0].RefTable = WalletsTable
 	NubanStaticAccountsTable.ForeignKeys[0].RefTable = WalletsTable
+	NubanTransfersTable.ForeignKeys[0].RefTable = TransactionsTable
 	RolePermissionsTable.ForeignKeys[0].RefTable = PermissionsTable
 	RolePermissionsTable.ForeignKeys[1].RefTable = RolesTable
 	SocialsTable.ForeignKeys[0].RefTable = BusinessesTable
+	StablecoinDepositsTable.ForeignKeys[0].RefTable = StablecoinWalletsTable
+	StablecoinDepositsTable.ForeignKeys[1].RefTable = TransactionsTable
+	StablecoinSupportedNetworksTable.ForeignKeys[0].RefTable = CurrenciesTable
+	StablecoinSupportedNetworksTable.ForeignKeys[1].RefTable = StablecoinNetworksTable
+	StablecoinWalletsTable.ForeignKeys[0].RefTable = CurrenciesTable
+	StablecoinWalletsTable.ForeignKeys[1].RefTable = StablecoinNetworksTable
+	StablecoinWalletsTable.ForeignKeys[2].RefTable = WalletsTable
+	StablecoinWithdrawalsTable.ForeignKeys[0].RefTable = TransactionsTable
+	TransactionsTable.ForeignKeys[0].RefTable = WalletsTable
 	UserDocumentsTable.ForeignKeys[0].RefTable = UsersTable
 	VaultsTable.ForeignKeys[0].RefTable = LedgerOwnersTable
 	WalletsTable.ForeignKeys[0].RefTable = CurrenciesTable

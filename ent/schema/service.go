@@ -50,8 +50,7 @@ func (Service) Fields() []ent.Field {
 			NotEmpty().
 			Unique(),
 		field.String("provider").
-			NotEmpty().
-			Unique(),
+			NotEmpty(),
 		field.Bool("require_subscription").
 			Default(false),
 		field.Bool("active").

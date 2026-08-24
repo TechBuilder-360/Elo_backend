@@ -95,6 +95,11 @@ func Code(v string) predicate.Currency {
 	return predicate.Currency(sql.FieldEQ(FieldCode, v))
 }
 
+// Logo applies equality check predicate on the "logo" field. It's identical to LogoEQ.
+func Logo(v string) predicate.Currency {
+	return predicate.Currency(sql.FieldEQ(FieldLogo, v))
+}
+
 // IsFiat applies equality check predicate on the "is_fiat" field. It's identical to IsFiatEQ.
 func IsFiat(v bool) predicate.Currency {
 	return predicate.Currency(sql.FieldEQ(FieldIsFiat, v))
@@ -435,6 +440,81 @@ func CodeContainsFold(v string) predicate.Currency {
 	return predicate.Currency(sql.FieldContainsFold(FieldCode, v))
 }
 
+// LogoEQ applies the EQ predicate on the "logo" field.
+func LogoEQ(v string) predicate.Currency {
+	return predicate.Currency(sql.FieldEQ(FieldLogo, v))
+}
+
+// LogoNEQ applies the NEQ predicate on the "logo" field.
+func LogoNEQ(v string) predicate.Currency {
+	return predicate.Currency(sql.FieldNEQ(FieldLogo, v))
+}
+
+// LogoIn applies the In predicate on the "logo" field.
+func LogoIn(vs ...string) predicate.Currency {
+	return predicate.Currency(sql.FieldIn(FieldLogo, vs...))
+}
+
+// LogoNotIn applies the NotIn predicate on the "logo" field.
+func LogoNotIn(vs ...string) predicate.Currency {
+	return predicate.Currency(sql.FieldNotIn(FieldLogo, vs...))
+}
+
+// LogoGT applies the GT predicate on the "logo" field.
+func LogoGT(v string) predicate.Currency {
+	return predicate.Currency(sql.FieldGT(FieldLogo, v))
+}
+
+// LogoGTE applies the GTE predicate on the "logo" field.
+func LogoGTE(v string) predicate.Currency {
+	return predicate.Currency(sql.FieldGTE(FieldLogo, v))
+}
+
+// LogoLT applies the LT predicate on the "logo" field.
+func LogoLT(v string) predicate.Currency {
+	return predicate.Currency(sql.FieldLT(FieldLogo, v))
+}
+
+// LogoLTE applies the LTE predicate on the "logo" field.
+func LogoLTE(v string) predicate.Currency {
+	return predicate.Currency(sql.FieldLTE(FieldLogo, v))
+}
+
+// LogoContains applies the Contains predicate on the "logo" field.
+func LogoContains(v string) predicate.Currency {
+	return predicate.Currency(sql.FieldContains(FieldLogo, v))
+}
+
+// LogoHasPrefix applies the HasPrefix predicate on the "logo" field.
+func LogoHasPrefix(v string) predicate.Currency {
+	return predicate.Currency(sql.FieldHasPrefix(FieldLogo, v))
+}
+
+// LogoHasSuffix applies the HasSuffix predicate on the "logo" field.
+func LogoHasSuffix(v string) predicate.Currency {
+	return predicate.Currency(sql.FieldHasSuffix(FieldLogo, v))
+}
+
+// LogoIsNil applies the IsNil predicate on the "logo" field.
+func LogoIsNil() predicate.Currency {
+	return predicate.Currency(sql.FieldIsNull(FieldLogo))
+}
+
+// LogoNotNil applies the NotNil predicate on the "logo" field.
+func LogoNotNil() predicate.Currency {
+	return predicate.Currency(sql.FieldNotNull(FieldLogo))
+}
+
+// LogoEqualFold applies the EqualFold predicate on the "logo" field.
+func LogoEqualFold(v string) predicate.Currency {
+	return predicate.Currency(sql.FieldEqualFold(FieldLogo, v))
+}
+
+// LogoContainsFold applies the ContainsFold predicate on the "logo" field.
+func LogoContainsFold(v string) predicate.Currency {
+	return predicate.Currency(sql.FieldContainsFold(FieldLogo, v))
+}
+
 // IsFiatEQ applies the EQ predicate on the "is_fiat" field.
 func IsFiatEQ(v bool) predicate.Currency {
 	return predicate.Currency(sql.FieldEQ(FieldIsFiat, v))
@@ -510,6 +590,52 @@ func HasWallets() predicate.Currency {
 func HasWalletsWith(preds ...predicate.Wallet) predicate.Currency {
 	return predicate.Currency(func(s *sql.Selector) {
 		step := newWalletsStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasStablecoinSupportedNetworks applies the HasEdge predicate on the "stablecoin_supported_networks" edge.
+func HasStablecoinSupportedNetworks() predicate.Currency {
+	return predicate.Currency(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, StablecoinSupportedNetworksTable, StablecoinSupportedNetworksColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasStablecoinSupportedNetworksWith applies the HasEdge predicate on the "stablecoin_supported_networks" edge with a given conditions (other predicates).
+func HasStablecoinSupportedNetworksWith(preds ...predicate.StablecoinSupportedNetwork) predicate.Currency {
+	return predicate.Currency(func(s *sql.Selector) {
+		step := newStablecoinSupportedNetworksStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasStablecoinCurrencies applies the HasEdge predicate on the "stablecoin_currencies" edge.
+func HasStablecoinCurrencies() predicate.Currency {
+	return predicate.Currency(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, StablecoinCurrenciesTable, StablecoinCurrenciesColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasStablecoinCurrenciesWith applies the HasEdge predicate on the "stablecoin_currencies" edge with a given conditions (other predicates).
+func HasStablecoinCurrenciesWith(preds ...predicate.StablecoinWallet) predicate.Currency {
+	return predicate.Currency(func(s *sql.Selector) {
+		step := newStablecoinCurrenciesStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)

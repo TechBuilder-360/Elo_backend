@@ -30,14 +30,26 @@ type KYBDocument func(*sql.Selector)
 // KYBMessage is the predicate function for kybmessage builders.
 type KYBMessage func(*sql.Selector)
 
+// Ledger is the predicate function for ledger builders.
+type Ledger func(*sql.Selector)
+
 // LedgerOwner is the predicate function for ledgerowner builders.
 type LedgerOwner func(*sql.Selector)
 
 // Manager is the predicate function for manager builders.
 type Manager func(*sql.Selector)
 
+// NubanDeposit is the predicate function for nubandeposit builders.
+type NubanDeposit func(*sql.Selector)
+
+// NubanDynamicAccount is the predicate function for nubandynamicaccount builders.
+type NubanDynamicAccount func(*sql.Selector)
+
 // NubanStaticAccount is the predicate function for nubanstaticaccount builders.
 type NubanStaticAccount func(*sql.Selector)
+
+// NubanTransfer is the predicate function for nubantransfer builders.
+type NubanTransfer func(*sql.Selector)
 
 // Permission is the predicate function for permission builders.
 type Permission func(*sql.Selector)
@@ -59,6 +71,24 @@ type Service func(*sql.Selector)
 
 // Social is the predicate function for social builders.
 type Social func(*sql.Selector)
+
+// StablecoinDeposit is the predicate function for stablecoindeposit builders.
+type StablecoinDeposit func(*sql.Selector)
+
+// StablecoinNetwork is the predicate function for stablecoinnetwork builders.
+type StablecoinNetwork func(*sql.Selector)
+
+// StablecoinSupportedNetwork is the predicate function for stablecoinsupportednetwork builders.
+type StablecoinSupportedNetwork func(*sql.Selector)
+
+// StablecoinWallet is the predicate function for stablecoinwallet builders.
+type StablecoinWallet func(*sql.Selector)
+
+// StablecoinWithdrawal is the predicate function for stablecoinwithdrawal builders.
+type StablecoinWithdrawal func(*sql.Selector)
+
+// Transaction is the predicate function for transaction builders.
+type Transaction func(*sql.Selector)
 
 // User is the predicate function for user builders.
 type User func(*sql.Selector)

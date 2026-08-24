@@ -3,8 +3,6 @@ package provider
 import (
 	"strings"
 	"sync"
-
-	"github.com/Toflex/directory_v2/pkg/constant"
 )
 
 type Impl interface {
@@ -14,13 +12,6 @@ type Impl interface {
 
 var mutex = sync.RWMutex{}
 var providers = map[string]Impl{}
-
-var ServiceProviders = []string{}
-
-func init() {
-	ServiceProviders = append(ServiceProviders,
-		constant.Brevo.ToString(), constant.Dojah.ToString())
-}
 
 // RegisterProvider registers a provider
 func RegisterProvider(provider ...Impl) {

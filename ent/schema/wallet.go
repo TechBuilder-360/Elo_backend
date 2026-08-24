@@ -49,6 +49,10 @@ func (Wallet) Edges() []ent.Edge {
 			Required(),
 
 		edge.To("nuban_static_account", NubanStaticAccount.Type),
+		edge.To("nuban_dynamic_account", NubanDynamicAccount.Type),
+
+		edge.To("stablecoin_wallets", StablecoinWallet.Type),
+		edge.To("ledger_entries", Ledger.Type),
 	}
 }
 
@@ -57,5 +61,6 @@ func (Wallet) Indexes() []ent.Index {
 		index.Fields("currency_id").
 			Edges("vault").
 			Unique(),
+		index.Fields("type"),
 	}
 }
