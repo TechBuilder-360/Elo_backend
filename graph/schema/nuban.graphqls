@@ -21,6 +21,6 @@ extend type Query {
 }
 
 extend type Mutation {
-    generateStaticNubanAccount(wallet_type): StaticNubanAccountDetail! @hasRole(role: ADMIN)
+    generateStaticNubanAccount(wallet_type: WalletType): StaticNubanAccountDetail! @hasRole(role: ADMIN)
     # generateDynamicNubanAccount: DynamicNubanAccountDetail! @hasRole(role: ADMIN)
 }

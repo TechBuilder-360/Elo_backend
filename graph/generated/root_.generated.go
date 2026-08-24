@@ -94,19 +94,18 @@ type ComplexityRoot struct {
 	}
 
 	Mutation struct {
-		AddBusinessWallet           func(childComplexity int, currencyCode string, walletType model.WalletType) int
-		BusinessDetail              func(childComplexity int, input model.BusinessDetail) int
-		DeleteDocument              func(childComplexity int, input model.RemoveDocumentInput) int
-		GenerateDynamicNubanAccount func(childComplexity int) int
-		GenerateStablecoin          func(childComplexity int, input *model.StablecoinInput) int
-		GenerateStaticNubanAccount  func(childComplexity int) int
-		Login                       func(childComplexity int, input model.Login) int
-		Logout                      func(childComplexity int) int
-		RegisterBusiness            func(childComplexity int, input model.RegisterBusinessInput) int
-		Registration                func(childComplexity int, input model.Registration) int
-		RequestOtp                  func(childComplexity int, input *model.RequestOtp) int
-		RequestUserVerification     func(childComplexity int, input model.VerificationPayload) int
-		UploadDocument              func(childComplexity int, input model.DocumentInput) int
+		AddBusinessWallet          func(childComplexity int, currencyCode string, walletType model.WalletType) int
+		BusinessDetail             func(childComplexity int, input model.BusinessDetail) int
+		DeleteDocument             func(childComplexity int, input model.RemoveDocumentInput) int
+		GenerateStablecoin         func(childComplexity int, input *model.StablecoinInput) int
+		GenerateStaticNubanAccount func(childComplexity int, walletType *model.WalletType) int
+		Login                      func(childComplexity int, input model.Login) int
+		Logout                     func(childComplexity int) int
+		RegisterBusiness           func(childComplexity int, input model.RegisterBusinessInput) int
+		Registration               func(childComplexity int, input model.Registration) int
+		RequestOtp                 func(childComplexity int, input *model.RequestOtp) int
+		RequestUserVerification    func(childComplexity int, input model.VerificationPayload) int
+		UploadDocument             func(childComplexity int, input model.DocumentInput) int
 	}
 
 	OTPResponse struct {
@@ -511,13 +510,6 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 
 		return e.complexity.Mutation.DeleteDocument(childComplexity, args["input"].(model.RemoveDocumentInput)), true
 
-	case "Mutation.generateDynamicNubanAccount":
-		if e.complexity.Mutation.GenerateDynamicNubanAccount == nil {
-			break
-		}
-
-		return e.complexity.Mutation.GenerateDynamicNubanAccount(childComplexity), true
-
 	case "Mutation.generateStablecoin":
 		if e.complexity.Mutation.GenerateStablecoin == nil {
 			break
@@ -535,7 +527,12 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			break
 		}
 
-		return e.complexity.Mutation.GenerateStaticNubanAccount(childComplexity), true
+		args, err := ec.field_Mutation_generateStaticNubanAccount_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.GenerateStaticNubanAccount(childComplexity, args["wallet_type"].(*model.WalletType)), true
 
 	case "Mutation.login":
 		if e.complexity.Mutation.Login == nil {
@@ -1427,8 +1424,8 @@ extend type Query {
 }
 
 extend type Mutation {
-    generateStaticNubanAccount: StaticNubanAccountDetail! @hasRole(role: ADMIN)
-    generateDynamicNubanAccount: DynamicNubanAccountDetail! @hasRole(role: ADMIN)
+    generateStaticNubanAccount(wallet_type: WalletType): StaticNubanAccountDetail! @hasRole(role: ADMIN)
+    # generateDynamicNubanAccount: DynamicNubanAccountDetail! @hasRole(role: ADMIN)
 }`, BuiltIn: false},
 	{Name: "../schema/stablecoin.graphqls", Input: `type Stablecoin {
     id: String!
