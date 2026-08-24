@@ -25,6 +25,8 @@ type QueryResolver interface {
 	GetCategories(ctx context.Context) ([]string, error)
 	FindBusiness(ctx context.Context, name *string, service *string, limit *int32) ([]*model.SearchBusiness, error)
 	Currencies(ctx context.Context, filter *model.CurrencyFilter) ([]*model.Currency, error)
+	BusinessNubanAccounts(ctx context.Context) ([]*model.StaticNubanAccountDetail, error)
+	BusinessStablecoins(ctx context.Context, filter *model.StablecoinFilter) ([]*model.Stablecoin, error)
 	Me(ctx context.Context) (*model.User, error)
 	GetUserBusinsses(ctx context.Context) ([]*model.UserBusiness, error)
 	BusinessWallets(ctx context.Context, walletType model.WalletType, filter *model.WalletFilter) ([]*model.Wallet, error)
@@ -65,6 +67,17 @@ func (ec *executionContext) field_Query_business_args(ctx context.Context, rawAr
 		return nil, err
 	}
 	args["id"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_business_stablecoins_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "filter", ec.unmarshalOStablecoinFilter2ᚖgithubᚗcomᚋToflexᚋdirectory_v2ᚋgraphᚋmodelᚐStablecoinFilter)
+	if err != nil {
+		return nil, err
+	}
+	args["filter"] = arg0
 	return args, nil
 }
 
@@ -1086,6 +1099,134 @@ func (ec *executionContext) fieldContext_Query_currencies(ctx context.Context, f
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
 	if fc.Args, err = ec.field_Query_currencies_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Query_business_nuban_accounts(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Query_business_nuban_accounts,
+		func(ctx context.Context) (any, error) {
+			return ec.resolvers.Query().BusinessNubanAccounts(ctx)
+		},
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			directive0 := next
+
+			directive1 := func(ctx context.Context) (any, error) {
+				role, err := ec.unmarshalNRole2githubᚗcomᚋToflexᚋdirectory_v2ᚋgraphᚋmodelᚐRole0(ctx, "ADMIN")
+				if err != nil {
+					var zeroVal []*model.StaticNubanAccountDetail
+					return zeroVal, err
+				}
+				if ec.directives.HasRole == nil {
+					var zeroVal []*model.StaticNubanAccountDetail
+					return zeroVal, errors.New("directive hasRole is not implemented")
+				}
+				return ec.directives.HasRole(ctx, nil, directive0, role)
+			}
+
+			next = directive1
+			return next
+		},
+		ec.marshalNStaticNubanAccountDetail2ᚕᚖgithubᚗcomᚋToflexᚋdirectory_v2ᚋgraphᚋmodelᚐStaticNubanAccountDetailᚄ,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Query_business_nuban_accounts(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "account_number":
+				return ec.fieldContext_StaticNubanAccountDetail_account_number(ctx, field)
+			case "account_name":
+				return ec.fieldContext_StaticNubanAccountDetail_account_name(ctx, field)
+			case "bank_name":
+				return ec.fieldContext_StaticNubanAccountDetail_bank_name(ctx, field)
+			case "currency":
+				return ec.fieldContext_StaticNubanAccountDetail_currency(ctx, field)
+			case "id":
+				return ec.fieldContext_StaticNubanAccountDetail_id(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type StaticNubanAccountDetail", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Query_business_stablecoins(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Query_business_stablecoins,
+		func(ctx context.Context) (any, error) {
+			fc := graphql.GetFieldContext(ctx)
+			return ec.resolvers.Query().BusinessStablecoins(ctx, fc.Args["filter"].(*model.StablecoinFilter))
+		},
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			directive0 := next
+
+			directive1 := func(ctx context.Context) (any, error) {
+				role, err := ec.unmarshalNRole2githubᚗcomᚋToflexᚋdirectory_v2ᚋgraphᚋmodelᚐRole0(ctx, "ADMIN")
+				if err != nil {
+					var zeroVal []*model.Stablecoin
+					return zeroVal, err
+				}
+				if ec.directives.HasRole == nil {
+					var zeroVal []*model.Stablecoin
+					return zeroVal, errors.New("directive hasRole is not implemented")
+				}
+				return ec.directives.HasRole(ctx, nil, directive0, role)
+			}
+
+			next = directive1
+			return next
+		},
+		ec.marshalNStablecoin2ᚕᚖgithubᚗcomᚋToflexᚋdirectory_v2ᚋgraphᚋmodelᚐStablecoinᚄ,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Query_business_stablecoins(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_Stablecoin_id(ctx, field)
+			case "address":
+				return ec.fieldContext_Stablecoin_address(ctx, field)
+			case "coin":
+				return ec.fieldContext_Stablecoin_coin(ctx, field)
+			case "network":
+				return ec.fieldContext_Stablecoin_network(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Stablecoin", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Query_business_stablecoins_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
 	}
@@ -2595,6 +2736,50 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 					}
 				}()
 				res = ec._Query_currencies(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx,
+					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
+		case "business_nuban_accounts":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_business_nuban_accounts(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx,
+					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
+		case "business_stablecoins":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_business_stablecoins(ctx, field)
 				if res == graphql.Null {
 					atomic.AddUint32(&fs.Invalids, 1)
 				}

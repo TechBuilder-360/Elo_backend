@@ -105,6 +105,18 @@ func (f KYBMessageFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, 
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.KYBMessageMutation", m)
 }
 
+// The LedgerFunc type is an adapter to allow the use of ordinary
+// function as Ledger mutator.
+type LedgerFunc func(context.Context, *ent.LedgerMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f LedgerFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.LedgerMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.LedgerMutation", m)
+}
+
 // The LedgerOwnerFunc type is an adapter to allow the use of ordinary
 // function as LedgerOwner mutator.
 type LedgerOwnerFunc func(context.Context, *ent.LedgerOwnerMutation) (ent.Value, error)
@@ -129,6 +141,30 @@ func (f ManagerFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, err
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.ManagerMutation", m)
 }
 
+// The NubanDepositFunc type is an adapter to allow the use of ordinary
+// function as NubanDeposit mutator.
+type NubanDepositFunc func(context.Context, *ent.NubanDepositMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f NubanDepositFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.NubanDepositMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.NubanDepositMutation", m)
+}
+
+// The NubanDynamicAccountFunc type is an adapter to allow the use of ordinary
+// function as NubanDynamicAccount mutator.
+type NubanDynamicAccountFunc func(context.Context, *ent.NubanDynamicAccountMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f NubanDynamicAccountFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.NubanDynamicAccountMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.NubanDynamicAccountMutation", m)
+}
+
 // The NubanStaticAccountFunc type is an adapter to allow the use of ordinary
 // function as NubanStaticAccount mutator.
 type NubanStaticAccountFunc func(context.Context, *ent.NubanStaticAccountMutation) (ent.Value, error)
@@ -139,6 +175,18 @@ func (f NubanStaticAccountFunc) Mutate(ctx context.Context, m ent.Mutation) (ent
 		return f(ctx, mv)
 	}
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.NubanStaticAccountMutation", m)
+}
+
+// The NubanTransferFunc type is an adapter to allow the use of ordinary
+// function as NubanTransfer mutator.
+type NubanTransferFunc func(context.Context, *ent.NubanTransferMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f NubanTransferFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.NubanTransferMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.NubanTransferMutation", m)
 }
 
 // The PermissionFunc type is an adapter to allow the use of ordinary
@@ -223,6 +271,78 @@ func (f SocialFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, erro
 		return f(ctx, mv)
 	}
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.SocialMutation", m)
+}
+
+// The StablecoinDepositFunc type is an adapter to allow the use of ordinary
+// function as StablecoinDeposit mutator.
+type StablecoinDepositFunc func(context.Context, *ent.StablecoinDepositMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f StablecoinDepositFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.StablecoinDepositMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.StablecoinDepositMutation", m)
+}
+
+// The StablecoinNetworkFunc type is an adapter to allow the use of ordinary
+// function as StablecoinNetwork mutator.
+type StablecoinNetworkFunc func(context.Context, *ent.StablecoinNetworkMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f StablecoinNetworkFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.StablecoinNetworkMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.StablecoinNetworkMutation", m)
+}
+
+// The StablecoinSupportedNetworkFunc type is an adapter to allow the use of ordinary
+// function as StablecoinSupportedNetwork mutator.
+type StablecoinSupportedNetworkFunc func(context.Context, *ent.StablecoinSupportedNetworkMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f StablecoinSupportedNetworkFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.StablecoinSupportedNetworkMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.StablecoinSupportedNetworkMutation", m)
+}
+
+// The StablecoinWalletFunc type is an adapter to allow the use of ordinary
+// function as StablecoinWallet mutator.
+type StablecoinWalletFunc func(context.Context, *ent.StablecoinWalletMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f StablecoinWalletFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.StablecoinWalletMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.StablecoinWalletMutation", m)
+}
+
+// The StablecoinWithdrawalFunc type is an adapter to allow the use of ordinary
+// function as StablecoinWithdrawal mutator.
+type StablecoinWithdrawalFunc func(context.Context, *ent.StablecoinWithdrawalMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f StablecoinWithdrawalFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.StablecoinWithdrawalMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.StablecoinWithdrawalMutation", m)
+}
+
+// The TransactionFunc type is an adapter to allow the use of ordinary
+// function as Transaction mutator.
+type TransactionFunc func(context.Context, *ent.TransactionMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f TransactionFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.TransactionMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.TransactionMutation", m)
 }
 
 // The UserFunc type is an adapter to allow the use of ordinary

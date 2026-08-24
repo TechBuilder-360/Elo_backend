@@ -118,7 +118,7 @@ func ToTitleCase(txt string) string {
 	return strings.Title(strings.ToLower(txt))
 }
 
-func RandomString(n int) string {
+func GenerateRandomString(n int) string {
 	const letters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
 	result := make([]byte, n)
 	for i := range result {

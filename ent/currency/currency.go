@@ -26,6 +26,8 @@ const (
 	FieldSymbol = "symbol"
 	// FieldCode holds the string denoting the code field in the database.
 	FieldCode = "code"
+	// FieldLogo holds the string denoting the logo field in the database.
+	FieldLogo = "logo"
 	// FieldIsFiat holds the string denoting the is_fiat field in the database.
 	FieldIsFiat = "is_fiat"
 	// FieldActive holds the string denoting the active field in the database.
@@ -34,6 +36,10 @@ const (
 	FieldMultiplier = "multiplier"
 	// EdgeWallets holds the string denoting the wallets edge name in mutations.
 	EdgeWallets = "wallets"
+	// EdgeStablecoinSupportedNetworks holds the string denoting the stablecoin_supported_networks edge name in mutations.
+	EdgeStablecoinSupportedNetworks = "stablecoin_supported_networks"
+	// EdgeStablecoinCurrencies holds the string denoting the stablecoin_currencies edge name in mutations.
+	EdgeStablecoinCurrencies = "stablecoin_currencies"
 	// Table holds the table name of the currency in the database.
 	Table = "currencies"
 	// WalletsTable is the table that holds the wallets relation/edge.
@@ -43,6 +49,20 @@ const (
 	WalletsInverseTable = "wallets"
 	// WalletsColumn is the table column denoting the wallets relation/edge.
 	WalletsColumn = "currency_id"
+	// StablecoinSupportedNetworksTable is the table that holds the stablecoin_supported_networks relation/edge.
+	StablecoinSupportedNetworksTable = "stablecoin_supported_networks"
+	// StablecoinSupportedNetworksInverseTable is the table name for the StablecoinSupportedNetwork entity.
+	// It exists in this package in order to avoid circular dependency with the "stablecoinsupportednetwork" package.
+	StablecoinSupportedNetworksInverseTable = "stablecoin_supported_networks"
+	// StablecoinSupportedNetworksColumn is the table column denoting the stablecoin_supported_networks relation/edge.
+	StablecoinSupportedNetworksColumn = "coin_id"
+	// StablecoinCurrenciesTable is the table that holds the stablecoin_currencies relation/edge.
+	StablecoinCurrenciesTable = "stablecoin_wallets"
+	// StablecoinCurrenciesInverseTable is the table name for the StablecoinWallet entity.
+	// It exists in this package in order to avoid circular dependency with the "stablecoinwallet" package.
+	StablecoinCurrenciesInverseTable = "stablecoin_wallets"
+	// StablecoinCurrenciesColumn is the table column denoting the stablecoin_currencies relation/edge.
+	StablecoinCurrenciesColumn = "coin_id"
 )
 
 // Columns holds all SQL columns for currency fields.
@@ -54,6 +74,7 @@ var Columns = []string{
 	FieldName,
 	FieldSymbol,
 	FieldCode,
+	FieldLogo,
 	FieldIsFiat,
 	FieldActive,
 	FieldMultiplier,
@@ -128,6 +149,11 @@ func ByCode(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldCode, opts...).ToFunc()
 }
 
+// ByLogo orders the results by the logo field.
+func ByLogo(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldLogo, opts...).ToFunc()
+}
+
 // ByIsFiat orders the results by the is_fiat field.
 func ByIsFiat(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldIsFiat, opts...).ToFunc()
@@ -156,10 +182,52 @@ func ByWallets(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 		sqlgraph.OrderByNeighborTerms(s, newWalletsStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
+
+// ByStablecoinSupportedNetworksCount orders the results by stablecoin_supported_networks count.
+func ByStablecoinSupportedNetworksCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newStablecoinSupportedNetworksStep(), opts...)
+	}
+}
+
+// ByStablecoinSupportedNetworks orders the results by stablecoin_supported_networks terms.
+func ByStablecoinSupportedNetworks(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newStablecoinSupportedNetworksStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+
+// ByStablecoinCurrenciesCount orders the results by stablecoin_currencies count.
+func ByStablecoinCurrenciesCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newStablecoinCurrenciesStep(), opts...)
+	}
+}
+
+// ByStablecoinCurrencies orders the results by stablecoin_currencies terms.
+func ByStablecoinCurrencies(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newStablecoinCurrenciesStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
 func newWalletsStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(WalletsInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.O2M, false, WalletsTable, WalletsColumn),
+	)
+}
+func newStablecoinSupportedNetworksStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(StablecoinSupportedNetworksInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, StablecoinSupportedNetworksTable, StablecoinSupportedNetworksColumn),
+	)
+}
+func newStablecoinCurrenciesStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(StablecoinCurrenciesInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, StablecoinCurrenciesTable, StablecoinCurrenciesColumn),
 	)
 }

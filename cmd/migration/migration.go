@@ -1,12 +1,12 @@
 package main
 
 import (
-	"os"
-
+	"github.com/Toflex/directory_v2/cmd/http/runtime"
 	"github.com/Toflex/directory_v2/cmd/migration/atlas"
 	"github.com/Toflex/directory_v2/cmd/migration/seed"
 	"github.com/Toflex/directory_v2/database/database"
 	"github.com/Toflex/directory_v2/ent"
+	"github.com/Toflex/directory_v2/pkg/configuration"
 	"github.com/Toflex/directory_v2/pkg/log"
 	"github.com/samber/do/v2"
 )
@@ -20,7 +20,8 @@ func initializeDI() {
 }
 
 func main() {
-	os.Setenv("ENVIRONMENT", "PRODUCTION")
+	configuration.LoadBaseConfiguration()
+
 	// initialize Runtime Dependency
 	initializeDI()
 
@@ -29,7 +30,7 @@ func main() {
 	defer db.Close()
 
 	// register providers
-	// runtime.Register()
+	runtime.Register(injector)
 
 	// run ATLAS migration
 	atlas.AtlasMigration()

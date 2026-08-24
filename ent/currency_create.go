@@ -13,6 +13,8 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/Toflex/directory_v2/ent/currency"
+	"github.com/Toflex/directory_v2/ent/stablecoinsupportednetwork"
+	"github.com/Toflex/directory_v2/ent/stablecoinwallet"
 	"github.com/Toflex/directory_v2/ent/wallet"
 )
 
@@ -84,6 +86,20 @@ func (cc *CurrencyCreate) SetCode(s string) *CurrencyCreate {
 	return cc
 }
 
+// SetLogo sets the "logo" field.
+func (cc *CurrencyCreate) SetLogo(s string) *CurrencyCreate {
+	cc.mutation.SetLogo(s)
+	return cc
+}
+
+// SetNillableLogo sets the "logo" field if the given value is not nil.
+func (cc *CurrencyCreate) SetNillableLogo(s *string) *CurrencyCreate {
+	if s != nil {
+		cc.SetLogo(*s)
+	}
+	return cc
+}
+
 // SetIsFiat sets the "is_fiat" field.
 func (cc *CurrencyCreate) SetIsFiat(b bool) *CurrencyCreate {
 	cc.mutation.SetIsFiat(b)
@@ -145,6 +161,36 @@ func (cc *CurrencyCreate) AddWallets(w ...*Wallet) *CurrencyCreate {
 		ids[i] = w[i].ID
 	}
 	return cc.AddWalletIDs(ids...)
+}
+
+// AddStablecoinSupportedNetworkIDs adds the "stablecoin_supported_networks" edge to the StablecoinSupportedNetwork entity by IDs.
+func (cc *CurrencyCreate) AddStablecoinSupportedNetworkIDs(ids ...string) *CurrencyCreate {
+	cc.mutation.AddStablecoinSupportedNetworkIDs(ids...)
+	return cc
+}
+
+// AddStablecoinSupportedNetworks adds the "stablecoin_supported_networks" edges to the StablecoinSupportedNetwork entity.
+func (cc *CurrencyCreate) AddStablecoinSupportedNetworks(s ...*StablecoinSupportedNetwork) *CurrencyCreate {
+	ids := make([]string, len(s))
+	for i := range s {
+		ids[i] = s[i].ID
+	}
+	return cc.AddStablecoinSupportedNetworkIDs(ids...)
+}
+
+// AddStablecoinCurrencyIDs adds the "stablecoin_currencies" edge to the StablecoinWallet entity by IDs.
+func (cc *CurrencyCreate) AddStablecoinCurrencyIDs(ids ...string) *CurrencyCreate {
+	cc.mutation.AddStablecoinCurrencyIDs(ids...)
+	return cc
+}
+
+// AddStablecoinCurrencies adds the "stablecoin_currencies" edges to the StablecoinWallet entity.
+func (cc *CurrencyCreate) AddStablecoinCurrencies(s ...*StablecoinWallet) *CurrencyCreate {
+	ids := make([]string, len(s))
+	for i := range s {
+		ids[i] = s[i].ID
+	}
+	return cc.AddStablecoinCurrencyIDs(ids...)
 }
 
 // Mutation returns the CurrencyMutation object of the builder.
@@ -305,6 +351,10 @@ func (cc *CurrencyCreate) createSpec() (*Currency, *sqlgraph.CreateSpec) {
 		_spec.SetField(currency.FieldCode, field.TypeString, value)
 		_node.Code = value
 	}
+	if value, ok := cc.mutation.Logo(); ok {
+		_spec.SetField(currency.FieldLogo, field.TypeString, value)
+		_node.Logo = &value
+	}
 	if value, ok := cc.mutation.IsFiat(); ok {
 		_spec.SetField(currency.FieldIsFiat, field.TypeBool, value)
 		_node.IsFiat = value
@@ -326,6 +376,38 @@ func (cc *CurrencyCreate) createSpec() (*Currency, *sqlgraph.CreateSpec) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(wallet.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := cc.mutation.StablecoinSupportedNetworksIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   currency.StablecoinSupportedNetworksTable,
+			Columns: []string{currency.StablecoinSupportedNetworksColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(stablecoinsupportednetwork.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := cc.mutation.StablecoinCurrenciesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   currency.StablecoinCurrenciesTable,
+			Columns: []string{currency.StablecoinCurrenciesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(stablecoinwallet.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {
@@ -448,6 +530,24 @@ func (u *CurrencyUpsert) SetCode(v string) *CurrencyUpsert {
 // UpdateCode sets the "code" field to the value that was provided on create.
 func (u *CurrencyUpsert) UpdateCode() *CurrencyUpsert {
 	u.SetExcluded(currency.FieldCode)
+	return u
+}
+
+// SetLogo sets the "logo" field.
+func (u *CurrencyUpsert) SetLogo(v string) *CurrencyUpsert {
+	u.Set(currency.FieldLogo, v)
+	return u
+}
+
+// UpdateLogo sets the "logo" field to the value that was provided on create.
+func (u *CurrencyUpsert) UpdateLogo() *CurrencyUpsert {
+	u.SetExcluded(currency.FieldLogo)
+	return u
+}
+
+// ClearLogo clears the value of the "logo" field.
+func (u *CurrencyUpsert) ClearLogo() *CurrencyUpsert {
+	u.SetNull(currency.FieldLogo)
 	return u
 }
 
@@ -618,6 +718,27 @@ func (u *CurrencyUpsertOne) SetCode(v string) *CurrencyUpsertOne {
 func (u *CurrencyUpsertOne) UpdateCode() *CurrencyUpsertOne {
 	return u.Update(func(s *CurrencyUpsert) {
 		s.UpdateCode()
+	})
+}
+
+// SetLogo sets the "logo" field.
+func (u *CurrencyUpsertOne) SetLogo(v string) *CurrencyUpsertOne {
+	return u.Update(func(s *CurrencyUpsert) {
+		s.SetLogo(v)
+	})
+}
+
+// UpdateLogo sets the "logo" field to the value that was provided on create.
+func (u *CurrencyUpsertOne) UpdateLogo() *CurrencyUpsertOne {
+	return u.Update(func(s *CurrencyUpsert) {
+		s.UpdateLogo()
+	})
+}
+
+// ClearLogo clears the value of the "logo" field.
+func (u *CurrencyUpsertOne) ClearLogo() *CurrencyUpsertOne {
+	return u.Update(func(s *CurrencyUpsert) {
+		s.ClearLogo()
 	})
 }
 
@@ -962,6 +1083,27 @@ func (u *CurrencyUpsertBulk) SetCode(v string) *CurrencyUpsertBulk {
 func (u *CurrencyUpsertBulk) UpdateCode() *CurrencyUpsertBulk {
 	return u.Update(func(s *CurrencyUpsert) {
 		s.UpdateCode()
+	})
+}
+
+// SetLogo sets the "logo" field.
+func (u *CurrencyUpsertBulk) SetLogo(v string) *CurrencyUpsertBulk {
+	return u.Update(func(s *CurrencyUpsert) {
+		s.SetLogo(v)
+	})
+}
+
+// UpdateLogo sets the "logo" field to the value that was provided on create.
+func (u *CurrencyUpsertBulk) UpdateLogo() *CurrencyUpsertBulk {
+	return u.Update(func(s *CurrencyUpsert) {
+		s.UpdateLogo()
+	})
+}
+
+// ClearLogo clears the value of the "logo" field.
+func (u *CurrencyUpsertBulk) ClearLogo() *CurrencyUpsertBulk {
+	return u.Update(func(s *CurrencyUpsert) {
+		s.ClearLogo()
 	})
 }
 

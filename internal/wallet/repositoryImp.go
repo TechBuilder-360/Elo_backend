@@ -168,3 +168,34 @@ func (r *repository) GetWalletWithCurrency(ctx context.Context, ownerID string, 
 		IsFiat:           w.Edges.Currency.IsFiat,
 	}, nil
 }
+
+func (r *repository) GetWalletByOwnerID(ctx context.Context, walletID, ownerID string) (*WalletResponse, error) {
+	w, err := r.db.Wallet.Query().Where(
+		wallet.IDEQ(walletID), wallet.HasVaultWith(vault.HasOwnerWith(ledgerowner.IDEQ(ownerID))),
+	).WithCurrency(func(q *ent.CurrencyQuery) {
+		q.Select(
+			currency.FieldID,
+			currency.FieldCode,
+			currency.FieldMultiplier,
+			currency.FieldIsFiat,
+		)
+	}).First(ctx)
+	if err != nil {
+		if ent.IsNotFound(err) {
+			return nil, nil
+		}
+
+		return nil, err
+	}
+
+	return &WalletResponse{
+		ID:               w.ID,
+		AvailableBalance: w.AvailableBalance,
+		LedgerBalance:    w.LedgerBalance,
+		HoldingBalance:   w.HoldingBalance,
+		Active:           w.Active,
+		Currency:         types.CurrencyCode(w.Edges.Currency.Code),
+		Multiplier:       w.Edges.Currency.Multiplier,
+		IsFiat:           w.Edges.Currency.IsFiat,
+	}, nil
+}

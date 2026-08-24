@@ -29,7 +29,7 @@ func (r *mutationResolver) RequestUserVerification(ctx context.Context, input mo
 		}, nil
 	}
 
-	res, err := r.VerificationService.RequestVerificationLink(ctx, &verification.VerificationRequest{
+	res, err := r.Services.VerificationService.RequestVerificationLink(ctx, &verification.VerificationRequest{
 		Entity: types.EntityType(*input.Entity),
 		ID:     u.ID,
 	})

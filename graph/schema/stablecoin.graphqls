@@ -1,0 +1,25 @@
+type Stablecoin {
+    id: String!
+    address: String!
+    coin: String!
+    network: String!
+}
+
+input StablecoinInput {
+    network: String!
+    wallet_id: String!
+}
+
+input StablecoinFilter {
+    coin: String
+    network: String
+    wallet_id: String
+}
+
+extend type Query {
+    business_stablecoins(filter: StablecoinFilter): [Stablecoin!]! @hasRole(role: ADMIN)
+}
+
+extend type Mutation {
+    generateStablecoin(input: StablecoinInput): Stablecoin! @hasRole(role: ADMIN)
+}

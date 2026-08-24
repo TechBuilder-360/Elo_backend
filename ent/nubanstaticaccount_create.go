@@ -102,20 +102,6 @@ func (nsac *NubanStaticAccountCreate) SetBankCode(s string) *NubanStaticAccountC
 	return nsac
 }
 
-// SetAddress sets the "address" field.
-func (nsac *NubanStaticAccountCreate) SetAddress(s string) *NubanStaticAccountCreate {
-	nsac.mutation.SetAddress(s)
-	return nsac
-}
-
-// SetNillableAddress sets the "address" field if the given value is not nil.
-func (nsac *NubanStaticAccountCreate) SetNillableAddress(s *string) *NubanStaticAccountCreate {
-	if s != nil {
-		nsac.SetAddress(*s)
-	}
-	return nsac
-}
-
 // SetState sets the "state" field.
 func (nsac *NubanStaticAccountCreate) SetState(n nubanstaticaccount.State) *NubanStaticAccountCreate {
 	nsac.mutation.SetState(n)
@@ -337,10 +323,6 @@ func (nsac *NubanStaticAccountCreate) createSpec() (*NubanStaticAccount, *sqlgra
 		_spec.SetField(nubanstaticaccount.FieldBankCode, field.TypeString, value)
 		_node.BankCode = value
 	}
-	if value, ok := nsac.mutation.Address(); ok {
-		_spec.SetField(nubanstaticaccount.FieldAddress, field.TypeString, value)
-		_node.Address = value
-	}
 	if value, ok := nsac.mutation.State(); ok {
 		_spec.SetField(nubanstaticaccount.FieldState, field.TypeEnum, value)
 		_node.State = value
@@ -513,24 +495,6 @@ func (u *NubanStaticAccountUpsert) SetBankCode(v string) *NubanStaticAccountUpse
 // UpdateBankCode sets the "bank_code" field to the value that was provided on create.
 func (u *NubanStaticAccountUpsert) UpdateBankCode() *NubanStaticAccountUpsert {
 	u.SetExcluded(nubanstaticaccount.FieldBankCode)
-	return u
-}
-
-// SetAddress sets the "address" field.
-func (u *NubanStaticAccountUpsert) SetAddress(v string) *NubanStaticAccountUpsert {
-	u.Set(nubanstaticaccount.FieldAddress, v)
-	return u
-}
-
-// UpdateAddress sets the "address" field to the value that was provided on create.
-func (u *NubanStaticAccountUpsert) UpdateAddress() *NubanStaticAccountUpsert {
-	u.SetExcluded(nubanstaticaccount.FieldAddress)
-	return u
-}
-
-// ClearAddress clears the value of the "address" field.
-func (u *NubanStaticAccountUpsert) ClearAddress() *NubanStaticAccountUpsert {
-	u.SetNull(nubanstaticaccount.FieldAddress)
 	return u
 }
 
@@ -713,27 +677,6 @@ func (u *NubanStaticAccountUpsertOne) SetBankCode(v string) *NubanStaticAccountU
 func (u *NubanStaticAccountUpsertOne) UpdateBankCode() *NubanStaticAccountUpsertOne {
 	return u.Update(func(s *NubanStaticAccountUpsert) {
 		s.UpdateBankCode()
-	})
-}
-
-// SetAddress sets the "address" field.
-func (u *NubanStaticAccountUpsertOne) SetAddress(v string) *NubanStaticAccountUpsertOne {
-	return u.Update(func(s *NubanStaticAccountUpsert) {
-		s.SetAddress(v)
-	})
-}
-
-// UpdateAddress sets the "address" field to the value that was provided on create.
-func (u *NubanStaticAccountUpsertOne) UpdateAddress() *NubanStaticAccountUpsertOne {
-	return u.Update(func(s *NubanStaticAccountUpsert) {
-		s.UpdateAddress()
-	})
-}
-
-// ClearAddress clears the value of the "address" field.
-func (u *NubanStaticAccountUpsertOne) ClearAddress() *NubanStaticAccountUpsertOne {
-	return u.Update(func(s *NubanStaticAccountUpsert) {
-		s.ClearAddress()
 	})
 }
 
@@ -1085,27 +1028,6 @@ func (u *NubanStaticAccountUpsertBulk) SetBankCode(v string) *NubanStaticAccount
 func (u *NubanStaticAccountUpsertBulk) UpdateBankCode() *NubanStaticAccountUpsertBulk {
 	return u.Update(func(s *NubanStaticAccountUpsert) {
 		s.UpdateBankCode()
-	})
-}
-
-// SetAddress sets the "address" field.
-func (u *NubanStaticAccountUpsertBulk) SetAddress(v string) *NubanStaticAccountUpsertBulk {
-	return u.Update(func(s *NubanStaticAccountUpsert) {
-		s.SetAddress(v)
-	})
-}
-
-// UpdateAddress sets the "address" field to the value that was provided on create.
-func (u *NubanStaticAccountUpsertBulk) UpdateAddress() *NubanStaticAccountUpsertBulk {
-	return u.Update(func(s *NubanStaticAccountUpsert) {
-		s.UpdateAddress()
-	})
-}
-
-// ClearAddress clears the value of the "address" field.
-func (u *NubanStaticAccountUpsertBulk) ClearAddress() *NubanStaticAccountUpsertBulk {
-	return u.Update(func(s *NubanStaticAccountUpsert) {
-		s.ClearAddress()
 	})
 }
 

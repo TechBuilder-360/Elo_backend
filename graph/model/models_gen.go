@@ -72,6 +72,16 @@ type DocumentInput struct {
 	File        string `json:"file"`
 }
 
+type DynamicNubanAccountDetail struct {
+	AccountNumber  string  `json:"account_number"`
+	AccountName    string  `json:"account_name"`
+	BankName       string  `json:"bank_name"`
+	Amount         float64 `json:"Amount"`
+	Currency       string  `json:"currency"`
+	ExpirationDate string  `json:"expiration_date"`
+	ID             string  `json:"id"`
+}
+
 type Login struct {
 	Otp        string `json:"otp"`
 	Identifier string `json:"identifier"`
@@ -133,6 +143,32 @@ type SearchBusiness struct {
 type Social struct {
 	Name string `json:"name"`
 	URL  string `json:"url"`
+}
+
+type Stablecoin struct {
+	ID      string `json:"id"`
+	Address string `json:"address"`
+	Coin    string `json:"coin"`
+	Network string `json:"network"`
+}
+
+type StablecoinFilter struct {
+	Coin     *string `json:"coin,omitempty"`
+	Network  *string `json:"network,omitempty"`
+	WalletID *string `json:"wallet_id,omitempty"`
+}
+
+type StablecoinInput struct {
+	Network  string `json:"network"`
+	WalletID string `json:"wallet_id"`
+}
+
+type StaticNubanAccountDetail struct {
+	AccountNumber string `json:"account_number"`
+	AccountName   string `json:"account_name"`
+	BankName      string `json:"bank_name"`
+	Currency      string `json:"currency"`
+	ID            string `json:"id"`
 }
 
 type User struct {

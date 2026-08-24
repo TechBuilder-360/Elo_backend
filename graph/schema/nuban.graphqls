@@ -1,0 +1,26 @@
+type StaticNubanAccountDetail {
+    account_number: String!
+    account_name: String!
+    bank_name: String!
+    currency: String!
+    id: String!
+}
+
+type DynamicNubanAccountDetail {
+    account_number: String!
+    account_name: String!
+    bank_name: String!
+    Amount: Float!
+    currency: String!
+    expiration_date: String!
+    id: String!
+}
+
+extend type Query {
+    business_nuban_accounts: [StaticNubanAccountDetail!]! @hasRole(role: ADMIN)
+}
+
+extend type Mutation {
+    generateStaticNubanAccount(wallet_type): StaticNubanAccountDetail! @hasRole(role: ADMIN)
+    # generateDynamicNubanAccount: DynamicNubanAccountDetail! @hasRole(role: ADMIN)
+}

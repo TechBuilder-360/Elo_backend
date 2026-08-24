@@ -12,8 +12,11 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/Toflex/directory_v2/ent/currency"
+	"github.com/Toflex/directory_v2/ent/ledger"
+	"github.com/Toflex/directory_v2/ent/nubandynamicaccount"
 	"github.com/Toflex/directory_v2/ent/nubanstaticaccount"
 	"github.com/Toflex/directory_v2/ent/predicate"
+	"github.com/Toflex/directory_v2/ent/stablecoinwallet"
 	"github.com/Toflex/directory_v2/ent/vault"
 	"github.com/Toflex/directory_v2/ent/wallet"
 )
@@ -193,6 +196,51 @@ func (wu *WalletUpdate) AddNubanStaticAccount(n ...*NubanStaticAccount) *WalletU
 	return wu.AddNubanStaticAccountIDs(ids...)
 }
 
+// AddNubanDynamicAccountIDs adds the "nuban_dynamic_account" edge to the NubanDynamicAccount entity by IDs.
+func (wu *WalletUpdate) AddNubanDynamicAccountIDs(ids ...string) *WalletUpdate {
+	wu.mutation.AddNubanDynamicAccountIDs(ids...)
+	return wu
+}
+
+// AddNubanDynamicAccount adds the "nuban_dynamic_account" edges to the NubanDynamicAccount entity.
+func (wu *WalletUpdate) AddNubanDynamicAccount(n ...*NubanDynamicAccount) *WalletUpdate {
+	ids := make([]string, len(n))
+	for i := range n {
+		ids[i] = n[i].ID
+	}
+	return wu.AddNubanDynamicAccountIDs(ids...)
+}
+
+// AddStablecoinWalletIDs adds the "stablecoin_wallets" edge to the StablecoinWallet entity by IDs.
+func (wu *WalletUpdate) AddStablecoinWalletIDs(ids ...string) *WalletUpdate {
+	wu.mutation.AddStablecoinWalletIDs(ids...)
+	return wu
+}
+
+// AddStablecoinWallets adds the "stablecoin_wallets" edges to the StablecoinWallet entity.
+func (wu *WalletUpdate) AddStablecoinWallets(s ...*StablecoinWallet) *WalletUpdate {
+	ids := make([]string, len(s))
+	for i := range s {
+		ids[i] = s[i].ID
+	}
+	return wu.AddStablecoinWalletIDs(ids...)
+}
+
+// AddLedgerEntryIDs adds the "ledger_entries" edge to the Ledger entity by IDs.
+func (wu *WalletUpdate) AddLedgerEntryIDs(ids ...string) *WalletUpdate {
+	wu.mutation.AddLedgerEntryIDs(ids...)
+	return wu
+}
+
+// AddLedgerEntries adds the "ledger_entries" edges to the Ledger entity.
+func (wu *WalletUpdate) AddLedgerEntries(l ...*Ledger) *WalletUpdate {
+	ids := make([]string, len(l))
+	for i := range l {
+		ids[i] = l[i].ID
+	}
+	return wu.AddLedgerEntryIDs(ids...)
+}
+
 // Mutation returns the WalletMutation object of the builder.
 func (wu *WalletUpdate) Mutation() *WalletMutation {
 	return wu.mutation
@@ -229,6 +277,69 @@ func (wu *WalletUpdate) RemoveNubanStaticAccount(n ...*NubanStaticAccount) *Wall
 		ids[i] = n[i].ID
 	}
 	return wu.RemoveNubanStaticAccountIDs(ids...)
+}
+
+// ClearNubanDynamicAccount clears all "nuban_dynamic_account" edges to the NubanDynamicAccount entity.
+func (wu *WalletUpdate) ClearNubanDynamicAccount() *WalletUpdate {
+	wu.mutation.ClearNubanDynamicAccount()
+	return wu
+}
+
+// RemoveNubanDynamicAccountIDs removes the "nuban_dynamic_account" edge to NubanDynamicAccount entities by IDs.
+func (wu *WalletUpdate) RemoveNubanDynamicAccountIDs(ids ...string) *WalletUpdate {
+	wu.mutation.RemoveNubanDynamicAccountIDs(ids...)
+	return wu
+}
+
+// RemoveNubanDynamicAccount removes "nuban_dynamic_account" edges to NubanDynamicAccount entities.
+func (wu *WalletUpdate) RemoveNubanDynamicAccount(n ...*NubanDynamicAccount) *WalletUpdate {
+	ids := make([]string, len(n))
+	for i := range n {
+		ids[i] = n[i].ID
+	}
+	return wu.RemoveNubanDynamicAccountIDs(ids...)
+}
+
+// ClearStablecoinWallets clears all "stablecoin_wallets" edges to the StablecoinWallet entity.
+func (wu *WalletUpdate) ClearStablecoinWallets() *WalletUpdate {
+	wu.mutation.ClearStablecoinWallets()
+	return wu
+}
+
+// RemoveStablecoinWalletIDs removes the "stablecoin_wallets" edge to StablecoinWallet entities by IDs.
+func (wu *WalletUpdate) RemoveStablecoinWalletIDs(ids ...string) *WalletUpdate {
+	wu.mutation.RemoveStablecoinWalletIDs(ids...)
+	return wu
+}
+
+// RemoveStablecoinWallets removes "stablecoin_wallets" edges to StablecoinWallet entities.
+func (wu *WalletUpdate) RemoveStablecoinWallets(s ...*StablecoinWallet) *WalletUpdate {
+	ids := make([]string, len(s))
+	for i := range s {
+		ids[i] = s[i].ID
+	}
+	return wu.RemoveStablecoinWalletIDs(ids...)
+}
+
+// ClearLedgerEntries clears all "ledger_entries" edges to the Ledger entity.
+func (wu *WalletUpdate) ClearLedgerEntries() *WalletUpdate {
+	wu.mutation.ClearLedgerEntries()
+	return wu
+}
+
+// RemoveLedgerEntryIDs removes the "ledger_entries" edge to Ledger entities by IDs.
+func (wu *WalletUpdate) RemoveLedgerEntryIDs(ids ...string) *WalletUpdate {
+	wu.mutation.RemoveLedgerEntryIDs(ids...)
+	return wu
+}
+
+// RemoveLedgerEntries removes "ledger_entries" edges to Ledger entities.
+func (wu *WalletUpdate) RemoveLedgerEntries(l ...*Ledger) *WalletUpdate {
+	ids := make([]string, len(l))
+	for i := range l {
+		ids[i] = l[i].ID
+	}
+	return wu.RemoveLedgerEntryIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -436,6 +547,141 @@ func (wu *WalletUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	if wu.mutation.NubanDynamicAccountCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   wallet.NubanDynamicAccountTable,
+			Columns: []string{wallet.NubanDynamicAccountColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(nubandynamicaccount.FieldID, field.TypeString),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := wu.mutation.RemovedNubanDynamicAccountIDs(); len(nodes) > 0 && !wu.mutation.NubanDynamicAccountCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   wallet.NubanDynamicAccountTable,
+			Columns: []string{wallet.NubanDynamicAccountColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(nubandynamicaccount.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := wu.mutation.NubanDynamicAccountIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   wallet.NubanDynamicAccountTable,
+			Columns: []string{wallet.NubanDynamicAccountColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(nubandynamicaccount.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if wu.mutation.StablecoinWalletsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   wallet.StablecoinWalletsTable,
+			Columns: []string{wallet.StablecoinWalletsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(stablecoinwallet.FieldID, field.TypeString),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := wu.mutation.RemovedStablecoinWalletsIDs(); len(nodes) > 0 && !wu.mutation.StablecoinWalletsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   wallet.StablecoinWalletsTable,
+			Columns: []string{wallet.StablecoinWalletsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(stablecoinwallet.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := wu.mutation.StablecoinWalletsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   wallet.StablecoinWalletsTable,
+			Columns: []string{wallet.StablecoinWalletsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(stablecoinwallet.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if wu.mutation.LedgerEntriesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   wallet.LedgerEntriesTable,
+			Columns: []string{wallet.LedgerEntriesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(ledger.FieldID, field.TypeString),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := wu.mutation.RemovedLedgerEntriesIDs(); len(nodes) > 0 && !wu.mutation.LedgerEntriesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   wallet.LedgerEntriesTable,
+			Columns: []string{wallet.LedgerEntriesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(ledger.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := wu.mutation.LedgerEntriesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   wallet.LedgerEntriesTable,
+			Columns: []string{wallet.LedgerEntriesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(ledger.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
 	if n, err = sqlgraph.UpdateNodes(ctx, wu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{wallet.Label}
@@ -618,6 +864,51 @@ func (wuo *WalletUpdateOne) AddNubanStaticAccount(n ...*NubanStaticAccount) *Wal
 	return wuo.AddNubanStaticAccountIDs(ids...)
 }
 
+// AddNubanDynamicAccountIDs adds the "nuban_dynamic_account" edge to the NubanDynamicAccount entity by IDs.
+func (wuo *WalletUpdateOne) AddNubanDynamicAccountIDs(ids ...string) *WalletUpdateOne {
+	wuo.mutation.AddNubanDynamicAccountIDs(ids...)
+	return wuo
+}
+
+// AddNubanDynamicAccount adds the "nuban_dynamic_account" edges to the NubanDynamicAccount entity.
+func (wuo *WalletUpdateOne) AddNubanDynamicAccount(n ...*NubanDynamicAccount) *WalletUpdateOne {
+	ids := make([]string, len(n))
+	for i := range n {
+		ids[i] = n[i].ID
+	}
+	return wuo.AddNubanDynamicAccountIDs(ids...)
+}
+
+// AddStablecoinWalletIDs adds the "stablecoin_wallets" edge to the StablecoinWallet entity by IDs.
+func (wuo *WalletUpdateOne) AddStablecoinWalletIDs(ids ...string) *WalletUpdateOne {
+	wuo.mutation.AddStablecoinWalletIDs(ids...)
+	return wuo
+}
+
+// AddStablecoinWallets adds the "stablecoin_wallets" edges to the StablecoinWallet entity.
+func (wuo *WalletUpdateOne) AddStablecoinWallets(s ...*StablecoinWallet) *WalletUpdateOne {
+	ids := make([]string, len(s))
+	for i := range s {
+		ids[i] = s[i].ID
+	}
+	return wuo.AddStablecoinWalletIDs(ids...)
+}
+
+// AddLedgerEntryIDs adds the "ledger_entries" edge to the Ledger entity by IDs.
+func (wuo *WalletUpdateOne) AddLedgerEntryIDs(ids ...string) *WalletUpdateOne {
+	wuo.mutation.AddLedgerEntryIDs(ids...)
+	return wuo
+}
+
+// AddLedgerEntries adds the "ledger_entries" edges to the Ledger entity.
+func (wuo *WalletUpdateOne) AddLedgerEntries(l ...*Ledger) *WalletUpdateOne {
+	ids := make([]string, len(l))
+	for i := range l {
+		ids[i] = l[i].ID
+	}
+	return wuo.AddLedgerEntryIDs(ids...)
+}
+
 // Mutation returns the WalletMutation object of the builder.
 func (wuo *WalletUpdateOne) Mutation() *WalletMutation {
 	return wuo.mutation
@@ -654,6 +945,69 @@ func (wuo *WalletUpdateOne) RemoveNubanStaticAccount(n ...*NubanStaticAccount) *
 		ids[i] = n[i].ID
 	}
 	return wuo.RemoveNubanStaticAccountIDs(ids...)
+}
+
+// ClearNubanDynamicAccount clears all "nuban_dynamic_account" edges to the NubanDynamicAccount entity.
+func (wuo *WalletUpdateOne) ClearNubanDynamicAccount() *WalletUpdateOne {
+	wuo.mutation.ClearNubanDynamicAccount()
+	return wuo
+}
+
+// RemoveNubanDynamicAccountIDs removes the "nuban_dynamic_account" edge to NubanDynamicAccount entities by IDs.
+func (wuo *WalletUpdateOne) RemoveNubanDynamicAccountIDs(ids ...string) *WalletUpdateOne {
+	wuo.mutation.RemoveNubanDynamicAccountIDs(ids...)
+	return wuo
+}
+
+// RemoveNubanDynamicAccount removes "nuban_dynamic_account" edges to NubanDynamicAccount entities.
+func (wuo *WalletUpdateOne) RemoveNubanDynamicAccount(n ...*NubanDynamicAccount) *WalletUpdateOne {
+	ids := make([]string, len(n))
+	for i := range n {
+		ids[i] = n[i].ID
+	}
+	return wuo.RemoveNubanDynamicAccountIDs(ids...)
+}
+
+// ClearStablecoinWallets clears all "stablecoin_wallets" edges to the StablecoinWallet entity.
+func (wuo *WalletUpdateOne) ClearStablecoinWallets() *WalletUpdateOne {
+	wuo.mutation.ClearStablecoinWallets()
+	return wuo
+}
+
+// RemoveStablecoinWalletIDs removes the "stablecoin_wallets" edge to StablecoinWallet entities by IDs.
+func (wuo *WalletUpdateOne) RemoveStablecoinWalletIDs(ids ...string) *WalletUpdateOne {
+	wuo.mutation.RemoveStablecoinWalletIDs(ids...)
+	return wuo
+}
+
+// RemoveStablecoinWallets removes "stablecoin_wallets" edges to StablecoinWallet entities.
+func (wuo *WalletUpdateOne) RemoveStablecoinWallets(s ...*StablecoinWallet) *WalletUpdateOne {
+	ids := make([]string, len(s))
+	for i := range s {
+		ids[i] = s[i].ID
+	}
+	return wuo.RemoveStablecoinWalletIDs(ids...)
+}
+
+// ClearLedgerEntries clears all "ledger_entries" edges to the Ledger entity.
+func (wuo *WalletUpdateOne) ClearLedgerEntries() *WalletUpdateOne {
+	wuo.mutation.ClearLedgerEntries()
+	return wuo
+}
+
+// RemoveLedgerEntryIDs removes the "ledger_entries" edge to Ledger entities by IDs.
+func (wuo *WalletUpdateOne) RemoveLedgerEntryIDs(ids ...string) *WalletUpdateOne {
+	wuo.mutation.RemoveLedgerEntryIDs(ids...)
+	return wuo
+}
+
+// RemoveLedgerEntries removes "ledger_entries" edges to Ledger entities.
+func (wuo *WalletUpdateOne) RemoveLedgerEntries(l ...*Ledger) *WalletUpdateOne {
+	ids := make([]string, len(l))
+	for i := range l {
+		ids[i] = l[i].ID
+	}
+	return wuo.RemoveLedgerEntryIDs(ids...)
 }
 
 // Where appends a list predicates to the WalletUpdate builder.
@@ -884,6 +1238,141 @@ func (wuo *WalletUpdateOne) sqlSave(ctx context.Context) (_node *Wallet, err err
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(nubanstaticaccount.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if wuo.mutation.NubanDynamicAccountCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   wallet.NubanDynamicAccountTable,
+			Columns: []string{wallet.NubanDynamicAccountColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(nubandynamicaccount.FieldID, field.TypeString),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := wuo.mutation.RemovedNubanDynamicAccountIDs(); len(nodes) > 0 && !wuo.mutation.NubanDynamicAccountCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   wallet.NubanDynamicAccountTable,
+			Columns: []string{wallet.NubanDynamicAccountColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(nubandynamicaccount.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := wuo.mutation.NubanDynamicAccountIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   wallet.NubanDynamicAccountTable,
+			Columns: []string{wallet.NubanDynamicAccountColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(nubandynamicaccount.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if wuo.mutation.StablecoinWalletsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   wallet.StablecoinWalletsTable,
+			Columns: []string{wallet.StablecoinWalletsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(stablecoinwallet.FieldID, field.TypeString),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := wuo.mutation.RemovedStablecoinWalletsIDs(); len(nodes) > 0 && !wuo.mutation.StablecoinWalletsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   wallet.StablecoinWalletsTable,
+			Columns: []string{wallet.StablecoinWalletsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(stablecoinwallet.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := wuo.mutation.StablecoinWalletsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   wallet.StablecoinWalletsTable,
+			Columns: []string{wallet.StablecoinWalletsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(stablecoinwallet.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if wuo.mutation.LedgerEntriesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   wallet.LedgerEntriesTable,
+			Columns: []string{wallet.LedgerEntriesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(ledger.FieldID, field.TypeString),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := wuo.mutation.RemovedLedgerEntriesIDs(); len(nodes) > 0 && !wuo.mutation.LedgerEntriesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   wallet.LedgerEntriesTable,
+			Columns: []string{wallet.LedgerEntriesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(ledger.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := wuo.mutation.LedgerEntriesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   wallet.LedgerEntriesTable,
+			Columns: []string{wallet.LedgerEntriesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(ledger.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {

@@ -39,6 +39,12 @@ const (
 	EdgeVault = "vault"
 	// EdgeNubanStaticAccount holds the string denoting the nuban_static_account edge name in mutations.
 	EdgeNubanStaticAccount = "nuban_static_account"
+	// EdgeNubanDynamicAccount holds the string denoting the nuban_dynamic_account edge name in mutations.
+	EdgeNubanDynamicAccount = "nuban_dynamic_account"
+	// EdgeStablecoinWallets holds the string denoting the stablecoin_wallets edge name in mutations.
+	EdgeStablecoinWallets = "stablecoin_wallets"
+	// EdgeLedgerEntries holds the string denoting the ledger_entries edge name in mutations.
+	EdgeLedgerEntries = "ledger_entries"
 	// Table holds the table name of the wallet in the database.
 	Table = "wallets"
 	// CurrencyTable is the table that holds the currency relation/edge.
@@ -62,6 +68,27 @@ const (
 	NubanStaticAccountInverseTable = "nuban_static_accounts"
 	// NubanStaticAccountColumn is the table column denoting the nuban_static_account relation/edge.
 	NubanStaticAccountColumn = "wallet_nuban_static_account"
+	// NubanDynamicAccountTable is the table that holds the nuban_dynamic_account relation/edge.
+	NubanDynamicAccountTable = "nuban_dynamic_accounts"
+	// NubanDynamicAccountInverseTable is the table name for the NubanDynamicAccount entity.
+	// It exists in this package in order to avoid circular dependency with the "nubandynamicaccount" package.
+	NubanDynamicAccountInverseTable = "nuban_dynamic_accounts"
+	// NubanDynamicAccountColumn is the table column denoting the nuban_dynamic_account relation/edge.
+	NubanDynamicAccountColumn = "wallet_nuban_dynamic_account"
+	// StablecoinWalletsTable is the table that holds the stablecoin_wallets relation/edge.
+	StablecoinWalletsTable = "stablecoin_wallets"
+	// StablecoinWalletsInverseTable is the table name for the StablecoinWallet entity.
+	// It exists in this package in order to avoid circular dependency with the "stablecoinwallet" package.
+	StablecoinWalletsInverseTable = "stablecoin_wallets"
+	// StablecoinWalletsColumn is the table column denoting the stablecoin_wallets relation/edge.
+	StablecoinWalletsColumn = "wallet_stablecoin_wallets"
+	// LedgerEntriesTable is the table that holds the ledger_entries relation/edge.
+	LedgerEntriesTable = "ledgers"
+	// LedgerEntriesInverseTable is the table name for the Ledger entity.
+	// It exists in this package in order to avoid circular dependency with the "ledger" package.
+	LedgerEntriesInverseTable = "ledgers"
+	// LedgerEntriesColumn is the table column denoting the ledger_entries relation/edge.
+	LedgerEntriesColumn = "wallet_id"
 )
 
 // Columns holds all SQL columns for wallet fields.
@@ -226,6 +253,48 @@ func ByNubanStaticAccount(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOptio
 		sqlgraph.OrderByNeighborTerms(s, newNubanStaticAccountStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
+
+// ByNubanDynamicAccountCount orders the results by nuban_dynamic_account count.
+func ByNubanDynamicAccountCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newNubanDynamicAccountStep(), opts...)
+	}
+}
+
+// ByNubanDynamicAccount orders the results by nuban_dynamic_account terms.
+func ByNubanDynamicAccount(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newNubanDynamicAccountStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+
+// ByStablecoinWalletsCount orders the results by stablecoin_wallets count.
+func ByStablecoinWalletsCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newStablecoinWalletsStep(), opts...)
+	}
+}
+
+// ByStablecoinWallets orders the results by stablecoin_wallets terms.
+func ByStablecoinWallets(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newStablecoinWalletsStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+
+// ByLedgerEntriesCount orders the results by ledger_entries count.
+func ByLedgerEntriesCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newLedgerEntriesStep(), opts...)
+	}
+}
+
+// ByLedgerEntries orders the results by ledger_entries terms.
+func ByLedgerEntries(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newLedgerEntriesStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
 func newCurrencyStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
@@ -245,5 +314,26 @@ func newNubanStaticAccountStep() *sqlgraph.Step {
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(NubanStaticAccountInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.O2M, false, NubanStaticAccountTable, NubanStaticAccountColumn),
+	)
+}
+func newNubanDynamicAccountStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(NubanDynamicAccountInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, NubanDynamicAccountTable, NubanDynamicAccountColumn),
+	)
+}
+func newStablecoinWalletsStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(StablecoinWalletsInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, StablecoinWalletsTable, StablecoinWalletsColumn),
+	)
+}
+func newLedgerEntriesStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(LedgerEntriesInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, LedgerEntriesTable, LedgerEntriesColumn),
 	)
 }

@@ -3,13 +3,8 @@ package resolver
 //go:generate go run github.com/99designs/gqlgen generate
 
 import (
+	"github.com/Toflex/directory_v2/cmd/http/runtime"
 	"github.com/Toflex/directory_v2/graph/generated"
-	"github.com/Toflex/directory_v2/internal/authentication"
-	"github.com/Toflex/directory_v2/internal/business"
-	"github.com/Toflex/directory_v2/internal/currency"
-	"github.com/Toflex/directory_v2/internal/transaction"
-	"github.com/Toflex/directory_v2/internal/wallet"
-	"github.com/Toflex/directory_v2/pkg/verification"
 )
 
 //go:generate go run github.com/99designs/gqlgen generate
@@ -19,12 +14,7 @@ import (
 // It serves as dependency injection for your app, add any dependencies you require here.
 
 type Resolver struct {
-	AuthenticationService authentication.IService
-	VerificationService   verification.IService
-	BusinessService       business.IService
-	WalletService         wallet.IService
-	CurrencyService       currency.IService
-	TransactionService    transaction.IService
+	Services *runtime.RegisteredService
 }
 
 // Query returns generated.QueryResolver implementation.

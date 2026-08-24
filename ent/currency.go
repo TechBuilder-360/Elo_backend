@@ -29,6 +29,8 @@ type Currency struct {
 	Symbol string `json:"symbol,omitempty"`
 	// Code holds the value of the "code" field.
 	Code string `json:"code,omitempty"`
+	// Logo holds the value of the "logo" field.
+	Logo *string `json:"logo,omitempty"`
 	// IsFiat holds the value of the "is_fiat" field.
 	IsFiat bool `json:"is_fiat,omitempty"`
 	// Active holds the value of the "active" field.
@@ -45,9 +47,13 @@ type Currency struct {
 type CurrencyEdges struct {
 	// Wallets holds the value of the wallets edge.
 	Wallets []*Wallet `json:"wallets,omitempty"`
+	// StablecoinSupportedNetworks holds the value of the stablecoin_supported_networks edge.
+	StablecoinSupportedNetworks []*StablecoinSupportedNetwork `json:"stablecoin_supported_networks,omitempty"`
+	// StablecoinCurrencies holds the value of the stablecoin_currencies edge.
+	StablecoinCurrencies []*StablecoinWallet `json:"stablecoin_currencies,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [1]bool
+	loadedTypes [3]bool
 }
 
 // WalletsOrErr returns the Wallets value or an error if the edge
@@ -59,6 +65,24 @@ func (e CurrencyEdges) WalletsOrErr() ([]*Wallet, error) {
 	return nil, &NotLoadedError{edge: "wallets"}
 }
 
+// StablecoinSupportedNetworksOrErr returns the StablecoinSupportedNetworks value or an error if the edge
+// was not loaded in eager-loading.
+func (e CurrencyEdges) StablecoinSupportedNetworksOrErr() ([]*StablecoinSupportedNetwork, error) {
+	if e.loadedTypes[1] {
+		return e.StablecoinSupportedNetworks, nil
+	}
+	return nil, &NotLoadedError{edge: "stablecoin_supported_networks"}
+}
+
+// StablecoinCurrenciesOrErr returns the StablecoinCurrencies value or an error if the edge
+// was not loaded in eager-loading.
+func (e CurrencyEdges) StablecoinCurrenciesOrErr() ([]*StablecoinWallet, error) {
+	if e.loadedTypes[2] {
+		return e.StablecoinCurrencies, nil
+	}
+	return nil, &NotLoadedError{edge: "stablecoin_currencies"}
+}
+
 // scanValues returns the types for scanning values from sql.Rows.
 func (*Currency) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
@@ -68,7 +92,7 @@ func (*Currency) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullBool)
 		case currency.FieldMultiplier:
 			values[i] = new(sql.NullInt64)
-		case currency.FieldID, currency.FieldName, currency.FieldSymbol, currency.FieldCode:
+		case currency.FieldID, currency.FieldName, currency.FieldSymbol, currency.FieldCode, currency.FieldLogo:
 			values[i] = new(sql.NullString)
 		case currency.FieldCreatedAt, currency.FieldUpdatedAt, currency.FieldDeletedAt:
 			values[i] = new(sql.NullTime)
@@ -130,6 +154,13 @@ func (c *Currency) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				c.Code = value.String
 			}
+		case currency.FieldLogo:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field logo", values[i])
+			} else if value.Valid {
+				c.Logo = new(string)
+				*c.Logo = value.String
+			}
 		case currency.FieldIsFiat:
 			if value, ok := values[i].(*sql.NullBool); !ok {
 				return fmt.Errorf("unexpected type %T for field is_fiat", values[i])
@@ -164,6 +195,16 @@ func (c *Currency) Value(name string) (ent.Value, error) {
 // QueryWallets queries the "wallets" edge of the Currency entity.
 func (c *Currency) QueryWallets() *WalletQuery {
 	return NewCurrencyClient(c.config).QueryWallets(c)
+}
+
+// QueryStablecoinSupportedNetworks queries the "stablecoin_supported_networks" edge of the Currency entity.
+func (c *Currency) QueryStablecoinSupportedNetworks() *StablecoinSupportedNetworkQuery {
+	return NewCurrencyClient(c.config).QueryStablecoinSupportedNetworks(c)
+}
+
+// QueryStablecoinCurrencies queries the "stablecoin_currencies" edge of the Currency entity.
+func (c *Currency) QueryStablecoinCurrencies() *StablecoinWalletQuery {
+	return NewCurrencyClient(c.config).QueryStablecoinCurrencies(c)
 }
 
 // Update returns a builder for updating this Currency.
@@ -208,6 +249,11 @@ func (c *Currency) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("code=")
 	builder.WriteString(c.Code)
+	builder.WriteString(", ")
+	if v := c.Logo; v != nil {
+		builder.WriteString("logo=")
+		builder.WriteString(*v)
+	}
 	builder.WriteString(", ")
 	builder.WriteString("is_fiat=")
 	builder.WriteString(fmt.Sprintf("%v", c.IsFiat))

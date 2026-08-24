@@ -14,17 +14,21 @@ import (
 	"entgo.io/ent/schema/field"
 	"github.com/Toflex/directory_v2/ent/currency"
 	"github.com/Toflex/directory_v2/ent/predicate"
+	"github.com/Toflex/directory_v2/ent/stablecoinsupportednetwork"
+	"github.com/Toflex/directory_v2/ent/stablecoinwallet"
 	"github.com/Toflex/directory_v2/ent/wallet"
 )
 
 // CurrencyQuery is the builder for querying Currency entities.
 type CurrencyQuery struct {
 	config
-	ctx         *QueryContext
-	order       []currency.OrderOption
-	inters      []Interceptor
-	predicates  []predicate.Currency
-	withWallets *WalletQuery
+	ctx                             *QueryContext
+	order                           []currency.OrderOption
+	inters                          []Interceptor
+	predicates                      []predicate.Currency
+	withWallets                     *WalletQuery
+	withStablecoinSupportedNetworks *StablecoinSupportedNetworkQuery
+	withStablecoinCurrencies        *StablecoinWalletQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -76,6 +80,50 @@ func (cq *CurrencyQuery) QueryWallets() *WalletQuery {
 			sqlgraph.From(currency.Table, currency.FieldID, selector),
 			sqlgraph.To(wallet.Table, wallet.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, currency.WalletsTable, currency.WalletsColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(cq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryStablecoinSupportedNetworks chains the current query on the "stablecoin_supported_networks" edge.
+func (cq *CurrencyQuery) QueryStablecoinSupportedNetworks() *StablecoinSupportedNetworkQuery {
+	query := (&StablecoinSupportedNetworkClient{config: cq.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := cq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := cq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(currency.Table, currency.FieldID, selector),
+			sqlgraph.To(stablecoinsupportednetwork.Table, stablecoinsupportednetwork.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, currency.StablecoinSupportedNetworksTable, currency.StablecoinSupportedNetworksColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(cq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryStablecoinCurrencies chains the current query on the "stablecoin_currencies" edge.
+func (cq *CurrencyQuery) QueryStablecoinCurrencies() *StablecoinWalletQuery {
+	query := (&StablecoinWalletClient{config: cq.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := cq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := cq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(currency.Table, currency.FieldID, selector),
+			sqlgraph.To(stablecoinwallet.Table, stablecoinwallet.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, currency.StablecoinCurrenciesTable, currency.StablecoinCurrenciesColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(cq.driver.Dialect(), step)
 		return fromU, nil
@@ -270,12 +318,14 @@ func (cq *CurrencyQuery) Clone() *CurrencyQuery {
 		return nil
 	}
 	return &CurrencyQuery{
-		config:      cq.config,
-		ctx:         cq.ctx.Clone(),
-		order:       append([]currency.OrderOption{}, cq.order...),
-		inters:      append([]Interceptor{}, cq.inters...),
-		predicates:  append([]predicate.Currency{}, cq.predicates...),
-		withWallets: cq.withWallets.Clone(),
+		config:                          cq.config,
+		ctx:                             cq.ctx.Clone(),
+		order:                           append([]currency.OrderOption{}, cq.order...),
+		inters:                          append([]Interceptor{}, cq.inters...),
+		predicates:                      append([]predicate.Currency{}, cq.predicates...),
+		withWallets:                     cq.withWallets.Clone(),
+		withStablecoinSupportedNetworks: cq.withStablecoinSupportedNetworks.Clone(),
+		withStablecoinCurrencies:        cq.withStablecoinCurrencies.Clone(),
 		// clone intermediate query.
 		sql:  cq.sql.Clone(),
 		path: cq.path,
@@ -290,6 +340,28 @@ func (cq *CurrencyQuery) WithWallets(opts ...func(*WalletQuery)) *CurrencyQuery 
 		opt(query)
 	}
 	cq.withWallets = query
+	return cq
+}
+
+// WithStablecoinSupportedNetworks tells the query-builder to eager-load the nodes that are connected to
+// the "stablecoin_supported_networks" edge. The optional arguments are used to configure the query builder of the edge.
+func (cq *CurrencyQuery) WithStablecoinSupportedNetworks(opts ...func(*StablecoinSupportedNetworkQuery)) *CurrencyQuery {
+	query := (&StablecoinSupportedNetworkClient{config: cq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	cq.withStablecoinSupportedNetworks = query
+	return cq
+}
+
+// WithStablecoinCurrencies tells the query-builder to eager-load the nodes that are connected to
+// the "stablecoin_currencies" edge. The optional arguments are used to configure the query builder of the edge.
+func (cq *CurrencyQuery) WithStablecoinCurrencies(opts ...func(*StablecoinWalletQuery)) *CurrencyQuery {
+	query := (&StablecoinWalletClient{config: cq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	cq.withStablecoinCurrencies = query
 	return cq
 }
 
@@ -371,8 +443,10 @@ func (cq *CurrencyQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Cur
 	var (
 		nodes       = []*Currency{}
 		_spec       = cq.querySpec()
-		loadedTypes = [1]bool{
+		loadedTypes = [3]bool{
 			cq.withWallets != nil,
+			cq.withStablecoinSupportedNetworks != nil,
+			cq.withStablecoinCurrencies != nil,
 		}
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
@@ -397,6 +471,24 @@ func (cq *CurrencyQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Cur
 		if err := cq.loadWallets(ctx, query, nodes,
 			func(n *Currency) { n.Edges.Wallets = []*Wallet{} },
 			func(n *Currency, e *Wallet) { n.Edges.Wallets = append(n.Edges.Wallets, e) }); err != nil {
+			return nil, err
+		}
+	}
+	if query := cq.withStablecoinSupportedNetworks; query != nil {
+		if err := cq.loadStablecoinSupportedNetworks(ctx, query, nodes,
+			func(n *Currency) { n.Edges.StablecoinSupportedNetworks = []*StablecoinSupportedNetwork{} },
+			func(n *Currency, e *StablecoinSupportedNetwork) {
+				n.Edges.StablecoinSupportedNetworks = append(n.Edges.StablecoinSupportedNetworks, e)
+			}); err != nil {
+			return nil, err
+		}
+	}
+	if query := cq.withStablecoinCurrencies; query != nil {
+		if err := cq.loadStablecoinCurrencies(ctx, query, nodes,
+			func(n *Currency) { n.Edges.StablecoinCurrencies = []*StablecoinWallet{} },
+			func(n *Currency, e *StablecoinWallet) {
+				n.Edges.StablecoinCurrencies = append(n.Edges.StablecoinCurrencies, e)
+			}); err != nil {
 			return nil, err
 		}
 	}
@@ -429,6 +521,67 @@ func (cq *CurrencyQuery) loadWallets(ctx context.Context, query *WalletQuery, no
 		node, ok := nodeids[fk]
 		if !ok {
 			return fmt.Errorf(`unexpected referenced foreign-key "currency_id" returned %v for node %v`, fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (cq *CurrencyQuery) loadStablecoinSupportedNetworks(ctx context.Context, query *StablecoinSupportedNetworkQuery, nodes []*Currency, init func(*Currency), assign func(*Currency, *StablecoinSupportedNetwork)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[string]*Currency)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(stablecoinsupportednetwork.FieldCoinID)
+	}
+	query.Where(predicate.StablecoinSupportedNetwork(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(currency.StablecoinSupportedNetworksColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.CoinID
+		node, ok := nodeids[fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "coin_id" returned %v for node %v`, fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (cq *CurrencyQuery) loadStablecoinCurrencies(ctx context.Context, query *StablecoinWalletQuery, nodes []*Currency, init func(*Currency), assign func(*Currency, *StablecoinWallet)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[string]*Currency)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	query.withFKs = true
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(stablecoinwallet.FieldCoinID)
+	}
+	query.Where(predicate.StablecoinWallet(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(currency.StablecoinCurrenciesColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.CoinID
+		node, ok := nodeids[fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "coin_id" returned %v for node %v`, fk, n.ID)
 		}
 		assign(node, n)
 	}
