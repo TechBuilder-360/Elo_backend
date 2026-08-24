@@ -15,7 +15,7 @@ import (
 // Currencies is the resolver for the currencies field.
 func (r *queryResolver) Currencies(ctx context.Context, filter *model.CurrencyFilter) ([]*model.Currency, error) {
 	logger := log.LoggerInContext(ctx)
-	result, err := r.CurrencyService.GetCurrencies(ctx, filter)
+	result, err := r.Services.CurrencyService.GetCurrencies(ctx, filter)
 	if err != nil {
 		logger.WithError(err).Error("failed to fetch currencies")
 		return nil, err

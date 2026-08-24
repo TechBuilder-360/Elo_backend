@@ -3,6 +3,7 @@ package router
 import (
 	"context"
 	"net/http"
+	"runtime/debug"
 	"strings"
 
 	stderrors "errors"
@@ -22,10 +23,6 @@ import (
 	"github.com/Toflex/directory_v2/graph/model"
 	resolver "github.com/Toflex/directory_v2/graph/resolvers"
 	"github.com/Toflex/directory_v2/internal/authentication"
-	"github.com/Toflex/directory_v2/internal/business"
-	"github.com/Toflex/directory_v2/internal/currency"
-	"github.com/Toflex/directory_v2/internal/transaction"
-	"github.com/Toflex/directory_v2/internal/wallet"
 	"github.com/Toflex/directory_v2/middlewares"
 	rbac "github.com/Toflex/directory_v2/pkg/RBAC"
 	"github.com/Toflex/directory_v2/pkg/configuration"
@@ -33,12 +30,10 @@ import (
 	apperrors "github.com/Toflex/directory_v2/pkg/errors"
 	"github.com/Toflex/directory_v2/pkg/log"
 	"github.com/Toflex/directory_v2/pkg/providers/dojah"
-	"github.com/Toflex/directory_v2/pkg/providers/mapelrad"
-	"github.com/Toflex/directory_v2/pkg/verification"
+	"github.com/Toflex/directory_v2/pkg/providers/maplerad"
 	"github.com/gin-gonic/gin"
 	"github.com/hibiken/asynq"
 	"github.com/hibiken/asynqmon"
-	"github.com/samber/do/v2"
 	"github.com/vektah/gqlparser/v2/ast"
 	"github.com/vektah/gqlparser/v2/gqlerror"
 )
@@ -204,19 +199,14 @@ func hasRoleDirective(a authentication.IService) func(
 
 func initalizeGQLRoute(engine *gin.Engine, basicAuth gin.HandlerFunc) {
 	resolverStruct := resolver.Resolver{
-		AuthenticationService: do.MustInvoke[authentication.IService](runtime.Injector),
-		VerificationService:   verification.NewService(),
-		BusinessService:       do.MustInvoke[business.IService](runtime.Injector),
-		WalletService:         do.MustInvoke[wallet.IService](runtime.Injector),
-		CurrencyService:       do.MustInvoke[currency.IService](runtime.Injector),
-		TransactionService:    do.MustInvoke[transaction.IService](runtime.Injector),
+		Services: runtime.NewService(runtime.Injector),
 	}
 
 	c := generated.Config{Resolvers: &resolverStruct}
 
-	c.Directives.AuthUser = authUserDirective(resolverStruct.AuthenticationService)
-	c.Directives.AuthBusiness = authBusinessDirective(resolverStruct.AuthenticationService)
-	c.Directives.HasRole = hasRoleDirective(resolverStruct.AuthenticationService)
+	c.Directives.AuthUser = authUserDirective(resolverStruct.Services.AuthenticationService)
+	c.Directives.AuthBusiness = authBusinessDirective(resolverStruct.Services.AuthenticationService)
+	c.Directives.HasRole = hasRoleDirective(resolverStruct.Services.AuthenticationService)
 
 	gqlHandler := handler.New(generated.NewExecutableSchema(c))
 	playgroundHandler := playground.Handler("API GraphQL playground", "/api")
@@ -233,7 +223,7 @@ func initalizeGQLRoute(engine *gin.Engine, basicAuth gin.HandlerFunc) {
 	})
 
 	gqlHandler.SetRecoverFunc(func(ctx context.Context, err interface{}) error {
-		log.WithError(err).Error("GraphQL panic recovered")
+		log.WithError(err).WithField("trace", debug.Stack()).Error("GraphQL panic recovered")
 		return gqlerror.Errorf("internal server error")
 	})
 
@@ -321,7 +311,7 @@ func initializeRestAPI(engine *gin.Engine) {
 	var (
 		// verificationController = verification.NewVerificationController(verification.NewService())
 		dojahController    = dojah.New(runtime.Injector)
-		mapleradController = mapelrad.New(runtime.Injector)
+		mapleradController = maplerad.New(runtime.Injector)
 	)
 
 	// ****************************************

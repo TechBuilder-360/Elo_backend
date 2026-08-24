@@ -20,9 +20,13 @@ import (
 	"github.com/Toflex/directory_v2/ent/currency"
 	"github.com/Toflex/directory_v2/ent/kybdocument"
 	"github.com/Toflex/directory_v2/ent/kybmessage"
+	"github.com/Toflex/directory_v2/ent/ledger"
 	"github.com/Toflex/directory_v2/ent/ledgerowner"
 	"github.com/Toflex/directory_v2/ent/manager"
+	"github.com/Toflex/directory_v2/ent/nubandeposit"
+	"github.com/Toflex/directory_v2/ent/nubandynamicaccount"
 	"github.com/Toflex/directory_v2/ent/nubanstaticaccount"
+	"github.com/Toflex/directory_v2/ent/nubantransfer"
 	"github.com/Toflex/directory_v2/ent/permission"
 	"github.com/Toflex/directory_v2/ent/provider"
 	"github.com/Toflex/directory_v2/ent/requestverification"
@@ -30,6 +34,12 @@ import (
 	"github.com/Toflex/directory_v2/ent/rolepermission"
 	"github.com/Toflex/directory_v2/ent/service"
 	"github.com/Toflex/directory_v2/ent/social"
+	"github.com/Toflex/directory_v2/ent/stablecoindeposit"
+	"github.com/Toflex/directory_v2/ent/stablecoinnetwork"
+	"github.com/Toflex/directory_v2/ent/stablecoinsupportednetwork"
+	"github.com/Toflex/directory_v2/ent/stablecoinwallet"
+	"github.com/Toflex/directory_v2/ent/stablecoinwithdrawal"
+	"github.com/Toflex/directory_v2/ent/transaction"
 	"github.com/Toflex/directory_v2/ent/user"
 	"github.com/Toflex/directory_v2/ent/userdocument"
 	"github.com/Toflex/directory_v2/ent/vault"
@@ -95,29 +105,39 @@ var (
 func checkColumn(table, column string) error {
 	initCheck.Do(func() {
 		columnCheck = sql.NewColumnCheck(map[string]func(string) bool{
-			business.Table:            business.ValidColumn,
-			businessdocument.Table:    businessdocument.ValidColumn,
-			businessfeature.Table:     businessfeature.ValidColumn,
-			businesslocation.Table:    businesslocation.ValidColumn,
-			businessservices.Table:    businessservices.ValidColumn,
-			currency.Table:            currency.ValidColumn,
-			kybdocument.Table:         kybdocument.ValidColumn,
-			kybmessage.Table:          kybmessage.ValidColumn,
-			ledgerowner.Table:         ledgerowner.ValidColumn,
-			manager.Table:             manager.ValidColumn,
-			nubanstaticaccount.Table:  nubanstaticaccount.ValidColumn,
-			permission.Table:          permission.ValidColumn,
-			provider.Table:            provider.ValidColumn,
-			requestverification.Table: requestverification.ValidColumn,
-			role.Table:                role.ValidColumn,
-			rolepermission.Table:      rolepermission.ValidColumn,
-			service.Table:             service.ValidColumn,
-			social.Table:              social.ValidColumn,
-			user.Table:                user.ValidColumn,
-			userdocument.Table:        userdocument.ValidColumn,
-			vault.Table:               vault.ValidColumn,
-			verification.Table:        verification.ValidColumn,
-			wallet.Table:              wallet.ValidColumn,
+			business.Table:                   business.ValidColumn,
+			businessdocument.Table:           businessdocument.ValidColumn,
+			businessfeature.Table:            businessfeature.ValidColumn,
+			businesslocation.Table:           businesslocation.ValidColumn,
+			businessservices.Table:           businessservices.ValidColumn,
+			currency.Table:                   currency.ValidColumn,
+			kybdocument.Table:                kybdocument.ValidColumn,
+			kybmessage.Table:                 kybmessage.ValidColumn,
+			ledger.Table:                     ledger.ValidColumn,
+			ledgerowner.Table:                ledgerowner.ValidColumn,
+			manager.Table:                    manager.ValidColumn,
+			nubandeposit.Table:               nubandeposit.ValidColumn,
+			nubandynamicaccount.Table:        nubandynamicaccount.ValidColumn,
+			nubanstaticaccount.Table:         nubanstaticaccount.ValidColumn,
+			nubantransfer.Table:              nubantransfer.ValidColumn,
+			permission.Table:                 permission.ValidColumn,
+			provider.Table:                   provider.ValidColumn,
+			requestverification.Table:        requestverification.ValidColumn,
+			role.Table:                       role.ValidColumn,
+			rolepermission.Table:             rolepermission.ValidColumn,
+			service.Table:                    service.ValidColumn,
+			social.Table:                     social.ValidColumn,
+			stablecoindeposit.Table:          stablecoindeposit.ValidColumn,
+			stablecoinnetwork.Table:          stablecoinnetwork.ValidColumn,
+			stablecoinsupportednetwork.Table: stablecoinsupportednetwork.ValidColumn,
+			stablecoinwallet.Table:           stablecoinwallet.ValidColumn,
+			stablecoinwithdrawal.Table:       stablecoinwithdrawal.ValidColumn,
+			transaction.Table:                transaction.ValidColumn,
+			user.Table:                       user.ValidColumn,
+			userdocument.Table:               userdocument.ValidColumn,
+			vault.Table:                      vault.ValidColumn,
+			verification.Table:               verification.ValidColumn,
+			wallet.Table:                     wallet.ValidColumn,
 		})
 	})
 	return columnCheck(table, column)

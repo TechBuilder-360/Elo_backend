@@ -52,9 +52,15 @@ type WalletEdges struct {
 	Vault *Vault `json:"vault,omitempty"`
 	// NubanStaticAccount holds the value of the nuban_static_account edge.
 	NubanStaticAccount []*NubanStaticAccount `json:"nuban_static_account,omitempty"`
+	// NubanDynamicAccount holds the value of the nuban_dynamic_account edge.
+	NubanDynamicAccount []*NubanDynamicAccount `json:"nuban_dynamic_account,omitempty"`
+	// StablecoinWallets holds the value of the stablecoin_wallets edge.
+	StablecoinWallets []*StablecoinWallet `json:"stablecoin_wallets,omitempty"`
+	// LedgerEntries holds the value of the ledger_entries edge.
+	LedgerEntries []*Ledger `json:"ledger_entries,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [3]bool
+	loadedTypes [6]bool
 }
 
 // CurrencyOrErr returns the Currency value or an error if the edge
@@ -86,6 +92,33 @@ func (e WalletEdges) NubanStaticAccountOrErr() ([]*NubanStaticAccount, error) {
 		return e.NubanStaticAccount, nil
 	}
 	return nil, &NotLoadedError{edge: "nuban_static_account"}
+}
+
+// NubanDynamicAccountOrErr returns the NubanDynamicAccount value or an error if the edge
+// was not loaded in eager-loading.
+func (e WalletEdges) NubanDynamicAccountOrErr() ([]*NubanDynamicAccount, error) {
+	if e.loadedTypes[3] {
+		return e.NubanDynamicAccount, nil
+	}
+	return nil, &NotLoadedError{edge: "nuban_dynamic_account"}
+}
+
+// StablecoinWalletsOrErr returns the StablecoinWallets value or an error if the edge
+// was not loaded in eager-loading.
+func (e WalletEdges) StablecoinWalletsOrErr() ([]*StablecoinWallet, error) {
+	if e.loadedTypes[4] {
+		return e.StablecoinWallets, nil
+	}
+	return nil, &NotLoadedError{edge: "stablecoin_wallets"}
+}
+
+// LedgerEntriesOrErr returns the LedgerEntries value or an error if the edge
+// was not loaded in eager-loading.
+func (e WalletEdges) LedgerEntriesOrErr() ([]*Ledger, error) {
+	if e.loadedTypes[5] {
+		return e.LedgerEntries, nil
+	}
+	return nil, &NotLoadedError{edge: "ledger_entries"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -212,6 +245,21 @@ func (w *Wallet) QueryVault() *VaultQuery {
 // QueryNubanStaticAccount queries the "nuban_static_account" edge of the Wallet entity.
 func (w *Wallet) QueryNubanStaticAccount() *NubanStaticAccountQuery {
 	return NewWalletClient(w.config).QueryNubanStaticAccount(w)
+}
+
+// QueryNubanDynamicAccount queries the "nuban_dynamic_account" edge of the Wallet entity.
+func (w *Wallet) QueryNubanDynamicAccount() *NubanDynamicAccountQuery {
+	return NewWalletClient(w.config).QueryNubanDynamicAccount(w)
+}
+
+// QueryStablecoinWallets queries the "stablecoin_wallets" edge of the Wallet entity.
+func (w *Wallet) QueryStablecoinWallets() *StablecoinWalletQuery {
+	return NewWalletClient(w.config).QueryStablecoinWallets(w)
+}
+
+// QueryLedgerEntries queries the "ledger_entries" edge of the Wallet entity.
+func (w *Wallet) QueryLedgerEntries() *LedgerQuery {
+	return NewWalletClient(w.config).QueryLedgerEntries(w)
 }
 
 // Update returns a builder for updating this Wallet.

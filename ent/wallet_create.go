@@ -13,7 +13,10 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/Toflex/directory_v2/ent/currency"
+	"github.com/Toflex/directory_v2/ent/ledger"
+	"github.com/Toflex/directory_v2/ent/nubandynamicaccount"
 	"github.com/Toflex/directory_v2/ent/nubanstaticaccount"
+	"github.com/Toflex/directory_v2/ent/stablecoinwallet"
 	"github.com/Toflex/directory_v2/ent/vault"
 	"github.com/Toflex/directory_v2/ent/wallet"
 )
@@ -187,6 +190,51 @@ func (wc *WalletCreate) AddNubanStaticAccount(n ...*NubanStaticAccount) *WalletC
 		ids[i] = n[i].ID
 	}
 	return wc.AddNubanStaticAccountIDs(ids...)
+}
+
+// AddNubanDynamicAccountIDs adds the "nuban_dynamic_account" edge to the NubanDynamicAccount entity by IDs.
+func (wc *WalletCreate) AddNubanDynamicAccountIDs(ids ...string) *WalletCreate {
+	wc.mutation.AddNubanDynamicAccountIDs(ids...)
+	return wc
+}
+
+// AddNubanDynamicAccount adds the "nuban_dynamic_account" edges to the NubanDynamicAccount entity.
+func (wc *WalletCreate) AddNubanDynamicAccount(n ...*NubanDynamicAccount) *WalletCreate {
+	ids := make([]string, len(n))
+	for i := range n {
+		ids[i] = n[i].ID
+	}
+	return wc.AddNubanDynamicAccountIDs(ids...)
+}
+
+// AddStablecoinWalletIDs adds the "stablecoin_wallets" edge to the StablecoinWallet entity by IDs.
+func (wc *WalletCreate) AddStablecoinWalletIDs(ids ...string) *WalletCreate {
+	wc.mutation.AddStablecoinWalletIDs(ids...)
+	return wc
+}
+
+// AddStablecoinWallets adds the "stablecoin_wallets" edges to the StablecoinWallet entity.
+func (wc *WalletCreate) AddStablecoinWallets(s ...*StablecoinWallet) *WalletCreate {
+	ids := make([]string, len(s))
+	for i := range s {
+		ids[i] = s[i].ID
+	}
+	return wc.AddStablecoinWalletIDs(ids...)
+}
+
+// AddLedgerEntryIDs adds the "ledger_entries" edge to the Ledger entity by IDs.
+func (wc *WalletCreate) AddLedgerEntryIDs(ids ...string) *WalletCreate {
+	wc.mutation.AddLedgerEntryIDs(ids...)
+	return wc
+}
+
+// AddLedgerEntries adds the "ledger_entries" edges to the Ledger entity.
+func (wc *WalletCreate) AddLedgerEntries(l ...*Ledger) *WalletCreate {
+	ids := make([]string, len(l))
+	for i := range l {
+		ids[i] = l[i].ID
+	}
+	return wc.AddLedgerEntryIDs(ids...)
 }
 
 // Mutation returns the WalletMutation object of the builder.
@@ -411,6 +459,54 @@ func (wc *WalletCreate) createSpec() (*Wallet, *sqlgraph.CreateSpec) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(nubanstaticaccount.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := wc.mutation.NubanDynamicAccountIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   wallet.NubanDynamicAccountTable,
+			Columns: []string{wallet.NubanDynamicAccountColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(nubandynamicaccount.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := wc.mutation.StablecoinWalletsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   wallet.StablecoinWalletsTable,
+			Columns: []string{wallet.StablecoinWalletsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(stablecoinwallet.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := wc.mutation.LedgerEntriesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   wallet.LedgerEntriesTable,
+			Columns: []string{wallet.LedgerEntriesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(ledger.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {

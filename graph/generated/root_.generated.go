@@ -77,6 +77,16 @@ type ComplexityRoot struct {
 		Symbol func(childComplexity int) int
 	}
 
+	DynamicNubanAccountDetail struct {
+		AccountName    func(childComplexity int) int
+		AccountNumber  func(childComplexity int) int
+		Amount         func(childComplexity int) int
+		BankName       func(childComplexity int) int
+		Currency       func(childComplexity int) int
+		ExpirationDate func(childComplexity int) int
+		ID             func(childComplexity int) int
+	}
+
 	LoginResponse struct {
 		AccessToken func(childComplexity int) int
 		ExpireAt    func(childComplexity int) int
@@ -84,16 +94,19 @@ type ComplexityRoot struct {
 	}
 
 	Mutation struct {
-		AddBusinessWallet       func(childComplexity int, currencyCode string, walletType model.WalletType) int
-		BusinessDetail          func(childComplexity int, input model.BusinessDetail) int
-		DeleteDocument          func(childComplexity int, input model.RemoveDocumentInput) int
-		Login                   func(childComplexity int, input model.Login) int
-		Logout                  func(childComplexity int) int
-		RegisterBusiness        func(childComplexity int, input model.RegisterBusinessInput) int
-		Registration            func(childComplexity int, input model.Registration) int
-		RequestOtp              func(childComplexity int, input *model.RequestOtp) int
-		RequestUserVerification func(childComplexity int, input model.VerificationPayload) int
-		UploadDocument          func(childComplexity int, input model.DocumentInput) int
+		AddBusinessWallet           func(childComplexity int, currencyCode string, walletType model.WalletType) int
+		BusinessDetail              func(childComplexity int, input model.BusinessDetail) int
+		DeleteDocument              func(childComplexity int, input model.RemoveDocumentInput) int
+		GenerateDynamicNubanAccount func(childComplexity int) int
+		GenerateStablecoin          func(childComplexity int, input *model.StablecoinInput) int
+		GenerateStaticNubanAccount  func(childComplexity int) int
+		Login                       func(childComplexity int, input model.Login) int
+		Logout                      func(childComplexity int) int
+		RegisterBusiness            func(childComplexity int, input model.RegisterBusinessInput) int
+		Registration                func(childComplexity int, input model.Registration) int
+		RequestOtp                  func(childComplexity int, input *model.RequestOtp) int
+		RequestUserVerification     func(childComplexity int, input model.VerificationPayload) int
+		UploadDocument              func(childComplexity int, input model.DocumentInput) int
 	}
 
 	OTPResponse struct {
@@ -101,17 +114,19 @@ type ComplexityRoot struct {
 	}
 
 	Query struct {
-		Business         func(childComplexity int, id string) int
-		BusinessWallet   func(childComplexity int, currencyCode string, walletType model.WalletType) int
-		BusinessWallets  func(childComplexity int, walletType model.WalletType, filter *model.WalletFilter) int
-		Currencies       func(childComplexity int, filter *model.CurrencyFilter) int
-		FindBusiness     func(childComplexity int, name *string, service *string, limit *int32) int
-		GetCategories    func(childComplexity int) int
-		GetDocuments     func(childComplexity int) int
-		GetKYBDocuments  func(childComplexity int) int
-		GetUserBusinsses func(childComplexity int) int
-		Me               func(childComplexity int) int
-		MyBusinesses     func(childComplexity int) int
+		Business              func(childComplexity int, id string) int
+		BusinessNubanAccounts func(childComplexity int) int
+		BusinessStablecoins   func(childComplexity int, filter *model.StablecoinFilter) int
+		BusinessWallet        func(childComplexity int, currencyCode string, walletType model.WalletType) int
+		BusinessWallets       func(childComplexity int, walletType model.WalletType, filter *model.WalletFilter) int
+		Currencies            func(childComplexity int, filter *model.CurrencyFilter) int
+		FindBusiness          func(childComplexity int, name *string, service *string, limit *int32) int
+		GetCategories         func(childComplexity int) int
+		GetDocuments          func(childComplexity int) int
+		GetKYBDocuments       func(childComplexity int) int
+		GetUserBusinsses      func(childComplexity int) int
+		Me                    func(childComplexity int) int
+		MyBusinesses          func(childComplexity int) int
 	}
 
 	RegistrationResponse struct {
@@ -128,6 +143,21 @@ type ComplexityRoot struct {
 	Social struct {
 		Name func(childComplexity int) int
 		URL  func(childComplexity int) int
+	}
+
+	Stablecoin struct {
+		Address func(childComplexity int) int
+		Coin    func(childComplexity int) int
+		ID      func(childComplexity int) int
+		Network func(childComplexity int) int
+	}
+
+	StaticNubanAccountDetail struct {
+		AccountName   func(childComplexity int) int
+		AccountNumber func(childComplexity int) int
+		BankName      func(childComplexity int) int
+		Currency      func(childComplexity int) int
+		ID            func(childComplexity int) int
 	}
 
 	User struct {
@@ -375,6 +405,55 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 
 		return e.complexity.Currency.Symbol(childComplexity), true
 
+	case "DynamicNubanAccountDetail.account_name":
+		if e.complexity.DynamicNubanAccountDetail.AccountName == nil {
+			break
+		}
+
+		return e.complexity.DynamicNubanAccountDetail.AccountName(childComplexity), true
+
+	case "DynamicNubanAccountDetail.account_number":
+		if e.complexity.DynamicNubanAccountDetail.AccountNumber == nil {
+			break
+		}
+
+		return e.complexity.DynamicNubanAccountDetail.AccountNumber(childComplexity), true
+
+	case "DynamicNubanAccountDetail.Amount":
+		if e.complexity.DynamicNubanAccountDetail.Amount == nil {
+			break
+		}
+
+		return e.complexity.DynamicNubanAccountDetail.Amount(childComplexity), true
+
+	case "DynamicNubanAccountDetail.bank_name":
+		if e.complexity.DynamicNubanAccountDetail.BankName == nil {
+			break
+		}
+
+		return e.complexity.DynamicNubanAccountDetail.BankName(childComplexity), true
+
+	case "DynamicNubanAccountDetail.currency":
+		if e.complexity.DynamicNubanAccountDetail.Currency == nil {
+			break
+		}
+
+		return e.complexity.DynamicNubanAccountDetail.Currency(childComplexity), true
+
+	case "DynamicNubanAccountDetail.expiration_date":
+		if e.complexity.DynamicNubanAccountDetail.ExpirationDate == nil {
+			break
+		}
+
+		return e.complexity.DynamicNubanAccountDetail.ExpirationDate(childComplexity), true
+
+	case "DynamicNubanAccountDetail.id":
+		if e.complexity.DynamicNubanAccountDetail.ID == nil {
+			break
+		}
+
+		return e.complexity.DynamicNubanAccountDetail.ID(childComplexity), true
+
 	case "LoginResponse.access_token":
 		if e.complexity.LoginResponse.AccessToken == nil {
 			break
@@ -431,6 +510,32 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.complexity.Mutation.DeleteDocument(childComplexity, args["input"].(model.RemoveDocumentInput)), true
+
+	case "Mutation.generateDynamicNubanAccount":
+		if e.complexity.Mutation.GenerateDynamicNubanAccount == nil {
+			break
+		}
+
+		return e.complexity.Mutation.GenerateDynamicNubanAccount(childComplexity), true
+
+	case "Mutation.generateStablecoin":
+		if e.complexity.Mutation.GenerateStablecoin == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_generateStablecoin_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.GenerateStablecoin(childComplexity, args["input"].(*model.StablecoinInput)), true
+
+	case "Mutation.generateStaticNubanAccount":
+		if e.complexity.Mutation.GenerateStaticNubanAccount == nil {
+			break
+		}
+
+		return e.complexity.Mutation.GenerateStaticNubanAccount(childComplexity), true
 
 	case "Mutation.login":
 		if e.complexity.Mutation.Login == nil {
@@ -529,6 +634,25 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.complexity.Query.Business(childComplexity, args["id"].(string)), true
+
+	case "Query.business_nuban_accounts":
+		if e.complexity.Query.BusinessNubanAccounts == nil {
+			break
+		}
+
+		return e.complexity.Query.BusinessNubanAccounts(childComplexity), true
+
+	case "Query.business_stablecoins":
+		if e.complexity.Query.BusinessStablecoins == nil {
+			break
+		}
+
+		args, err := ec.field_Query_business_stablecoins_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.BusinessStablecoins(childComplexity, args["filter"].(*model.StablecoinFilter)), true
 
 	case "Query.business_wallet":
 		if e.complexity.Query.BusinessWallet == nil {
@@ -668,6 +792,69 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.complexity.Social.URL(childComplexity), true
+
+	case "Stablecoin.address":
+		if e.complexity.Stablecoin.Address == nil {
+			break
+		}
+
+		return e.complexity.Stablecoin.Address(childComplexity), true
+
+	case "Stablecoin.coin":
+		if e.complexity.Stablecoin.Coin == nil {
+			break
+		}
+
+		return e.complexity.Stablecoin.Coin(childComplexity), true
+
+	case "Stablecoin.id":
+		if e.complexity.Stablecoin.ID == nil {
+			break
+		}
+
+		return e.complexity.Stablecoin.ID(childComplexity), true
+
+	case "Stablecoin.network":
+		if e.complexity.Stablecoin.Network == nil {
+			break
+		}
+
+		return e.complexity.Stablecoin.Network(childComplexity), true
+
+	case "StaticNubanAccountDetail.account_name":
+		if e.complexity.StaticNubanAccountDetail.AccountName == nil {
+			break
+		}
+
+		return e.complexity.StaticNubanAccountDetail.AccountName(childComplexity), true
+
+	case "StaticNubanAccountDetail.account_number":
+		if e.complexity.StaticNubanAccountDetail.AccountNumber == nil {
+			break
+		}
+
+		return e.complexity.StaticNubanAccountDetail.AccountNumber(childComplexity), true
+
+	case "StaticNubanAccountDetail.bank_name":
+		if e.complexity.StaticNubanAccountDetail.BankName == nil {
+			break
+		}
+
+		return e.complexity.StaticNubanAccountDetail.BankName(childComplexity), true
+
+	case "StaticNubanAccountDetail.currency":
+		if e.complexity.StaticNubanAccountDetail.Currency == nil {
+			break
+		}
+
+		return e.complexity.StaticNubanAccountDetail.Currency(childComplexity), true
+
+	case "StaticNubanAccountDetail.id":
+		if e.complexity.StaticNubanAccountDetail.ID == nil {
+			break
+		}
+
+		return e.complexity.StaticNubanAccountDetail.ID(childComplexity), true
 
 	case "User.disable_reason":
 		if e.complexity.User.DisableReason == nil {
@@ -917,6 +1104,8 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 		ec.unmarshalInputRegistration,
 		ec.unmarshalInputRemoveDocumentInput,
 		ec.unmarshalInputRequestOTP,
+		ec.unmarshalInputStablecoinFilter,
+		ec.unmarshalInputStablecoinInput,
 		ec.unmarshalInputWalletFilter,
 		ec.unmarshalInputbusinessDetail,
 		ec.unmarshalInputrole,
@@ -1214,6 +1403,57 @@ input CurrencyFilter {
 
 extend type Query {
   currencies(filter: CurrencyFilter): [Currency!]!
+}`, BuiltIn: false},
+	{Name: "../schema/nuban.graphqls", Input: `type StaticNubanAccountDetail {
+    account_number: String!
+    account_name: String!
+    bank_name: String!
+    currency: String!
+    id: String!
+}
+
+type DynamicNubanAccountDetail {
+    account_number: String!
+    account_name: String!
+    bank_name: String!
+    Amount: Float!
+    currency: String!
+    expiration_date: String!
+    id: String!
+}
+
+extend type Query {
+    business_nuban_accounts: [StaticNubanAccountDetail!]! @hasRole(role: ADMIN)
+}
+
+extend type Mutation {
+    generateStaticNubanAccount: StaticNubanAccountDetail! @hasRole(role: ADMIN)
+    generateDynamicNubanAccount: DynamicNubanAccountDetail! @hasRole(role: ADMIN)
+}`, BuiltIn: false},
+	{Name: "../schema/stablecoin.graphqls", Input: `type Stablecoin {
+    id: String!
+    address: String!
+    coin: String!
+    network: String!
+}
+
+input StablecoinInput {
+    network: String!
+    wallet_id: String!
+}
+
+input StablecoinFilter {
+    coin: String
+    network: String
+    wallet_id: String
+}
+
+extend type Query {
+    business_stablecoins(filter: StablecoinFilter): [Stablecoin!]! @hasRole(role: ADMIN)
+}
+
+extend type Mutation {
+    generateStablecoin(input: StablecoinInput): Stablecoin! @hasRole(role: ADMIN)
 }`, BuiltIn: false},
 	{Name: "../schema/user.graphqls", Input: `directive @authUser on FIELD_DEFINITION
 

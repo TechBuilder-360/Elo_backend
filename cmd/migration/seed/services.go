@@ -25,6 +25,41 @@ func seedServices(ctx context.Context, db *ent.Client) error {
 			SetMax(0).
 			SetActive(true).
 			SetProvider("dojah").SetFee(&schema.Fee{}),
+		db.Service.Create().
+			SetName("Generate Stablecoin Address Solana").
+			SetIdentifier("stablecoin-address-sol").
+			SetMin(0).
+			SetMax(0).
+			SetActive(true).
+			SetProvider("maplerad").SetFee(&schema.Fee{}),
+		db.Service.Create().
+			SetName("Generate Stablecoin Address Tron").
+			SetIdentifier("stablecoin-address-tron").
+			SetMin(0).
+			SetMax(0).
+			SetActive(true).
+			SetProvider("maplerad").SetFee(&schema.Fee{}),
+		db.Service.Create().
+			SetName("Generate Stablecoin Address Polygon").
+			SetIdentifier("stablecoin-address-polygon").
+			SetMin(0).
+			SetMax(0).
+			SetActive(true).
+			SetProvider("maplerad").SetFee(&schema.Fee{}),
+		db.Service.Create().
+			SetName("Generate Stablecoin Address Optimism").
+			SetIdentifier("stablecoin-address-optimism").
+			SetMin(0).
+			SetMax(0).
+			SetActive(true).
+			SetProvider("maplerad").SetFee(&schema.Fee{}),
+		db.Service.Create().
+			SetName("Generate Stablecoin Address Ethereum").
+			SetIdentifier("stablecoin-address-eth").
+			SetMin(0).
+			SetMax(0).
+			SetActive(true).
+			SetProvider("maplerad").SetFee(&schema.Fee{}),
 	).OnConflict(
 		sql.ConflictColumns(service.FieldIdentifier),
 		sql.DoNothing(),

@@ -36,8 +36,6 @@ type NubanStaticAccount struct {
 	BankName string `json:"bank_name,omitempty"`
 	// BankCode holds the value of the "bank_code" field.
 	BankCode string `json:"bank_code,omitempty"`
-	// Address holds the value of the "address" field.
-	Address string `json:"address,omitempty"`
 	// State holds the value of the "state" field.
 	State nubanstaticaccount.State `json:"state,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
@@ -72,7 +70,7 @@ func (*NubanStaticAccount) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case nubanstaticaccount.FieldID, nubanstaticaccount.FieldProvider, nubanstaticaccount.FieldProviderReference, nubanstaticaccount.FieldAccountNumber, nubanstaticaccount.FieldAccountName, nubanstaticaccount.FieldBankName, nubanstaticaccount.FieldBankCode, nubanstaticaccount.FieldAddress, nubanstaticaccount.FieldState:
+		case nubanstaticaccount.FieldID, nubanstaticaccount.FieldProvider, nubanstaticaccount.FieldProviderReference, nubanstaticaccount.FieldAccountNumber, nubanstaticaccount.FieldAccountName, nubanstaticaccount.FieldBankName, nubanstaticaccount.FieldBankCode, nubanstaticaccount.FieldState:
 			values[i] = new(sql.NullString)
 		case nubanstaticaccount.FieldCreatedAt, nubanstaticaccount.FieldUpdatedAt, nubanstaticaccount.FieldDeletedAt:
 			values[i] = new(sql.NullTime)
@@ -153,12 +151,6 @@ func (nsa *NubanStaticAccount) assignValues(columns []string, values []any) erro
 				return fmt.Errorf("unexpected type %T for field bank_code", values[i])
 			} else if value.Valid {
 				nsa.BankCode = value.String
-			}
-		case nubanstaticaccount.FieldAddress:
-			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field address", values[i])
-			} else if value.Valid {
-				nsa.Address = value.String
 			}
 		case nubanstaticaccount.FieldState:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -242,9 +234,6 @@ func (nsa *NubanStaticAccount) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("bank_code=")
 	builder.WriteString(nsa.BankCode)
-	builder.WriteString(", ")
-	builder.WriteString("address=")
-	builder.WriteString(nsa.Address)
 	builder.WriteString(", ")
 	builder.WriteString("state=")
 	builder.WriteString(fmt.Sprintf("%v", nsa.State))

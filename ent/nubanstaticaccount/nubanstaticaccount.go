@@ -33,8 +33,6 @@ const (
 	FieldBankName = "bank_name"
 	// FieldBankCode holds the string denoting the bank_code field in the database.
 	FieldBankCode = "bank_code"
-	// FieldAddress holds the string denoting the address field in the database.
-	FieldAddress = "address"
 	// FieldState holds the string denoting the state field in the database.
 	FieldState = "state"
 	// EdgeWallet holds the string denoting the wallet edge name in mutations.
@@ -62,7 +60,6 @@ var Columns = []string{
 	FieldAccountName,
 	FieldBankName,
 	FieldBankCode,
-	FieldAddress,
 	FieldState,
 }
 
@@ -184,11 +181,6 @@ func ByBankName(opts ...sql.OrderTermOption) OrderOption {
 // ByBankCode orders the results by the bank_code field.
 func ByBankCode(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldBankCode, opts...).ToFunc()
-}
-
-// ByAddress orders the results by the address field.
-func ByAddress(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldAddress, opts...).ToFunc()
 }
 
 // ByState orders the results by the state field.

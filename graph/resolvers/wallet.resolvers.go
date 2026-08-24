@@ -23,7 +23,7 @@ func (r *queryResolver) BusinessWallets(ctx context.Context, wt model.WalletType
 		return nil, err
 	}
 
-	response, err := r.BusinessService.GetBusinessWallets(ctx, b, wt.String(), filter)
+	response, err := r.Services.BusinessService.GetBusinessWallets(ctx, b, wt.String(), filter)
 	if err != nil {
 		logger.WithError(err).Error("failed to fetch wallets")
 		return nil, err
@@ -42,7 +42,7 @@ func (r *queryResolver) BusinessWallet(ctx context.Context, currencyCode string,
 		return nil, err
 	}
 
-	response, err := r.BusinessService.GetBusinessWallet(ctx, b, wt.String(), currencyCode)
+	response, err := r.Services.BusinessService.GetBusinessWallet(ctx, b, wt.String(), currencyCode)
 	if err != nil {
 		logger.WithError(err).Error("failed to fetch wallet")
 		return nil, err
@@ -70,7 +70,7 @@ func (r *mutationResolver) AddBusinessWallet(ctx context.Context, currencyCode s
 	// get owner ID from the business object
 	ownerID := owner.ID
 
-	response, err := r.WalletService.AddWallet(ctx, ownerID, walletType.String(), currencyCode)
+	response, err := r.Services.WalletService.AddWallet(ctx, ownerID, walletType.String(), currencyCode)
 	if err != nil {
 		logger.WithError(err).Error("wallet creation failed")
 		return nil, err

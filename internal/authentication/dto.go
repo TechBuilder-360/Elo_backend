@@ -40,7 +40,7 @@ func (r *Registration) Validate() error {
 	// validate display name field
 	displayName := util.AddressToString(r.DisplayName)
 	if len(displayName) == 0 {
-		displayName = fmt.Sprintf("%s_%s", r.FirstName, util.RandomString(4))
+		displayName = fmt.Sprintf("%s_%s", r.FirstName, util.GenerateRandomString(4))
 	}
 
 	if len(displayName) > 10 {

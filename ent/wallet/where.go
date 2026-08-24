@@ -519,6 +519,75 @@ func HasNubanStaticAccountWith(preds ...predicate.NubanStaticAccount) predicate.
 	})
 }
 
+// HasNubanDynamicAccount applies the HasEdge predicate on the "nuban_dynamic_account" edge.
+func HasNubanDynamicAccount() predicate.Wallet {
+	return predicate.Wallet(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, NubanDynamicAccountTable, NubanDynamicAccountColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasNubanDynamicAccountWith applies the HasEdge predicate on the "nuban_dynamic_account" edge with a given conditions (other predicates).
+func HasNubanDynamicAccountWith(preds ...predicate.NubanDynamicAccount) predicate.Wallet {
+	return predicate.Wallet(func(s *sql.Selector) {
+		step := newNubanDynamicAccountStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasStablecoinWallets applies the HasEdge predicate on the "stablecoin_wallets" edge.
+func HasStablecoinWallets() predicate.Wallet {
+	return predicate.Wallet(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, StablecoinWalletsTable, StablecoinWalletsColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasStablecoinWalletsWith applies the HasEdge predicate on the "stablecoin_wallets" edge with a given conditions (other predicates).
+func HasStablecoinWalletsWith(preds ...predicate.StablecoinWallet) predicate.Wallet {
+	return predicate.Wallet(func(s *sql.Selector) {
+		step := newStablecoinWalletsStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasLedgerEntries applies the HasEdge predicate on the "ledger_entries" edge.
+func HasLedgerEntries() predicate.Wallet {
+	return predicate.Wallet(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, LedgerEntriesTable, LedgerEntriesColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasLedgerEntriesWith applies the HasEdge predicate on the "ledger_entries" edge with a given conditions (other predicates).
+func HasLedgerEntriesWith(preds ...predicate.Ledger) predicate.Wallet {
+	return predicate.Wallet(func(s *sql.Selector) {
+		step := newLedgerEntriesStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
 // And groups predicates with the AND operator between them.
 func And(predicates ...predicate.Wallet) predicate.Wallet {
 	return predicate.Wallet(sql.AndPredicates(predicates...))

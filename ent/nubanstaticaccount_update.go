@@ -139,26 +139,6 @@ func (nsau *NubanStaticAccountUpdate) SetNillableBankCode(s *string) *NubanStati
 	return nsau
 }
 
-// SetAddress sets the "address" field.
-func (nsau *NubanStaticAccountUpdate) SetAddress(s string) *NubanStaticAccountUpdate {
-	nsau.mutation.SetAddress(s)
-	return nsau
-}
-
-// SetNillableAddress sets the "address" field if the given value is not nil.
-func (nsau *NubanStaticAccountUpdate) SetNillableAddress(s *string) *NubanStaticAccountUpdate {
-	if s != nil {
-		nsau.SetAddress(*s)
-	}
-	return nsau
-}
-
-// ClearAddress clears the value of the "address" field.
-func (nsau *NubanStaticAccountUpdate) ClearAddress() *NubanStaticAccountUpdate {
-	nsau.mutation.ClearAddress()
-	return nsau
-}
-
 // SetState sets the "state" field.
 func (nsau *NubanStaticAccountUpdate) SetState(n nubanstaticaccount.State) *NubanStaticAccountUpdate {
 	nsau.mutation.SetState(n)
@@ -302,12 +282,6 @@ func (nsau *NubanStaticAccountUpdate) sqlSave(ctx context.Context) (n int, err e
 	}
 	if value, ok := nsau.mutation.BankCode(); ok {
 		_spec.SetField(nubanstaticaccount.FieldBankCode, field.TypeString, value)
-	}
-	if value, ok := nsau.mutation.Address(); ok {
-		_spec.SetField(nubanstaticaccount.FieldAddress, field.TypeString, value)
-	}
-	if nsau.mutation.AddressCleared() {
-		_spec.ClearField(nubanstaticaccount.FieldAddress, field.TypeString)
 	}
 	if value, ok := nsau.mutation.State(); ok {
 		_spec.SetField(nubanstaticaccount.FieldState, field.TypeEnum, value)
@@ -468,26 +442,6 @@ func (nsauo *NubanStaticAccountUpdateOne) SetNillableBankCode(s *string) *NubanS
 	if s != nil {
 		nsauo.SetBankCode(*s)
 	}
-	return nsauo
-}
-
-// SetAddress sets the "address" field.
-func (nsauo *NubanStaticAccountUpdateOne) SetAddress(s string) *NubanStaticAccountUpdateOne {
-	nsauo.mutation.SetAddress(s)
-	return nsauo
-}
-
-// SetNillableAddress sets the "address" field if the given value is not nil.
-func (nsauo *NubanStaticAccountUpdateOne) SetNillableAddress(s *string) *NubanStaticAccountUpdateOne {
-	if s != nil {
-		nsauo.SetAddress(*s)
-	}
-	return nsauo
-}
-
-// ClearAddress clears the value of the "address" field.
-func (nsauo *NubanStaticAccountUpdateOne) ClearAddress() *NubanStaticAccountUpdateOne {
-	nsauo.mutation.ClearAddress()
 	return nsauo
 }
 
@@ -664,12 +618,6 @@ func (nsauo *NubanStaticAccountUpdateOne) sqlSave(ctx context.Context) (_node *N
 	}
 	if value, ok := nsauo.mutation.BankCode(); ok {
 		_spec.SetField(nubanstaticaccount.FieldBankCode, field.TypeString, value)
-	}
-	if value, ok := nsauo.mutation.Address(); ok {
-		_spec.SetField(nubanstaticaccount.FieldAddress, field.TypeString, value)
-	}
-	if nsauo.mutation.AddressCleared() {
-		_spec.ClearField(nubanstaticaccount.FieldAddress, field.TypeString)
 	}
 	if value, ok := nsauo.mutation.State(); ok {
 		_spec.SetField(nubanstaticaccount.FieldState, field.TypeEnum, value)

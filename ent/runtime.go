@@ -13,9 +13,13 @@ import (
 	"github.com/Toflex/directory_v2/ent/currency"
 	"github.com/Toflex/directory_v2/ent/kybdocument"
 	"github.com/Toflex/directory_v2/ent/kybmessage"
+	"github.com/Toflex/directory_v2/ent/ledger"
 	"github.com/Toflex/directory_v2/ent/ledgerowner"
 	"github.com/Toflex/directory_v2/ent/manager"
+	"github.com/Toflex/directory_v2/ent/nubandeposit"
+	"github.com/Toflex/directory_v2/ent/nubandynamicaccount"
 	"github.com/Toflex/directory_v2/ent/nubanstaticaccount"
+	"github.com/Toflex/directory_v2/ent/nubantransfer"
 	"github.com/Toflex/directory_v2/ent/permission"
 	"github.com/Toflex/directory_v2/ent/provider"
 	"github.com/Toflex/directory_v2/ent/requestverification"
@@ -24,6 +28,12 @@ import (
 	"github.com/Toflex/directory_v2/ent/schema"
 	"github.com/Toflex/directory_v2/ent/service"
 	"github.com/Toflex/directory_v2/ent/social"
+	"github.com/Toflex/directory_v2/ent/stablecoindeposit"
+	"github.com/Toflex/directory_v2/ent/stablecoinnetwork"
+	"github.com/Toflex/directory_v2/ent/stablecoinsupportednetwork"
+	"github.com/Toflex/directory_v2/ent/stablecoinwallet"
+	"github.com/Toflex/directory_v2/ent/stablecoinwithdrawal"
+	"github.com/Toflex/directory_v2/ent/transaction"
 	"github.com/Toflex/directory_v2/ent/user"
 	"github.com/Toflex/directory_v2/ent/userdocument"
 	"github.com/Toflex/directory_v2/ent/vault"
@@ -279,11 +289,11 @@ func init() {
 	// currency.CodeValidator is a validator for the "code" field. It is called by the builders before save.
 	currency.CodeValidator = currencyDescCode.Validators[0].(func(string) error)
 	// currencyDescIsFiat is the schema descriptor for is_fiat field.
-	currencyDescIsFiat := currencyFields[3].Descriptor()
+	currencyDescIsFiat := currencyFields[4].Descriptor()
 	// currency.DefaultIsFiat holds the default value on creation for the is_fiat field.
 	currency.DefaultIsFiat = currencyDescIsFiat.Default.(bool)
 	// currencyDescActive is the schema descriptor for active field.
-	currencyDescActive := currencyFields[4].Descriptor()
+	currencyDescActive := currencyFields[5].Descriptor()
 	// currency.DefaultActive holds the default value on creation for the active field.
 	currency.DefaultActive = currencyDescActive.Default.(bool)
 	// currencyDescID is the schema descriptor for id field.
@@ -344,6 +354,53 @@ func init() {
 	kybmessageDescID := kybmessageMixinFields0[0].Descriptor()
 	// kybmessage.DefaultID holds the default value on creation for the id field.
 	kybmessage.DefaultID = kybmessageDescID.Default.(func() string)
+	ledgerMixin := schema.Ledger{}.Mixin()
+	ledgerMixinFields0 := ledgerMixin[0].Fields()
+	_ = ledgerMixinFields0
+	ledgerFields := schema.Ledger{}.Fields()
+	_ = ledgerFields
+	// ledgerDescCreatedAt is the schema descriptor for created_at field.
+	ledgerDescCreatedAt := ledgerMixinFields0[1].Descriptor()
+	// ledger.DefaultCreatedAt holds the default value on creation for the created_at field.
+	ledger.DefaultCreatedAt = ledgerDescCreatedAt.Default.(func() time.Time)
+	// ledgerDescUpdatedAt is the schema descriptor for updated_at field.
+	ledgerDescUpdatedAt := ledgerMixinFields0[2].Descriptor()
+	// ledger.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	ledger.DefaultUpdatedAt = ledgerDescUpdatedAt.Default.(func() time.Time)
+	// ledger.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	ledger.UpdateDefaultUpdatedAt = ledgerDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// ledgerDescTransactionID is the schema descriptor for transaction_id field.
+	ledgerDescTransactionID := ledgerFields[0].Descriptor()
+	// ledger.TransactionIDValidator is a validator for the "transaction_id" field. It is called by the builders before save.
+	ledger.TransactionIDValidator = ledgerDescTransactionID.Validators[0].(func(string) error)
+	// ledgerDescWalletID is the schema descriptor for wallet_id field.
+	ledgerDescWalletID := ledgerFields[2].Descriptor()
+	// ledger.WalletIDValidator is a validator for the "wallet_id" field. It is called by the builders before save.
+	ledger.WalletIDValidator = ledgerDescWalletID.Validators[0].(func(string) error)
+	// ledgerDescDebit is the schema descriptor for debit field.
+	ledgerDescDebit := ledgerFields[3].Descriptor()
+	// ledger.DefaultDebit holds the default value on creation for the debit field.
+	ledger.DefaultDebit = ledgerDescDebit.Default.(int64)
+	// ledgerDescCredit is the schema descriptor for credit field.
+	ledgerDescCredit := ledgerFields[4].Descriptor()
+	// ledger.DefaultCredit holds the default value on creation for the credit field.
+	ledger.DefaultCredit = ledgerDescCredit.Default.(int64)
+	// ledgerDescCurrentBalance is the schema descriptor for current_balance field.
+	ledgerDescCurrentBalance := ledgerFields[5].Descriptor()
+	// ledger.DefaultCurrentBalance holds the default value on creation for the current_balance field.
+	ledger.DefaultCurrentBalance = ledgerDescCurrentBalance.Default.(int64)
+	// ledgerDescPreviousBalance is the schema descriptor for previous_balance field.
+	ledgerDescPreviousBalance := ledgerFields[6].Descriptor()
+	// ledger.DefaultPreviousBalance holds the default value on creation for the previous_balance field.
+	ledger.DefaultPreviousBalance = ledgerDescPreviousBalance.Default.(int64)
+	// ledgerDescIsReversal is the schema descriptor for is_reversal field.
+	ledgerDescIsReversal := ledgerFields[7].Descriptor()
+	// ledger.DefaultIsReversal holds the default value on creation for the is_reversal field.
+	ledger.DefaultIsReversal = ledgerDescIsReversal.Default.(bool)
+	// ledgerDescID is the schema descriptor for id field.
+	ledgerDescID := ledgerMixinFields0[0].Descriptor()
+	// ledger.DefaultID holds the default value on creation for the id field.
+	ledger.DefaultID = ledgerDescID.Default.(func() string)
 	ledgerownerMixin := schema.LedgerOwner{}.Mixin()
 	ledgerownerMixinFields0 := ledgerownerMixin[0].Fields()
 	_ = ledgerownerMixinFields0
@@ -394,6 +451,108 @@ func init() {
 	managerDescID := managerMixinFields0[0].Descriptor()
 	// manager.DefaultID holds the default value on creation for the id field.
 	manager.DefaultID = managerDescID.Default.(func() string)
+	nubandepositMixin := schema.NubanDeposit{}.Mixin()
+	nubandepositMixinFields0 := nubandepositMixin[0].Fields()
+	_ = nubandepositMixinFields0
+	nubandepositFields := schema.NubanDeposit{}.Fields()
+	_ = nubandepositFields
+	// nubandepositDescCreatedAt is the schema descriptor for created_at field.
+	nubandepositDescCreatedAt := nubandepositMixinFields0[1].Descriptor()
+	// nubandeposit.DefaultCreatedAt holds the default value on creation for the created_at field.
+	nubandeposit.DefaultCreatedAt = nubandepositDescCreatedAt.Default.(func() time.Time)
+	// nubandepositDescUpdatedAt is the schema descriptor for updated_at field.
+	nubandepositDescUpdatedAt := nubandepositMixinFields0[2].Descriptor()
+	// nubandeposit.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	nubandeposit.DefaultUpdatedAt = nubandepositDescUpdatedAt.Default.(func() time.Time)
+	// nubandeposit.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	nubandeposit.UpdateDefaultUpdatedAt = nubandepositDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// nubandepositDescRecipientAccountName is the schema descriptor for recipient_account_name field.
+	nubandepositDescRecipientAccountName := nubandepositFields[0].Descriptor()
+	// nubandeposit.RecipientAccountNameValidator is a validator for the "recipient_account_name" field. It is called by the builders before save.
+	nubandeposit.RecipientAccountNameValidator = nubandepositDescRecipientAccountName.Validators[0].(func(string) error)
+	// nubandepositDescRecipientAccountNumber is the schema descriptor for recipient_account_number field.
+	nubandepositDescRecipientAccountNumber := nubandepositFields[1].Descriptor()
+	// nubandeposit.RecipientAccountNumberValidator is a validator for the "recipient_account_number" field. It is called by the builders before save.
+	nubandeposit.RecipientAccountNumberValidator = nubandepositDescRecipientAccountNumber.Validators[0].(func(string) error)
+	// nubandepositDescSenderAccountName is the schema descriptor for sender_account_name field.
+	nubandepositDescSenderAccountName := nubandepositFields[2].Descriptor()
+	// nubandeposit.SenderAccountNameValidator is a validator for the "sender_account_name" field. It is called by the builders before save.
+	nubandeposit.SenderAccountNameValidator = nubandepositDescSenderAccountName.Validators[0].(func(string) error)
+	// nubandepositDescSenderAccountNumber is the schema descriptor for sender_account_number field.
+	nubandepositDescSenderAccountNumber := nubandepositFields[3].Descriptor()
+	// nubandeposit.SenderAccountNumberValidator is a validator for the "sender_account_number" field. It is called by the builders before save.
+	nubandeposit.SenderAccountNumberValidator = nubandepositDescSenderAccountNumber.Validators[0].(func(string) error)
+	// nubandepositDescSenderBankName is the schema descriptor for sender_bank_name field.
+	nubandepositDescSenderBankName := nubandepositFields[4].Descriptor()
+	// nubandeposit.SenderBankNameValidator is a validator for the "sender_bank_name" field. It is called by the builders before save.
+	nubandeposit.SenderBankNameValidator = nubandepositDescSenderBankName.Validators[0].(func(string) error)
+	// nubandepositDescSenderBankCode is the schema descriptor for sender_bank_code field.
+	nubandepositDescSenderBankCode := nubandepositFields[5].Descriptor()
+	// nubandeposit.SenderBankCodeValidator is a validator for the "sender_bank_code" field. It is called by the builders before save.
+	nubandeposit.SenderBankCodeValidator = nubandepositDescSenderBankCode.Validators[0].(func(string) error)
+	// nubandepositDescNarration is the schema descriptor for narration field.
+	nubandepositDescNarration := nubandepositFields[6].Descriptor()
+	// nubandeposit.NarrationValidator is a validator for the "narration" field. It is called by the builders before save.
+	nubandeposit.NarrationValidator = nubandepositDescNarration.Validators[0].(func(string) error)
+	// nubandepositDescAmount is the schema descriptor for amount field.
+	nubandepositDescAmount := nubandepositFields[7].Descriptor()
+	// nubandeposit.DefaultAmount holds the default value on creation for the amount field.
+	nubandeposit.DefaultAmount = nubandepositDescAmount.Default.(int64)
+	// nubandepositDescTransactionID is the schema descriptor for transaction_id field.
+	nubandepositDescTransactionID := nubandepositFields[8].Descriptor()
+	// nubandeposit.TransactionIDValidator is a validator for the "transaction_id" field. It is called by the builders before save.
+	nubandeposit.TransactionIDValidator = nubandepositDescTransactionID.Validators[0].(func(string) error)
+	// nubandepositDescSessionID is the schema descriptor for session_id field.
+	nubandepositDescSessionID := nubandepositFields[9].Descriptor()
+	// nubandeposit.SessionIDValidator is a validator for the "session_id" field. It is called by the builders before save.
+	nubandeposit.SessionIDValidator = nubandepositDescSessionID.Validators[0].(func(string) error)
+	// nubandepositDescProviderReference is the schema descriptor for provider_reference field.
+	nubandepositDescProviderReference := nubandepositFields[10].Descriptor()
+	// nubandeposit.ProviderReferenceValidator is a validator for the "provider_reference" field. It is called by the builders before save.
+	nubandeposit.ProviderReferenceValidator = nubandepositDescProviderReference.Validators[0].(func(string) error)
+	// nubandepositDescProvider is the schema descriptor for provider field.
+	nubandepositDescProvider := nubandepositFields[11].Descriptor()
+	// nubandeposit.ProviderValidator is a validator for the "provider" field. It is called by the builders before save.
+	nubandeposit.ProviderValidator = nubandepositDescProvider.Validators[0].(func(string) error)
+	// nubandepositDescID is the schema descriptor for id field.
+	nubandepositDescID := nubandepositMixinFields0[0].Descriptor()
+	// nubandeposit.DefaultID holds the default value on creation for the id field.
+	nubandeposit.DefaultID = nubandepositDescID.Default.(func() string)
+	nubandynamicaccountMixin := schema.NubanDynamicAccount{}.Mixin()
+	nubandynamicaccountMixinFields0 := nubandynamicaccountMixin[0].Fields()
+	_ = nubandynamicaccountMixinFields0
+	nubandynamicaccountFields := schema.NubanDynamicAccount{}.Fields()
+	_ = nubandynamicaccountFields
+	// nubandynamicaccountDescCreatedAt is the schema descriptor for created_at field.
+	nubandynamicaccountDescCreatedAt := nubandynamicaccountMixinFields0[1].Descriptor()
+	// nubandynamicaccount.DefaultCreatedAt holds the default value on creation for the created_at field.
+	nubandynamicaccount.DefaultCreatedAt = nubandynamicaccountDescCreatedAt.Default.(func() time.Time)
+	// nubandynamicaccountDescUpdatedAt is the schema descriptor for updated_at field.
+	nubandynamicaccountDescUpdatedAt := nubandynamicaccountMixinFields0[2].Descriptor()
+	// nubandynamicaccount.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	nubandynamicaccount.DefaultUpdatedAt = nubandynamicaccountDescUpdatedAt.Default.(func() time.Time)
+	// nubandynamicaccount.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	nubandynamicaccount.UpdateDefaultUpdatedAt = nubandynamicaccountDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// nubandynamicaccountDescAccountNumber is the schema descriptor for account_number field.
+	nubandynamicaccountDescAccountNumber := nubandynamicaccountFields[2].Descriptor()
+	// nubandynamicaccount.AccountNumberValidator is a validator for the "account_number" field. It is called by the builders before save.
+	nubandynamicaccount.AccountNumberValidator = nubandynamicaccountDescAccountNumber.Validators[0].(func(string) error)
+	// nubandynamicaccountDescAccountName is the schema descriptor for account_name field.
+	nubandynamicaccountDescAccountName := nubandynamicaccountFields[3].Descriptor()
+	// nubandynamicaccount.AccountNameValidator is a validator for the "account_name" field. It is called by the builders before save.
+	nubandynamicaccount.AccountNameValidator = nubandynamicaccountDescAccountName.Validators[0].(func(string) error)
+	// nubandynamicaccountDescBankName is the schema descriptor for bank_name field.
+	nubandynamicaccountDescBankName := nubandynamicaccountFields[4].Descriptor()
+	// nubandynamicaccount.BankNameValidator is a validator for the "bank_name" field. It is called by the builders before save.
+	nubandynamicaccount.BankNameValidator = nubandynamicaccountDescBankName.Validators[0].(func(string) error)
+	// nubandynamicaccountDescBankCode is the schema descriptor for bank_code field.
+	nubandynamicaccountDescBankCode := nubandynamicaccountFields[5].Descriptor()
+	// nubandynamicaccount.BankCodeValidator is a validator for the "bank_code" field. It is called by the builders before save.
+	nubandynamicaccount.BankCodeValidator = nubandynamicaccountDescBankCode.Validators[0].(func(string) error)
+	// nubandynamicaccountDescID is the schema descriptor for id field.
+	nubandynamicaccountDescID := nubandynamicaccountMixinFields0[0].Descriptor()
+	// nubandynamicaccount.DefaultID holds the default value on creation for the id field.
+	nubandynamicaccount.DefaultID = nubandynamicaccountDescID.Default.(func() string)
 	nubanstaticaccountMixin := schema.NubanStaticAccount{}.Mixin()
 	nubanstaticaccountMixinFields0 := nubanstaticaccountMixin[0].Fields()
 	_ = nubanstaticaccountMixinFields0
@@ -429,6 +588,65 @@ func init() {
 	nubanstaticaccountDescID := nubanstaticaccountMixinFields0[0].Descriptor()
 	// nubanstaticaccount.DefaultID holds the default value on creation for the id field.
 	nubanstaticaccount.DefaultID = nubanstaticaccountDescID.Default.(func() string)
+	nubantransferMixin := schema.NubanTransfer{}.Mixin()
+	nubantransferMixinFields0 := nubantransferMixin[0].Fields()
+	_ = nubantransferMixinFields0
+	nubantransferFields := schema.NubanTransfer{}.Fields()
+	_ = nubantransferFields
+	// nubantransferDescCreatedAt is the schema descriptor for created_at field.
+	nubantransferDescCreatedAt := nubantransferMixinFields0[1].Descriptor()
+	// nubantransfer.DefaultCreatedAt holds the default value on creation for the created_at field.
+	nubantransfer.DefaultCreatedAt = nubantransferDescCreatedAt.Default.(func() time.Time)
+	// nubantransferDescUpdatedAt is the schema descriptor for updated_at field.
+	nubantransferDescUpdatedAt := nubantransferMixinFields0[2].Descriptor()
+	// nubantransfer.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	nubantransfer.DefaultUpdatedAt = nubantransferDescUpdatedAt.Default.(func() time.Time)
+	// nubantransfer.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	nubantransfer.UpdateDefaultUpdatedAt = nubantransferDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// nubantransferDescRecipientAccountName is the schema descriptor for recipient_account_name field.
+	nubantransferDescRecipientAccountName := nubantransferFields[0].Descriptor()
+	// nubantransfer.RecipientAccountNameValidator is a validator for the "recipient_account_name" field. It is called by the builders before save.
+	nubantransfer.RecipientAccountNameValidator = nubantransferDescRecipientAccountName.Validators[0].(func(string) error)
+	// nubantransferDescRecipientAccountNumber is the schema descriptor for recipient_account_number field.
+	nubantransferDescRecipientAccountNumber := nubantransferFields[1].Descriptor()
+	// nubantransfer.RecipientAccountNumberValidator is a validator for the "recipient_account_number" field. It is called by the builders before save.
+	nubantransfer.RecipientAccountNumberValidator = nubantransferDescRecipientAccountNumber.Validators[0].(func(string) error)
+	// nubantransferDescSenderAccountName is the schema descriptor for sender_account_name field.
+	nubantransferDescSenderAccountName := nubantransferFields[2].Descriptor()
+	// nubantransfer.SenderAccountNameValidator is a validator for the "sender_account_name" field. It is called by the builders before save.
+	nubantransfer.SenderAccountNameValidator = nubantransferDescSenderAccountName.Validators[0].(func(string) error)
+	// nubantransferDescSenderAccountNumber is the schema descriptor for sender_account_number field.
+	nubantransferDescSenderAccountNumber := nubantransferFields[3].Descriptor()
+	// nubantransfer.SenderAccountNumberValidator is a validator for the "sender_account_number" field. It is called by the builders before save.
+	nubantransfer.SenderAccountNumberValidator = nubantransferDescSenderAccountNumber.Validators[0].(func(string) error)
+	// nubantransferDescSenderBankName is the schema descriptor for sender_bank_name field.
+	nubantransferDescSenderBankName := nubantransferFields[4].Descriptor()
+	// nubantransfer.SenderBankNameValidator is a validator for the "sender_bank_name" field. It is called by the builders before save.
+	nubantransfer.SenderBankNameValidator = nubantransferDescSenderBankName.Validators[0].(func(string) error)
+	// nubantransferDescSenderBankCode is the schema descriptor for sender_bank_code field.
+	nubantransferDescSenderBankCode := nubantransferFields[5].Descriptor()
+	// nubantransfer.SenderBankCodeValidator is a validator for the "sender_bank_code" field. It is called by the builders before save.
+	nubantransfer.SenderBankCodeValidator = nubantransferDescSenderBankCode.Validators[0].(func(string) error)
+	// nubantransferDescAmount is the schema descriptor for amount field.
+	nubantransferDescAmount := nubantransferFields[6].Descriptor()
+	// nubantransfer.DefaultAmount holds the default value on creation for the amount field.
+	nubantransfer.DefaultAmount = nubantransferDescAmount.Default.(int64)
+	// nubantransferDescSessionID is the schema descriptor for session_id field.
+	nubantransferDescSessionID := nubantransferFields[7].Descriptor()
+	// nubantransfer.SessionIDValidator is a validator for the "session_id" field. It is called by the builders before save.
+	nubantransfer.SessionIDValidator = nubantransferDescSessionID.Validators[0].(func(string) error)
+	// nubantransferDescProviderReference is the schema descriptor for provider_reference field.
+	nubantransferDescProviderReference := nubantransferFields[8].Descriptor()
+	// nubantransfer.ProviderReferenceValidator is a validator for the "provider_reference" field. It is called by the builders before save.
+	nubantransfer.ProviderReferenceValidator = nubantransferDescProviderReference.Validators[0].(func(string) error)
+	// nubantransferDescProvider is the schema descriptor for provider field.
+	nubantransferDescProvider := nubantransferFields[9].Descriptor()
+	// nubantransfer.ProviderValidator is a validator for the "provider" field. It is called by the builders before save.
+	nubantransfer.ProviderValidator = nubantransferDescProvider.Validators[0].(func(string) error)
+	// nubantransferDescID is the schema descriptor for id field.
+	nubantransferDescID := nubantransferMixinFields0[0].Descriptor()
+	// nubantransfer.DefaultID holds the default value on creation for the id field.
+	nubantransfer.DefaultID = nubantransferDescID.Default.(func() string)
 	permissionMixin := schema.Permission{}.Mixin()
 	permissionMixinFields0 := permissionMixin[0].Fields()
 	_ = permissionMixinFields0
@@ -656,6 +874,252 @@ func init() {
 	socialDescID := socialMixinFields0[0].Descriptor()
 	// social.DefaultID holds the default value on creation for the id field.
 	social.DefaultID = socialDescID.Default.(func() string)
+	stablecoindepositMixin := schema.StablecoinDeposit{}.Mixin()
+	stablecoindepositMixinFields0 := stablecoindepositMixin[0].Fields()
+	_ = stablecoindepositMixinFields0
+	stablecoindepositFields := schema.StablecoinDeposit{}.Fields()
+	_ = stablecoindepositFields
+	// stablecoindepositDescCreatedAt is the schema descriptor for created_at field.
+	stablecoindepositDescCreatedAt := stablecoindepositMixinFields0[1].Descriptor()
+	// stablecoindeposit.DefaultCreatedAt holds the default value on creation for the created_at field.
+	stablecoindeposit.DefaultCreatedAt = stablecoindepositDescCreatedAt.Default.(func() time.Time)
+	// stablecoindepositDescUpdatedAt is the schema descriptor for updated_at field.
+	stablecoindepositDescUpdatedAt := stablecoindepositMixinFields0[2].Descriptor()
+	// stablecoindeposit.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	stablecoindeposit.DefaultUpdatedAt = stablecoindepositDescUpdatedAt.Default.(func() time.Time)
+	// stablecoindeposit.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	stablecoindeposit.UpdateDefaultUpdatedAt = stablecoindepositDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// stablecoindepositDescCoin is the schema descriptor for coin field.
+	stablecoindepositDescCoin := stablecoindepositFields[0].Descriptor()
+	// stablecoindeposit.CoinValidator is a validator for the "coin" field. It is called by the builders before save.
+	stablecoindeposit.CoinValidator = stablecoindepositDescCoin.Validators[0].(func(string) error)
+	// stablecoindepositDescNetwork is the schema descriptor for network field.
+	stablecoindepositDescNetwork := stablecoindepositFields[1].Descriptor()
+	// stablecoindeposit.NetworkValidator is a validator for the "network" field. It is called by the builders before save.
+	stablecoindeposit.NetworkValidator = stablecoindepositDescNetwork.Validators[0].(func(string) error)
+	// stablecoindepositDescAddress is the schema descriptor for address field.
+	stablecoindepositDescAddress := stablecoindepositFields[2].Descriptor()
+	// stablecoindeposit.AddressValidator is a validator for the "address" field. It is called by the builders before save.
+	stablecoindeposit.AddressValidator = stablecoindepositDescAddress.Validators[0].(func(string) error)
+	// stablecoindepositDescTransactionID is the schema descriptor for transaction_id field.
+	stablecoindepositDescTransactionID := stablecoindepositFields[3].Descriptor()
+	// stablecoindeposit.TransactionIDValidator is a validator for the "transaction_id" field. It is called by the builders before save.
+	stablecoindeposit.TransactionIDValidator = stablecoindepositDescTransactionID.Validators[0].(func(string) error)
+	// stablecoindepositDescStablecoinWalletID is the schema descriptor for stablecoin_wallet_id field.
+	stablecoindepositDescStablecoinWalletID := stablecoindepositFields[4].Descriptor()
+	// stablecoindeposit.StablecoinWalletIDValidator is a validator for the "stablecoin_wallet_id" field. It is called by the builders before save.
+	stablecoindeposit.StablecoinWalletIDValidator = stablecoindepositDescStablecoinWalletID.Validators[0].(func(string) error)
+	// stablecoindepositDescProviderReference is the schema descriptor for provider_reference field.
+	stablecoindepositDescProviderReference := stablecoindepositFields[5].Descriptor()
+	// stablecoindeposit.ProviderReferenceValidator is a validator for the "provider_reference" field. It is called by the builders before save.
+	stablecoindeposit.ProviderReferenceValidator = stablecoindepositDescProviderReference.Validators[0].(func(string) error)
+	// stablecoindepositDescProvider is the schema descriptor for provider field.
+	stablecoindepositDescProvider := stablecoindepositFields[6].Descriptor()
+	// stablecoindeposit.ProviderValidator is a validator for the "provider" field. It is called by the builders before save.
+	stablecoindeposit.ProviderValidator = stablecoindepositDescProvider.Validators[0].(func(string) error)
+	// stablecoindepositDescID is the schema descriptor for id field.
+	stablecoindepositDescID := stablecoindepositMixinFields0[0].Descriptor()
+	// stablecoindeposit.DefaultID holds the default value on creation for the id field.
+	stablecoindeposit.DefaultID = stablecoindepositDescID.Default.(func() string)
+	stablecoinnetworkMixin := schema.StablecoinNetwork{}.Mixin()
+	stablecoinnetworkMixinFields0 := stablecoinnetworkMixin[0].Fields()
+	_ = stablecoinnetworkMixinFields0
+	stablecoinnetworkFields := schema.StablecoinNetwork{}.Fields()
+	_ = stablecoinnetworkFields
+	// stablecoinnetworkDescCreatedAt is the schema descriptor for created_at field.
+	stablecoinnetworkDescCreatedAt := stablecoinnetworkMixinFields0[1].Descriptor()
+	// stablecoinnetwork.DefaultCreatedAt holds the default value on creation for the created_at field.
+	stablecoinnetwork.DefaultCreatedAt = stablecoinnetworkDescCreatedAt.Default.(func() time.Time)
+	// stablecoinnetworkDescUpdatedAt is the schema descriptor for updated_at field.
+	stablecoinnetworkDescUpdatedAt := stablecoinnetworkMixinFields0[2].Descriptor()
+	// stablecoinnetwork.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	stablecoinnetwork.DefaultUpdatedAt = stablecoinnetworkDescUpdatedAt.Default.(func() time.Time)
+	// stablecoinnetwork.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	stablecoinnetwork.UpdateDefaultUpdatedAt = stablecoinnetworkDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// stablecoinnetworkDescName is the schema descriptor for name field.
+	stablecoinnetworkDescName := stablecoinnetworkFields[0].Descriptor()
+	// stablecoinnetwork.NameValidator is a validator for the "name" field. It is called by the builders before save.
+	stablecoinnetwork.NameValidator = stablecoinnetworkDescName.Validators[0].(func(string) error)
+	// stablecoinnetworkDescSlug is the schema descriptor for slug field.
+	stablecoinnetworkDescSlug := stablecoinnetworkFields[1].Descriptor()
+	// stablecoinnetwork.SlugValidator is a validator for the "slug" field. It is called by the builders before save.
+	stablecoinnetwork.SlugValidator = stablecoinnetworkDescSlug.Validators[0].(func(string) error)
+	// stablecoinnetworkDescLogoURL is the schema descriptor for logo_url field.
+	stablecoinnetworkDescLogoURL := stablecoinnetworkFields[2].Descriptor()
+	// stablecoinnetwork.DefaultLogoURL holds the default value on creation for the logo_url field.
+	stablecoinnetwork.DefaultLogoURL = stablecoinnetworkDescLogoURL.Default.(string)
+	// stablecoinnetworkDescActive is the schema descriptor for active field.
+	stablecoinnetworkDescActive := stablecoinnetworkFields[3].Descriptor()
+	// stablecoinnetwork.DefaultActive holds the default value on creation for the active field.
+	stablecoinnetwork.DefaultActive = stablecoinnetworkDescActive.Default.(bool)
+	// stablecoinnetworkDescID is the schema descriptor for id field.
+	stablecoinnetworkDescID := stablecoinnetworkMixinFields0[0].Descriptor()
+	// stablecoinnetwork.DefaultID holds the default value on creation for the id field.
+	stablecoinnetwork.DefaultID = stablecoinnetworkDescID.Default.(func() string)
+	stablecoinsupportednetworkMixin := schema.StablecoinSupportedNetwork{}.Mixin()
+	stablecoinsupportednetworkMixinFields0 := stablecoinsupportednetworkMixin[0].Fields()
+	_ = stablecoinsupportednetworkMixinFields0
+	stablecoinsupportednetworkFields := schema.StablecoinSupportedNetwork{}.Fields()
+	_ = stablecoinsupportednetworkFields
+	// stablecoinsupportednetworkDescCreatedAt is the schema descriptor for created_at field.
+	stablecoinsupportednetworkDescCreatedAt := stablecoinsupportednetworkMixinFields0[1].Descriptor()
+	// stablecoinsupportednetwork.DefaultCreatedAt holds the default value on creation for the created_at field.
+	stablecoinsupportednetwork.DefaultCreatedAt = stablecoinsupportednetworkDescCreatedAt.Default.(func() time.Time)
+	// stablecoinsupportednetworkDescUpdatedAt is the schema descriptor for updated_at field.
+	stablecoinsupportednetworkDescUpdatedAt := stablecoinsupportednetworkMixinFields0[2].Descriptor()
+	// stablecoinsupportednetwork.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	stablecoinsupportednetwork.DefaultUpdatedAt = stablecoinsupportednetworkDescUpdatedAt.Default.(func() time.Time)
+	// stablecoinsupportednetwork.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	stablecoinsupportednetwork.UpdateDefaultUpdatedAt = stablecoinsupportednetworkDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// stablecoinsupportednetworkDescNetworkID is the schema descriptor for network_id field.
+	stablecoinsupportednetworkDescNetworkID := stablecoinsupportednetworkFields[0].Descriptor()
+	// stablecoinsupportednetwork.NetworkIDValidator is a validator for the "network_id" field. It is called by the builders before save.
+	stablecoinsupportednetwork.NetworkIDValidator = stablecoinsupportednetworkDescNetworkID.Validators[0].(func(string) error)
+	// stablecoinsupportednetworkDescCoinID is the schema descriptor for coin_id field.
+	stablecoinsupportednetworkDescCoinID := stablecoinsupportednetworkFields[1].Descriptor()
+	// stablecoinsupportednetwork.CoinIDValidator is a validator for the "coin_id" field. It is called by the builders before save.
+	stablecoinsupportednetwork.CoinIDValidator = stablecoinsupportednetworkDescCoinID.Validators[0].(func(string) error)
+	// stablecoinsupportednetworkDescCanSend is the schema descriptor for can_send field.
+	stablecoinsupportednetworkDescCanSend := stablecoinsupportednetworkFields[2].Descriptor()
+	// stablecoinsupportednetwork.DefaultCanSend holds the default value on creation for the can_send field.
+	stablecoinsupportednetwork.DefaultCanSend = stablecoinsupportednetworkDescCanSend.Default.(bool)
+	// stablecoinsupportednetworkDescCanReceive is the schema descriptor for can_receive field.
+	stablecoinsupportednetworkDescCanReceive := stablecoinsupportednetworkFields[3].Descriptor()
+	// stablecoinsupportednetwork.DefaultCanReceive holds the default value on creation for the can_receive field.
+	stablecoinsupportednetwork.DefaultCanReceive = stablecoinsupportednetworkDescCanReceive.Default.(bool)
+	// stablecoinsupportednetworkDescActive is the schema descriptor for active field.
+	stablecoinsupportednetworkDescActive := stablecoinsupportednetworkFields[4].Descriptor()
+	// stablecoinsupportednetwork.DefaultActive holds the default value on creation for the active field.
+	stablecoinsupportednetwork.DefaultActive = stablecoinsupportednetworkDescActive.Default.(bool)
+	// stablecoinsupportednetworkDescID is the schema descriptor for id field.
+	stablecoinsupportednetworkDescID := stablecoinsupportednetworkMixinFields0[0].Descriptor()
+	// stablecoinsupportednetwork.DefaultID holds the default value on creation for the id field.
+	stablecoinsupportednetwork.DefaultID = stablecoinsupportednetworkDescID.Default.(func() string)
+	stablecoinwalletMixin := schema.StablecoinWallet{}.Mixin()
+	stablecoinwalletMixinFields0 := stablecoinwalletMixin[0].Fields()
+	_ = stablecoinwalletMixinFields0
+	stablecoinwalletFields := schema.StablecoinWallet{}.Fields()
+	_ = stablecoinwalletFields
+	// stablecoinwalletDescCreatedAt is the schema descriptor for created_at field.
+	stablecoinwalletDescCreatedAt := stablecoinwalletMixinFields0[1].Descriptor()
+	// stablecoinwallet.DefaultCreatedAt holds the default value on creation for the created_at field.
+	stablecoinwallet.DefaultCreatedAt = stablecoinwalletDescCreatedAt.Default.(func() time.Time)
+	// stablecoinwalletDescUpdatedAt is the schema descriptor for updated_at field.
+	stablecoinwalletDescUpdatedAt := stablecoinwalletMixinFields0[2].Descriptor()
+	// stablecoinwallet.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	stablecoinwallet.DefaultUpdatedAt = stablecoinwalletDescUpdatedAt.Default.(func() time.Time)
+	// stablecoinwallet.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	stablecoinwallet.UpdateDefaultUpdatedAt = stablecoinwalletDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// stablecoinwalletDescCoin is the schema descriptor for coin field.
+	stablecoinwalletDescCoin := stablecoinwalletFields[0].Descriptor()
+	// stablecoinwallet.CoinValidator is a validator for the "coin" field. It is called by the builders before save.
+	stablecoinwallet.CoinValidator = stablecoinwalletDescCoin.Validators[0].(func(string) error)
+	// stablecoinwalletDescNetwork is the schema descriptor for network field.
+	stablecoinwalletDescNetwork := stablecoinwalletFields[1].Descriptor()
+	// stablecoinwallet.NetworkValidator is a validator for the "network" field. It is called by the builders before save.
+	stablecoinwallet.NetworkValidator = stablecoinwalletDescNetwork.Validators[0].(func(string) error)
+	// stablecoinwalletDescNetworkID is the schema descriptor for network_id field.
+	stablecoinwalletDescNetworkID := stablecoinwalletFields[2].Descriptor()
+	// stablecoinwallet.NetworkIDValidator is a validator for the "network_id" field. It is called by the builders before save.
+	stablecoinwallet.NetworkIDValidator = stablecoinwalletDescNetworkID.Validators[0].(func(string) error)
+	// stablecoinwalletDescCoinID is the schema descriptor for coin_id field.
+	stablecoinwalletDescCoinID := stablecoinwalletFields[3].Descriptor()
+	// stablecoinwallet.CoinIDValidator is a validator for the "coin_id" field. It is called by the builders before save.
+	stablecoinwallet.CoinIDValidator = stablecoinwalletDescCoinID.Validators[0].(func(string) error)
+	// stablecoinwalletDescAddress is the schema descriptor for address field.
+	stablecoinwalletDescAddress := stablecoinwalletFields[4].Descriptor()
+	// stablecoinwallet.AddressValidator is a validator for the "address" field. It is called by the builders before save.
+	stablecoinwallet.AddressValidator = stablecoinwalletDescAddress.Validators[0].(func(string) error)
+	// stablecoinwalletDescProviderReference is the schema descriptor for provider_reference field.
+	stablecoinwalletDescProviderReference := stablecoinwalletFields[5].Descriptor()
+	// stablecoinwallet.ProviderReferenceValidator is a validator for the "provider_reference" field. It is called by the builders before save.
+	stablecoinwallet.ProviderReferenceValidator = stablecoinwalletDescProviderReference.Validators[0].(func(string) error)
+	// stablecoinwalletDescProvider is the schema descriptor for provider field.
+	stablecoinwalletDescProvider := stablecoinwalletFields[6].Descriptor()
+	// stablecoinwallet.ProviderValidator is a validator for the "provider" field. It is called by the builders before save.
+	stablecoinwallet.ProviderValidator = stablecoinwalletDescProvider.Validators[0].(func(string) error)
+	// stablecoinwalletDescDisabled is the schema descriptor for disabled field.
+	stablecoinwalletDescDisabled := stablecoinwalletFields[7].Descriptor()
+	// stablecoinwallet.DefaultDisabled holds the default value on creation for the disabled field.
+	stablecoinwallet.DefaultDisabled = stablecoinwalletDescDisabled.Default.(bool)
+	// stablecoinwalletDescID is the schema descriptor for id field.
+	stablecoinwalletDescID := stablecoinwalletMixinFields0[0].Descriptor()
+	// stablecoinwallet.DefaultID holds the default value on creation for the id field.
+	stablecoinwallet.DefaultID = stablecoinwalletDescID.Default.(func() string)
+	stablecoinwithdrawalMixin := schema.StablecoinWithdrawal{}.Mixin()
+	stablecoinwithdrawalMixinFields0 := stablecoinwithdrawalMixin[0].Fields()
+	_ = stablecoinwithdrawalMixinFields0
+	stablecoinwithdrawalFields := schema.StablecoinWithdrawal{}.Fields()
+	_ = stablecoinwithdrawalFields
+	// stablecoinwithdrawalDescCreatedAt is the schema descriptor for created_at field.
+	stablecoinwithdrawalDescCreatedAt := stablecoinwithdrawalMixinFields0[1].Descriptor()
+	// stablecoinwithdrawal.DefaultCreatedAt holds the default value on creation for the created_at field.
+	stablecoinwithdrawal.DefaultCreatedAt = stablecoinwithdrawalDescCreatedAt.Default.(func() time.Time)
+	// stablecoinwithdrawalDescUpdatedAt is the schema descriptor for updated_at field.
+	stablecoinwithdrawalDescUpdatedAt := stablecoinwithdrawalMixinFields0[2].Descriptor()
+	// stablecoinwithdrawal.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	stablecoinwithdrawal.DefaultUpdatedAt = stablecoinwithdrawalDescUpdatedAt.Default.(func() time.Time)
+	// stablecoinwithdrawal.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	stablecoinwithdrawal.UpdateDefaultUpdatedAt = stablecoinwithdrawalDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// stablecoinwithdrawalDescCoin is the schema descriptor for coin field.
+	stablecoinwithdrawalDescCoin := stablecoinwithdrawalFields[0].Descriptor()
+	// stablecoinwithdrawal.CoinValidator is a validator for the "coin" field. It is called by the builders before save.
+	stablecoinwithdrawal.CoinValidator = stablecoinwithdrawalDescCoin.Validators[0].(func(string) error)
+	// stablecoinwithdrawalDescNetwork is the schema descriptor for network field.
+	stablecoinwithdrawalDescNetwork := stablecoinwithdrawalFields[1].Descriptor()
+	// stablecoinwithdrawal.NetworkValidator is a validator for the "network" field. It is called by the builders before save.
+	stablecoinwithdrawal.NetworkValidator = stablecoinwithdrawalDescNetwork.Validators[0].(func(string) error)
+	// stablecoinwithdrawalDescDestinationAddress is the schema descriptor for destination_address field.
+	stablecoinwithdrawalDescDestinationAddress := stablecoinwithdrawalFields[2].Descriptor()
+	// stablecoinwithdrawal.DestinationAddressValidator is a validator for the "destination_address" field. It is called by the builders before save.
+	stablecoinwithdrawal.DestinationAddressValidator = stablecoinwithdrawalDescDestinationAddress.Validators[0].(func(string) error)
+	// stablecoinwithdrawalDescAmount is the schema descriptor for amount field.
+	stablecoinwithdrawalDescAmount := stablecoinwithdrawalFields[3].Descriptor()
+	// stablecoinwithdrawal.DefaultAmount holds the default value on creation for the amount field.
+	stablecoinwithdrawal.DefaultAmount = stablecoinwithdrawalDescAmount.Default.(int64)
+	// stablecoinwithdrawalDescTransactionID is the schema descriptor for transaction_id field.
+	stablecoinwithdrawalDescTransactionID := stablecoinwithdrawalFields[4].Descriptor()
+	// stablecoinwithdrawal.TransactionIDValidator is a validator for the "transaction_id" field. It is called by the builders before save.
+	stablecoinwithdrawal.TransactionIDValidator = stablecoinwithdrawalDescTransactionID.Validators[0].(func(string) error)
+	// stablecoinwithdrawalDescProvider is the schema descriptor for provider field.
+	stablecoinwithdrawalDescProvider := stablecoinwithdrawalFields[6].Descriptor()
+	// stablecoinwithdrawal.ProviderValidator is a validator for the "provider" field. It is called by the builders before save.
+	stablecoinwithdrawal.ProviderValidator = stablecoinwithdrawalDescProvider.Validators[0].(func(string) error)
+	// stablecoinwithdrawalDescID is the schema descriptor for id field.
+	stablecoinwithdrawalDescID := stablecoinwithdrawalMixinFields0[0].Descriptor()
+	// stablecoinwithdrawal.DefaultID holds the default value on creation for the id field.
+	stablecoinwithdrawal.DefaultID = stablecoinwithdrawalDescID.Default.(func() string)
+	transactionMixin := schema.Transaction{}.Mixin()
+	transactionMixinFields0 := transactionMixin[0].Fields()
+	_ = transactionMixinFields0
+	transactionFields := schema.Transaction{}.Fields()
+	_ = transactionFields
+	// transactionDescCreatedAt is the schema descriptor for created_at field.
+	transactionDescCreatedAt := transactionMixinFields0[1].Descriptor()
+	// transaction.DefaultCreatedAt holds the default value on creation for the created_at field.
+	transaction.DefaultCreatedAt = transactionDescCreatedAt.Default.(func() time.Time)
+	// transactionDescUpdatedAt is the schema descriptor for updated_at field.
+	transactionDescUpdatedAt := transactionMixinFields0[2].Descriptor()
+	// transaction.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	transaction.DefaultUpdatedAt = transactionDescUpdatedAt.Default.(func() time.Time)
+	// transaction.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	transaction.UpdateDefaultUpdatedAt = transactionDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// transactionDescCurrency is the schema descriptor for currency field.
+	transactionDescCurrency := transactionFields[5].Descriptor()
+	// transaction.CurrencyValidator is a validator for the "currency" field. It is called by the builders before save.
+	transaction.CurrencyValidator = transactionDescCurrency.Validators[0].(func(string) error)
+	// transactionDescAmount is the schema descriptor for amount field.
+	transactionDescAmount := transactionFields[8].Descriptor()
+	// transaction.DefaultAmount holds the default value on creation for the amount field.
+	transaction.DefaultAmount = transactionDescAmount.Default.(int64)
+	// transactionDescFee is the schema descriptor for fee field.
+	transactionDescFee := transactionFields[9].Descriptor()
+	// transaction.DefaultFee holds the default value on creation for the fee field.
+	transaction.DefaultFee = transactionDescFee.Default.(int64)
+	// transactionDescID is the schema descriptor for id field.
+	transactionDescID := transactionMixinFields0[0].Descriptor()
+	// transaction.DefaultID holds the default value on creation for the id field.
+	transaction.DefaultID = transactionDescID.Default.(func() string)
 	userMixin := schema.User{}.Mixin()
 	userMixinFields0 := userMixin[0].Fields()
 	_ = userMixinFields0

@@ -13,6 +13,8 @@ import (
 	"entgo.io/ent/schema/field"
 	"github.com/Toflex/directory_v2/ent/currency"
 	"github.com/Toflex/directory_v2/ent/predicate"
+	"github.com/Toflex/directory_v2/ent/stablecoinsupportednetwork"
+	"github.com/Toflex/directory_v2/ent/stablecoinwallet"
 	"github.com/Toflex/directory_v2/ent/wallet"
 )
 
@@ -97,6 +99,26 @@ func (cu *CurrencyUpdate) SetNillableCode(s *string) *CurrencyUpdate {
 	return cu
 }
 
+// SetLogo sets the "logo" field.
+func (cu *CurrencyUpdate) SetLogo(s string) *CurrencyUpdate {
+	cu.mutation.SetLogo(s)
+	return cu
+}
+
+// SetNillableLogo sets the "logo" field if the given value is not nil.
+func (cu *CurrencyUpdate) SetNillableLogo(s *string) *CurrencyUpdate {
+	if s != nil {
+		cu.SetLogo(*s)
+	}
+	return cu
+}
+
+// ClearLogo clears the value of the "logo" field.
+func (cu *CurrencyUpdate) ClearLogo() *CurrencyUpdate {
+	cu.mutation.ClearLogo()
+	return cu
+}
+
 // SetIsFiat sets the "is_fiat" field.
 func (cu *CurrencyUpdate) SetIsFiat(b bool) *CurrencyUpdate {
 	cu.mutation.SetIsFiat(b)
@@ -161,6 +183,36 @@ func (cu *CurrencyUpdate) AddWallets(w ...*Wallet) *CurrencyUpdate {
 	return cu.AddWalletIDs(ids...)
 }
 
+// AddStablecoinSupportedNetworkIDs adds the "stablecoin_supported_networks" edge to the StablecoinSupportedNetwork entity by IDs.
+func (cu *CurrencyUpdate) AddStablecoinSupportedNetworkIDs(ids ...string) *CurrencyUpdate {
+	cu.mutation.AddStablecoinSupportedNetworkIDs(ids...)
+	return cu
+}
+
+// AddStablecoinSupportedNetworks adds the "stablecoin_supported_networks" edges to the StablecoinSupportedNetwork entity.
+func (cu *CurrencyUpdate) AddStablecoinSupportedNetworks(s ...*StablecoinSupportedNetwork) *CurrencyUpdate {
+	ids := make([]string, len(s))
+	for i := range s {
+		ids[i] = s[i].ID
+	}
+	return cu.AddStablecoinSupportedNetworkIDs(ids...)
+}
+
+// AddStablecoinCurrencyIDs adds the "stablecoin_currencies" edge to the StablecoinWallet entity by IDs.
+func (cu *CurrencyUpdate) AddStablecoinCurrencyIDs(ids ...string) *CurrencyUpdate {
+	cu.mutation.AddStablecoinCurrencyIDs(ids...)
+	return cu
+}
+
+// AddStablecoinCurrencies adds the "stablecoin_currencies" edges to the StablecoinWallet entity.
+func (cu *CurrencyUpdate) AddStablecoinCurrencies(s ...*StablecoinWallet) *CurrencyUpdate {
+	ids := make([]string, len(s))
+	for i := range s {
+		ids[i] = s[i].ID
+	}
+	return cu.AddStablecoinCurrencyIDs(ids...)
+}
+
 // Mutation returns the CurrencyMutation object of the builder.
 func (cu *CurrencyUpdate) Mutation() *CurrencyMutation {
 	return cu.mutation
@@ -185,6 +237,48 @@ func (cu *CurrencyUpdate) RemoveWallets(w ...*Wallet) *CurrencyUpdate {
 		ids[i] = w[i].ID
 	}
 	return cu.RemoveWalletIDs(ids...)
+}
+
+// ClearStablecoinSupportedNetworks clears all "stablecoin_supported_networks" edges to the StablecoinSupportedNetwork entity.
+func (cu *CurrencyUpdate) ClearStablecoinSupportedNetworks() *CurrencyUpdate {
+	cu.mutation.ClearStablecoinSupportedNetworks()
+	return cu
+}
+
+// RemoveStablecoinSupportedNetworkIDs removes the "stablecoin_supported_networks" edge to StablecoinSupportedNetwork entities by IDs.
+func (cu *CurrencyUpdate) RemoveStablecoinSupportedNetworkIDs(ids ...string) *CurrencyUpdate {
+	cu.mutation.RemoveStablecoinSupportedNetworkIDs(ids...)
+	return cu
+}
+
+// RemoveStablecoinSupportedNetworks removes "stablecoin_supported_networks" edges to StablecoinSupportedNetwork entities.
+func (cu *CurrencyUpdate) RemoveStablecoinSupportedNetworks(s ...*StablecoinSupportedNetwork) *CurrencyUpdate {
+	ids := make([]string, len(s))
+	for i := range s {
+		ids[i] = s[i].ID
+	}
+	return cu.RemoveStablecoinSupportedNetworkIDs(ids...)
+}
+
+// ClearStablecoinCurrencies clears all "stablecoin_currencies" edges to the StablecoinWallet entity.
+func (cu *CurrencyUpdate) ClearStablecoinCurrencies() *CurrencyUpdate {
+	cu.mutation.ClearStablecoinCurrencies()
+	return cu
+}
+
+// RemoveStablecoinCurrencyIDs removes the "stablecoin_currencies" edge to StablecoinWallet entities by IDs.
+func (cu *CurrencyUpdate) RemoveStablecoinCurrencyIDs(ids ...string) *CurrencyUpdate {
+	cu.mutation.RemoveStablecoinCurrencyIDs(ids...)
+	return cu
+}
+
+// RemoveStablecoinCurrencies removes "stablecoin_currencies" edges to StablecoinWallet entities.
+func (cu *CurrencyUpdate) RemoveStablecoinCurrencies(s ...*StablecoinWallet) *CurrencyUpdate {
+	ids := make([]string, len(s))
+	for i := range s {
+		ids[i] = s[i].ID
+	}
+	return cu.RemoveStablecoinCurrencyIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -273,6 +367,12 @@ func (cu *CurrencyUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if value, ok := cu.mutation.Code(); ok {
 		_spec.SetField(currency.FieldCode, field.TypeString, value)
 	}
+	if value, ok := cu.mutation.Logo(); ok {
+		_spec.SetField(currency.FieldLogo, field.TypeString, value)
+	}
+	if cu.mutation.LogoCleared() {
+		_spec.ClearField(currency.FieldLogo, field.TypeString)
+	}
 	if value, ok := cu.mutation.IsFiat(); ok {
 		_spec.SetField(currency.FieldIsFiat, field.TypeBool, value)
 	}
@@ -323,6 +423,96 @@ func (cu *CurrencyUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(wallet.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if cu.mutation.StablecoinSupportedNetworksCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   currency.StablecoinSupportedNetworksTable,
+			Columns: []string{currency.StablecoinSupportedNetworksColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(stablecoinsupportednetwork.FieldID, field.TypeString),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := cu.mutation.RemovedStablecoinSupportedNetworksIDs(); len(nodes) > 0 && !cu.mutation.StablecoinSupportedNetworksCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   currency.StablecoinSupportedNetworksTable,
+			Columns: []string{currency.StablecoinSupportedNetworksColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(stablecoinsupportednetwork.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := cu.mutation.StablecoinSupportedNetworksIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   currency.StablecoinSupportedNetworksTable,
+			Columns: []string{currency.StablecoinSupportedNetworksColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(stablecoinsupportednetwork.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if cu.mutation.StablecoinCurrenciesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   currency.StablecoinCurrenciesTable,
+			Columns: []string{currency.StablecoinCurrenciesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(stablecoinwallet.FieldID, field.TypeString),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := cu.mutation.RemovedStablecoinCurrenciesIDs(); len(nodes) > 0 && !cu.mutation.StablecoinCurrenciesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   currency.StablecoinCurrenciesTable,
+			Columns: []string{currency.StablecoinCurrenciesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(stablecoinwallet.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := cu.mutation.StablecoinCurrenciesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   currency.StablecoinCurrenciesTable,
+			Columns: []string{currency.StablecoinCurrenciesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(stablecoinwallet.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {
@@ -418,6 +608,26 @@ func (cuo *CurrencyUpdateOne) SetNillableCode(s *string) *CurrencyUpdateOne {
 	return cuo
 }
 
+// SetLogo sets the "logo" field.
+func (cuo *CurrencyUpdateOne) SetLogo(s string) *CurrencyUpdateOne {
+	cuo.mutation.SetLogo(s)
+	return cuo
+}
+
+// SetNillableLogo sets the "logo" field if the given value is not nil.
+func (cuo *CurrencyUpdateOne) SetNillableLogo(s *string) *CurrencyUpdateOne {
+	if s != nil {
+		cuo.SetLogo(*s)
+	}
+	return cuo
+}
+
+// ClearLogo clears the value of the "logo" field.
+func (cuo *CurrencyUpdateOne) ClearLogo() *CurrencyUpdateOne {
+	cuo.mutation.ClearLogo()
+	return cuo
+}
+
 // SetIsFiat sets the "is_fiat" field.
 func (cuo *CurrencyUpdateOne) SetIsFiat(b bool) *CurrencyUpdateOne {
 	cuo.mutation.SetIsFiat(b)
@@ -482,6 +692,36 @@ func (cuo *CurrencyUpdateOne) AddWallets(w ...*Wallet) *CurrencyUpdateOne {
 	return cuo.AddWalletIDs(ids...)
 }
 
+// AddStablecoinSupportedNetworkIDs adds the "stablecoin_supported_networks" edge to the StablecoinSupportedNetwork entity by IDs.
+func (cuo *CurrencyUpdateOne) AddStablecoinSupportedNetworkIDs(ids ...string) *CurrencyUpdateOne {
+	cuo.mutation.AddStablecoinSupportedNetworkIDs(ids...)
+	return cuo
+}
+
+// AddStablecoinSupportedNetworks adds the "stablecoin_supported_networks" edges to the StablecoinSupportedNetwork entity.
+func (cuo *CurrencyUpdateOne) AddStablecoinSupportedNetworks(s ...*StablecoinSupportedNetwork) *CurrencyUpdateOne {
+	ids := make([]string, len(s))
+	for i := range s {
+		ids[i] = s[i].ID
+	}
+	return cuo.AddStablecoinSupportedNetworkIDs(ids...)
+}
+
+// AddStablecoinCurrencyIDs adds the "stablecoin_currencies" edge to the StablecoinWallet entity by IDs.
+func (cuo *CurrencyUpdateOne) AddStablecoinCurrencyIDs(ids ...string) *CurrencyUpdateOne {
+	cuo.mutation.AddStablecoinCurrencyIDs(ids...)
+	return cuo
+}
+
+// AddStablecoinCurrencies adds the "stablecoin_currencies" edges to the StablecoinWallet entity.
+func (cuo *CurrencyUpdateOne) AddStablecoinCurrencies(s ...*StablecoinWallet) *CurrencyUpdateOne {
+	ids := make([]string, len(s))
+	for i := range s {
+		ids[i] = s[i].ID
+	}
+	return cuo.AddStablecoinCurrencyIDs(ids...)
+}
+
 // Mutation returns the CurrencyMutation object of the builder.
 func (cuo *CurrencyUpdateOne) Mutation() *CurrencyMutation {
 	return cuo.mutation
@@ -506,6 +746,48 @@ func (cuo *CurrencyUpdateOne) RemoveWallets(w ...*Wallet) *CurrencyUpdateOne {
 		ids[i] = w[i].ID
 	}
 	return cuo.RemoveWalletIDs(ids...)
+}
+
+// ClearStablecoinSupportedNetworks clears all "stablecoin_supported_networks" edges to the StablecoinSupportedNetwork entity.
+func (cuo *CurrencyUpdateOne) ClearStablecoinSupportedNetworks() *CurrencyUpdateOne {
+	cuo.mutation.ClearStablecoinSupportedNetworks()
+	return cuo
+}
+
+// RemoveStablecoinSupportedNetworkIDs removes the "stablecoin_supported_networks" edge to StablecoinSupportedNetwork entities by IDs.
+func (cuo *CurrencyUpdateOne) RemoveStablecoinSupportedNetworkIDs(ids ...string) *CurrencyUpdateOne {
+	cuo.mutation.RemoveStablecoinSupportedNetworkIDs(ids...)
+	return cuo
+}
+
+// RemoveStablecoinSupportedNetworks removes "stablecoin_supported_networks" edges to StablecoinSupportedNetwork entities.
+func (cuo *CurrencyUpdateOne) RemoveStablecoinSupportedNetworks(s ...*StablecoinSupportedNetwork) *CurrencyUpdateOne {
+	ids := make([]string, len(s))
+	for i := range s {
+		ids[i] = s[i].ID
+	}
+	return cuo.RemoveStablecoinSupportedNetworkIDs(ids...)
+}
+
+// ClearStablecoinCurrencies clears all "stablecoin_currencies" edges to the StablecoinWallet entity.
+func (cuo *CurrencyUpdateOne) ClearStablecoinCurrencies() *CurrencyUpdateOne {
+	cuo.mutation.ClearStablecoinCurrencies()
+	return cuo
+}
+
+// RemoveStablecoinCurrencyIDs removes the "stablecoin_currencies" edge to StablecoinWallet entities by IDs.
+func (cuo *CurrencyUpdateOne) RemoveStablecoinCurrencyIDs(ids ...string) *CurrencyUpdateOne {
+	cuo.mutation.RemoveStablecoinCurrencyIDs(ids...)
+	return cuo
+}
+
+// RemoveStablecoinCurrencies removes "stablecoin_currencies" edges to StablecoinWallet entities.
+func (cuo *CurrencyUpdateOne) RemoveStablecoinCurrencies(s ...*StablecoinWallet) *CurrencyUpdateOne {
+	ids := make([]string, len(s))
+	for i := range s {
+		ids[i] = s[i].ID
+	}
+	return cuo.RemoveStablecoinCurrencyIDs(ids...)
 }
 
 // Where appends a list predicates to the CurrencyUpdate builder.
@@ -624,6 +906,12 @@ func (cuo *CurrencyUpdateOne) sqlSave(ctx context.Context) (_node *Currency, err
 	if value, ok := cuo.mutation.Code(); ok {
 		_spec.SetField(currency.FieldCode, field.TypeString, value)
 	}
+	if value, ok := cuo.mutation.Logo(); ok {
+		_spec.SetField(currency.FieldLogo, field.TypeString, value)
+	}
+	if cuo.mutation.LogoCleared() {
+		_spec.ClearField(currency.FieldLogo, field.TypeString)
+	}
 	if value, ok := cuo.mutation.IsFiat(); ok {
 		_spec.SetField(currency.FieldIsFiat, field.TypeBool, value)
 	}
@@ -674,6 +962,96 @@ func (cuo *CurrencyUpdateOne) sqlSave(ctx context.Context) (_node *Currency, err
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(wallet.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if cuo.mutation.StablecoinSupportedNetworksCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   currency.StablecoinSupportedNetworksTable,
+			Columns: []string{currency.StablecoinSupportedNetworksColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(stablecoinsupportednetwork.FieldID, field.TypeString),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := cuo.mutation.RemovedStablecoinSupportedNetworksIDs(); len(nodes) > 0 && !cuo.mutation.StablecoinSupportedNetworksCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   currency.StablecoinSupportedNetworksTable,
+			Columns: []string{currency.StablecoinSupportedNetworksColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(stablecoinsupportednetwork.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := cuo.mutation.StablecoinSupportedNetworksIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   currency.StablecoinSupportedNetworksTable,
+			Columns: []string{currency.StablecoinSupportedNetworksColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(stablecoinsupportednetwork.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if cuo.mutation.StablecoinCurrenciesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   currency.StablecoinCurrenciesTable,
+			Columns: []string{currency.StablecoinCurrenciesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(stablecoinwallet.FieldID, field.TypeString),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := cuo.mutation.RemovedStablecoinCurrenciesIDs(); len(nodes) > 0 && !cuo.mutation.StablecoinCurrenciesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   currency.StablecoinCurrenciesTable,
+			Columns: []string{currency.StablecoinCurrenciesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(stablecoinwallet.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := cuo.mutation.StablecoinCurrenciesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   currency.StablecoinCurrenciesTable,
+			Columns: []string{currency.StablecoinCurrenciesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(stablecoinwallet.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {

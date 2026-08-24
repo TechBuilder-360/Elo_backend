@@ -23,9 +23,13 @@ import (
 	"github.com/Toflex/directory_v2/ent/currency"
 	"github.com/Toflex/directory_v2/ent/kybdocument"
 	"github.com/Toflex/directory_v2/ent/kybmessage"
+	"github.com/Toflex/directory_v2/ent/ledger"
 	"github.com/Toflex/directory_v2/ent/ledgerowner"
 	"github.com/Toflex/directory_v2/ent/manager"
+	"github.com/Toflex/directory_v2/ent/nubandeposit"
+	"github.com/Toflex/directory_v2/ent/nubandynamicaccount"
 	"github.com/Toflex/directory_v2/ent/nubanstaticaccount"
+	"github.com/Toflex/directory_v2/ent/nubantransfer"
 	"github.com/Toflex/directory_v2/ent/permission"
 	"github.com/Toflex/directory_v2/ent/provider"
 	"github.com/Toflex/directory_v2/ent/requestverification"
@@ -33,6 +37,12 @@ import (
 	"github.com/Toflex/directory_v2/ent/rolepermission"
 	"github.com/Toflex/directory_v2/ent/service"
 	"github.com/Toflex/directory_v2/ent/social"
+	"github.com/Toflex/directory_v2/ent/stablecoindeposit"
+	"github.com/Toflex/directory_v2/ent/stablecoinnetwork"
+	"github.com/Toflex/directory_v2/ent/stablecoinsupportednetwork"
+	"github.com/Toflex/directory_v2/ent/stablecoinwallet"
+	"github.com/Toflex/directory_v2/ent/stablecoinwithdrawal"
+	"github.com/Toflex/directory_v2/ent/transaction"
 	"github.com/Toflex/directory_v2/ent/user"
 	"github.com/Toflex/directory_v2/ent/userdocument"
 	"github.com/Toflex/directory_v2/ent/vault"
@@ -61,12 +71,20 @@ type Client struct {
 	KYBDocument *KYBDocumentClient
 	// KYBMessage is the client for interacting with the KYBMessage builders.
 	KYBMessage *KYBMessageClient
+	// Ledger is the client for interacting with the Ledger builders.
+	Ledger *LedgerClient
 	// LedgerOwner is the client for interacting with the LedgerOwner builders.
 	LedgerOwner *LedgerOwnerClient
 	// Manager is the client for interacting with the Manager builders.
 	Manager *ManagerClient
+	// NubanDeposit is the client for interacting with the NubanDeposit builders.
+	NubanDeposit *NubanDepositClient
+	// NubanDynamicAccount is the client for interacting with the NubanDynamicAccount builders.
+	NubanDynamicAccount *NubanDynamicAccountClient
 	// NubanStaticAccount is the client for interacting with the NubanStaticAccount builders.
 	NubanStaticAccount *NubanStaticAccountClient
+	// NubanTransfer is the client for interacting with the NubanTransfer builders.
+	NubanTransfer *NubanTransferClient
 	// Permission is the client for interacting with the Permission builders.
 	Permission *PermissionClient
 	// Provider is the client for interacting with the Provider builders.
@@ -81,6 +99,18 @@ type Client struct {
 	Service *ServiceClient
 	// Social is the client for interacting with the Social builders.
 	Social *SocialClient
+	// StablecoinDeposit is the client for interacting with the StablecoinDeposit builders.
+	StablecoinDeposit *StablecoinDepositClient
+	// StablecoinNetwork is the client for interacting with the StablecoinNetwork builders.
+	StablecoinNetwork *StablecoinNetworkClient
+	// StablecoinSupportedNetwork is the client for interacting with the StablecoinSupportedNetwork builders.
+	StablecoinSupportedNetwork *StablecoinSupportedNetworkClient
+	// StablecoinWallet is the client for interacting with the StablecoinWallet builders.
+	StablecoinWallet *StablecoinWalletClient
+	// StablecoinWithdrawal is the client for interacting with the StablecoinWithdrawal builders.
+	StablecoinWithdrawal *StablecoinWithdrawalClient
+	// Transaction is the client for interacting with the Transaction builders.
+	Transaction *TransactionClient
 	// User is the client for interacting with the User builders.
 	User *UserClient
 	// UserDocument is the client for interacting with the UserDocument builders.
@@ -110,9 +140,13 @@ func (c *Client) init() {
 	c.Currency = NewCurrencyClient(c.config)
 	c.KYBDocument = NewKYBDocumentClient(c.config)
 	c.KYBMessage = NewKYBMessageClient(c.config)
+	c.Ledger = NewLedgerClient(c.config)
 	c.LedgerOwner = NewLedgerOwnerClient(c.config)
 	c.Manager = NewManagerClient(c.config)
+	c.NubanDeposit = NewNubanDepositClient(c.config)
+	c.NubanDynamicAccount = NewNubanDynamicAccountClient(c.config)
 	c.NubanStaticAccount = NewNubanStaticAccountClient(c.config)
+	c.NubanTransfer = NewNubanTransferClient(c.config)
 	c.Permission = NewPermissionClient(c.config)
 	c.Provider = NewProviderClient(c.config)
 	c.RequestVerification = NewRequestVerificationClient(c.config)
@@ -120,6 +154,12 @@ func (c *Client) init() {
 	c.RolePermission = NewRolePermissionClient(c.config)
 	c.Service = NewServiceClient(c.config)
 	c.Social = NewSocialClient(c.config)
+	c.StablecoinDeposit = NewStablecoinDepositClient(c.config)
+	c.StablecoinNetwork = NewStablecoinNetworkClient(c.config)
+	c.StablecoinSupportedNetwork = NewStablecoinSupportedNetworkClient(c.config)
+	c.StablecoinWallet = NewStablecoinWalletClient(c.config)
+	c.StablecoinWithdrawal = NewStablecoinWithdrawalClient(c.config)
+	c.Transaction = NewTransactionClient(c.config)
 	c.User = NewUserClient(c.config)
 	c.UserDocument = NewUserDocumentClient(c.config)
 	c.Vault = NewVaultClient(c.config)
@@ -215,31 +255,41 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 	cfg := c.config
 	cfg.driver = tx
 	return &Tx{
-		ctx:                 ctx,
-		config:              cfg,
-		Business:            NewBusinessClient(cfg),
-		BusinessDocument:    NewBusinessDocumentClient(cfg),
-		BusinessFeature:     NewBusinessFeatureClient(cfg),
-		BusinessLocation:    NewBusinessLocationClient(cfg),
-		BusinessServices:    NewBusinessServicesClient(cfg),
-		Currency:            NewCurrencyClient(cfg),
-		KYBDocument:         NewKYBDocumentClient(cfg),
-		KYBMessage:          NewKYBMessageClient(cfg),
-		LedgerOwner:         NewLedgerOwnerClient(cfg),
-		Manager:             NewManagerClient(cfg),
-		NubanStaticAccount:  NewNubanStaticAccountClient(cfg),
-		Permission:          NewPermissionClient(cfg),
-		Provider:            NewProviderClient(cfg),
-		RequestVerification: NewRequestVerificationClient(cfg),
-		Role:                NewRoleClient(cfg),
-		RolePermission:      NewRolePermissionClient(cfg),
-		Service:             NewServiceClient(cfg),
-		Social:              NewSocialClient(cfg),
-		User:                NewUserClient(cfg),
-		UserDocument:        NewUserDocumentClient(cfg),
-		Vault:               NewVaultClient(cfg),
-		Verification:        NewVerificationClient(cfg),
-		Wallet:              NewWalletClient(cfg),
+		ctx:                        ctx,
+		config:                     cfg,
+		Business:                   NewBusinessClient(cfg),
+		BusinessDocument:           NewBusinessDocumentClient(cfg),
+		BusinessFeature:            NewBusinessFeatureClient(cfg),
+		BusinessLocation:           NewBusinessLocationClient(cfg),
+		BusinessServices:           NewBusinessServicesClient(cfg),
+		Currency:                   NewCurrencyClient(cfg),
+		KYBDocument:                NewKYBDocumentClient(cfg),
+		KYBMessage:                 NewKYBMessageClient(cfg),
+		Ledger:                     NewLedgerClient(cfg),
+		LedgerOwner:                NewLedgerOwnerClient(cfg),
+		Manager:                    NewManagerClient(cfg),
+		NubanDeposit:               NewNubanDepositClient(cfg),
+		NubanDynamicAccount:        NewNubanDynamicAccountClient(cfg),
+		NubanStaticAccount:         NewNubanStaticAccountClient(cfg),
+		NubanTransfer:              NewNubanTransferClient(cfg),
+		Permission:                 NewPermissionClient(cfg),
+		Provider:                   NewProviderClient(cfg),
+		RequestVerification:        NewRequestVerificationClient(cfg),
+		Role:                       NewRoleClient(cfg),
+		RolePermission:             NewRolePermissionClient(cfg),
+		Service:                    NewServiceClient(cfg),
+		Social:                     NewSocialClient(cfg),
+		StablecoinDeposit:          NewStablecoinDepositClient(cfg),
+		StablecoinNetwork:          NewStablecoinNetworkClient(cfg),
+		StablecoinSupportedNetwork: NewStablecoinSupportedNetworkClient(cfg),
+		StablecoinWallet:           NewStablecoinWalletClient(cfg),
+		StablecoinWithdrawal:       NewStablecoinWithdrawalClient(cfg),
+		Transaction:                NewTransactionClient(cfg),
+		User:                       NewUserClient(cfg),
+		UserDocument:               NewUserDocumentClient(cfg),
+		Vault:                      NewVaultClient(cfg),
+		Verification:               NewVerificationClient(cfg),
+		Wallet:                     NewWalletClient(cfg),
 	}, nil
 }
 
@@ -257,31 +307,41 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 	cfg := c.config
 	cfg.driver = &txDriver{tx: tx, drv: c.driver}
 	return &Tx{
-		ctx:                 ctx,
-		config:              cfg,
-		Business:            NewBusinessClient(cfg),
-		BusinessDocument:    NewBusinessDocumentClient(cfg),
-		BusinessFeature:     NewBusinessFeatureClient(cfg),
-		BusinessLocation:    NewBusinessLocationClient(cfg),
-		BusinessServices:    NewBusinessServicesClient(cfg),
-		Currency:            NewCurrencyClient(cfg),
-		KYBDocument:         NewKYBDocumentClient(cfg),
-		KYBMessage:          NewKYBMessageClient(cfg),
-		LedgerOwner:         NewLedgerOwnerClient(cfg),
-		Manager:             NewManagerClient(cfg),
-		NubanStaticAccount:  NewNubanStaticAccountClient(cfg),
-		Permission:          NewPermissionClient(cfg),
-		Provider:            NewProviderClient(cfg),
-		RequestVerification: NewRequestVerificationClient(cfg),
-		Role:                NewRoleClient(cfg),
-		RolePermission:      NewRolePermissionClient(cfg),
-		Service:             NewServiceClient(cfg),
-		Social:              NewSocialClient(cfg),
-		User:                NewUserClient(cfg),
-		UserDocument:        NewUserDocumentClient(cfg),
-		Vault:               NewVaultClient(cfg),
-		Verification:        NewVerificationClient(cfg),
-		Wallet:              NewWalletClient(cfg),
+		ctx:                        ctx,
+		config:                     cfg,
+		Business:                   NewBusinessClient(cfg),
+		BusinessDocument:           NewBusinessDocumentClient(cfg),
+		BusinessFeature:            NewBusinessFeatureClient(cfg),
+		BusinessLocation:           NewBusinessLocationClient(cfg),
+		BusinessServices:           NewBusinessServicesClient(cfg),
+		Currency:                   NewCurrencyClient(cfg),
+		KYBDocument:                NewKYBDocumentClient(cfg),
+		KYBMessage:                 NewKYBMessageClient(cfg),
+		Ledger:                     NewLedgerClient(cfg),
+		LedgerOwner:                NewLedgerOwnerClient(cfg),
+		Manager:                    NewManagerClient(cfg),
+		NubanDeposit:               NewNubanDepositClient(cfg),
+		NubanDynamicAccount:        NewNubanDynamicAccountClient(cfg),
+		NubanStaticAccount:         NewNubanStaticAccountClient(cfg),
+		NubanTransfer:              NewNubanTransferClient(cfg),
+		Permission:                 NewPermissionClient(cfg),
+		Provider:                   NewProviderClient(cfg),
+		RequestVerification:        NewRequestVerificationClient(cfg),
+		Role:                       NewRoleClient(cfg),
+		RolePermission:             NewRolePermissionClient(cfg),
+		Service:                    NewServiceClient(cfg),
+		Social:                     NewSocialClient(cfg),
+		StablecoinDeposit:          NewStablecoinDepositClient(cfg),
+		StablecoinNetwork:          NewStablecoinNetworkClient(cfg),
+		StablecoinSupportedNetwork: NewStablecoinSupportedNetworkClient(cfg),
+		StablecoinWallet:           NewStablecoinWalletClient(cfg),
+		StablecoinWithdrawal:       NewStablecoinWithdrawalClient(cfg),
+		Transaction:                NewTransactionClient(cfg),
+		User:                       NewUserClient(cfg),
+		UserDocument:               NewUserDocumentClient(cfg),
+		Vault:                      NewVaultClient(cfg),
+		Verification:               NewVerificationClient(cfg),
+		Wallet:                     NewWalletClient(cfg),
 	}, nil
 }
 
@@ -312,9 +372,12 @@ func (c *Client) Close() error {
 func (c *Client) Use(hooks ...Hook) {
 	for _, n := range []interface{ Use(...Hook) }{
 		c.Business, c.BusinessDocument, c.BusinessFeature, c.BusinessLocation,
-		c.BusinessServices, c.Currency, c.KYBDocument, c.KYBMessage, c.LedgerOwner,
-		c.Manager, c.NubanStaticAccount, c.Permission, c.Provider,
-		c.RequestVerification, c.Role, c.RolePermission, c.Service, c.Social, c.User,
+		c.BusinessServices, c.Currency, c.KYBDocument, c.KYBMessage, c.Ledger,
+		c.LedgerOwner, c.Manager, c.NubanDeposit, c.NubanDynamicAccount,
+		c.NubanStaticAccount, c.NubanTransfer, c.Permission, c.Provider,
+		c.RequestVerification, c.Role, c.RolePermission, c.Service, c.Social,
+		c.StablecoinDeposit, c.StablecoinNetwork, c.StablecoinSupportedNetwork,
+		c.StablecoinWallet, c.StablecoinWithdrawal, c.Transaction, c.User,
 		c.UserDocument, c.Vault, c.Verification, c.Wallet,
 	} {
 		n.Use(hooks...)
@@ -326,9 +389,12 @@ func (c *Client) Use(hooks ...Hook) {
 func (c *Client) Intercept(interceptors ...Interceptor) {
 	for _, n := range []interface{ Intercept(...Interceptor) }{
 		c.Business, c.BusinessDocument, c.BusinessFeature, c.BusinessLocation,
-		c.BusinessServices, c.Currency, c.KYBDocument, c.KYBMessage, c.LedgerOwner,
-		c.Manager, c.NubanStaticAccount, c.Permission, c.Provider,
-		c.RequestVerification, c.Role, c.RolePermission, c.Service, c.Social, c.User,
+		c.BusinessServices, c.Currency, c.KYBDocument, c.KYBMessage, c.Ledger,
+		c.LedgerOwner, c.Manager, c.NubanDeposit, c.NubanDynamicAccount,
+		c.NubanStaticAccount, c.NubanTransfer, c.Permission, c.Provider,
+		c.RequestVerification, c.Role, c.RolePermission, c.Service, c.Social,
+		c.StablecoinDeposit, c.StablecoinNetwork, c.StablecoinSupportedNetwork,
+		c.StablecoinWallet, c.StablecoinWithdrawal, c.Transaction, c.User,
 		c.UserDocument, c.Vault, c.Verification, c.Wallet,
 	} {
 		n.Intercept(interceptors...)
@@ -354,12 +420,20 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.KYBDocument.mutate(ctx, m)
 	case *KYBMessageMutation:
 		return c.KYBMessage.mutate(ctx, m)
+	case *LedgerMutation:
+		return c.Ledger.mutate(ctx, m)
 	case *LedgerOwnerMutation:
 		return c.LedgerOwner.mutate(ctx, m)
 	case *ManagerMutation:
 		return c.Manager.mutate(ctx, m)
+	case *NubanDepositMutation:
+		return c.NubanDeposit.mutate(ctx, m)
+	case *NubanDynamicAccountMutation:
+		return c.NubanDynamicAccount.mutate(ctx, m)
 	case *NubanStaticAccountMutation:
 		return c.NubanStaticAccount.mutate(ctx, m)
+	case *NubanTransferMutation:
+		return c.NubanTransfer.mutate(ctx, m)
 	case *PermissionMutation:
 		return c.Permission.mutate(ctx, m)
 	case *ProviderMutation:
@@ -374,6 +448,18 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.Service.mutate(ctx, m)
 	case *SocialMutation:
 		return c.Social.mutate(ctx, m)
+	case *StablecoinDepositMutation:
+		return c.StablecoinDeposit.mutate(ctx, m)
+	case *StablecoinNetworkMutation:
+		return c.StablecoinNetwork.mutate(ctx, m)
+	case *StablecoinSupportedNetworkMutation:
+		return c.StablecoinSupportedNetwork.mutate(ctx, m)
+	case *StablecoinWalletMutation:
+		return c.StablecoinWallet.mutate(ctx, m)
+	case *StablecoinWithdrawalMutation:
+		return c.StablecoinWithdrawal.mutate(ctx, m)
+	case *TransactionMutation:
+		return c.Transaction.mutate(ctx, m)
 	case *UserMutation:
 		return c.User.mutate(ctx, m)
 	case *UserDocumentMutation:
@@ -1402,6 +1488,38 @@ func (c *CurrencyClient) QueryWallets(cu *Currency) *WalletQuery {
 	return query
 }
 
+// QueryStablecoinSupportedNetworks queries the stablecoin_supported_networks edge of a Currency.
+func (c *CurrencyClient) QueryStablecoinSupportedNetworks(cu *Currency) *StablecoinSupportedNetworkQuery {
+	query := (&StablecoinSupportedNetworkClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := cu.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(currency.Table, currency.FieldID, id),
+			sqlgraph.To(stablecoinsupportednetwork.Table, stablecoinsupportednetwork.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, currency.StablecoinSupportedNetworksTable, currency.StablecoinSupportedNetworksColumn),
+		)
+		fromV = sqlgraph.Neighbors(cu.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryStablecoinCurrencies queries the stablecoin_currencies edge of a Currency.
+func (c *CurrencyClient) QueryStablecoinCurrencies(cu *Currency) *StablecoinWalletQuery {
+	query := (&StablecoinWalletClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := cu.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(currency.Table, currency.FieldID, id),
+			sqlgraph.To(stablecoinwallet.Table, stablecoinwallet.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, currency.StablecoinCurrenciesTable, currency.StablecoinCurrenciesColumn),
+		)
+		fromV = sqlgraph.Neighbors(cu.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // Hooks returns the client hooks.
 func (c *CurrencyClient) Hooks() []Hook {
 	return c.hooks.Currency
@@ -1722,6 +1840,187 @@ func (c *KYBMessageClient) mutate(ctx context.Context, m *KYBMessageMutation) (V
 		return (&KYBMessageDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
 	default:
 		return nil, fmt.Errorf("ent: unknown KYBMessage mutation op: %q", m.Op())
+	}
+}
+
+// LedgerClient is a client for the Ledger schema.
+type LedgerClient struct {
+	config
+}
+
+// NewLedgerClient returns a client for the Ledger from the given config.
+func NewLedgerClient(c config) *LedgerClient {
+	return &LedgerClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `ledger.Hooks(f(g(h())))`.
+func (c *LedgerClient) Use(hooks ...Hook) {
+	c.hooks.Ledger = append(c.hooks.Ledger, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `ledger.Intercept(f(g(h())))`.
+func (c *LedgerClient) Intercept(interceptors ...Interceptor) {
+	c.inters.Ledger = append(c.inters.Ledger, interceptors...)
+}
+
+// Create returns a builder for creating a Ledger entity.
+func (c *LedgerClient) Create() *LedgerCreate {
+	mutation := newLedgerMutation(c.config, OpCreate)
+	return &LedgerCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of Ledger entities.
+func (c *LedgerClient) CreateBulk(builders ...*LedgerCreate) *LedgerCreateBulk {
+	return &LedgerCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *LedgerClient) MapCreateBulk(slice any, setFunc func(*LedgerCreate, int)) *LedgerCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &LedgerCreateBulk{err: fmt.Errorf("calling to LedgerClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*LedgerCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &LedgerCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for Ledger.
+func (c *LedgerClient) Update() *LedgerUpdate {
+	mutation := newLedgerMutation(c.config, OpUpdate)
+	return &LedgerUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *LedgerClient) UpdateOne(l *Ledger) *LedgerUpdateOne {
+	mutation := newLedgerMutation(c.config, OpUpdateOne, withLedger(l))
+	return &LedgerUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *LedgerClient) UpdateOneID(id string) *LedgerUpdateOne {
+	mutation := newLedgerMutation(c.config, OpUpdateOne, withLedgerID(id))
+	return &LedgerUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for Ledger.
+func (c *LedgerClient) Delete() *LedgerDelete {
+	mutation := newLedgerMutation(c.config, OpDelete)
+	return &LedgerDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *LedgerClient) DeleteOne(l *Ledger) *LedgerDeleteOne {
+	return c.DeleteOneID(l.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *LedgerClient) DeleteOneID(id string) *LedgerDeleteOne {
+	builder := c.Delete().Where(ledger.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &LedgerDeleteOne{builder}
+}
+
+// Query returns a query builder for Ledger.
+func (c *LedgerClient) Query() *LedgerQuery {
+	return &LedgerQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeLedger},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a Ledger entity by its id.
+func (c *LedgerClient) Get(ctx context.Context, id string) (*Ledger, error) {
+	return c.Query().Where(ledger.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *LedgerClient) GetX(ctx context.Context, id string) *Ledger {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryTransaction queries the transaction edge of a Ledger.
+func (c *LedgerClient) QueryTransaction(l *Ledger) *TransactionQuery {
+	query := (&TransactionClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := l.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(ledger.Table, ledger.FieldID, id),
+			sqlgraph.To(transaction.Table, transaction.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, ledger.TransactionTable, ledger.TransactionColumn),
+		)
+		fromV = sqlgraph.Neighbors(l.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryWallet queries the wallet edge of a Ledger.
+func (c *LedgerClient) QueryWallet(l *Ledger) *WalletQuery {
+	query := (&WalletClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := l.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(ledger.Table, ledger.FieldID, id),
+			sqlgraph.To(wallet.Table, wallet.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, ledger.WalletTable, ledger.WalletColumn),
+		)
+		fromV = sqlgraph.Neighbors(l.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryReversalTransaction queries the reversal_transaction edge of a Ledger.
+func (c *LedgerClient) QueryReversalTransaction(l *Ledger) *TransactionQuery {
+	query := (&TransactionClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := l.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(ledger.Table, ledger.FieldID, id),
+			sqlgraph.To(transaction.Table, transaction.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, ledger.ReversalTransactionTable, ledger.ReversalTransactionColumn),
+		)
+		fromV = sqlgraph.Neighbors(l.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *LedgerClient) Hooks() []Hook {
+	return c.hooks.Ledger
+}
+
+// Interceptors returns the client interceptors.
+func (c *LedgerClient) Interceptors() []Interceptor {
+	return c.inters.Ledger
+}
+
+func (c *LedgerClient) mutate(ctx context.Context, m *LedgerMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&LedgerCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&LedgerUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&LedgerUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&LedgerDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown Ledger mutation op: %q", m.Op())
 	}
 }
 
@@ -2087,6 +2386,304 @@ func (c *ManagerClient) mutate(ctx context.Context, m *ManagerMutation) (Value, 
 	}
 }
 
+// NubanDepositClient is a client for the NubanDeposit schema.
+type NubanDepositClient struct {
+	config
+}
+
+// NewNubanDepositClient returns a client for the NubanDeposit from the given config.
+func NewNubanDepositClient(c config) *NubanDepositClient {
+	return &NubanDepositClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `nubandeposit.Hooks(f(g(h())))`.
+func (c *NubanDepositClient) Use(hooks ...Hook) {
+	c.hooks.NubanDeposit = append(c.hooks.NubanDeposit, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `nubandeposit.Intercept(f(g(h())))`.
+func (c *NubanDepositClient) Intercept(interceptors ...Interceptor) {
+	c.inters.NubanDeposit = append(c.inters.NubanDeposit, interceptors...)
+}
+
+// Create returns a builder for creating a NubanDeposit entity.
+func (c *NubanDepositClient) Create() *NubanDepositCreate {
+	mutation := newNubanDepositMutation(c.config, OpCreate)
+	return &NubanDepositCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of NubanDeposit entities.
+func (c *NubanDepositClient) CreateBulk(builders ...*NubanDepositCreate) *NubanDepositCreateBulk {
+	return &NubanDepositCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *NubanDepositClient) MapCreateBulk(slice any, setFunc func(*NubanDepositCreate, int)) *NubanDepositCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &NubanDepositCreateBulk{err: fmt.Errorf("calling to NubanDepositClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*NubanDepositCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &NubanDepositCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for NubanDeposit.
+func (c *NubanDepositClient) Update() *NubanDepositUpdate {
+	mutation := newNubanDepositMutation(c.config, OpUpdate)
+	return &NubanDepositUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *NubanDepositClient) UpdateOne(nd *NubanDeposit) *NubanDepositUpdateOne {
+	mutation := newNubanDepositMutation(c.config, OpUpdateOne, withNubanDeposit(nd))
+	return &NubanDepositUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *NubanDepositClient) UpdateOneID(id string) *NubanDepositUpdateOne {
+	mutation := newNubanDepositMutation(c.config, OpUpdateOne, withNubanDepositID(id))
+	return &NubanDepositUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for NubanDeposit.
+func (c *NubanDepositClient) Delete() *NubanDepositDelete {
+	mutation := newNubanDepositMutation(c.config, OpDelete)
+	return &NubanDepositDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *NubanDepositClient) DeleteOne(nd *NubanDeposit) *NubanDepositDeleteOne {
+	return c.DeleteOneID(nd.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *NubanDepositClient) DeleteOneID(id string) *NubanDepositDeleteOne {
+	builder := c.Delete().Where(nubandeposit.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &NubanDepositDeleteOne{builder}
+}
+
+// Query returns a query builder for NubanDeposit.
+func (c *NubanDepositClient) Query() *NubanDepositQuery {
+	return &NubanDepositQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeNubanDeposit},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a NubanDeposit entity by its id.
+func (c *NubanDepositClient) Get(ctx context.Context, id string) (*NubanDeposit, error) {
+	return c.Query().Where(nubandeposit.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *NubanDepositClient) GetX(ctx context.Context, id string) *NubanDeposit {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryTransaction queries the transaction edge of a NubanDeposit.
+func (c *NubanDepositClient) QueryTransaction(nd *NubanDeposit) *TransactionQuery {
+	query := (&TransactionClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := nd.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(nubandeposit.Table, nubandeposit.FieldID, id),
+			sqlgraph.To(transaction.Table, transaction.FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, true, nubandeposit.TransactionTable, nubandeposit.TransactionColumn),
+		)
+		fromV = sqlgraph.Neighbors(nd.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *NubanDepositClient) Hooks() []Hook {
+	return c.hooks.NubanDeposit
+}
+
+// Interceptors returns the client interceptors.
+func (c *NubanDepositClient) Interceptors() []Interceptor {
+	return c.inters.NubanDeposit
+}
+
+func (c *NubanDepositClient) mutate(ctx context.Context, m *NubanDepositMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&NubanDepositCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&NubanDepositUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&NubanDepositUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&NubanDepositDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown NubanDeposit mutation op: %q", m.Op())
+	}
+}
+
+// NubanDynamicAccountClient is a client for the NubanDynamicAccount schema.
+type NubanDynamicAccountClient struct {
+	config
+}
+
+// NewNubanDynamicAccountClient returns a client for the NubanDynamicAccount from the given config.
+func NewNubanDynamicAccountClient(c config) *NubanDynamicAccountClient {
+	return &NubanDynamicAccountClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `nubandynamicaccount.Hooks(f(g(h())))`.
+func (c *NubanDynamicAccountClient) Use(hooks ...Hook) {
+	c.hooks.NubanDynamicAccount = append(c.hooks.NubanDynamicAccount, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `nubandynamicaccount.Intercept(f(g(h())))`.
+func (c *NubanDynamicAccountClient) Intercept(interceptors ...Interceptor) {
+	c.inters.NubanDynamicAccount = append(c.inters.NubanDynamicAccount, interceptors...)
+}
+
+// Create returns a builder for creating a NubanDynamicAccount entity.
+func (c *NubanDynamicAccountClient) Create() *NubanDynamicAccountCreate {
+	mutation := newNubanDynamicAccountMutation(c.config, OpCreate)
+	return &NubanDynamicAccountCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of NubanDynamicAccount entities.
+func (c *NubanDynamicAccountClient) CreateBulk(builders ...*NubanDynamicAccountCreate) *NubanDynamicAccountCreateBulk {
+	return &NubanDynamicAccountCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *NubanDynamicAccountClient) MapCreateBulk(slice any, setFunc func(*NubanDynamicAccountCreate, int)) *NubanDynamicAccountCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &NubanDynamicAccountCreateBulk{err: fmt.Errorf("calling to NubanDynamicAccountClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*NubanDynamicAccountCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &NubanDynamicAccountCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for NubanDynamicAccount.
+func (c *NubanDynamicAccountClient) Update() *NubanDynamicAccountUpdate {
+	mutation := newNubanDynamicAccountMutation(c.config, OpUpdate)
+	return &NubanDynamicAccountUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *NubanDynamicAccountClient) UpdateOne(nda *NubanDynamicAccount) *NubanDynamicAccountUpdateOne {
+	mutation := newNubanDynamicAccountMutation(c.config, OpUpdateOne, withNubanDynamicAccount(nda))
+	return &NubanDynamicAccountUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *NubanDynamicAccountClient) UpdateOneID(id string) *NubanDynamicAccountUpdateOne {
+	mutation := newNubanDynamicAccountMutation(c.config, OpUpdateOne, withNubanDynamicAccountID(id))
+	return &NubanDynamicAccountUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for NubanDynamicAccount.
+func (c *NubanDynamicAccountClient) Delete() *NubanDynamicAccountDelete {
+	mutation := newNubanDynamicAccountMutation(c.config, OpDelete)
+	return &NubanDynamicAccountDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *NubanDynamicAccountClient) DeleteOne(nda *NubanDynamicAccount) *NubanDynamicAccountDeleteOne {
+	return c.DeleteOneID(nda.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *NubanDynamicAccountClient) DeleteOneID(id string) *NubanDynamicAccountDeleteOne {
+	builder := c.Delete().Where(nubandynamicaccount.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &NubanDynamicAccountDeleteOne{builder}
+}
+
+// Query returns a query builder for NubanDynamicAccount.
+func (c *NubanDynamicAccountClient) Query() *NubanDynamicAccountQuery {
+	return &NubanDynamicAccountQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeNubanDynamicAccount},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a NubanDynamicAccount entity by its id.
+func (c *NubanDynamicAccountClient) Get(ctx context.Context, id string) (*NubanDynamicAccount, error) {
+	return c.Query().Where(nubandynamicaccount.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *NubanDynamicAccountClient) GetX(ctx context.Context, id string) *NubanDynamicAccount {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryWallet queries the wallet edge of a NubanDynamicAccount.
+func (c *NubanDynamicAccountClient) QueryWallet(nda *NubanDynamicAccount) *WalletQuery {
+	query := (&WalletClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := nda.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(nubandynamicaccount.Table, nubandynamicaccount.FieldID, id),
+			sqlgraph.To(wallet.Table, wallet.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, nubandynamicaccount.WalletTable, nubandynamicaccount.WalletColumn),
+		)
+		fromV = sqlgraph.Neighbors(nda.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *NubanDynamicAccountClient) Hooks() []Hook {
+	return c.hooks.NubanDynamicAccount
+}
+
+// Interceptors returns the client interceptors.
+func (c *NubanDynamicAccountClient) Interceptors() []Interceptor {
+	return c.inters.NubanDynamicAccount
+}
+
+func (c *NubanDynamicAccountClient) mutate(ctx context.Context, m *NubanDynamicAccountMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&NubanDynamicAccountCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&NubanDynamicAccountUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&NubanDynamicAccountUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&NubanDynamicAccountDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown NubanDynamicAccount mutation op: %q", m.Op())
+	}
+}
+
 // NubanStaticAccountClient is a client for the NubanStaticAccount schema.
 type NubanStaticAccountClient struct {
 	config
@@ -2233,6 +2830,155 @@ func (c *NubanStaticAccountClient) mutate(ctx context.Context, m *NubanStaticAcc
 		return (&NubanStaticAccountDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
 	default:
 		return nil, fmt.Errorf("ent: unknown NubanStaticAccount mutation op: %q", m.Op())
+	}
+}
+
+// NubanTransferClient is a client for the NubanTransfer schema.
+type NubanTransferClient struct {
+	config
+}
+
+// NewNubanTransferClient returns a client for the NubanTransfer from the given config.
+func NewNubanTransferClient(c config) *NubanTransferClient {
+	return &NubanTransferClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `nubantransfer.Hooks(f(g(h())))`.
+func (c *NubanTransferClient) Use(hooks ...Hook) {
+	c.hooks.NubanTransfer = append(c.hooks.NubanTransfer, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `nubantransfer.Intercept(f(g(h())))`.
+func (c *NubanTransferClient) Intercept(interceptors ...Interceptor) {
+	c.inters.NubanTransfer = append(c.inters.NubanTransfer, interceptors...)
+}
+
+// Create returns a builder for creating a NubanTransfer entity.
+func (c *NubanTransferClient) Create() *NubanTransferCreate {
+	mutation := newNubanTransferMutation(c.config, OpCreate)
+	return &NubanTransferCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of NubanTransfer entities.
+func (c *NubanTransferClient) CreateBulk(builders ...*NubanTransferCreate) *NubanTransferCreateBulk {
+	return &NubanTransferCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *NubanTransferClient) MapCreateBulk(slice any, setFunc func(*NubanTransferCreate, int)) *NubanTransferCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &NubanTransferCreateBulk{err: fmt.Errorf("calling to NubanTransferClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*NubanTransferCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &NubanTransferCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for NubanTransfer.
+func (c *NubanTransferClient) Update() *NubanTransferUpdate {
+	mutation := newNubanTransferMutation(c.config, OpUpdate)
+	return &NubanTransferUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *NubanTransferClient) UpdateOne(nt *NubanTransfer) *NubanTransferUpdateOne {
+	mutation := newNubanTransferMutation(c.config, OpUpdateOne, withNubanTransfer(nt))
+	return &NubanTransferUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *NubanTransferClient) UpdateOneID(id string) *NubanTransferUpdateOne {
+	mutation := newNubanTransferMutation(c.config, OpUpdateOne, withNubanTransferID(id))
+	return &NubanTransferUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for NubanTransfer.
+func (c *NubanTransferClient) Delete() *NubanTransferDelete {
+	mutation := newNubanTransferMutation(c.config, OpDelete)
+	return &NubanTransferDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *NubanTransferClient) DeleteOne(nt *NubanTransfer) *NubanTransferDeleteOne {
+	return c.DeleteOneID(nt.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *NubanTransferClient) DeleteOneID(id string) *NubanTransferDeleteOne {
+	builder := c.Delete().Where(nubantransfer.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &NubanTransferDeleteOne{builder}
+}
+
+// Query returns a query builder for NubanTransfer.
+func (c *NubanTransferClient) Query() *NubanTransferQuery {
+	return &NubanTransferQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeNubanTransfer},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a NubanTransfer entity by its id.
+func (c *NubanTransferClient) Get(ctx context.Context, id string) (*NubanTransfer, error) {
+	return c.Query().Where(nubantransfer.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *NubanTransferClient) GetX(ctx context.Context, id string) *NubanTransfer {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryTransaction queries the transaction edge of a NubanTransfer.
+func (c *NubanTransferClient) QueryTransaction(nt *NubanTransfer) *TransactionQuery {
+	query := (&TransactionClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := nt.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(nubantransfer.Table, nubantransfer.FieldID, id),
+			sqlgraph.To(transaction.Table, transaction.FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, true, nubantransfer.TransactionTable, nubantransfer.TransactionColumn),
+		)
+		fromV = sqlgraph.Neighbors(nt.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *NubanTransferClient) Hooks() []Hook {
+	return c.hooks.NubanTransfer
+}
+
+// Interceptors returns the client interceptors.
+func (c *NubanTransferClient) Interceptors() []Interceptor {
+	return c.inters.NubanTransfer
+}
+
+func (c *NubanTransferClient) mutate(ctx context.Context, m *NubanTransferMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&NubanTransferCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&NubanTransferUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&NubanTransferUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&NubanTransferDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown NubanTransfer mutation op: %q", m.Op())
 	}
 }
 
@@ -3295,6 +4041,1092 @@ func (c *SocialClient) mutate(ctx context.Context, m *SocialMutation) (Value, er
 	}
 }
 
+// StablecoinDepositClient is a client for the StablecoinDeposit schema.
+type StablecoinDepositClient struct {
+	config
+}
+
+// NewStablecoinDepositClient returns a client for the StablecoinDeposit from the given config.
+func NewStablecoinDepositClient(c config) *StablecoinDepositClient {
+	return &StablecoinDepositClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `stablecoindeposit.Hooks(f(g(h())))`.
+func (c *StablecoinDepositClient) Use(hooks ...Hook) {
+	c.hooks.StablecoinDeposit = append(c.hooks.StablecoinDeposit, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `stablecoindeposit.Intercept(f(g(h())))`.
+func (c *StablecoinDepositClient) Intercept(interceptors ...Interceptor) {
+	c.inters.StablecoinDeposit = append(c.inters.StablecoinDeposit, interceptors...)
+}
+
+// Create returns a builder for creating a StablecoinDeposit entity.
+func (c *StablecoinDepositClient) Create() *StablecoinDepositCreate {
+	mutation := newStablecoinDepositMutation(c.config, OpCreate)
+	return &StablecoinDepositCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of StablecoinDeposit entities.
+func (c *StablecoinDepositClient) CreateBulk(builders ...*StablecoinDepositCreate) *StablecoinDepositCreateBulk {
+	return &StablecoinDepositCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *StablecoinDepositClient) MapCreateBulk(slice any, setFunc func(*StablecoinDepositCreate, int)) *StablecoinDepositCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &StablecoinDepositCreateBulk{err: fmt.Errorf("calling to StablecoinDepositClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*StablecoinDepositCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &StablecoinDepositCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for StablecoinDeposit.
+func (c *StablecoinDepositClient) Update() *StablecoinDepositUpdate {
+	mutation := newStablecoinDepositMutation(c.config, OpUpdate)
+	return &StablecoinDepositUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *StablecoinDepositClient) UpdateOne(sd *StablecoinDeposit) *StablecoinDepositUpdateOne {
+	mutation := newStablecoinDepositMutation(c.config, OpUpdateOne, withStablecoinDeposit(sd))
+	return &StablecoinDepositUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *StablecoinDepositClient) UpdateOneID(id string) *StablecoinDepositUpdateOne {
+	mutation := newStablecoinDepositMutation(c.config, OpUpdateOne, withStablecoinDepositID(id))
+	return &StablecoinDepositUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for StablecoinDeposit.
+func (c *StablecoinDepositClient) Delete() *StablecoinDepositDelete {
+	mutation := newStablecoinDepositMutation(c.config, OpDelete)
+	return &StablecoinDepositDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *StablecoinDepositClient) DeleteOne(sd *StablecoinDeposit) *StablecoinDepositDeleteOne {
+	return c.DeleteOneID(sd.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *StablecoinDepositClient) DeleteOneID(id string) *StablecoinDepositDeleteOne {
+	builder := c.Delete().Where(stablecoindeposit.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &StablecoinDepositDeleteOne{builder}
+}
+
+// Query returns a query builder for StablecoinDeposit.
+func (c *StablecoinDepositClient) Query() *StablecoinDepositQuery {
+	return &StablecoinDepositQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeStablecoinDeposit},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a StablecoinDeposit entity by its id.
+func (c *StablecoinDepositClient) Get(ctx context.Context, id string) (*StablecoinDeposit, error) {
+	return c.Query().Where(stablecoindeposit.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *StablecoinDepositClient) GetX(ctx context.Context, id string) *StablecoinDeposit {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryTransaction queries the transaction edge of a StablecoinDeposit.
+func (c *StablecoinDepositClient) QueryTransaction(sd *StablecoinDeposit) *TransactionQuery {
+	query := (&TransactionClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := sd.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(stablecoindeposit.Table, stablecoindeposit.FieldID, id),
+			sqlgraph.To(transaction.Table, transaction.FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, true, stablecoindeposit.TransactionTable, stablecoindeposit.TransactionColumn),
+		)
+		fromV = sqlgraph.Neighbors(sd.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryStablecoinWallet queries the stablecoin_wallet edge of a StablecoinDeposit.
+func (c *StablecoinDepositClient) QueryStablecoinWallet(sd *StablecoinDeposit) *StablecoinWalletQuery {
+	query := (&StablecoinWalletClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := sd.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(stablecoindeposit.Table, stablecoindeposit.FieldID, id),
+			sqlgraph.To(stablecoinwallet.Table, stablecoinwallet.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, stablecoindeposit.StablecoinWalletTable, stablecoindeposit.StablecoinWalletColumn),
+		)
+		fromV = sqlgraph.Neighbors(sd.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *StablecoinDepositClient) Hooks() []Hook {
+	return c.hooks.StablecoinDeposit
+}
+
+// Interceptors returns the client interceptors.
+func (c *StablecoinDepositClient) Interceptors() []Interceptor {
+	return c.inters.StablecoinDeposit
+}
+
+func (c *StablecoinDepositClient) mutate(ctx context.Context, m *StablecoinDepositMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&StablecoinDepositCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&StablecoinDepositUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&StablecoinDepositUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&StablecoinDepositDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown StablecoinDeposit mutation op: %q", m.Op())
+	}
+}
+
+// StablecoinNetworkClient is a client for the StablecoinNetwork schema.
+type StablecoinNetworkClient struct {
+	config
+}
+
+// NewStablecoinNetworkClient returns a client for the StablecoinNetwork from the given config.
+func NewStablecoinNetworkClient(c config) *StablecoinNetworkClient {
+	return &StablecoinNetworkClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `stablecoinnetwork.Hooks(f(g(h())))`.
+func (c *StablecoinNetworkClient) Use(hooks ...Hook) {
+	c.hooks.StablecoinNetwork = append(c.hooks.StablecoinNetwork, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `stablecoinnetwork.Intercept(f(g(h())))`.
+func (c *StablecoinNetworkClient) Intercept(interceptors ...Interceptor) {
+	c.inters.StablecoinNetwork = append(c.inters.StablecoinNetwork, interceptors...)
+}
+
+// Create returns a builder for creating a StablecoinNetwork entity.
+func (c *StablecoinNetworkClient) Create() *StablecoinNetworkCreate {
+	mutation := newStablecoinNetworkMutation(c.config, OpCreate)
+	return &StablecoinNetworkCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of StablecoinNetwork entities.
+func (c *StablecoinNetworkClient) CreateBulk(builders ...*StablecoinNetworkCreate) *StablecoinNetworkCreateBulk {
+	return &StablecoinNetworkCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *StablecoinNetworkClient) MapCreateBulk(slice any, setFunc func(*StablecoinNetworkCreate, int)) *StablecoinNetworkCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &StablecoinNetworkCreateBulk{err: fmt.Errorf("calling to StablecoinNetworkClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*StablecoinNetworkCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &StablecoinNetworkCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for StablecoinNetwork.
+func (c *StablecoinNetworkClient) Update() *StablecoinNetworkUpdate {
+	mutation := newStablecoinNetworkMutation(c.config, OpUpdate)
+	return &StablecoinNetworkUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *StablecoinNetworkClient) UpdateOne(sn *StablecoinNetwork) *StablecoinNetworkUpdateOne {
+	mutation := newStablecoinNetworkMutation(c.config, OpUpdateOne, withStablecoinNetwork(sn))
+	return &StablecoinNetworkUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *StablecoinNetworkClient) UpdateOneID(id string) *StablecoinNetworkUpdateOne {
+	mutation := newStablecoinNetworkMutation(c.config, OpUpdateOne, withStablecoinNetworkID(id))
+	return &StablecoinNetworkUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for StablecoinNetwork.
+func (c *StablecoinNetworkClient) Delete() *StablecoinNetworkDelete {
+	mutation := newStablecoinNetworkMutation(c.config, OpDelete)
+	return &StablecoinNetworkDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *StablecoinNetworkClient) DeleteOne(sn *StablecoinNetwork) *StablecoinNetworkDeleteOne {
+	return c.DeleteOneID(sn.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *StablecoinNetworkClient) DeleteOneID(id string) *StablecoinNetworkDeleteOne {
+	builder := c.Delete().Where(stablecoinnetwork.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &StablecoinNetworkDeleteOne{builder}
+}
+
+// Query returns a query builder for StablecoinNetwork.
+func (c *StablecoinNetworkClient) Query() *StablecoinNetworkQuery {
+	return &StablecoinNetworkQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeStablecoinNetwork},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a StablecoinNetwork entity by its id.
+func (c *StablecoinNetworkClient) Get(ctx context.Context, id string) (*StablecoinNetwork, error) {
+	return c.Query().Where(stablecoinnetwork.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *StablecoinNetworkClient) GetX(ctx context.Context, id string) *StablecoinNetwork {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryStablecoinNetworks queries the stablecoin_networks edge of a StablecoinNetwork.
+func (c *StablecoinNetworkClient) QueryStablecoinNetworks(sn *StablecoinNetwork) *StablecoinWalletQuery {
+	query := (&StablecoinWalletClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := sn.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(stablecoinnetwork.Table, stablecoinnetwork.FieldID, id),
+			sqlgraph.To(stablecoinwallet.Table, stablecoinwallet.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, stablecoinnetwork.StablecoinNetworksTable, stablecoinnetwork.StablecoinNetworksColumn),
+		)
+		fromV = sqlgraph.Neighbors(sn.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryStablecoinSupportedNetworks queries the stablecoin_supported_networks edge of a StablecoinNetwork.
+func (c *StablecoinNetworkClient) QueryStablecoinSupportedNetworks(sn *StablecoinNetwork) *StablecoinSupportedNetworkQuery {
+	query := (&StablecoinSupportedNetworkClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := sn.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(stablecoinnetwork.Table, stablecoinnetwork.FieldID, id),
+			sqlgraph.To(stablecoinsupportednetwork.Table, stablecoinsupportednetwork.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, stablecoinnetwork.StablecoinSupportedNetworksTable, stablecoinnetwork.StablecoinSupportedNetworksColumn),
+		)
+		fromV = sqlgraph.Neighbors(sn.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *StablecoinNetworkClient) Hooks() []Hook {
+	return c.hooks.StablecoinNetwork
+}
+
+// Interceptors returns the client interceptors.
+func (c *StablecoinNetworkClient) Interceptors() []Interceptor {
+	return c.inters.StablecoinNetwork
+}
+
+func (c *StablecoinNetworkClient) mutate(ctx context.Context, m *StablecoinNetworkMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&StablecoinNetworkCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&StablecoinNetworkUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&StablecoinNetworkUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&StablecoinNetworkDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown StablecoinNetwork mutation op: %q", m.Op())
+	}
+}
+
+// StablecoinSupportedNetworkClient is a client for the StablecoinSupportedNetwork schema.
+type StablecoinSupportedNetworkClient struct {
+	config
+}
+
+// NewStablecoinSupportedNetworkClient returns a client for the StablecoinSupportedNetwork from the given config.
+func NewStablecoinSupportedNetworkClient(c config) *StablecoinSupportedNetworkClient {
+	return &StablecoinSupportedNetworkClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `stablecoinsupportednetwork.Hooks(f(g(h())))`.
+func (c *StablecoinSupportedNetworkClient) Use(hooks ...Hook) {
+	c.hooks.StablecoinSupportedNetwork = append(c.hooks.StablecoinSupportedNetwork, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `stablecoinsupportednetwork.Intercept(f(g(h())))`.
+func (c *StablecoinSupportedNetworkClient) Intercept(interceptors ...Interceptor) {
+	c.inters.StablecoinSupportedNetwork = append(c.inters.StablecoinSupportedNetwork, interceptors...)
+}
+
+// Create returns a builder for creating a StablecoinSupportedNetwork entity.
+func (c *StablecoinSupportedNetworkClient) Create() *StablecoinSupportedNetworkCreate {
+	mutation := newStablecoinSupportedNetworkMutation(c.config, OpCreate)
+	return &StablecoinSupportedNetworkCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of StablecoinSupportedNetwork entities.
+func (c *StablecoinSupportedNetworkClient) CreateBulk(builders ...*StablecoinSupportedNetworkCreate) *StablecoinSupportedNetworkCreateBulk {
+	return &StablecoinSupportedNetworkCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *StablecoinSupportedNetworkClient) MapCreateBulk(slice any, setFunc func(*StablecoinSupportedNetworkCreate, int)) *StablecoinSupportedNetworkCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &StablecoinSupportedNetworkCreateBulk{err: fmt.Errorf("calling to StablecoinSupportedNetworkClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*StablecoinSupportedNetworkCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &StablecoinSupportedNetworkCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for StablecoinSupportedNetwork.
+func (c *StablecoinSupportedNetworkClient) Update() *StablecoinSupportedNetworkUpdate {
+	mutation := newStablecoinSupportedNetworkMutation(c.config, OpUpdate)
+	return &StablecoinSupportedNetworkUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *StablecoinSupportedNetworkClient) UpdateOne(ssn *StablecoinSupportedNetwork) *StablecoinSupportedNetworkUpdateOne {
+	mutation := newStablecoinSupportedNetworkMutation(c.config, OpUpdateOne, withStablecoinSupportedNetwork(ssn))
+	return &StablecoinSupportedNetworkUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *StablecoinSupportedNetworkClient) UpdateOneID(id string) *StablecoinSupportedNetworkUpdateOne {
+	mutation := newStablecoinSupportedNetworkMutation(c.config, OpUpdateOne, withStablecoinSupportedNetworkID(id))
+	return &StablecoinSupportedNetworkUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for StablecoinSupportedNetwork.
+func (c *StablecoinSupportedNetworkClient) Delete() *StablecoinSupportedNetworkDelete {
+	mutation := newStablecoinSupportedNetworkMutation(c.config, OpDelete)
+	return &StablecoinSupportedNetworkDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *StablecoinSupportedNetworkClient) DeleteOne(ssn *StablecoinSupportedNetwork) *StablecoinSupportedNetworkDeleteOne {
+	return c.DeleteOneID(ssn.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *StablecoinSupportedNetworkClient) DeleteOneID(id string) *StablecoinSupportedNetworkDeleteOne {
+	builder := c.Delete().Where(stablecoinsupportednetwork.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &StablecoinSupportedNetworkDeleteOne{builder}
+}
+
+// Query returns a query builder for StablecoinSupportedNetwork.
+func (c *StablecoinSupportedNetworkClient) Query() *StablecoinSupportedNetworkQuery {
+	return &StablecoinSupportedNetworkQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeStablecoinSupportedNetwork},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a StablecoinSupportedNetwork entity by its id.
+func (c *StablecoinSupportedNetworkClient) Get(ctx context.Context, id string) (*StablecoinSupportedNetwork, error) {
+	return c.Query().Where(stablecoinsupportednetwork.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *StablecoinSupportedNetworkClient) GetX(ctx context.Context, id string) *StablecoinSupportedNetwork {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryCurrency queries the currency edge of a StablecoinSupportedNetwork.
+func (c *StablecoinSupportedNetworkClient) QueryCurrency(ssn *StablecoinSupportedNetwork) *CurrencyQuery {
+	query := (&CurrencyClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := ssn.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(stablecoinsupportednetwork.Table, stablecoinsupportednetwork.FieldID, id),
+			sqlgraph.To(currency.Table, currency.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, stablecoinsupportednetwork.CurrencyTable, stablecoinsupportednetwork.CurrencyColumn),
+		)
+		fromV = sqlgraph.Neighbors(ssn.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryStablecoinNetwork queries the stablecoin_network edge of a StablecoinSupportedNetwork.
+func (c *StablecoinSupportedNetworkClient) QueryStablecoinNetwork(ssn *StablecoinSupportedNetwork) *StablecoinNetworkQuery {
+	query := (&StablecoinNetworkClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := ssn.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(stablecoinsupportednetwork.Table, stablecoinsupportednetwork.FieldID, id),
+			sqlgraph.To(stablecoinnetwork.Table, stablecoinnetwork.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, stablecoinsupportednetwork.StablecoinNetworkTable, stablecoinsupportednetwork.StablecoinNetworkColumn),
+		)
+		fromV = sqlgraph.Neighbors(ssn.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *StablecoinSupportedNetworkClient) Hooks() []Hook {
+	return c.hooks.StablecoinSupportedNetwork
+}
+
+// Interceptors returns the client interceptors.
+func (c *StablecoinSupportedNetworkClient) Interceptors() []Interceptor {
+	return c.inters.StablecoinSupportedNetwork
+}
+
+func (c *StablecoinSupportedNetworkClient) mutate(ctx context.Context, m *StablecoinSupportedNetworkMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&StablecoinSupportedNetworkCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&StablecoinSupportedNetworkUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&StablecoinSupportedNetworkUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&StablecoinSupportedNetworkDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown StablecoinSupportedNetwork mutation op: %q", m.Op())
+	}
+}
+
+// StablecoinWalletClient is a client for the StablecoinWallet schema.
+type StablecoinWalletClient struct {
+	config
+}
+
+// NewStablecoinWalletClient returns a client for the StablecoinWallet from the given config.
+func NewStablecoinWalletClient(c config) *StablecoinWalletClient {
+	return &StablecoinWalletClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `stablecoinwallet.Hooks(f(g(h())))`.
+func (c *StablecoinWalletClient) Use(hooks ...Hook) {
+	c.hooks.StablecoinWallet = append(c.hooks.StablecoinWallet, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `stablecoinwallet.Intercept(f(g(h())))`.
+func (c *StablecoinWalletClient) Intercept(interceptors ...Interceptor) {
+	c.inters.StablecoinWallet = append(c.inters.StablecoinWallet, interceptors...)
+}
+
+// Create returns a builder for creating a StablecoinWallet entity.
+func (c *StablecoinWalletClient) Create() *StablecoinWalletCreate {
+	mutation := newStablecoinWalletMutation(c.config, OpCreate)
+	return &StablecoinWalletCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of StablecoinWallet entities.
+func (c *StablecoinWalletClient) CreateBulk(builders ...*StablecoinWalletCreate) *StablecoinWalletCreateBulk {
+	return &StablecoinWalletCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *StablecoinWalletClient) MapCreateBulk(slice any, setFunc func(*StablecoinWalletCreate, int)) *StablecoinWalletCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &StablecoinWalletCreateBulk{err: fmt.Errorf("calling to StablecoinWalletClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*StablecoinWalletCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &StablecoinWalletCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for StablecoinWallet.
+func (c *StablecoinWalletClient) Update() *StablecoinWalletUpdate {
+	mutation := newStablecoinWalletMutation(c.config, OpUpdate)
+	return &StablecoinWalletUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *StablecoinWalletClient) UpdateOne(sw *StablecoinWallet) *StablecoinWalletUpdateOne {
+	mutation := newStablecoinWalletMutation(c.config, OpUpdateOne, withStablecoinWallet(sw))
+	return &StablecoinWalletUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *StablecoinWalletClient) UpdateOneID(id string) *StablecoinWalletUpdateOne {
+	mutation := newStablecoinWalletMutation(c.config, OpUpdateOne, withStablecoinWalletID(id))
+	return &StablecoinWalletUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for StablecoinWallet.
+func (c *StablecoinWalletClient) Delete() *StablecoinWalletDelete {
+	mutation := newStablecoinWalletMutation(c.config, OpDelete)
+	return &StablecoinWalletDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *StablecoinWalletClient) DeleteOne(sw *StablecoinWallet) *StablecoinWalletDeleteOne {
+	return c.DeleteOneID(sw.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *StablecoinWalletClient) DeleteOneID(id string) *StablecoinWalletDeleteOne {
+	builder := c.Delete().Where(stablecoinwallet.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &StablecoinWalletDeleteOne{builder}
+}
+
+// Query returns a query builder for StablecoinWallet.
+func (c *StablecoinWalletClient) Query() *StablecoinWalletQuery {
+	return &StablecoinWalletQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeStablecoinWallet},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a StablecoinWallet entity by its id.
+func (c *StablecoinWalletClient) Get(ctx context.Context, id string) (*StablecoinWallet, error) {
+	return c.Query().Where(stablecoinwallet.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *StablecoinWalletClient) GetX(ctx context.Context, id string) *StablecoinWallet {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryWallet queries the wallet edge of a StablecoinWallet.
+func (c *StablecoinWalletClient) QueryWallet(sw *StablecoinWallet) *WalletQuery {
+	query := (&WalletClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := sw.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(stablecoinwallet.Table, stablecoinwallet.FieldID, id),
+			sqlgraph.To(wallet.Table, wallet.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, stablecoinwallet.WalletTable, stablecoinwallet.WalletColumn),
+		)
+		fromV = sqlgraph.Neighbors(sw.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryCurrency queries the currency edge of a StablecoinWallet.
+func (c *StablecoinWalletClient) QueryCurrency(sw *StablecoinWallet) *CurrencyQuery {
+	query := (&CurrencyClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := sw.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(stablecoinwallet.Table, stablecoinwallet.FieldID, id),
+			sqlgraph.To(currency.Table, currency.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, stablecoinwallet.CurrencyTable, stablecoinwallet.CurrencyColumn),
+		)
+		fromV = sqlgraph.Neighbors(sw.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryStablecoinNetworks queries the stablecoin_networks edge of a StablecoinWallet.
+func (c *StablecoinWalletClient) QueryStablecoinNetworks(sw *StablecoinWallet) *StablecoinNetworkQuery {
+	query := (&StablecoinNetworkClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := sw.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(stablecoinwallet.Table, stablecoinwallet.FieldID, id),
+			sqlgraph.To(stablecoinnetwork.Table, stablecoinnetwork.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, stablecoinwallet.StablecoinNetworksTable, stablecoinwallet.StablecoinNetworksColumn),
+		)
+		fromV = sqlgraph.Neighbors(sw.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryStablecoinDeposits queries the stablecoin_deposits edge of a StablecoinWallet.
+func (c *StablecoinWalletClient) QueryStablecoinDeposits(sw *StablecoinWallet) *StablecoinDepositQuery {
+	query := (&StablecoinDepositClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := sw.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(stablecoinwallet.Table, stablecoinwallet.FieldID, id),
+			sqlgraph.To(stablecoindeposit.Table, stablecoindeposit.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, stablecoinwallet.StablecoinDepositsTable, stablecoinwallet.StablecoinDepositsColumn),
+		)
+		fromV = sqlgraph.Neighbors(sw.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *StablecoinWalletClient) Hooks() []Hook {
+	return c.hooks.StablecoinWallet
+}
+
+// Interceptors returns the client interceptors.
+func (c *StablecoinWalletClient) Interceptors() []Interceptor {
+	return c.inters.StablecoinWallet
+}
+
+func (c *StablecoinWalletClient) mutate(ctx context.Context, m *StablecoinWalletMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&StablecoinWalletCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&StablecoinWalletUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&StablecoinWalletUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&StablecoinWalletDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown StablecoinWallet mutation op: %q", m.Op())
+	}
+}
+
+// StablecoinWithdrawalClient is a client for the StablecoinWithdrawal schema.
+type StablecoinWithdrawalClient struct {
+	config
+}
+
+// NewStablecoinWithdrawalClient returns a client for the StablecoinWithdrawal from the given config.
+func NewStablecoinWithdrawalClient(c config) *StablecoinWithdrawalClient {
+	return &StablecoinWithdrawalClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `stablecoinwithdrawal.Hooks(f(g(h())))`.
+func (c *StablecoinWithdrawalClient) Use(hooks ...Hook) {
+	c.hooks.StablecoinWithdrawal = append(c.hooks.StablecoinWithdrawal, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `stablecoinwithdrawal.Intercept(f(g(h())))`.
+func (c *StablecoinWithdrawalClient) Intercept(interceptors ...Interceptor) {
+	c.inters.StablecoinWithdrawal = append(c.inters.StablecoinWithdrawal, interceptors...)
+}
+
+// Create returns a builder for creating a StablecoinWithdrawal entity.
+func (c *StablecoinWithdrawalClient) Create() *StablecoinWithdrawalCreate {
+	mutation := newStablecoinWithdrawalMutation(c.config, OpCreate)
+	return &StablecoinWithdrawalCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of StablecoinWithdrawal entities.
+func (c *StablecoinWithdrawalClient) CreateBulk(builders ...*StablecoinWithdrawalCreate) *StablecoinWithdrawalCreateBulk {
+	return &StablecoinWithdrawalCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *StablecoinWithdrawalClient) MapCreateBulk(slice any, setFunc func(*StablecoinWithdrawalCreate, int)) *StablecoinWithdrawalCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &StablecoinWithdrawalCreateBulk{err: fmt.Errorf("calling to StablecoinWithdrawalClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*StablecoinWithdrawalCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &StablecoinWithdrawalCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for StablecoinWithdrawal.
+func (c *StablecoinWithdrawalClient) Update() *StablecoinWithdrawalUpdate {
+	mutation := newStablecoinWithdrawalMutation(c.config, OpUpdate)
+	return &StablecoinWithdrawalUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *StablecoinWithdrawalClient) UpdateOne(sw *StablecoinWithdrawal) *StablecoinWithdrawalUpdateOne {
+	mutation := newStablecoinWithdrawalMutation(c.config, OpUpdateOne, withStablecoinWithdrawal(sw))
+	return &StablecoinWithdrawalUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *StablecoinWithdrawalClient) UpdateOneID(id string) *StablecoinWithdrawalUpdateOne {
+	mutation := newStablecoinWithdrawalMutation(c.config, OpUpdateOne, withStablecoinWithdrawalID(id))
+	return &StablecoinWithdrawalUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for StablecoinWithdrawal.
+func (c *StablecoinWithdrawalClient) Delete() *StablecoinWithdrawalDelete {
+	mutation := newStablecoinWithdrawalMutation(c.config, OpDelete)
+	return &StablecoinWithdrawalDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *StablecoinWithdrawalClient) DeleteOne(sw *StablecoinWithdrawal) *StablecoinWithdrawalDeleteOne {
+	return c.DeleteOneID(sw.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *StablecoinWithdrawalClient) DeleteOneID(id string) *StablecoinWithdrawalDeleteOne {
+	builder := c.Delete().Where(stablecoinwithdrawal.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &StablecoinWithdrawalDeleteOne{builder}
+}
+
+// Query returns a query builder for StablecoinWithdrawal.
+func (c *StablecoinWithdrawalClient) Query() *StablecoinWithdrawalQuery {
+	return &StablecoinWithdrawalQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeStablecoinWithdrawal},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a StablecoinWithdrawal entity by its id.
+func (c *StablecoinWithdrawalClient) Get(ctx context.Context, id string) (*StablecoinWithdrawal, error) {
+	return c.Query().Where(stablecoinwithdrawal.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *StablecoinWithdrawalClient) GetX(ctx context.Context, id string) *StablecoinWithdrawal {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryTransaction queries the transaction edge of a StablecoinWithdrawal.
+func (c *StablecoinWithdrawalClient) QueryTransaction(sw *StablecoinWithdrawal) *TransactionQuery {
+	query := (&TransactionClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := sw.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(stablecoinwithdrawal.Table, stablecoinwithdrawal.FieldID, id),
+			sqlgraph.To(transaction.Table, transaction.FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, true, stablecoinwithdrawal.TransactionTable, stablecoinwithdrawal.TransactionColumn),
+		)
+		fromV = sqlgraph.Neighbors(sw.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *StablecoinWithdrawalClient) Hooks() []Hook {
+	return c.hooks.StablecoinWithdrawal
+}
+
+// Interceptors returns the client interceptors.
+func (c *StablecoinWithdrawalClient) Interceptors() []Interceptor {
+	return c.inters.StablecoinWithdrawal
+}
+
+func (c *StablecoinWithdrawalClient) mutate(ctx context.Context, m *StablecoinWithdrawalMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&StablecoinWithdrawalCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&StablecoinWithdrawalUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&StablecoinWithdrawalUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&StablecoinWithdrawalDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown StablecoinWithdrawal mutation op: %q", m.Op())
+	}
+}
+
+// TransactionClient is a client for the Transaction schema.
+type TransactionClient struct {
+	config
+}
+
+// NewTransactionClient returns a client for the Transaction from the given config.
+func NewTransactionClient(c config) *TransactionClient {
+	return &TransactionClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `transaction.Hooks(f(g(h())))`.
+func (c *TransactionClient) Use(hooks ...Hook) {
+	c.hooks.Transaction = append(c.hooks.Transaction, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `transaction.Intercept(f(g(h())))`.
+func (c *TransactionClient) Intercept(interceptors ...Interceptor) {
+	c.inters.Transaction = append(c.inters.Transaction, interceptors...)
+}
+
+// Create returns a builder for creating a Transaction entity.
+func (c *TransactionClient) Create() *TransactionCreate {
+	mutation := newTransactionMutation(c.config, OpCreate)
+	return &TransactionCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of Transaction entities.
+func (c *TransactionClient) CreateBulk(builders ...*TransactionCreate) *TransactionCreateBulk {
+	return &TransactionCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *TransactionClient) MapCreateBulk(slice any, setFunc func(*TransactionCreate, int)) *TransactionCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &TransactionCreateBulk{err: fmt.Errorf("calling to TransactionClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*TransactionCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &TransactionCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for Transaction.
+func (c *TransactionClient) Update() *TransactionUpdate {
+	mutation := newTransactionMutation(c.config, OpUpdate)
+	return &TransactionUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *TransactionClient) UpdateOne(t *Transaction) *TransactionUpdateOne {
+	mutation := newTransactionMutation(c.config, OpUpdateOne, withTransaction(t))
+	return &TransactionUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *TransactionClient) UpdateOneID(id string) *TransactionUpdateOne {
+	mutation := newTransactionMutation(c.config, OpUpdateOne, withTransactionID(id))
+	return &TransactionUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for Transaction.
+func (c *TransactionClient) Delete() *TransactionDelete {
+	mutation := newTransactionMutation(c.config, OpDelete)
+	return &TransactionDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *TransactionClient) DeleteOne(t *Transaction) *TransactionDeleteOne {
+	return c.DeleteOneID(t.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *TransactionClient) DeleteOneID(id string) *TransactionDeleteOne {
+	builder := c.Delete().Where(transaction.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &TransactionDeleteOne{builder}
+}
+
+// Query returns a query builder for Transaction.
+func (c *TransactionClient) Query() *TransactionQuery {
+	return &TransactionQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeTransaction},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a Transaction entity by its id.
+func (c *TransactionClient) Get(ctx context.Context, id string) (*Transaction, error) {
+	return c.Query().Where(transaction.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *TransactionClient) GetX(ctx context.Context, id string) *Transaction {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryNubanDeposit queries the nuban_deposit edge of a Transaction.
+func (c *TransactionClient) QueryNubanDeposit(t *Transaction) *NubanDepositQuery {
+	query := (&NubanDepositClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := t.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(transaction.Table, transaction.FieldID, id),
+			sqlgraph.To(nubandeposit.Table, nubandeposit.FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, false, transaction.NubanDepositTable, transaction.NubanDepositColumn),
+		)
+		fromV = sqlgraph.Neighbors(t.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryNubanTransfer queries the nuban_transfer edge of a Transaction.
+func (c *TransactionClient) QueryNubanTransfer(t *Transaction) *NubanTransferQuery {
+	query := (&NubanTransferClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := t.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(transaction.Table, transaction.FieldID, id),
+			sqlgraph.To(nubantransfer.Table, nubantransfer.FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, false, transaction.NubanTransferTable, transaction.NubanTransferColumn),
+		)
+		fromV = sqlgraph.Neighbors(t.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryWallet queries the wallet edge of a Transaction.
+func (c *TransactionClient) QueryWallet(t *Transaction) *WalletQuery {
+	query := (&WalletClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := t.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(transaction.Table, transaction.FieldID, id),
+			sqlgraph.To(wallet.Table, wallet.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, transaction.WalletTable, transaction.WalletColumn),
+		)
+		fromV = sqlgraph.Neighbors(t.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryStablecoinDeposit queries the stablecoin_deposit edge of a Transaction.
+func (c *TransactionClient) QueryStablecoinDeposit(t *Transaction) *StablecoinDepositQuery {
+	query := (&StablecoinDepositClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := t.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(transaction.Table, transaction.FieldID, id),
+			sqlgraph.To(stablecoindeposit.Table, stablecoindeposit.FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, false, transaction.StablecoinDepositTable, transaction.StablecoinDepositColumn),
+		)
+		fromV = sqlgraph.Neighbors(t.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryStablecoinWithdrawal queries the stablecoin_withdrawal edge of a Transaction.
+func (c *TransactionClient) QueryStablecoinWithdrawal(t *Transaction) *StablecoinWithdrawalQuery {
+	query := (&StablecoinWithdrawalClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := t.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(transaction.Table, transaction.FieldID, id),
+			sqlgraph.To(stablecoinwithdrawal.Table, stablecoinwithdrawal.FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, false, transaction.StablecoinWithdrawalTable, transaction.StablecoinWithdrawalColumn),
+		)
+		fromV = sqlgraph.Neighbors(t.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryLedgerEntries queries the ledger_entries edge of a Transaction.
+func (c *TransactionClient) QueryLedgerEntries(t *Transaction) *LedgerQuery {
+	query := (&LedgerClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := t.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(transaction.Table, transaction.FieldID, id),
+			sqlgraph.To(ledger.Table, ledger.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, transaction.LedgerEntriesTable, transaction.LedgerEntriesColumn),
+		)
+		fromV = sqlgraph.Neighbors(t.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryReversalLedgerEntries queries the reversal_ledger_entries edge of a Transaction.
+func (c *TransactionClient) QueryReversalLedgerEntries(t *Transaction) *LedgerQuery {
+	query := (&LedgerClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := t.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(transaction.Table, transaction.FieldID, id),
+			sqlgraph.To(ledger.Table, ledger.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, transaction.ReversalLedgerEntriesTable, transaction.ReversalLedgerEntriesColumn),
+		)
+		fromV = sqlgraph.Neighbors(t.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *TransactionClient) Hooks() []Hook {
+	return c.hooks.Transaction
+}
+
+// Interceptors returns the client interceptors.
+func (c *TransactionClient) Interceptors() []Interceptor {
+	return c.inters.Transaction
+}
+
+func (c *TransactionClient) mutate(ctx context.Context, m *TransactionMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&TransactionCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&TransactionUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&TransactionUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&TransactionDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown Transaction mutation op: %q", m.Op())
+	}
+}
+
 // UserClient is a client for the User schema.
 type UserClient struct {
 	config
@@ -4159,6 +5991,54 @@ func (c *WalletClient) QueryNubanStaticAccount(w *Wallet) *NubanStaticAccountQue
 	return query
 }
 
+// QueryNubanDynamicAccount queries the nuban_dynamic_account edge of a Wallet.
+func (c *WalletClient) QueryNubanDynamicAccount(w *Wallet) *NubanDynamicAccountQuery {
+	query := (&NubanDynamicAccountClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := w.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(wallet.Table, wallet.FieldID, id),
+			sqlgraph.To(nubandynamicaccount.Table, nubandynamicaccount.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, wallet.NubanDynamicAccountTable, wallet.NubanDynamicAccountColumn),
+		)
+		fromV = sqlgraph.Neighbors(w.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryStablecoinWallets queries the stablecoin_wallets edge of a Wallet.
+func (c *WalletClient) QueryStablecoinWallets(w *Wallet) *StablecoinWalletQuery {
+	query := (&StablecoinWalletClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := w.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(wallet.Table, wallet.FieldID, id),
+			sqlgraph.To(stablecoinwallet.Table, stablecoinwallet.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, wallet.StablecoinWalletsTable, wallet.StablecoinWalletsColumn),
+		)
+		fromV = sqlgraph.Neighbors(w.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryLedgerEntries queries the ledger_entries edge of a Wallet.
+func (c *WalletClient) QueryLedgerEntries(w *Wallet) *LedgerQuery {
+	query := (&LedgerClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := w.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(wallet.Table, wallet.FieldID, id),
+			sqlgraph.To(ledger.Table, ledger.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, wallet.LedgerEntriesTable, wallet.LedgerEntriesColumn),
+		)
+		fromV = sqlgraph.Neighbors(w.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // Hooks returns the client hooks.
 func (c *WalletClient) Hooks() []Hook {
 	return c.hooks.Wallet
@@ -4188,14 +6068,20 @@ func (c *WalletClient) mutate(ctx context.Context, m *WalletMutation) (Value, er
 type (
 	hooks struct {
 		Business, BusinessDocument, BusinessFeature, BusinessLocation, BusinessServices,
-		Currency, KYBDocument, KYBMessage, LedgerOwner, Manager, NubanStaticAccount,
-		Permission, Provider, RequestVerification, Role, RolePermission, Service,
-		Social, User, UserDocument, Vault, Verification, Wallet []ent.Hook
+		Currency, KYBDocument, KYBMessage, Ledger, LedgerOwner, Manager, NubanDeposit,
+		NubanDynamicAccount, NubanStaticAccount, NubanTransfer, Permission, Provider,
+		RequestVerification, Role, RolePermission, Service, Social, StablecoinDeposit,
+		StablecoinNetwork, StablecoinSupportedNetwork, StablecoinWallet,
+		StablecoinWithdrawal, Transaction, User, UserDocument, Vault, Verification,
+		Wallet []ent.Hook
 	}
 	inters struct {
 		Business, BusinessDocument, BusinessFeature, BusinessLocation, BusinessServices,
-		Currency, KYBDocument, KYBMessage, LedgerOwner, Manager, NubanStaticAccount,
-		Permission, Provider, RequestVerification, Role, RolePermission, Service,
-		Social, User, UserDocument, Vault, Verification, Wallet []ent.Interceptor
+		Currency, KYBDocument, KYBMessage, Ledger, LedgerOwner, Manager, NubanDeposit,
+		NubanDynamicAccount, NubanStaticAccount, NubanTransfer, Permission, Provider,
+		RequestVerification, Role, RolePermission, Service, Social, StablecoinDeposit,
+		StablecoinNetwork, StablecoinSupportedNetwork, StablecoinWallet,
+		StablecoinWithdrawal, Transaction, User, UserDocument, Vault, Verification,
+		Wallet []ent.Interceptor
 	}
 )

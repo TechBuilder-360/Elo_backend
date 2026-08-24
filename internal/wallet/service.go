@@ -16,6 +16,7 @@ type IService interface {
 	GetWallets(ctx context.Context, ownerID, walletType string, filter *model.WalletFilter) ([]*model.Wallet, error)
 	GetWallet(ctx context.Context, ownerID, walletType, currencyCode string) (*model.Wallet, error)
 	AddWallet(ctx context.Context, ownerID, walletType, currencyCode string) (*model.Wallet, error)
+	GetWalletOwnerWithID(ctx context.Context, ownerID, walletID string) (*model.Wallet, error)
 }
 
 type service struct {

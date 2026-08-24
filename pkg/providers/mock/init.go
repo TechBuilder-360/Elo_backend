@@ -19,11 +19,11 @@ func New() *mock {
 }
 
 func (*mock) Slug() string {
-	return strings.ToLower(constant.SendGrid.ToString())
+	return strings.ToLower(constant.Mock.ToString())
 }
 
 func (*mock) DisplayName() string {
-	return constant.SendGrid.ToString()
+	return constant.Mock.ToString()
 }
 
 var _ provider.Impl = (*mock)(nil)
