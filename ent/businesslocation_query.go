@@ -8,6 +8,7 @@ import (
 	"math"
 
 	"entgo.io/ent"
+	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
@@ -25,6 +26,7 @@ type BusinessLocationQuery struct {
 	predicates   []predicate.BusinessLocation
 	withBusiness *BusinessQuery
 	withFKs      bool
+	modifiers    []func(*sql.Selector)
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -391,6 +393,9 @@ func (blq *BusinessLocationQuery) sqlAll(ctx context.Context, hooks ...queryHook
 		node.Edges.loadedTypes = loadedTypes
 		return node.assignValues(columns, values)
 	}
+	if len(blq.modifiers) > 0 {
+		_spec.Modifiers = blq.modifiers
+	}
 	for i := range hooks {
 		hooks[i](ctx, _spec)
 	}
@@ -444,6 +449,9 @@ func (blq *BusinessLocationQuery) loadBusiness(ctx context.Context, query *Busin
 
 func (blq *BusinessLocationQuery) sqlCount(ctx context.Context) (int, error) {
 	_spec := blq.querySpec()
+	if len(blq.modifiers) > 0 {
+		_spec.Modifiers = blq.modifiers
+	}
 	_spec.Node.Columns = blq.ctx.Fields
 	if len(blq.ctx.Fields) > 0 {
 		_spec.Unique = blq.ctx.Unique != nil && *blq.ctx.Unique
@@ -506,6 +514,9 @@ func (blq *BusinessLocationQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	if blq.ctx.Unique != nil && *blq.ctx.Unique {
 		selector.Distinct()
 	}
+	for _, m := range blq.modifiers {
+		m(selector)
+	}
 	for _, p := range blq.predicates {
 		p(selector)
 	}
@@ -521,6 +532,32 @@ func (blq *BusinessLocationQuery) sqlQuery(ctx context.Context) *sql.Selector {
 		selector.Limit(*limit)
 	}
 	return selector
+}
+
+// ForUpdate locks the selected rows against concurrent updates, and prevent them from being
+// updated, deleted or "selected ... for update" by other sessions, until the transaction is
+// either committed or rolled-back.
+func (blq *BusinessLocationQuery) ForUpdate(opts ...sql.LockOption) *BusinessLocationQuery {
+	if blq.driver.Dialect() == dialect.Postgres {
+		blq.Unique(false)
+	}
+	blq.modifiers = append(blq.modifiers, func(s *sql.Selector) {
+		s.ForUpdate(opts...)
+	})
+	return blq
+}
+
+// ForShare behaves similarly to ForUpdate, except that it acquires a shared mode lock
+// on any rows that are read. Other sessions can read the rows, but cannot modify them
+// until your transaction commits.
+func (blq *BusinessLocationQuery) ForShare(opts ...sql.LockOption) *BusinessLocationQuery {
+	if blq.driver.Dialect() == dialect.Postgres {
+		blq.Unique(false)
+	}
+	blq.modifiers = append(blq.modifiers, func(s *sql.Selector) {
+		s.ForShare(opts...)
+	})
+	return blq
 }
 
 // BusinessLocationGroupBy is the group-by builder for BusinessLocation entities.

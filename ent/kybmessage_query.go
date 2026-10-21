@@ -8,6 +8,7 @@ import (
 	"math"
 
 	"entgo.io/ent"
+	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
@@ -25,6 +26,7 @@ type KYBMessageQuery struct {
 	predicates   []predicate.KYBMessage
 	withBusiness *BusinessQuery
 	withFKs      bool
+	modifiers    []func(*sql.Selector)
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -391,6 +393,9 @@ func (kmq *KYBMessageQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*
 		node.Edges.loadedTypes = loadedTypes
 		return node.assignValues(columns, values)
 	}
+	if len(kmq.modifiers) > 0 {
+		_spec.Modifiers = kmq.modifiers
+	}
 	for i := range hooks {
 		hooks[i](ctx, _spec)
 	}
@@ -444,6 +449,9 @@ func (kmq *KYBMessageQuery) loadBusiness(ctx context.Context, query *BusinessQue
 
 func (kmq *KYBMessageQuery) sqlCount(ctx context.Context) (int, error) {
 	_spec := kmq.querySpec()
+	if len(kmq.modifiers) > 0 {
+		_spec.Modifiers = kmq.modifiers
+	}
 	_spec.Node.Columns = kmq.ctx.Fields
 	if len(kmq.ctx.Fields) > 0 {
 		_spec.Unique = kmq.ctx.Unique != nil && *kmq.ctx.Unique
@@ -506,6 +514,9 @@ func (kmq *KYBMessageQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	if kmq.ctx.Unique != nil && *kmq.ctx.Unique {
 		selector.Distinct()
 	}
+	for _, m := range kmq.modifiers {
+		m(selector)
+	}
 	for _, p := range kmq.predicates {
 		p(selector)
 	}
@@ -521,6 +532,32 @@ func (kmq *KYBMessageQuery) sqlQuery(ctx context.Context) *sql.Selector {
 		selector.Limit(*limit)
 	}
 	return selector
+}
+
+// ForUpdate locks the selected rows against concurrent updates, and prevent them from being
+// updated, deleted or "selected ... for update" by other sessions, until the transaction is
+// either committed or rolled-back.
+func (kmq *KYBMessageQuery) ForUpdate(opts ...sql.LockOption) *KYBMessageQuery {
+	if kmq.driver.Dialect() == dialect.Postgres {
+		kmq.Unique(false)
+	}
+	kmq.modifiers = append(kmq.modifiers, func(s *sql.Selector) {
+		s.ForUpdate(opts...)
+	})
+	return kmq
+}
+
+// ForShare behaves similarly to ForUpdate, except that it acquires a shared mode lock
+// on any rows that are read. Other sessions can read the rows, but cannot modify them
+// until your transaction commits.
+func (kmq *KYBMessageQuery) ForShare(opts ...sql.LockOption) *KYBMessageQuery {
+	if kmq.driver.Dialect() == dialect.Postgres {
+		kmq.Unique(false)
+	}
+	kmq.modifiers = append(kmq.modifiers, func(s *sql.Selector) {
+		s.ForShare(opts...)
+	})
+	return kmq
 }
 
 // KYBMessageGroupBy is the group-by builder for KYBMessage entities.

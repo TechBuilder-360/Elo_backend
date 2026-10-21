@@ -3,6 +3,7 @@
 package ledger
 
 import (
+	"fmt"
 	"time"
 
 	"entgo.io/ent/dialect/sql"
@@ -26,6 +27,8 @@ const (
 	FieldReversalTransactionID = "reversal_transaction_id"
 	// FieldWalletID holds the string denoting the wallet_id field in the database.
 	FieldWalletID = "wallet_id"
+	// FieldAffectedBalance holds the string denoting the affected_balance field in the database.
+	FieldAffectedBalance = "affected_balance"
 	// FieldDebit holds the string denoting the debit field in the database.
 	FieldDebit = "debit"
 	// FieldCredit holds the string denoting the credit field in the database.
@@ -76,6 +79,7 @@ var Columns = []string{
 	FieldTransactionID,
 	FieldReversalTransactionID,
 	FieldWalletID,
+	FieldAffectedBalance,
 	FieldDebit,
 	FieldCredit,
 	FieldCurrentBalance,
@@ -118,6 +122,30 @@ var (
 	DefaultID func() string
 )
 
+// AffectedBalance defines the type for the "affected_balance" enum field.
+type AffectedBalance string
+
+// AffectedBalance values.
+const (
+	AffectedBalanceHOLDING_BALANCE   AffectedBalance = "HOLDING_BALANCE"
+	AffectedBalanceAVAILABLE_BALANCE AffectedBalance = "AVAILABLE_BALANCE"
+	AffectedBalanceLEDGER_BALANCE    AffectedBalance = "LEDGER_BALANCE"
+)
+
+func (ab AffectedBalance) String() string {
+	return string(ab)
+}
+
+// AffectedBalanceValidator is a validator for the "affected_balance" field enum values. It is called by the builders before save.
+func AffectedBalanceValidator(ab AffectedBalance) error {
+	switch ab {
+	case AffectedBalanceHOLDING_BALANCE, AffectedBalanceAVAILABLE_BALANCE, AffectedBalanceLEDGER_BALANCE:
+		return nil
+	default:
+		return fmt.Errorf("ledger: invalid enum value for affected_balance field: %q", ab)
+	}
+}
+
 // OrderOption defines the ordering options for the Ledger queries.
 type OrderOption func(*sql.Selector)
 
@@ -154,6 +182,11 @@ func ByReversalTransactionID(opts ...sql.OrderTermOption) OrderOption {
 // ByWalletID orders the results by the wallet_id field.
 func ByWalletID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldWalletID, opts...).ToFunc()
+}
+
+// ByAffectedBalance orders the results by the affected_balance field.
+func ByAffectedBalance(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldAffectedBalance, opts...).ToFunc()
 }
 
 // ByDebit orders the results by the debit field.
@@ -205,7 +238,7 @@ func newTransactionStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(TransactionInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.M2O, true, TransactionTable, TransactionColumn),
+		sqlgraph.Edge(sqlgraph.O2O, true, TransactionTable, TransactionColumn),
 	)
 }
 func newWalletStep() *sqlgraph.Step {

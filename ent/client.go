@@ -17,21 +17,27 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"github.com/Toflex/directory_v2/ent/business"
 	"github.com/Toflex/directory_v2/ent/businessdocument"
-	"github.com/Toflex/directory_v2/ent/businessfeature"
 	"github.com/Toflex/directory_v2/ent/businesslocation"
 	"github.com/Toflex/directory_v2/ent/businessservices"
 	"github.com/Toflex/directory_v2/ent/currency"
+	"github.com/Toflex/directory_v2/ent/feerule"
+	"github.com/Toflex/directory_v2/ent/feetier"
+	"github.com/Toflex/directory_v2/ent/invoice"
 	"github.com/Toflex/directory_v2/ent/kybdocument"
 	"github.com/Toflex/directory_v2/ent/kybmessage"
 	"github.com/Toflex/directory_v2/ent/ledger"
 	"github.com/Toflex/directory_v2/ent/ledgerowner"
 	"github.com/Toflex/directory_v2/ent/manager"
+	"github.com/Toflex/directory_v2/ent/nubanbank"
+	"github.com/Toflex/directory_v2/ent/nubanbeneficiary"
+	"github.com/Toflex/directory_v2/ent/nubanblacklist"
 	"github.com/Toflex/directory_v2/ent/nubandeposit"
 	"github.com/Toflex/directory_v2/ent/nubandynamicaccount"
 	"github.com/Toflex/directory_v2/ent/nubanstaticaccount"
 	"github.com/Toflex/directory_v2/ent/nubantransfer"
 	"github.com/Toflex/directory_v2/ent/permission"
 	"github.com/Toflex/directory_v2/ent/provider"
+	"github.com/Toflex/directory_v2/ent/providerbank"
 	"github.com/Toflex/directory_v2/ent/requestverification"
 	"github.com/Toflex/directory_v2/ent/role"
 	"github.com/Toflex/directory_v2/ent/rolepermission"
@@ -42,7 +48,10 @@ import (
 	"github.com/Toflex/directory_v2/ent/stablecoinsupportednetwork"
 	"github.com/Toflex/directory_v2/ent/stablecoinwallet"
 	"github.com/Toflex/directory_v2/ent/stablecoinwithdrawal"
+	"github.com/Toflex/directory_v2/ent/subscription"
+	"github.com/Toflex/directory_v2/ent/subscriptionplan"
 	"github.com/Toflex/directory_v2/ent/transaction"
+	"github.com/Toflex/directory_v2/ent/transactionfee"
 	"github.com/Toflex/directory_v2/ent/user"
 	"github.com/Toflex/directory_v2/ent/userdocument"
 	"github.com/Toflex/directory_v2/ent/vault"
@@ -59,14 +68,18 @@ type Client struct {
 	Business *BusinessClient
 	// BusinessDocument is the client for interacting with the BusinessDocument builders.
 	BusinessDocument *BusinessDocumentClient
-	// BusinessFeature is the client for interacting with the BusinessFeature builders.
-	BusinessFeature *BusinessFeatureClient
 	// BusinessLocation is the client for interacting with the BusinessLocation builders.
 	BusinessLocation *BusinessLocationClient
 	// BusinessServices is the client for interacting with the BusinessServices builders.
 	BusinessServices *BusinessServicesClient
 	// Currency is the client for interacting with the Currency builders.
 	Currency *CurrencyClient
+	// FeeRule is the client for interacting with the FeeRule builders.
+	FeeRule *FeeRuleClient
+	// FeeTier is the client for interacting with the FeeTier builders.
+	FeeTier *FeeTierClient
+	// Invoice is the client for interacting with the Invoice builders.
+	Invoice *InvoiceClient
 	// KYBDocument is the client for interacting with the KYBDocument builders.
 	KYBDocument *KYBDocumentClient
 	// KYBMessage is the client for interacting with the KYBMessage builders.
@@ -77,6 +90,12 @@ type Client struct {
 	LedgerOwner *LedgerOwnerClient
 	// Manager is the client for interacting with the Manager builders.
 	Manager *ManagerClient
+	// NubanBank is the client for interacting with the NubanBank builders.
+	NubanBank *NubanBankClient
+	// NubanBeneficiary is the client for interacting with the NubanBeneficiary builders.
+	NubanBeneficiary *NubanBeneficiaryClient
+	// NubanBlacklist is the client for interacting with the NubanBlacklist builders.
+	NubanBlacklist *NubanBlacklistClient
 	// NubanDeposit is the client for interacting with the NubanDeposit builders.
 	NubanDeposit *NubanDepositClient
 	// NubanDynamicAccount is the client for interacting with the NubanDynamicAccount builders.
@@ -89,6 +108,8 @@ type Client struct {
 	Permission *PermissionClient
 	// Provider is the client for interacting with the Provider builders.
 	Provider *ProviderClient
+	// ProviderBank is the client for interacting with the ProviderBank builders.
+	ProviderBank *ProviderBankClient
 	// RequestVerification is the client for interacting with the RequestVerification builders.
 	RequestVerification *RequestVerificationClient
 	// Role is the client for interacting with the Role builders.
@@ -109,8 +130,14 @@ type Client struct {
 	StablecoinWallet *StablecoinWalletClient
 	// StablecoinWithdrawal is the client for interacting with the StablecoinWithdrawal builders.
 	StablecoinWithdrawal *StablecoinWithdrawalClient
+	// Subscription is the client for interacting with the Subscription builders.
+	Subscription *SubscriptionClient
+	// SubscriptionPlan is the client for interacting with the SubscriptionPlan builders.
+	SubscriptionPlan *SubscriptionPlanClient
 	// Transaction is the client for interacting with the Transaction builders.
 	Transaction *TransactionClient
+	// TransactionFee is the client for interacting with the TransactionFee builders.
+	TransactionFee *TransactionFeeClient
 	// User is the client for interacting with the User builders.
 	User *UserClient
 	// UserDocument is the client for interacting with the UserDocument builders.
@@ -134,21 +161,27 @@ func (c *Client) init() {
 	c.Schema = migrate.NewSchema(c.driver)
 	c.Business = NewBusinessClient(c.config)
 	c.BusinessDocument = NewBusinessDocumentClient(c.config)
-	c.BusinessFeature = NewBusinessFeatureClient(c.config)
 	c.BusinessLocation = NewBusinessLocationClient(c.config)
 	c.BusinessServices = NewBusinessServicesClient(c.config)
 	c.Currency = NewCurrencyClient(c.config)
+	c.FeeRule = NewFeeRuleClient(c.config)
+	c.FeeTier = NewFeeTierClient(c.config)
+	c.Invoice = NewInvoiceClient(c.config)
 	c.KYBDocument = NewKYBDocumentClient(c.config)
 	c.KYBMessage = NewKYBMessageClient(c.config)
 	c.Ledger = NewLedgerClient(c.config)
 	c.LedgerOwner = NewLedgerOwnerClient(c.config)
 	c.Manager = NewManagerClient(c.config)
+	c.NubanBank = NewNubanBankClient(c.config)
+	c.NubanBeneficiary = NewNubanBeneficiaryClient(c.config)
+	c.NubanBlacklist = NewNubanBlacklistClient(c.config)
 	c.NubanDeposit = NewNubanDepositClient(c.config)
 	c.NubanDynamicAccount = NewNubanDynamicAccountClient(c.config)
 	c.NubanStaticAccount = NewNubanStaticAccountClient(c.config)
 	c.NubanTransfer = NewNubanTransferClient(c.config)
 	c.Permission = NewPermissionClient(c.config)
 	c.Provider = NewProviderClient(c.config)
+	c.ProviderBank = NewProviderBankClient(c.config)
 	c.RequestVerification = NewRequestVerificationClient(c.config)
 	c.Role = NewRoleClient(c.config)
 	c.RolePermission = NewRolePermissionClient(c.config)
@@ -159,7 +192,10 @@ func (c *Client) init() {
 	c.StablecoinSupportedNetwork = NewStablecoinSupportedNetworkClient(c.config)
 	c.StablecoinWallet = NewStablecoinWalletClient(c.config)
 	c.StablecoinWithdrawal = NewStablecoinWithdrawalClient(c.config)
+	c.Subscription = NewSubscriptionClient(c.config)
+	c.SubscriptionPlan = NewSubscriptionPlanClient(c.config)
 	c.Transaction = NewTransactionClient(c.config)
+	c.TransactionFee = NewTransactionFeeClient(c.config)
 	c.User = NewUserClient(c.config)
 	c.UserDocument = NewUserDocumentClient(c.config)
 	c.Vault = NewVaultClient(c.config)
@@ -259,21 +295,27 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		config:                     cfg,
 		Business:                   NewBusinessClient(cfg),
 		BusinessDocument:           NewBusinessDocumentClient(cfg),
-		BusinessFeature:            NewBusinessFeatureClient(cfg),
 		BusinessLocation:           NewBusinessLocationClient(cfg),
 		BusinessServices:           NewBusinessServicesClient(cfg),
 		Currency:                   NewCurrencyClient(cfg),
+		FeeRule:                    NewFeeRuleClient(cfg),
+		FeeTier:                    NewFeeTierClient(cfg),
+		Invoice:                    NewInvoiceClient(cfg),
 		KYBDocument:                NewKYBDocumentClient(cfg),
 		KYBMessage:                 NewKYBMessageClient(cfg),
 		Ledger:                     NewLedgerClient(cfg),
 		LedgerOwner:                NewLedgerOwnerClient(cfg),
 		Manager:                    NewManagerClient(cfg),
+		NubanBank:                  NewNubanBankClient(cfg),
+		NubanBeneficiary:           NewNubanBeneficiaryClient(cfg),
+		NubanBlacklist:             NewNubanBlacklistClient(cfg),
 		NubanDeposit:               NewNubanDepositClient(cfg),
 		NubanDynamicAccount:        NewNubanDynamicAccountClient(cfg),
 		NubanStaticAccount:         NewNubanStaticAccountClient(cfg),
 		NubanTransfer:              NewNubanTransferClient(cfg),
 		Permission:                 NewPermissionClient(cfg),
 		Provider:                   NewProviderClient(cfg),
+		ProviderBank:               NewProviderBankClient(cfg),
 		RequestVerification:        NewRequestVerificationClient(cfg),
 		Role:                       NewRoleClient(cfg),
 		RolePermission:             NewRolePermissionClient(cfg),
@@ -284,7 +326,10 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		StablecoinSupportedNetwork: NewStablecoinSupportedNetworkClient(cfg),
 		StablecoinWallet:           NewStablecoinWalletClient(cfg),
 		StablecoinWithdrawal:       NewStablecoinWithdrawalClient(cfg),
+		Subscription:               NewSubscriptionClient(cfg),
+		SubscriptionPlan:           NewSubscriptionPlanClient(cfg),
 		Transaction:                NewTransactionClient(cfg),
+		TransactionFee:             NewTransactionFeeClient(cfg),
 		User:                       NewUserClient(cfg),
 		UserDocument:               NewUserDocumentClient(cfg),
 		Vault:                      NewVaultClient(cfg),
@@ -311,21 +356,27 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		config:                     cfg,
 		Business:                   NewBusinessClient(cfg),
 		BusinessDocument:           NewBusinessDocumentClient(cfg),
-		BusinessFeature:            NewBusinessFeatureClient(cfg),
 		BusinessLocation:           NewBusinessLocationClient(cfg),
 		BusinessServices:           NewBusinessServicesClient(cfg),
 		Currency:                   NewCurrencyClient(cfg),
+		FeeRule:                    NewFeeRuleClient(cfg),
+		FeeTier:                    NewFeeTierClient(cfg),
+		Invoice:                    NewInvoiceClient(cfg),
 		KYBDocument:                NewKYBDocumentClient(cfg),
 		KYBMessage:                 NewKYBMessageClient(cfg),
 		Ledger:                     NewLedgerClient(cfg),
 		LedgerOwner:                NewLedgerOwnerClient(cfg),
 		Manager:                    NewManagerClient(cfg),
+		NubanBank:                  NewNubanBankClient(cfg),
+		NubanBeneficiary:           NewNubanBeneficiaryClient(cfg),
+		NubanBlacklist:             NewNubanBlacklistClient(cfg),
 		NubanDeposit:               NewNubanDepositClient(cfg),
 		NubanDynamicAccount:        NewNubanDynamicAccountClient(cfg),
 		NubanStaticAccount:         NewNubanStaticAccountClient(cfg),
 		NubanTransfer:              NewNubanTransferClient(cfg),
 		Permission:                 NewPermissionClient(cfg),
 		Provider:                   NewProviderClient(cfg),
+		ProviderBank:               NewProviderBankClient(cfg),
 		RequestVerification:        NewRequestVerificationClient(cfg),
 		Role:                       NewRoleClient(cfg),
 		RolePermission:             NewRolePermissionClient(cfg),
@@ -336,7 +387,10 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		StablecoinSupportedNetwork: NewStablecoinSupportedNetworkClient(cfg),
 		StablecoinWallet:           NewStablecoinWalletClient(cfg),
 		StablecoinWithdrawal:       NewStablecoinWithdrawalClient(cfg),
+		Subscription:               NewSubscriptionClient(cfg),
+		SubscriptionPlan:           NewSubscriptionPlanClient(cfg),
 		Transaction:                NewTransactionClient(cfg),
+		TransactionFee:             NewTransactionFeeClient(cfg),
 		User:                       NewUserClient(cfg),
 		UserDocument:               NewUserDocumentClient(cfg),
 		Vault:                      NewVaultClient(cfg),
@@ -371,14 +425,16 @@ func (c *Client) Close() error {
 // In order to add hooks to a specific client, call: `client.Node.Use(...)`.
 func (c *Client) Use(hooks ...Hook) {
 	for _, n := range []interface{ Use(...Hook) }{
-		c.Business, c.BusinessDocument, c.BusinessFeature, c.BusinessLocation,
-		c.BusinessServices, c.Currency, c.KYBDocument, c.KYBMessage, c.Ledger,
-		c.LedgerOwner, c.Manager, c.NubanDeposit, c.NubanDynamicAccount,
-		c.NubanStaticAccount, c.NubanTransfer, c.Permission, c.Provider,
+		c.Business, c.BusinessDocument, c.BusinessLocation, c.BusinessServices,
+		c.Currency, c.FeeRule, c.FeeTier, c.Invoice, c.KYBDocument, c.KYBMessage,
+		c.Ledger, c.LedgerOwner, c.Manager, c.NubanBank, c.NubanBeneficiary,
+		c.NubanBlacklist, c.NubanDeposit, c.NubanDynamicAccount, c.NubanStaticAccount,
+		c.NubanTransfer, c.Permission, c.Provider, c.ProviderBank,
 		c.RequestVerification, c.Role, c.RolePermission, c.Service, c.Social,
 		c.StablecoinDeposit, c.StablecoinNetwork, c.StablecoinSupportedNetwork,
-		c.StablecoinWallet, c.StablecoinWithdrawal, c.Transaction, c.User,
-		c.UserDocument, c.Vault, c.Verification, c.Wallet,
+		c.StablecoinWallet, c.StablecoinWithdrawal, c.Subscription, c.SubscriptionPlan,
+		c.Transaction, c.TransactionFee, c.User, c.UserDocument, c.Vault,
+		c.Verification, c.Wallet,
 	} {
 		n.Use(hooks...)
 	}
@@ -388,14 +444,16 @@ func (c *Client) Use(hooks ...Hook) {
 // In order to add interceptors to a specific client, call: `client.Node.Intercept(...)`.
 func (c *Client) Intercept(interceptors ...Interceptor) {
 	for _, n := range []interface{ Intercept(...Interceptor) }{
-		c.Business, c.BusinessDocument, c.BusinessFeature, c.BusinessLocation,
-		c.BusinessServices, c.Currency, c.KYBDocument, c.KYBMessage, c.Ledger,
-		c.LedgerOwner, c.Manager, c.NubanDeposit, c.NubanDynamicAccount,
-		c.NubanStaticAccount, c.NubanTransfer, c.Permission, c.Provider,
+		c.Business, c.BusinessDocument, c.BusinessLocation, c.BusinessServices,
+		c.Currency, c.FeeRule, c.FeeTier, c.Invoice, c.KYBDocument, c.KYBMessage,
+		c.Ledger, c.LedgerOwner, c.Manager, c.NubanBank, c.NubanBeneficiary,
+		c.NubanBlacklist, c.NubanDeposit, c.NubanDynamicAccount, c.NubanStaticAccount,
+		c.NubanTransfer, c.Permission, c.Provider, c.ProviderBank,
 		c.RequestVerification, c.Role, c.RolePermission, c.Service, c.Social,
 		c.StablecoinDeposit, c.StablecoinNetwork, c.StablecoinSupportedNetwork,
-		c.StablecoinWallet, c.StablecoinWithdrawal, c.Transaction, c.User,
-		c.UserDocument, c.Vault, c.Verification, c.Wallet,
+		c.StablecoinWallet, c.StablecoinWithdrawal, c.Subscription, c.SubscriptionPlan,
+		c.Transaction, c.TransactionFee, c.User, c.UserDocument, c.Vault,
+		c.Verification, c.Wallet,
 	} {
 		n.Intercept(interceptors...)
 	}
@@ -408,14 +466,18 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.Business.mutate(ctx, m)
 	case *BusinessDocumentMutation:
 		return c.BusinessDocument.mutate(ctx, m)
-	case *BusinessFeatureMutation:
-		return c.BusinessFeature.mutate(ctx, m)
 	case *BusinessLocationMutation:
 		return c.BusinessLocation.mutate(ctx, m)
 	case *BusinessServicesMutation:
 		return c.BusinessServices.mutate(ctx, m)
 	case *CurrencyMutation:
 		return c.Currency.mutate(ctx, m)
+	case *FeeRuleMutation:
+		return c.FeeRule.mutate(ctx, m)
+	case *FeeTierMutation:
+		return c.FeeTier.mutate(ctx, m)
+	case *InvoiceMutation:
+		return c.Invoice.mutate(ctx, m)
 	case *KYBDocumentMutation:
 		return c.KYBDocument.mutate(ctx, m)
 	case *KYBMessageMutation:
@@ -426,6 +488,12 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.LedgerOwner.mutate(ctx, m)
 	case *ManagerMutation:
 		return c.Manager.mutate(ctx, m)
+	case *NubanBankMutation:
+		return c.NubanBank.mutate(ctx, m)
+	case *NubanBeneficiaryMutation:
+		return c.NubanBeneficiary.mutate(ctx, m)
+	case *NubanBlacklistMutation:
+		return c.NubanBlacklist.mutate(ctx, m)
 	case *NubanDepositMutation:
 		return c.NubanDeposit.mutate(ctx, m)
 	case *NubanDynamicAccountMutation:
@@ -438,6 +506,8 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.Permission.mutate(ctx, m)
 	case *ProviderMutation:
 		return c.Provider.mutate(ctx, m)
+	case *ProviderBankMutation:
+		return c.ProviderBank.mutate(ctx, m)
 	case *RequestVerificationMutation:
 		return c.RequestVerification.mutate(ctx, m)
 	case *RoleMutation:
@@ -458,8 +528,14 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.StablecoinWallet.mutate(ctx, m)
 	case *StablecoinWithdrawalMutation:
 		return c.StablecoinWithdrawal.mutate(ctx, m)
+	case *SubscriptionMutation:
+		return c.Subscription.mutate(ctx, m)
+	case *SubscriptionPlanMutation:
+		return c.SubscriptionPlan.mutate(ctx, m)
 	case *TransactionMutation:
 		return c.Transaction.mutate(ctx, m)
+	case *TransactionFeeMutation:
+		return c.TransactionFee.mutate(ctx, m)
 	case *UserMutation:
 		return c.User.mutate(ctx, m)
 	case *UserDocumentMutation:
@@ -743,6 +819,22 @@ func (c *BusinessClient) QueryOwner(b *Business) *LedgerOwnerQuery {
 	return query
 }
 
+// QuerySubscriptions queries the subscriptions edge of a Business.
+func (c *BusinessClient) QuerySubscriptions(b *Business) *SubscriptionQuery {
+	query := (&SubscriptionClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := b.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(business.Table, business.FieldID, id),
+			sqlgraph.To(subscription.Table, subscription.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, business.SubscriptionsTable, business.SubscriptionsColumn),
+		)
+		fromV = sqlgraph.Neighbors(b.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // Hooks returns the client hooks.
 func (c *BusinessClient) Hooks() []Hook {
 	return c.hooks.Business
@@ -930,139 +1022,6 @@ func (c *BusinessDocumentClient) mutate(ctx context.Context, m *BusinessDocument
 		return (&BusinessDocumentDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
 	default:
 		return nil, fmt.Errorf("ent: unknown BusinessDocument mutation op: %q", m.Op())
-	}
-}
-
-// BusinessFeatureClient is a client for the BusinessFeature schema.
-type BusinessFeatureClient struct {
-	config
-}
-
-// NewBusinessFeatureClient returns a client for the BusinessFeature from the given config.
-func NewBusinessFeatureClient(c config) *BusinessFeatureClient {
-	return &BusinessFeatureClient{config: c}
-}
-
-// Use adds a list of mutation hooks to the hooks stack.
-// A call to `Use(f, g, h)` equals to `businessfeature.Hooks(f(g(h())))`.
-func (c *BusinessFeatureClient) Use(hooks ...Hook) {
-	c.hooks.BusinessFeature = append(c.hooks.BusinessFeature, hooks...)
-}
-
-// Intercept adds a list of query interceptors to the interceptors stack.
-// A call to `Intercept(f, g, h)` equals to `businessfeature.Intercept(f(g(h())))`.
-func (c *BusinessFeatureClient) Intercept(interceptors ...Interceptor) {
-	c.inters.BusinessFeature = append(c.inters.BusinessFeature, interceptors...)
-}
-
-// Create returns a builder for creating a BusinessFeature entity.
-func (c *BusinessFeatureClient) Create() *BusinessFeatureCreate {
-	mutation := newBusinessFeatureMutation(c.config, OpCreate)
-	return &BusinessFeatureCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// CreateBulk returns a builder for creating a bulk of BusinessFeature entities.
-func (c *BusinessFeatureClient) CreateBulk(builders ...*BusinessFeatureCreate) *BusinessFeatureCreateBulk {
-	return &BusinessFeatureCreateBulk{config: c.config, builders: builders}
-}
-
-// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
-// a builder and applies setFunc on it.
-func (c *BusinessFeatureClient) MapCreateBulk(slice any, setFunc func(*BusinessFeatureCreate, int)) *BusinessFeatureCreateBulk {
-	rv := reflect.ValueOf(slice)
-	if rv.Kind() != reflect.Slice {
-		return &BusinessFeatureCreateBulk{err: fmt.Errorf("calling to BusinessFeatureClient.MapCreateBulk with wrong type %T, need slice", slice)}
-	}
-	builders := make([]*BusinessFeatureCreate, rv.Len())
-	for i := 0; i < rv.Len(); i++ {
-		builders[i] = c.Create()
-		setFunc(builders[i], i)
-	}
-	return &BusinessFeatureCreateBulk{config: c.config, builders: builders}
-}
-
-// Update returns an update builder for BusinessFeature.
-func (c *BusinessFeatureClient) Update() *BusinessFeatureUpdate {
-	mutation := newBusinessFeatureMutation(c.config, OpUpdate)
-	return &BusinessFeatureUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// UpdateOne returns an update builder for the given entity.
-func (c *BusinessFeatureClient) UpdateOne(bf *BusinessFeature) *BusinessFeatureUpdateOne {
-	mutation := newBusinessFeatureMutation(c.config, OpUpdateOne, withBusinessFeature(bf))
-	return &BusinessFeatureUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// UpdateOneID returns an update builder for the given id.
-func (c *BusinessFeatureClient) UpdateOneID(id string) *BusinessFeatureUpdateOne {
-	mutation := newBusinessFeatureMutation(c.config, OpUpdateOne, withBusinessFeatureID(id))
-	return &BusinessFeatureUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// Delete returns a delete builder for BusinessFeature.
-func (c *BusinessFeatureClient) Delete() *BusinessFeatureDelete {
-	mutation := newBusinessFeatureMutation(c.config, OpDelete)
-	return &BusinessFeatureDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// DeleteOne returns a builder for deleting the given entity.
-func (c *BusinessFeatureClient) DeleteOne(bf *BusinessFeature) *BusinessFeatureDeleteOne {
-	return c.DeleteOneID(bf.ID)
-}
-
-// DeleteOneID returns a builder for deleting the given entity by its id.
-func (c *BusinessFeatureClient) DeleteOneID(id string) *BusinessFeatureDeleteOne {
-	builder := c.Delete().Where(businessfeature.ID(id))
-	builder.mutation.id = &id
-	builder.mutation.op = OpDeleteOne
-	return &BusinessFeatureDeleteOne{builder}
-}
-
-// Query returns a query builder for BusinessFeature.
-func (c *BusinessFeatureClient) Query() *BusinessFeatureQuery {
-	return &BusinessFeatureQuery{
-		config: c.config,
-		ctx:    &QueryContext{Type: TypeBusinessFeature},
-		inters: c.Interceptors(),
-	}
-}
-
-// Get returns a BusinessFeature entity by its id.
-func (c *BusinessFeatureClient) Get(ctx context.Context, id string) (*BusinessFeature, error) {
-	return c.Query().Where(businessfeature.ID(id)).Only(ctx)
-}
-
-// GetX is like Get, but panics if an error occurs.
-func (c *BusinessFeatureClient) GetX(ctx context.Context, id string) *BusinessFeature {
-	obj, err := c.Get(ctx, id)
-	if err != nil {
-		panic(err)
-	}
-	return obj
-}
-
-// Hooks returns the client hooks.
-func (c *BusinessFeatureClient) Hooks() []Hook {
-	return c.hooks.BusinessFeature
-}
-
-// Interceptors returns the client interceptors.
-func (c *BusinessFeatureClient) Interceptors() []Interceptor {
-	return c.inters.BusinessFeature
-}
-
-func (c *BusinessFeatureClient) mutate(ctx context.Context, m *BusinessFeatureMutation) (Value, error) {
-	switch m.Op() {
-	case OpCreate:
-		return (&BusinessFeatureCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
-	case OpUpdate:
-		return (&BusinessFeatureUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
-	case OpUpdateOne:
-		return (&BusinessFeatureUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
-	case OpDelete, OpDeleteOne:
-		return (&BusinessFeatureDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
-	default:
-		return nil, fmt.Errorf("ent: unknown BusinessFeature mutation op: %q", m.Op())
 	}
 }
 
@@ -1545,6 +1504,485 @@ func (c *CurrencyClient) mutate(ctx context.Context, m *CurrencyMutation) (Value
 	}
 }
 
+// FeeRuleClient is a client for the FeeRule schema.
+type FeeRuleClient struct {
+	config
+}
+
+// NewFeeRuleClient returns a client for the FeeRule from the given config.
+func NewFeeRuleClient(c config) *FeeRuleClient {
+	return &FeeRuleClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `feerule.Hooks(f(g(h())))`.
+func (c *FeeRuleClient) Use(hooks ...Hook) {
+	c.hooks.FeeRule = append(c.hooks.FeeRule, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `feerule.Intercept(f(g(h())))`.
+func (c *FeeRuleClient) Intercept(interceptors ...Interceptor) {
+	c.inters.FeeRule = append(c.inters.FeeRule, interceptors...)
+}
+
+// Create returns a builder for creating a FeeRule entity.
+func (c *FeeRuleClient) Create() *FeeRuleCreate {
+	mutation := newFeeRuleMutation(c.config, OpCreate)
+	return &FeeRuleCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of FeeRule entities.
+func (c *FeeRuleClient) CreateBulk(builders ...*FeeRuleCreate) *FeeRuleCreateBulk {
+	return &FeeRuleCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *FeeRuleClient) MapCreateBulk(slice any, setFunc func(*FeeRuleCreate, int)) *FeeRuleCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &FeeRuleCreateBulk{err: fmt.Errorf("calling to FeeRuleClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*FeeRuleCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &FeeRuleCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for FeeRule.
+func (c *FeeRuleClient) Update() *FeeRuleUpdate {
+	mutation := newFeeRuleMutation(c.config, OpUpdate)
+	return &FeeRuleUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *FeeRuleClient) UpdateOne(fr *FeeRule) *FeeRuleUpdateOne {
+	mutation := newFeeRuleMutation(c.config, OpUpdateOne, withFeeRule(fr))
+	return &FeeRuleUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *FeeRuleClient) UpdateOneID(id string) *FeeRuleUpdateOne {
+	mutation := newFeeRuleMutation(c.config, OpUpdateOne, withFeeRuleID(id))
+	return &FeeRuleUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for FeeRule.
+func (c *FeeRuleClient) Delete() *FeeRuleDelete {
+	mutation := newFeeRuleMutation(c.config, OpDelete)
+	return &FeeRuleDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *FeeRuleClient) DeleteOne(fr *FeeRule) *FeeRuleDeleteOne {
+	return c.DeleteOneID(fr.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *FeeRuleClient) DeleteOneID(id string) *FeeRuleDeleteOne {
+	builder := c.Delete().Where(feerule.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &FeeRuleDeleteOne{builder}
+}
+
+// Query returns a query builder for FeeRule.
+func (c *FeeRuleClient) Query() *FeeRuleQuery {
+	return &FeeRuleQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeFeeRule},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a FeeRule entity by its id.
+func (c *FeeRuleClient) Get(ctx context.Context, id string) (*FeeRule, error) {
+	return c.Query().Where(feerule.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *FeeRuleClient) GetX(ctx context.Context, id string) *FeeRule {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryService queries the service edge of a FeeRule.
+func (c *FeeRuleClient) QueryService(fr *FeeRule) *ServiceQuery {
+	query := (&ServiceClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := fr.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(feerule.Table, feerule.FieldID, id),
+			sqlgraph.To(service.Table, service.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, feerule.ServiceTable, feerule.ServiceColumn),
+		)
+		fromV = sqlgraph.Neighbors(fr.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryTiers queries the tiers edge of a FeeRule.
+func (c *FeeRuleClient) QueryTiers(fr *FeeRule) *FeeTierQuery {
+	query := (&FeeTierClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := fr.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(feerule.Table, feerule.FieldID, id),
+			sqlgraph.To(feetier.Table, feetier.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, feerule.TiersTable, feerule.TiersColumn),
+		)
+		fromV = sqlgraph.Neighbors(fr.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *FeeRuleClient) Hooks() []Hook {
+	return c.hooks.FeeRule
+}
+
+// Interceptors returns the client interceptors.
+func (c *FeeRuleClient) Interceptors() []Interceptor {
+	return c.inters.FeeRule
+}
+
+func (c *FeeRuleClient) mutate(ctx context.Context, m *FeeRuleMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&FeeRuleCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&FeeRuleUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&FeeRuleUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&FeeRuleDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown FeeRule mutation op: %q", m.Op())
+	}
+}
+
+// FeeTierClient is a client for the FeeTier schema.
+type FeeTierClient struct {
+	config
+}
+
+// NewFeeTierClient returns a client for the FeeTier from the given config.
+func NewFeeTierClient(c config) *FeeTierClient {
+	return &FeeTierClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `feetier.Hooks(f(g(h())))`.
+func (c *FeeTierClient) Use(hooks ...Hook) {
+	c.hooks.FeeTier = append(c.hooks.FeeTier, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `feetier.Intercept(f(g(h())))`.
+func (c *FeeTierClient) Intercept(interceptors ...Interceptor) {
+	c.inters.FeeTier = append(c.inters.FeeTier, interceptors...)
+}
+
+// Create returns a builder for creating a FeeTier entity.
+func (c *FeeTierClient) Create() *FeeTierCreate {
+	mutation := newFeeTierMutation(c.config, OpCreate)
+	return &FeeTierCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of FeeTier entities.
+func (c *FeeTierClient) CreateBulk(builders ...*FeeTierCreate) *FeeTierCreateBulk {
+	return &FeeTierCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *FeeTierClient) MapCreateBulk(slice any, setFunc func(*FeeTierCreate, int)) *FeeTierCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &FeeTierCreateBulk{err: fmt.Errorf("calling to FeeTierClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*FeeTierCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &FeeTierCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for FeeTier.
+func (c *FeeTierClient) Update() *FeeTierUpdate {
+	mutation := newFeeTierMutation(c.config, OpUpdate)
+	return &FeeTierUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *FeeTierClient) UpdateOne(ft *FeeTier) *FeeTierUpdateOne {
+	mutation := newFeeTierMutation(c.config, OpUpdateOne, withFeeTier(ft))
+	return &FeeTierUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *FeeTierClient) UpdateOneID(id string) *FeeTierUpdateOne {
+	mutation := newFeeTierMutation(c.config, OpUpdateOne, withFeeTierID(id))
+	return &FeeTierUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for FeeTier.
+func (c *FeeTierClient) Delete() *FeeTierDelete {
+	mutation := newFeeTierMutation(c.config, OpDelete)
+	return &FeeTierDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *FeeTierClient) DeleteOne(ft *FeeTier) *FeeTierDeleteOne {
+	return c.DeleteOneID(ft.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *FeeTierClient) DeleteOneID(id string) *FeeTierDeleteOne {
+	builder := c.Delete().Where(feetier.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &FeeTierDeleteOne{builder}
+}
+
+// Query returns a query builder for FeeTier.
+func (c *FeeTierClient) Query() *FeeTierQuery {
+	return &FeeTierQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeFeeTier},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a FeeTier entity by its id.
+func (c *FeeTierClient) Get(ctx context.Context, id string) (*FeeTier, error) {
+	return c.Query().Where(feetier.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *FeeTierClient) GetX(ctx context.Context, id string) *FeeTier {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryFeeRule queries the fee_rule edge of a FeeTier.
+func (c *FeeTierClient) QueryFeeRule(ft *FeeTier) *FeeRuleQuery {
+	query := (&FeeRuleClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := ft.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(feetier.Table, feetier.FieldID, id),
+			sqlgraph.To(feerule.Table, feerule.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, feetier.FeeRuleTable, feetier.FeeRuleColumn),
+		)
+		fromV = sqlgraph.Neighbors(ft.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *FeeTierClient) Hooks() []Hook {
+	return c.hooks.FeeTier
+}
+
+// Interceptors returns the client interceptors.
+func (c *FeeTierClient) Interceptors() []Interceptor {
+	return c.inters.FeeTier
+}
+
+func (c *FeeTierClient) mutate(ctx context.Context, m *FeeTierMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&FeeTierCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&FeeTierUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&FeeTierUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&FeeTierDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown FeeTier mutation op: %q", m.Op())
+	}
+}
+
+// InvoiceClient is a client for the Invoice schema.
+type InvoiceClient struct {
+	config
+}
+
+// NewInvoiceClient returns a client for the Invoice from the given config.
+func NewInvoiceClient(c config) *InvoiceClient {
+	return &InvoiceClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `invoice.Hooks(f(g(h())))`.
+func (c *InvoiceClient) Use(hooks ...Hook) {
+	c.hooks.Invoice = append(c.hooks.Invoice, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `invoice.Intercept(f(g(h())))`.
+func (c *InvoiceClient) Intercept(interceptors ...Interceptor) {
+	c.inters.Invoice = append(c.inters.Invoice, interceptors...)
+}
+
+// Create returns a builder for creating a Invoice entity.
+func (c *InvoiceClient) Create() *InvoiceCreate {
+	mutation := newInvoiceMutation(c.config, OpCreate)
+	return &InvoiceCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of Invoice entities.
+func (c *InvoiceClient) CreateBulk(builders ...*InvoiceCreate) *InvoiceCreateBulk {
+	return &InvoiceCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *InvoiceClient) MapCreateBulk(slice any, setFunc func(*InvoiceCreate, int)) *InvoiceCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &InvoiceCreateBulk{err: fmt.Errorf("calling to InvoiceClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*InvoiceCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &InvoiceCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for Invoice.
+func (c *InvoiceClient) Update() *InvoiceUpdate {
+	mutation := newInvoiceMutation(c.config, OpUpdate)
+	return &InvoiceUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *InvoiceClient) UpdateOne(i *Invoice) *InvoiceUpdateOne {
+	mutation := newInvoiceMutation(c.config, OpUpdateOne, withInvoice(i))
+	return &InvoiceUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *InvoiceClient) UpdateOneID(id string) *InvoiceUpdateOne {
+	mutation := newInvoiceMutation(c.config, OpUpdateOne, withInvoiceID(id))
+	return &InvoiceUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for Invoice.
+func (c *InvoiceClient) Delete() *InvoiceDelete {
+	mutation := newInvoiceMutation(c.config, OpDelete)
+	return &InvoiceDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *InvoiceClient) DeleteOne(i *Invoice) *InvoiceDeleteOne {
+	return c.DeleteOneID(i.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *InvoiceClient) DeleteOneID(id string) *InvoiceDeleteOne {
+	builder := c.Delete().Where(invoice.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &InvoiceDeleteOne{builder}
+}
+
+// Query returns a query builder for Invoice.
+func (c *InvoiceClient) Query() *InvoiceQuery {
+	return &InvoiceQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeInvoice},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a Invoice entity by its id.
+func (c *InvoiceClient) Get(ctx context.Context, id string) (*Invoice, error) {
+	return c.Query().Where(invoice.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *InvoiceClient) GetX(ctx context.Context, id string) *Invoice {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QuerySubscription queries the subscription edge of a Invoice.
+func (c *InvoiceClient) QuerySubscription(i *Invoice) *SubscriptionQuery {
+	query := (&SubscriptionClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := i.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(invoice.Table, invoice.FieldID, id),
+			sqlgraph.To(subscription.Table, subscription.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, invoice.SubscriptionTable, invoice.SubscriptionColumn),
+		)
+		fromV = sqlgraph.Neighbors(i.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryTransaction queries the transaction edge of a Invoice.
+func (c *InvoiceClient) QueryTransaction(i *Invoice) *TransactionQuery {
+	query := (&TransactionClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := i.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(invoice.Table, invoice.FieldID, id),
+			sqlgraph.To(transaction.Table, transaction.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, invoice.TransactionTable, invoice.TransactionColumn),
+		)
+		fromV = sqlgraph.Neighbors(i.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *InvoiceClient) Hooks() []Hook {
+	return c.hooks.Invoice
+}
+
+// Interceptors returns the client interceptors.
+func (c *InvoiceClient) Interceptors() []Interceptor {
+	return c.inters.Invoice
+}
+
+func (c *InvoiceClient) mutate(ctx context.Context, m *InvoiceMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&InvoiceCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&InvoiceUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&InvoiceUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&InvoiceDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown Invoice mutation op: %q", m.Op())
+	}
+}
+
 // KYBDocumentClient is a client for the KYBDocument schema.
 type KYBDocumentClient struct {
 	config
@@ -1959,7 +2397,7 @@ func (c *LedgerClient) QueryTransaction(l *Ledger) *TransactionQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(ledger.Table, ledger.FieldID, id),
 			sqlgraph.To(transaction.Table, transaction.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, ledger.TransactionTable, ledger.TransactionColumn),
+			sqlgraph.Edge(sqlgraph.O2O, true, ledger.TransactionTable, ledger.TransactionColumn),
 		)
 		fromV = sqlgraph.Neighbors(l.driver.Dialect(), step)
 		return fromV, nil
@@ -2180,6 +2618,22 @@ func (c *LedgerOwnerClient) QueryUser(lo *LedgerOwner) *UserQuery {
 	return query
 }
 
+// QueryNubanBeneficiaries queries the nuban_beneficiaries edge of a LedgerOwner.
+func (c *LedgerOwnerClient) QueryNubanBeneficiaries(lo *LedgerOwner) *NubanBeneficiaryQuery {
+	query := (&NubanBeneficiaryClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := lo.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(ledgerowner.Table, ledgerowner.FieldID, id),
+			sqlgraph.To(nubanbeneficiary.Table, nubanbeneficiary.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, ledgerowner.NubanBeneficiariesTable, ledgerowner.NubanBeneficiariesColumn),
+		)
+		fromV = sqlgraph.Neighbors(lo.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // Hooks returns the client hooks.
 func (c *LedgerOwnerClient) Hooks() []Hook {
 	return c.hooks.LedgerOwner
@@ -2383,6 +2837,533 @@ func (c *ManagerClient) mutate(ctx context.Context, m *ManagerMutation) (Value, 
 		return (&ManagerDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
 	default:
 		return nil, fmt.Errorf("ent: unknown Manager mutation op: %q", m.Op())
+	}
+}
+
+// NubanBankClient is a client for the NubanBank schema.
+type NubanBankClient struct {
+	config
+}
+
+// NewNubanBankClient returns a client for the NubanBank from the given config.
+func NewNubanBankClient(c config) *NubanBankClient {
+	return &NubanBankClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `nubanbank.Hooks(f(g(h())))`.
+func (c *NubanBankClient) Use(hooks ...Hook) {
+	c.hooks.NubanBank = append(c.hooks.NubanBank, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `nubanbank.Intercept(f(g(h())))`.
+func (c *NubanBankClient) Intercept(interceptors ...Interceptor) {
+	c.inters.NubanBank = append(c.inters.NubanBank, interceptors...)
+}
+
+// Create returns a builder for creating a NubanBank entity.
+func (c *NubanBankClient) Create() *NubanBankCreate {
+	mutation := newNubanBankMutation(c.config, OpCreate)
+	return &NubanBankCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of NubanBank entities.
+func (c *NubanBankClient) CreateBulk(builders ...*NubanBankCreate) *NubanBankCreateBulk {
+	return &NubanBankCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *NubanBankClient) MapCreateBulk(slice any, setFunc func(*NubanBankCreate, int)) *NubanBankCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &NubanBankCreateBulk{err: fmt.Errorf("calling to NubanBankClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*NubanBankCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &NubanBankCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for NubanBank.
+func (c *NubanBankClient) Update() *NubanBankUpdate {
+	mutation := newNubanBankMutation(c.config, OpUpdate)
+	return &NubanBankUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *NubanBankClient) UpdateOne(nb *NubanBank) *NubanBankUpdateOne {
+	mutation := newNubanBankMutation(c.config, OpUpdateOne, withNubanBank(nb))
+	return &NubanBankUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *NubanBankClient) UpdateOneID(id string) *NubanBankUpdateOne {
+	mutation := newNubanBankMutation(c.config, OpUpdateOne, withNubanBankID(id))
+	return &NubanBankUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for NubanBank.
+func (c *NubanBankClient) Delete() *NubanBankDelete {
+	mutation := newNubanBankMutation(c.config, OpDelete)
+	return &NubanBankDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *NubanBankClient) DeleteOne(nb *NubanBank) *NubanBankDeleteOne {
+	return c.DeleteOneID(nb.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *NubanBankClient) DeleteOneID(id string) *NubanBankDeleteOne {
+	builder := c.Delete().Where(nubanbank.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &NubanBankDeleteOne{builder}
+}
+
+// Query returns a query builder for NubanBank.
+func (c *NubanBankClient) Query() *NubanBankQuery {
+	return &NubanBankQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeNubanBank},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a NubanBank entity by its id.
+func (c *NubanBankClient) Get(ctx context.Context, id string) (*NubanBank, error) {
+	return c.Query().Where(nubanbank.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *NubanBankClient) GetX(ctx context.Context, id string) *NubanBank {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryProviderBanks queries the provider_banks edge of a NubanBank.
+func (c *NubanBankClient) QueryProviderBanks(nb *NubanBank) *ProviderBankQuery {
+	query := (&ProviderBankClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := nb.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(nubanbank.Table, nubanbank.FieldID, id),
+			sqlgraph.To(providerbank.Table, providerbank.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, nubanbank.ProviderBanksTable, nubanbank.ProviderBanksColumn),
+		)
+		fromV = sqlgraph.Neighbors(nb.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryBank queries the bank edge of a NubanBank.
+func (c *NubanBankClient) QueryBank(nb *NubanBank) *NubanTransferQuery {
+	query := (&NubanTransferClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := nb.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(nubanbank.Table, nubanbank.FieldID, id),
+			sqlgraph.To(nubantransfer.Table, nubantransfer.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, nubanbank.BankTable, nubanbank.BankColumn),
+		)
+		fromV = sqlgraph.Neighbors(nb.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryBeneficiaryBank queries the beneficiary_bank edge of a NubanBank.
+func (c *NubanBankClient) QueryBeneficiaryBank(nb *NubanBank) *NubanBeneficiaryQuery {
+	query := (&NubanBeneficiaryClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := nb.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(nubanbank.Table, nubanbank.FieldID, id),
+			sqlgraph.To(nubanbeneficiary.Table, nubanbeneficiary.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, nubanbank.BeneficiaryBankTable, nubanbank.BeneficiaryBankColumn),
+		)
+		fromV = sqlgraph.Neighbors(nb.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryBlacklist queries the blacklist edge of a NubanBank.
+func (c *NubanBankClient) QueryBlacklist(nb *NubanBank) *NubanBlacklistQuery {
+	query := (&NubanBlacklistClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := nb.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(nubanbank.Table, nubanbank.FieldID, id),
+			sqlgraph.To(nubanblacklist.Table, nubanblacklist.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, nubanbank.BlacklistTable, nubanbank.BlacklistColumn),
+		)
+		fromV = sqlgraph.Neighbors(nb.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *NubanBankClient) Hooks() []Hook {
+	return c.hooks.NubanBank
+}
+
+// Interceptors returns the client interceptors.
+func (c *NubanBankClient) Interceptors() []Interceptor {
+	return c.inters.NubanBank
+}
+
+func (c *NubanBankClient) mutate(ctx context.Context, m *NubanBankMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&NubanBankCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&NubanBankUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&NubanBankUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&NubanBankDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown NubanBank mutation op: %q", m.Op())
+	}
+}
+
+// NubanBeneficiaryClient is a client for the NubanBeneficiary schema.
+type NubanBeneficiaryClient struct {
+	config
+}
+
+// NewNubanBeneficiaryClient returns a client for the NubanBeneficiary from the given config.
+func NewNubanBeneficiaryClient(c config) *NubanBeneficiaryClient {
+	return &NubanBeneficiaryClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `nubanbeneficiary.Hooks(f(g(h())))`.
+func (c *NubanBeneficiaryClient) Use(hooks ...Hook) {
+	c.hooks.NubanBeneficiary = append(c.hooks.NubanBeneficiary, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `nubanbeneficiary.Intercept(f(g(h())))`.
+func (c *NubanBeneficiaryClient) Intercept(interceptors ...Interceptor) {
+	c.inters.NubanBeneficiary = append(c.inters.NubanBeneficiary, interceptors...)
+}
+
+// Create returns a builder for creating a NubanBeneficiary entity.
+func (c *NubanBeneficiaryClient) Create() *NubanBeneficiaryCreate {
+	mutation := newNubanBeneficiaryMutation(c.config, OpCreate)
+	return &NubanBeneficiaryCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of NubanBeneficiary entities.
+func (c *NubanBeneficiaryClient) CreateBulk(builders ...*NubanBeneficiaryCreate) *NubanBeneficiaryCreateBulk {
+	return &NubanBeneficiaryCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *NubanBeneficiaryClient) MapCreateBulk(slice any, setFunc func(*NubanBeneficiaryCreate, int)) *NubanBeneficiaryCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &NubanBeneficiaryCreateBulk{err: fmt.Errorf("calling to NubanBeneficiaryClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*NubanBeneficiaryCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &NubanBeneficiaryCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for NubanBeneficiary.
+func (c *NubanBeneficiaryClient) Update() *NubanBeneficiaryUpdate {
+	mutation := newNubanBeneficiaryMutation(c.config, OpUpdate)
+	return &NubanBeneficiaryUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *NubanBeneficiaryClient) UpdateOne(nb *NubanBeneficiary) *NubanBeneficiaryUpdateOne {
+	mutation := newNubanBeneficiaryMutation(c.config, OpUpdateOne, withNubanBeneficiary(nb))
+	return &NubanBeneficiaryUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *NubanBeneficiaryClient) UpdateOneID(id string) *NubanBeneficiaryUpdateOne {
+	mutation := newNubanBeneficiaryMutation(c.config, OpUpdateOne, withNubanBeneficiaryID(id))
+	return &NubanBeneficiaryUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for NubanBeneficiary.
+func (c *NubanBeneficiaryClient) Delete() *NubanBeneficiaryDelete {
+	mutation := newNubanBeneficiaryMutation(c.config, OpDelete)
+	return &NubanBeneficiaryDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *NubanBeneficiaryClient) DeleteOne(nb *NubanBeneficiary) *NubanBeneficiaryDeleteOne {
+	return c.DeleteOneID(nb.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *NubanBeneficiaryClient) DeleteOneID(id string) *NubanBeneficiaryDeleteOne {
+	builder := c.Delete().Where(nubanbeneficiary.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &NubanBeneficiaryDeleteOne{builder}
+}
+
+// Query returns a query builder for NubanBeneficiary.
+func (c *NubanBeneficiaryClient) Query() *NubanBeneficiaryQuery {
+	return &NubanBeneficiaryQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeNubanBeneficiary},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a NubanBeneficiary entity by its id.
+func (c *NubanBeneficiaryClient) Get(ctx context.Context, id string) (*NubanBeneficiary, error) {
+	return c.Query().Where(nubanbeneficiary.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *NubanBeneficiaryClient) GetX(ctx context.Context, id string) *NubanBeneficiary {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryNubanBeneficiary queries the nuban_beneficiary edge of a NubanBeneficiary.
+func (c *NubanBeneficiaryClient) QueryNubanBeneficiary(nb *NubanBeneficiary) *LedgerOwnerQuery {
+	query := (&LedgerOwnerClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := nb.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(nubanbeneficiary.Table, nubanbeneficiary.FieldID, id),
+			sqlgraph.To(ledgerowner.Table, ledgerowner.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, nubanbeneficiary.NubanBeneficiaryTable, nubanbeneficiary.NubanBeneficiaryColumn),
+		)
+		fromV = sqlgraph.Neighbors(nb.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryNubanBeneficiaries queries the nuban_beneficiaries edge of a NubanBeneficiary.
+func (c *NubanBeneficiaryClient) QueryNubanBeneficiaries(nb *NubanBeneficiary) *NubanTransferQuery {
+	query := (&NubanTransferClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := nb.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(nubanbeneficiary.Table, nubanbeneficiary.FieldID, id),
+			sqlgraph.To(nubantransfer.Table, nubantransfer.FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, false, nubanbeneficiary.NubanBeneficiariesTable, nubanbeneficiary.NubanBeneficiariesPrimaryKey...),
+		)
+		fromV = sqlgraph.Neighbors(nb.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryNubanBank queries the nuban_bank edge of a NubanBeneficiary.
+func (c *NubanBeneficiaryClient) QueryNubanBank(nb *NubanBeneficiary) *NubanBankQuery {
+	query := (&NubanBankClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := nb.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(nubanbeneficiary.Table, nubanbeneficiary.FieldID, id),
+			sqlgraph.To(nubanbank.Table, nubanbank.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, nubanbeneficiary.NubanBankTable, nubanbeneficiary.NubanBankColumn),
+		)
+		fromV = sqlgraph.Neighbors(nb.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *NubanBeneficiaryClient) Hooks() []Hook {
+	return c.hooks.NubanBeneficiary
+}
+
+// Interceptors returns the client interceptors.
+func (c *NubanBeneficiaryClient) Interceptors() []Interceptor {
+	return c.inters.NubanBeneficiary
+}
+
+func (c *NubanBeneficiaryClient) mutate(ctx context.Context, m *NubanBeneficiaryMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&NubanBeneficiaryCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&NubanBeneficiaryUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&NubanBeneficiaryUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&NubanBeneficiaryDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown NubanBeneficiary mutation op: %q", m.Op())
+	}
+}
+
+// NubanBlacklistClient is a client for the NubanBlacklist schema.
+type NubanBlacklistClient struct {
+	config
+}
+
+// NewNubanBlacklistClient returns a client for the NubanBlacklist from the given config.
+func NewNubanBlacklistClient(c config) *NubanBlacklistClient {
+	return &NubanBlacklistClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `nubanblacklist.Hooks(f(g(h())))`.
+func (c *NubanBlacklistClient) Use(hooks ...Hook) {
+	c.hooks.NubanBlacklist = append(c.hooks.NubanBlacklist, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `nubanblacklist.Intercept(f(g(h())))`.
+func (c *NubanBlacklistClient) Intercept(interceptors ...Interceptor) {
+	c.inters.NubanBlacklist = append(c.inters.NubanBlacklist, interceptors...)
+}
+
+// Create returns a builder for creating a NubanBlacklist entity.
+func (c *NubanBlacklistClient) Create() *NubanBlacklistCreate {
+	mutation := newNubanBlacklistMutation(c.config, OpCreate)
+	return &NubanBlacklistCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of NubanBlacklist entities.
+func (c *NubanBlacklistClient) CreateBulk(builders ...*NubanBlacklistCreate) *NubanBlacklistCreateBulk {
+	return &NubanBlacklistCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *NubanBlacklistClient) MapCreateBulk(slice any, setFunc func(*NubanBlacklistCreate, int)) *NubanBlacklistCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &NubanBlacklistCreateBulk{err: fmt.Errorf("calling to NubanBlacklistClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*NubanBlacklistCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &NubanBlacklistCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for NubanBlacklist.
+func (c *NubanBlacklistClient) Update() *NubanBlacklistUpdate {
+	mutation := newNubanBlacklistMutation(c.config, OpUpdate)
+	return &NubanBlacklistUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *NubanBlacklistClient) UpdateOne(nb *NubanBlacklist) *NubanBlacklistUpdateOne {
+	mutation := newNubanBlacklistMutation(c.config, OpUpdateOne, withNubanBlacklist(nb))
+	return &NubanBlacklistUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *NubanBlacklistClient) UpdateOneID(id string) *NubanBlacklistUpdateOne {
+	mutation := newNubanBlacklistMutation(c.config, OpUpdateOne, withNubanBlacklistID(id))
+	return &NubanBlacklistUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for NubanBlacklist.
+func (c *NubanBlacklistClient) Delete() *NubanBlacklistDelete {
+	mutation := newNubanBlacklistMutation(c.config, OpDelete)
+	return &NubanBlacklistDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *NubanBlacklistClient) DeleteOne(nb *NubanBlacklist) *NubanBlacklistDeleteOne {
+	return c.DeleteOneID(nb.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *NubanBlacklistClient) DeleteOneID(id string) *NubanBlacklistDeleteOne {
+	builder := c.Delete().Where(nubanblacklist.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &NubanBlacklistDeleteOne{builder}
+}
+
+// Query returns a query builder for NubanBlacklist.
+func (c *NubanBlacklistClient) Query() *NubanBlacklistQuery {
+	return &NubanBlacklistQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeNubanBlacklist},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a NubanBlacklist entity by its id.
+func (c *NubanBlacklistClient) Get(ctx context.Context, id string) (*NubanBlacklist, error) {
+	return c.Query().Where(nubanblacklist.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *NubanBlacklistClient) GetX(ctx context.Context, id string) *NubanBlacklist {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryNubanBank queries the nuban_bank edge of a NubanBlacklist.
+func (c *NubanBlacklistClient) QueryNubanBank(nb *NubanBlacklist) *NubanBankQuery {
+	query := (&NubanBankClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := nb.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(nubanblacklist.Table, nubanblacklist.FieldID, id),
+			sqlgraph.To(nubanbank.Table, nubanbank.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, nubanblacklist.NubanBankTable, nubanblacklist.NubanBankColumn),
+		)
+		fromV = sqlgraph.Neighbors(nb.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *NubanBlacklistClient) Hooks() []Hook {
+	return c.hooks.NubanBlacklist
+}
+
+// Interceptors returns the client interceptors.
+func (c *NubanBlacklistClient) Interceptors() []Interceptor {
+	return c.inters.NubanBlacklist
+}
+
+func (c *NubanBlacklistClient) mutate(ctx context.Context, m *NubanBlacklistMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&NubanBlacklistCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&NubanBlacklistUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&NubanBlacklistUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&NubanBlacklistDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown NubanBlacklist mutation op: %q", m.Op())
 	}
 }
 
@@ -2957,6 +3938,38 @@ func (c *NubanTransferClient) QueryTransaction(nt *NubanTransfer) *TransactionQu
 	return query
 }
 
+// QueryNubanBank queries the nuban_bank edge of a NubanTransfer.
+func (c *NubanTransferClient) QueryNubanBank(nt *NubanTransfer) *NubanBankQuery {
+	query := (&NubanBankClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := nt.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(nubantransfer.Table, nubantransfer.FieldID, id),
+			sqlgraph.To(nubanbank.Table, nubanbank.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, nubantransfer.NubanBankTable, nubantransfer.NubanBankColumn),
+		)
+		fromV = sqlgraph.Neighbors(nt.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryBeneficiaries queries the beneficiaries edge of a NubanTransfer.
+func (c *NubanTransferClient) QueryBeneficiaries(nt *NubanTransfer) *NubanBeneficiaryQuery {
+	query := (&NubanBeneficiaryClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := nt.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(nubantransfer.Table, nubantransfer.FieldID, id),
+			sqlgraph.To(nubanbeneficiary.Table, nubanbeneficiary.FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, true, nubantransfer.BeneficiariesTable, nubantransfer.BeneficiariesPrimaryKey...),
+		)
+		fromV = sqlgraph.Neighbors(nt.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // Hooks returns the client hooks.
 func (c *NubanTransferClient) Hooks() []Hook {
 	return c.hooks.NubanTransfer
@@ -3261,6 +4274,155 @@ func (c *ProviderClient) mutate(ctx context.Context, m *ProviderMutation) (Value
 		return (&ProviderDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
 	default:
 		return nil, fmt.Errorf("ent: unknown Provider mutation op: %q", m.Op())
+	}
+}
+
+// ProviderBankClient is a client for the ProviderBank schema.
+type ProviderBankClient struct {
+	config
+}
+
+// NewProviderBankClient returns a client for the ProviderBank from the given config.
+func NewProviderBankClient(c config) *ProviderBankClient {
+	return &ProviderBankClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `providerbank.Hooks(f(g(h())))`.
+func (c *ProviderBankClient) Use(hooks ...Hook) {
+	c.hooks.ProviderBank = append(c.hooks.ProviderBank, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `providerbank.Intercept(f(g(h())))`.
+func (c *ProviderBankClient) Intercept(interceptors ...Interceptor) {
+	c.inters.ProviderBank = append(c.inters.ProviderBank, interceptors...)
+}
+
+// Create returns a builder for creating a ProviderBank entity.
+func (c *ProviderBankClient) Create() *ProviderBankCreate {
+	mutation := newProviderBankMutation(c.config, OpCreate)
+	return &ProviderBankCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of ProviderBank entities.
+func (c *ProviderBankClient) CreateBulk(builders ...*ProviderBankCreate) *ProviderBankCreateBulk {
+	return &ProviderBankCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *ProviderBankClient) MapCreateBulk(slice any, setFunc func(*ProviderBankCreate, int)) *ProviderBankCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &ProviderBankCreateBulk{err: fmt.Errorf("calling to ProviderBankClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*ProviderBankCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &ProviderBankCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for ProviderBank.
+func (c *ProviderBankClient) Update() *ProviderBankUpdate {
+	mutation := newProviderBankMutation(c.config, OpUpdate)
+	return &ProviderBankUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *ProviderBankClient) UpdateOne(pb *ProviderBank) *ProviderBankUpdateOne {
+	mutation := newProviderBankMutation(c.config, OpUpdateOne, withProviderBank(pb))
+	return &ProviderBankUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *ProviderBankClient) UpdateOneID(id int) *ProviderBankUpdateOne {
+	mutation := newProviderBankMutation(c.config, OpUpdateOne, withProviderBankID(id))
+	return &ProviderBankUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for ProviderBank.
+func (c *ProviderBankClient) Delete() *ProviderBankDelete {
+	mutation := newProviderBankMutation(c.config, OpDelete)
+	return &ProviderBankDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *ProviderBankClient) DeleteOne(pb *ProviderBank) *ProviderBankDeleteOne {
+	return c.DeleteOneID(pb.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *ProviderBankClient) DeleteOneID(id int) *ProviderBankDeleteOne {
+	builder := c.Delete().Where(providerbank.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &ProviderBankDeleteOne{builder}
+}
+
+// Query returns a query builder for ProviderBank.
+func (c *ProviderBankClient) Query() *ProviderBankQuery {
+	return &ProviderBankQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeProviderBank},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a ProviderBank entity by its id.
+func (c *ProviderBankClient) Get(ctx context.Context, id int) (*ProviderBank, error) {
+	return c.Query().Where(providerbank.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *ProviderBankClient) GetX(ctx context.Context, id int) *ProviderBank {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryBank queries the bank edge of a ProviderBank.
+func (c *ProviderBankClient) QueryBank(pb *ProviderBank) *NubanBankQuery {
+	query := (&NubanBankClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := pb.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(providerbank.Table, providerbank.FieldID, id),
+			sqlgraph.To(nubanbank.Table, nubanbank.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, providerbank.BankTable, providerbank.BankColumn),
+		)
+		fromV = sqlgraph.Neighbors(pb.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *ProviderBankClient) Hooks() []Hook {
+	return c.hooks.ProviderBank
+}
+
+// Interceptors returns the client interceptors.
+func (c *ProviderBankClient) Interceptors() []Interceptor {
+	return c.inters.ProviderBank
+}
+
+func (c *ProviderBankClient) mutate(ctx context.Context, m *ProviderBankMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&ProviderBankCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&ProviderBankUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&ProviderBankUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&ProviderBankDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown ProviderBank mutation op: %q", m.Op())
 	}
 }
 
@@ -3865,6 +5027,22 @@ func (c *ServiceClient) GetX(ctx context.Context, id string) *Service {
 		panic(err)
 	}
 	return obj
+}
+
+// QueryFeeRules queries the fee_rules edge of a Service.
+func (c *ServiceClient) QueryFeeRules(s *Service) *FeeRuleQuery {
+	query := (&FeeRuleClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := s.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(service.Table, service.FieldID, id),
+			sqlgraph.To(feerule.Table, feerule.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, service.FeeRulesTable, service.FeeRulesColumn),
+		)
+		fromV = sqlgraph.Neighbors(s.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
 }
 
 // Hooks returns the client hooks.
@@ -4882,6 +6060,336 @@ func (c *StablecoinWithdrawalClient) mutate(ctx context.Context, m *StablecoinWi
 	}
 }
 
+// SubscriptionClient is a client for the Subscription schema.
+type SubscriptionClient struct {
+	config
+}
+
+// NewSubscriptionClient returns a client for the Subscription from the given config.
+func NewSubscriptionClient(c config) *SubscriptionClient {
+	return &SubscriptionClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `subscription.Hooks(f(g(h())))`.
+func (c *SubscriptionClient) Use(hooks ...Hook) {
+	c.hooks.Subscription = append(c.hooks.Subscription, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `subscription.Intercept(f(g(h())))`.
+func (c *SubscriptionClient) Intercept(interceptors ...Interceptor) {
+	c.inters.Subscription = append(c.inters.Subscription, interceptors...)
+}
+
+// Create returns a builder for creating a Subscription entity.
+func (c *SubscriptionClient) Create() *SubscriptionCreate {
+	mutation := newSubscriptionMutation(c.config, OpCreate)
+	return &SubscriptionCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of Subscription entities.
+func (c *SubscriptionClient) CreateBulk(builders ...*SubscriptionCreate) *SubscriptionCreateBulk {
+	return &SubscriptionCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *SubscriptionClient) MapCreateBulk(slice any, setFunc func(*SubscriptionCreate, int)) *SubscriptionCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &SubscriptionCreateBulk{err: fmt.Errorf("calling to SubscriptionClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*SubscriptionCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &SubscriptionCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for Subscription.
+func (c *SubscriptionClient) Update() *SubscriptionUpdate {
+	mutation := newSubscriptionMutation(c.config, OpUpdate)
+	return &SubscriptionUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *SubscriptionClient) UpdateOne(s *Subscription) *SubscriptionUpdateOne {
+	mutation := newSubscriptionMutation(c.config, OpUpdateOne, withSubscription(s))
+	return &SubscriptionUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *SubscriptionClient) UpdateOneID(id string) *SubscriptionUpdateOne {
+	mutation := newSubscriptionMutation(c.config, OpUpdateOne, withSubscriptionID(id))
+	return &SubscriptionUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for Subscription.
+func (c *SubscriptionClient) Delete() *SubscriptionDelete {
+	mutation := newSubscriptionMutation(c.config, OpDelete)
+	return &SubscriptionDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *SubscriptionClient) DeleteOne(s *Subscription) *SubscriptionDeleteOne {
+	return c.DeleteOneID(s.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *SubscriptionClient) DeleteOneID(id string) *SubscriptionDeleteOne {
+	builder := c.Delete().Where(subscription.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &SubscriptionDeleteOne{builder}
+}
+
+// Query returns a query builder for Subscription.
+func (c *SubscriptionClient) Query() *SubscriptionQuery {
+	return &SubscriptionQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeSubscription},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a Subscription entity by its id.
+func (c *SubscriptionClient) Get(ctx context.Context, id string) (*Subscription, error) {
+	return c.Query().Where(subscription.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *SubscriptionClient) GetX(ctx context.Context, id string) *Subscription {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryPlan queries the plan edge of a Subscription.
+func (c *SubscriptionClient) QueryPlan(s *Subscription) *SubscriptionPlanQuery {
+	query := (&SubscriptionPlanClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := s.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(subscription.Table, subscription.FieldID, id),
+			sqlgraph.To(subscriptionplan.Table, subscriptionplan.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, subscription.PlanTable, subscription.PlanColumn),
+		)
+		fromV = sqlgraph.Neighbors(s.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryBusiness queries the business edge of a Subscription.
+func (c *SubscriptionClient) QueryBusiness(s *Subscription) *BusinessQuery {
+	query := (&BusinessClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := s.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(subscription.Table, subscription.FieldID, id),
+			sqlgraph.To(business.Table, business.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, subscription.BusinessTable, subscription.BusinessColumn),
+		)
+		fromV = sqlgraph.Neighbors(s.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryInvoices queries the invoices edge of a Subscription.
+func (c *SubscriptionClient) QueryInvoices(s *Subscription) *InvoiceQuery {
+	query := (&InvoiceClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := s.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(subscription.Table, subscription.FieldID, id),
+			sqlgraph.To(invoice.Table, invoice.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, subscription.InvoicesTable, subscription.InvoicesColumn),
+		)
+		fromV = sqlgraph.Neighbors(s.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *SubscriptionClient) Hooks() []Hook {
+	return c.hooks.Subscription
+}
+
+// Interceptors returns the client interceptors.
+func (c *SubscriptionClient) Interceptors() []Interceptor {
+	return c.inters.Subscription
+}
+
+func (c *SubscriptionClient) mutate(ctx context.Context, m *SubscriptionMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&SubscriptionCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&SubscriptionUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&SubscriptionUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&SubscriptionDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown Subscription mutation op: %q", m.Op())
+	}
+}
+
+// SubscriptionPlanClient is a client for the SubscriptionPlan schema.
+type SubscriptionPlanClient struct {
+	config
+}
+
+// NewSubscriptionPlanClient returns a client for the SubscriptionPlan from the given config.
+func NewSubscriptionPlanClient(c config) *SubscriptionPlanClient {
+	return &SubscriptionPlanClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `subscriptionplan.Hooks(f(g(h())))`.
+func (c *SubscriptionPlanClient) Use(hooks ...Hook) {
+	c.hooks.SubscriptionPlan = append(c.hooks.SubscriptionPlan, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `subscriptionplan.Intercept(f(g(h())))`.
+func (c *SubscriptionPlanClient) Intercept(interceptors ...Interceptor) {
+	c.inters.SubscriptionPlan = append(c.inters.SubscriptionPlan, interceptors...)
+}
+
+// Create returns a builder for creating a SubscriptionPlan entity.
+func (c *SubscriptionPlanClient) Create() *SubscriptionPlanCreate {
+	mutation := newSubscriptionPlanMutation(c.config, OpCreate)
+	return &SubscriptionPlanCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of SubscriptionPlan entities.
+func (c *SubscriptionPlanClient) CreateBulk(builders ...*SubscriptionPlanCreate) *SubscriptionPlanCreateBulk {
+	return &SubscriptionPlanCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *SubscriptionPlanClient) MapCreateBulk(slice any, setFunc func(*SubscriptionPlanCreate, int)) *SubscriptionPlanCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &SubscriptionPlanCreateBulk{err: fmt.Errorf("calling to SubscriptionPlanClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*SubscriptionPlanCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &SubscriptionPlanCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for SubscriptionPlan.
+func (c *SubscriptionPlanClient) Update() *SubscriptionPlanUpdate {
+	mutation := newSubscriptionPlanMutation(c.config, OpUpdate)
+	return &SubscriptionPlanUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *SubscriptionPlanClient) UpdateOne(sp *SubscriptionPlan) *SubscriptionPlanUpdateOne {
+	mutation := newSubscriptionPlanMutation(c.config, OpUpdateOne, withSubscriptionPlan(sp))
+	return &SubscriptionPlanUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *SubscriptionPlanClient) UpdateOneID(id string) *SubscriptionPlanUpdateOne {
+	mutation := newSubscriptionPlanMutation(c.config, OpUpdateOne, withSubscriptionPlanID(id))
+	return &SubscriptionPlanUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for SubscriptionPlan.
+func (c *SubscriptionPlanClient) Delete() *SubscriptionPlanDelete {
+	mutation := newSubscriptionPlanMutation(c.config, OpDelete)
+	return &SubscriptionPlanDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *SubscriptionPlanClient) DeleteOne(sp *SubscriptionPlan) *SubscriptionPlanDeleteOne {
+	return c.DeleteOneID(sp.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *SubscriptionPlanClient) DeleteOneID(id string) *SubscriptionPlanDeleteOne {
+	builder := c.Delete().Where(subscriptionplan.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &SubscriptionPlanDeleteOne{builder}
+}
+
+// Query returns a query builder for SubscriptionPlan.
+func (c *SubscriptionPlanClient) Query() *SubscriptionPlanQuery {
+	return &SubscriptionPlanQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeSubscriptionPlan},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a SubscriptionPlan entity by its id.
+func (c *SubscriptionPlanClient) Get(ctx context.Context, id string) (*SubscriptionPlan, error) {
+	return c.Query().Where(subscriptionplan.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *SubscriptionPlanClient) GetX(ctx context.Context, id string) *SubscriptionPlan {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QuerySubscriptions queries the subscriptions edge of a SubscriptionPlan.
+func (c *SubscriptionPlanClient) QuerySubscriptions(sp *SubscriptionPlan) *SubscriptionQuery {
+	query := (&SubscriptionClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := sp.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(subscriptionplan.Table, subscriptionplan.FieldID, id),
+			sqlgraph.To(subscription.Table, subscription.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, subscriptionplan.SubscriptionsTable, subscriptionplan.SubscriptionsColumn),
+		)
+		fromV = sqlgraph.Neighbors(sp.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *SubscriptionPlanClient) Hooks() []Hook {
+	return c.hooks.SubscriptionPlan
+}
+
+// Interceptors returns the client interceptors.
+func (c *SubscriptionPlanClient) Interceptors() []Interceptor {
+	return c.inters.SubscriptionPlan
+}
+
+func (c *SubscriptionPlanClient) mutate(ctx context.Context, m *SubscriptionPlanMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&SubscriptionPlanCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&SubscriptionPlanUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&SubscriptionPlanUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&SubscriptionPlanDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown SubscriptionPlan mutation op: %q", m.Op())
+	}
+}
+
 // TransactionClient is a client for the Transaction schema.
 type TransactionClient struct {
 	config
@@ -5022,22 +6530,6 @@ func (c *TransactionClient) QueryNubanTransfer(t *Transaction) *NubanTransferQue
 	return query
 }
 
-// QueryWallet queries the wallet edge of a Transaction.
-func (c *TransactionClient) QueryWallet(t *Transaction) *WalletQuery {
-	query := (&WalletClient{config: c.config}).Query()
-	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := t.ID
-		step := sqlgraph.NewStep(
-			sqlgraph.From(transaction.Table, transaction.FieldID, id),
-			sqlgraph.To(wallet.Table, wallet.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, false, transaction.WalletTable, transaction.WalletColumn),
-		)
-		fromV = sqlgraph.Neighbors(t.driver.Dialect(), step)
-		return fromV, nil
-	}
-	return query
-}
-
 // QueryStablecoinDeposit queries the stablecoin_deposit edge of a Transaction.
 func (c *TransactionClient) QueryStablecoinDeposit(t *Transaction) *StablecoinDepositQuery {
 	query := (&StablecoinDepositClient{config: c.config}).Query()
@@ -5070,15 +6562,31 @@ func (c *TransactionClient) QueryStablecoinWithdrawal(t *Transaction) *Stablecoi
 	return query
 }
 
-// QueryLedgerEntries queries the ledger_entries edge of a Transaction.
-func (c *TransactionClient) QueryLedgerEntries(t *Transaction) *LedgerQuery {
+// QueryFees queries the fees edge of a Transaction.
+func (c *TransactionClient) QueryFees(t *Transaction) *TransactionFeeQuery {
+	query := (&TransactionFeeClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := t.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(transaction.Table, transaction.FieldID, id),
+			sqlgraph.To(transactionfee.Table, transactionfee.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, transaction.FeesTable, transaction.FeesColumn),
+		)
+		fromV = sqlgraph.Neighbors(t.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryLedgerEntry queries the ledger_entry edge of a Transaction.
+func (c *TransactionClient) QueryLedgerEntry(t *Transaction) *LedgerQuery {
 	query := (&LedgerClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := t.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(transaction.Table, transaction.FieldID, id),
 			sqlgraph.To(ledger.Table, ledger.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, transaction.LedgerEntriesTable, transaction.LedgerEntriesColumn),
+			sqlgraph.Edge(sqlgraph.O2O, false, transaction.LedgerEntryTable, transaction.LedgerEntryColumn),
 		)
 		fromV = sqlgraph.Neighbors(t.driver.Dialect(), step)
 		return fromV, nil
@@ -5095,6 +6603,22 @@ func (c *TransactionClient) QueryReversalLedgerEntries(t *Transaction) *LedgerQu
 			sqlgraph.From(transaction.Table, transaction.FieldID, id),
 			sqlgraph.To(ledger.Table, ledger.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, transaction.ReversalLedgerEntriesTable, transaction.ReversalLedgerEntriesColumn),
+		)
+		fromV = sqlgraph.Neighbors(t.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryInvoice queries the invoice edge of a Transaction.
+func (c *TransactionClient) QueryInvoice(t *Transaction) *InvoiceQuery {
+	query := (&InvoiceClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := t.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(transaction.Table, transaction.FieldID, id),
+			sqlgraph.To(invoice.Table, invoice.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, transaction.InvoiceTable, transaction.InvoiceColumn),
 		)
 		fromV = sqlgraph.Neighbors(t.driver.Dialect(), step)
 		return fromV, nil
@@ -5124,6 +6648,155 @@ func (c *TransactionClient) mutate(ctx context.Context, m *TransactionMutation) 
 		return (&TransactionDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
 	default:
 		return nil, fmt.Errorf("ent: unknown Transaction mutation op: %q", m.Op())
+	}
+}
+
+// TransactionFeeClient is a client for the TransactionFee schema.
+type TransactionFeeClient struct {
+	config
+}
+
+// NewTransactionFeeClient returns a client for the TransactionFee from the given config.
+func NewTransactionFeeClient(c config) *TransactionFeeClient {
+	return &TransactionFeeClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `transactionfee.Hooks(f(g(h())))`.
+func (c *TransactionFeeClient) Use(hooks ...Hook) {
+	c.hooks.TransactionFee = append(c.hooks.TransactionFee, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `transactionfee.Intercept(f(g(h())))`.
+func (c *TransactionFeeClient) Intercept(interceptors ...Interceptor) {
+	c.inters.TransactionFee = append(c.inters.TransactionFee, interceptors...)
+}
+
+// Create returns a builder for creating a TransactionFee entity.
+func (c *TransactionFeeClient) Create() *TransactionFeeCreate {
+	mutation := newTransactionFeeMutation(c.config, OpCreate)
+	return &TransactionFeeCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of TransactionFee entities.
+func (c *TransactionFeeClient) CreateBulk(builders ...*TransactionFeeCreate) *TransactionFeeCreateBulk {
+	return &TransactionFeeCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *TransactionFeeClient) MapCreateBulk(slice any, setFunc func(*TransactionFeeCreate, int)) *TransactionFeeCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &TransactionFeeCreateBulk{err: fmt.Errorf("calling to TransactionFeeClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*TransactionFeeCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &TransactionFeeCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for TransactionFee.
+func (c *TransactionFeeClient) Update() *TransactionFeeUpdate {
+	mutation := newTransactionFeeMutation(c.config, OpUpdate)
+	return &TransactionFeeUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *TransactionFeeClient) UpdateOne(tf *TransactionFee) *TransactionFeeUpdateOne {
+	mutation := newTransactionFeeMutation(c.config, OpUpdateOne, withTransactionFee(tf))
+	return &TransactionFeeUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *TransactionFeeClient) UpdateOneID(id string) *TransactionFeeUpdateOne {
+	mutation := newTransactionFeeMutation(c.config, OpUpdateOne, withTransactionFeeID(id))
+	return &TransactionFeeUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for TransactionFee.
+func (c *TransactionFeeClient) Delete() *TransactionFeeDelete {
+	mutation := newTransactionFeeMutation(c.config, OpDelete)
+	return &TransactionFeeDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *TransactionFeeClient) DeleteOne(tf *TransactionFee) *TransactionFeeDeleteOne {
+	return c.DeleteOneID(tf.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *TransactionFeeClient) DeleteOneID(id string) *TransactionFeeDeleteOne {
+	builder := c.Delete().Where(transactionfee.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &TransactionFeeDeleteOne{builder}
+}
+
+// Query returns a query builder for TransactionFee.
+func (c *TransactionFeeClient) Query() *TransactionFeeQuery {
+	return &TransactionFeeQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeTransactionFee},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a TransactionFee entity by its id.
+func (c *TransactionFeeClient) Get(ctx context.Context, id string) (*TransactionFee, error) {
+	return c.Query().Where(transactionfee.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *TransactionFeeClient) GetX(ctx context.Context, id string) *TransactionFee {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryTransaction queries the transaction edge of a TransactionFee.
+func (c *TransactionFeeClient) QueryTransaction(tf *TransactionFee) *TransactionQuery {
+	query := (&TransactionClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := tf.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(transactionfee.Table, transactionfee.FieldID, id),
+			sqlgraph.To(transaction.Table, transaction.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, transactionfee.TransactionTable, transactionfee.TransactionColumn),
+		)
+		fromV = sqlgraph.Neighbors(tf.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *TransactionFeeClient) Hooks() []Hook {
+	return c.hooks.TransactionFee
+}
+
+// Interceptors returns the client interceptors.
+func (c *TransactionFeeClient) Interceptors() []Interceptor {
+	return c.inters.TransactionFee
+}
+
+func (c *TransactionFeeClient) mutate(ctx context.Context, m *TransactionFeeMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&TransactionFeeCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&TransactionFeeUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&TransactionFeeUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&TransactionFeeDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown TransactionFee mutation op: %q", m.Op())
 	}
 }
 
@@ -6067,21 +7740,25 @@ func (c *WalletClient) mutate(ctx context.Context, m *WalletMutation) (Value, er
 // hooks and interceptors per client, for fast access.
 type (
 	hooks struct {
-		Business, BusinessDocument, BusinessFeature, BusinessLocation, BusinessServices,
-		Currency, KYBDocument, KYBMessage, Ledger, LedgerOwner, Manager, NubanDeposit,
+		Business, BusinessDocument, BusinessLocation, BusinessServices, Currency,
+		FeeRule, FeeTier, Invoice, KYBDocument, KYBMessage, Ledger, LedgerOwner,
+		Manager, NubanBank, NubanBeneficiary, NubanBlacklist, NubanDeposit,
 		NubanDynamicAccount, NubanStaticAccount, NubanTransfer, Permission, Provider,
-		RequestVerification, Role, RolePermission, Service, Social, StablecoinDeposit,
-		StablecoinNetwork, StablecoinSupportedNetwork, StablecoinWallet,
-		StablecoinWithdrawal, Transaction, User, UserDocument, Vault, Verification,
+		ProviderBank, RequestVerification, Role, RolePermission, Service, Social,
+		StablecoinDeposit, StablecoinNetwork, StablecoinSupportedNetwork,
+		StablecoinWallet, StablecoinWithdrawal, Subscription, SubscriptionPlan,
+		Transaction, TransactionFee, User, UserDocument, Vault, Verification,
 		Wallet []ent.Hook
 	}
 	inters struct {
-		Business, BusinessDocument, BusinessFeature, BusinessLocation, BusinessServices,
-		Currency, KYBDocument, KYBMessage, Ledger, LedgerOwner, Manager, NubanDeposit,
+		Business, BusinessDocument, BusinessLocation, BusinessServices, Currency,
+		FeeRule, FeeTier, Invoice, KYBDocument, KYBMessage, Ledger, LedgerOwner,
+		Manager, NubanBank, NubanBeneficiary, NubanBlacklist, NubanDeposit,
 		NubanDynamicAccount, NubanStaticAccount, NubanTransfer, Permission, Provider,
-		RequestVerification, Role, RolePermission, Service, Social, StablecoinDeposit,
-		StablecoinNetwork, StablecoinSupportedNetwork, StablecoinWallet,
-		StablecoinWithdrawal, Transaction, User, UserDocument, Vault, Verification,
+		ProviderBank, RequestVerification, Role, RolePermission, Service, Social,
+		StablecoinDeposit, StablecoinNetwork, StablecoinSupportedNetwork,
+		StablecoinWallet, StablecoinWithdrawal, Subscription, SubscriptionPlan,
+		Transaction, TransactionFee, User, UserDocument, Vault, Verification,
 		Wallet []ent.Interceptor
 	}
 )

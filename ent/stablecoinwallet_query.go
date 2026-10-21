@@ -9,6 +9,7 @@ import (
 	"math"
 
 	"entgo.io/ent"
+	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
@@ -32,6 +33,7 @@ type StablecoinWalletQuery struct {
 	withStablecoinNetworks *StablecoinNetworkQuery
 	withStablecoinDeposits *StablecoinDepositQuery
 	withFKs                bool
+	modifiers              []func(*sql.Selector)
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -503,6 +505,9 @@ func (swq *StablecoinWalletQuery) sqlAll(ctx context.Context, hooks ...queryHook
 		node.Edges.loadedTypes = loadedTypes
 		return node.assignValues(columns, values)
 	}
+	if len(swq.modifiers) > 0 {
+		_spec.Modifiers = swq.modifiers
+	}
 	for i := range hooks {
 		hooks[i](ctx, _spec)
 	}
@@ -665,6 +670,9 @@ func (swq *StablecoinWalletQuery) loadStablecoinDeposits(ctx context.Context, qu
 
 func (swq *StablecoinWalletQuery) sqlCount(ctx context.Context) (int, error) {
 	_spec := swq.querySpec()
+	if len(swq.modifiers) > 0 {
+		_spec.Modifiers = swq.modifiers
+	}
 	_spec.Node.Columns = swq.ctx.Fields
 	if len(swq.ctx.Fields) > 0 {
 		_spec.Unique = swq.ctx.Unique != nil && *swq.ctx.Unique
@@ -733,6 +741,9 @@ func (swq *StablecoinWalletQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	if swq.ctx.Unique != nil && *swq.ctx.Unique {
 		selector.Distinct()
 	}
+	for _, m := range swq.modifiers {
+		m(selector)
+	}
 	for _, p := range swq.predicates {
 		p(selector)
 	}
@@ -748,6 +759,32 @@ func (swq *StablecoinWalletQuery) sqlQuery(ctx context.Context) *sql.Selector {
 		selector.Limit(*limit)
 	}
 	return selector
+}
+
+// ForUpdate locks the selected rows against concurrent updates, and prevent them from being
+// updated, deleted or "selected ... for update" by other sessions, until the transaction is
+// either committed or rolled-back.
+func (swq *StablecoinWalletQuery) ForUpdate(opts ...sql.LockOption) *StablecoinWalletQuery {
+	if swq.driver.Dialect() == dialect.Postgres {
+		swq.Unique(false)
+	}
+	swq.modifiers = append(swq.modifiers, func(s *sql.Selector) {
+		s.ForUpdate(opts...)
+	})
+	return swq
+}
+
+// ForShare behaves similarly to ForUpdate, except that it acquires a shared mode lock
+// on any rows that are read. Other sessions can read the rows, but cannot modify them
+// until your transaction commits.
+func (swq *StablecoinWalletQuery) ForShare(opts ...sql.LockOption) *StablecoinWalletQuery {
+	if swq.driver.Dialect() == dialect.Postgres {
+		swq.Unique(false)
+	}
+	swq.modifiers = append(swq.modifiers, func(s *sql.Selector) {
+		s.ForShare(opts...)
+	})
+	return swq
 }
 
 // StablecoinWalletGroupBy is the group-by builder for StablecoinWallet entities.

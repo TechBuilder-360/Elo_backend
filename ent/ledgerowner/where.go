@@ -319,6 +319,29 @@ func HasUserWith(preds ...predicate.User) predicate.LedgerOwner {
 	})
 }
 
+// HasNubanBeneficiaries applies the HasEdge predicate on the "nuban_beneficiaries" edge.
+func HasNubanBeneficiaries() predicate.LedgerOwner {
+	return predicate.LedgerOwner(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, NubanBeneficiariesTable, NubanBeneficiariesColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasNubanBeneficiariesWith applies the HasEdge predicate on the "nuban_beneficiaries" edge with a given conditions (other predicates).
+func HasNubanBeneficiariesWith(preds ...predicate.NubanBeneficiary) predicate.LedgerOwner {
+	return predicate.LedgerOwner(func(s *sql.Selector) {
+		step := newNubanBeneficiariesStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
 // And groups predicates with the AND operator between them.
 func And(predicates ...predicate.LedgerOwner) predicate.LedgerOwner {
 	return predicate.LedgerOwner(sql.AndPredicates(predicates...))

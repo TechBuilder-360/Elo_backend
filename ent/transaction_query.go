@@ -9,9 +9,11 @@ import (
 	"math"
 
 	"entgo.io/ent"
+	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/Toflex/directory_v2/ent/invoice"
 	"github.com/Toflex/directory_v2/ent/ledger"
 	"github.com/Toflex/directory_v2/ent/nubandeposit"
 	"github.com/Toflex/directory_v2/ent/nubantransfer"
@@ -19,7 +21,7 @@ import (
 	"github.com/Toflex/directory_v2/ent/stablecoindeposit"
 	"github.com/Toflex/directory_v2/ent/stablecoinwithdrawal"
 	"github.com/Toflex/directory_v2/ent/transaction"
-	"github.com/Toflex/directory_v2/ent/wallet"
+	"github.com/Toflex/directory_v2/ent/transactionfee"
 )
 
 // TransactionQuery is the builder for querying Transaction entities.
@@ -31,12 +33,13 @@ type TransactionQuery struct {
 	predicates                []predicate.Transaction
 	withNubanDeposit          *NubanDepositQuery
 	withNubanTransfer         *NubanTransferQuery
-	withWallet                *WalletQuery
 	withStablecoinDeposit     *StablecoinDepositQuery
 	withStablecoinWithdrawal  *StablecoinWithdrawalQuery
-	withLedgerEntries         *LedgerQuery
+	withFees                  *TransactionFeeQuery
+	withLedgerEntry           *LedgerQuery
 	withReversalLedgerEntries *LedgerQuery
-	withFKs                   bool
+	withInvoice               *InvoiceQuery
+	modifiers                 []func(*sql.Selector)
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -117,28 +120,6 @@ func (tq *TransactionQuery) QueryNubanTransfer() *NubanTransferQuery {
 	return query
 }
 
-// QueryWallet chains the current query on the "wallet" edge.
-func (tq *TransactionQuery) QueryWallet() *WalletQuery {
-	query := (&WalletClient{config: tq.config}).Query()
-	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
-		if err := tq.prepareQuery(ctx); err != nil {
-			return nil, err
-		}
-		selector := tq.sqlQuery(ctx)
-		if err := selector.Err(); err != nil {
-			return nil, err
-		}
-		step := sqlgraph.NewStep(
-			sqlgraph.From(transaction.Table, transaction.FieldID, selector),
-			sqlgraph.To(wallet.Table, wallet.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, false, transaction.WalletTable, transaction.WalletColumn),
-		)
-		fromU = sqlgraph.SetNeighbors(tq.driver.Dialect(), step)
-		return fromU, nil
-	}
-	return query
-}
-
 // QueryStablecoinDeposit chains the current query on the "stablecoin_deposit" edge.
 func (tq *TransactionQuery) QueryStablecoinDeposit() *StablecoinDepositQuery {
 	query := (&StablecoinDepositClient{config: tq.config}).Query()
@@ -183,8 +164,30 @@ func (tq *TransactionQuery) QueryStablecoinWithdrawal() *StablecoinWithdrawalQue
 	return query
 }
 
-// QueryLedgerEntries chains the current query on the "ledger_entries" edge.
-func (tq *TransactionQuery) QueryLedgerEntries() *LedgerQuery {
+// QueryFees chains the current query on the "fees" edge.
+func (tq *TransactionQuery) QueryFees() *TransactionFeeQuery {
+	query := (&TransactionFeeClient{config: tq.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := tq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := tq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(transaction.Table, transaction.FieldID, selector),
+			sqlgraph.To(transactionfee.Table, transactionfee.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, transaction.FeesTable, transaction.FeesColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(tq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryLedgerEntry chains the current query on the "ledger_entry" edge.
+func (tq *TransactionQuery) QueryLedgerEntry() *LedgerQuery {
 	query := (&LedgerClient{config: tq.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := tq.prepareQuery(ctx); err != nil {
@@ -197,7 +200,7 @@ func (tq *TransactionQuery) QueryLedgerEntries() *LedgerQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(transaction.Table, transaction.FieldID, selector),
 			sqlgraph.To(ledger.Table, ledger.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, transaction.LedgerEntriesTable, transaction.LedgerEntriesColumn),
+			sqlgraph.Edge(sqlgraph.O2O, false, transaction.LedgerEntryTable, transaction.LedgerEntryColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(tq.driver.Dialect(), step)
 		return fromU, nil
@@ -220,6 +223,28 @@ func (tq *TransactionQuery) QueryReversalLedgerEntries() *LedgerQuery {
 			sqlgraph.From(transaction.Table, transaction.FieldID, selector),
 			sqlgraph.To(ledger.Table, ledger.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, transaction.ReversalLedgerEntriesTable, transaction.ReversalLedgerEntriesColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(tq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryInvoice chains the current query on the "invoice" edge.
+func (tq *TransactionQuery) QueryInvoice() *InvoiceQuery {
+	query := (&InvoiceClient{config: tq.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := tq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := tq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(transaction.Table, transaction.FieldID, selector),
+			sqlgraph.To(invoice.Table, invoice.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, transaction.InvoiceTable, transaction.InvoiceColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(tq.driver.Dialect(), step)
 		return fromU, nil
@@ -421,11 +446,12 @@ func (tq *TransactionQuery) Clone() *TransactionQuery {
 		predicates:                append([]predicate.Transaction{}, tq.predicates...),
 		withNubanDeposit:          tq.withNubanDeposit.Clone(),
 		withNubanTransfer:         tq.withNubanTransfer.Clone(),
-		withWallet:                tq.withWallet.Clone(),
 		withStablecoinDeposit:     tq.withStablecoinDeposit.Clone(),
 		withStablecoinWithdrawal:  tq.withStablecoinWithdrawal.Clone(),
-		withLedgerEntries:         tq.withLedgerEntries.Clone(),
+		withFees:                  tq.withFees.Clone(),
+		withLedgerEntry:           tq.withLedgerEntry.Clone(),
 		withReversalLedgerEntries: tq.withReversalLedgerEntries.Clone(),
+		withInvoice:               tq.withInvoice.Clone(),
 		// clone intermediate query.
 		sql:  tq.sql.Clone(),
 		path: tq.path,
@@ -454,17 +480,6 @@ func (tq *TransactionQuery) WithNubanTransfer(opts ...func(*NubanTransferQuery))
 	return tq
 }
 
-// WithWallet tells the query-builder to eager-load the nodes that are connected to
-// the "wallet" edge. The optional arguments are used to configure the query builder of the edge.
-func (tq *TransactionQuery) WithWallet(opts ...func(*WalletQuery)) *TransactionQuery {
-	query := (&WalletClient{config: tq.config}).Query()
-	for _, opt := range opts {
-		opt(query)
-	}
-	tq.withWallet = query
-	return tq
-}
-
 // WithStablecoinDeposit tells the query-builder to eager-load the nodes that are connected to
 // the "stablecoin_deposit" edge. The optional arguments are used to configure the query builder of the edge.
 func (tq *TransactionQuery) WithStablecoinDeposit(opts ...func(*StablecoinDepositQuery)) *TransactionQuery {
@@ -487,14 +502,25 @@ func (tq *TransactionQuery) WithStablecoinWithdrawal(opts ...func(*StablecoinWit
 	return tq
 }
 
-// WithLedgerEntries tells the query-builder to eager-load the nodes that are connected to
-// the "ledger_entries" edge. The optional arguments are used to configure the query builder of the edge.
-func (tq *TransactionQuery) WithLedgerEntries(opts ...func(*LedgerQuery)) *TransactionQuery {
+// WithFees tells the query-builder to eager-load the nodes that are connected to
+// the "fees" edge. The optional arguments are used to configure the query builder of the edge.
+func (tq *TransactionQuery) WithFees(opts ...func(*TransactionFeeQuery)) *TransactionQuery {
+	query := (&TransactionFeeClient{config: tq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	tq.withFees = query
+	return tq
+}
+
+// WithLedgerEntry tells the query-builder to eager-load the nodes that are connected to
+// the "ledger_entry" edge. The optional arguments are used to configure the query builder of the edge.
+func (tq *TransactionQuery) WithLedgerEntry(opts ...func(*LedgerQuery)) *TransactionQuery {
 	query := (&LedgerClient{config: tq.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
-	tq.withLedgerEntries = query
+	tq.withLedgerEntry = query
 	return tq
 }
 
@@ -506,6 +532,17 @@ func (tq *TransactionQuery) WithReversalLedgerEntries(opts ...func(*LedgerQuery)
 		opt(query)
 	}
 	tq.withReversalLedgerEntries = query
+	return tq
+}
+
+// WithInvoice tells the query-builder to eager-load the nodes that are connected to
+// the "invoice" edge. The optional arguments are used to configure the query builder of the edge.
+func (tq *TransactionQuery) WithInvoice(opts ...func(*InvoiceQuery)) *TransactionQuery {
+	query := (&InvoiceClient{config: tq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	tq.withInvoice = query
 	return tq
 }
 
@@ -586,24 +623,18 @@ func (tq *TransactionQuery) prepareQuery(ctx context.Context) error {
 func (tq *TransactionQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Transaction, error) {
 	var (
 		nodes       = []*Transaction{}
-		withFKs     = tq.withFKs
 		_spec       = tq.querySpec()
-		loadedTypes = [7]bool{
+		loadedTypes = [8]bool{
 			tq.withNubanDeposit != nil,
 			tq.withNubanTransfer != nil,
-			tq.withWallet != nil,
 			tq.withStablecoinDeposit != nil,
 			tq.withStablecoinWithdrawal != nil,
-			tq.withLedgerEntries != nil,
+			tq.withFees != nil,
+			tq.withLedgerEntry != nil,
 			tq.withReversalLedgerEntries != nil,
+			tq.withInvoice != nil,
 		}
 	)
-	if tq.withWallet != nil {
-		withFKs = true
-	}
-	if withFKs {
-		_spec.Node.Columns = append(_spec.Node.Columns, transaction.ForeignKeys...)
-	}
 	_spec.ScanValues = func(columns []string) ([]any, error) {
 		return (*Transaction).scanValues(nil, columns)
 	}
@@ -612,6 +643,9 @@ func (tq *TransactionQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*
 		nodes = append(nodes, node)
 		node.Edges.loadedTypes = loadedTypes
 		return node.assignValues(columns, values)
+	}
+	if len(tq.modifiers) > 0 {
+		_spec.Modifiers = tq.modifiers
 	}
 	for i := range hooks {
 		hooks[i](ctx, _spec)
@@ -634,12 +668,6 @@ func (tq *TransactionQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*
 			return nil, err
 		}
 	}
-	if query := tq.withWallet; query != nil {
-		if err := tq.loadWallet(ctx, query, nodes, nil,
-			func(n *Transaction, e *Wallet) { n.Edges.Wallet = e }); err != nil {
-			return nil, err
-		}
-	}
 	if query := tq.withStablecoinDeposit; query != nil {
 		if err := tq.loadStablecoinDeposit(ctx, query, nodes, nil,
 			func(n *Transaction, e *StablecoinDeposit) { n.Edges.StablecoinDeposit = e }); err != nil {
@@ -652,10 +680,16 @@ func (tq *TransactionQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*
 			return nil, err
 		}
 	}
-	if query := tq.withLedgerEntries; query != nil {
-		if err := tq.loadLedgerEntries(ctx, query, nodes,
-			func(n *Transaction) { n.Edges.LedgerEntries = []*Ledger{} },
-			func(n *Transaction, e *Ledger) { n.Edges.LedgerEntries = append(n.Edges.LedgerEntries, e) }); err != nil {
+	if query := tq.withFees; query != nil {
+		if err := tq.loadFees(ctx, query, nodes,
+			func(n *Transaction) { n.Edges.Fees = []*TransactionFee{} },
+			func(n *Transaction, e *TransactionFee) { n.Edges.Fees = append(n.Edges.Fees, e) }); err != nil {
+			return nil, err
+		}
+	}
+	if query := tq.withLedgerEntry; query != nil {
+		if err := tq.loadLedgerEntry(ctx, query, nodes, nil,
+			func(n *Transaction, e *Ledger) { n.Edges.LedgerEntry = e }); err != nil {
 			return nil, err
 		}
 	}
@@ -665,6 +699,13 @@ func (tq *TransactionQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*
 			func(n *Transaction, e *Ledger) {
 				n.Edges.ReversalLedgerEntries = append(n.Edges.ReversalLedgerEntries, e)
 			}); err != nil {
+			return nil, err
+		}
+	}
+	if query := tq.withInvoice; query != nil {
+		if err := tq.loadInvoice(ctx, query, nodes,
+			func(n *Transaction) { n.Edges.Invoice = []*Invoice{} },
+			func(n *Transaction, e *Invoice) { n.Edges.Invoice = append(n.Edges.Invoice, e) }); err != nil {
 			return nil, err
 		}
 	}
@@ -726,38 +767,6 @@ func (tq *TransactionQuery) loadNubanTransfer(ctx context.Context, query *NubanT
 	}
 	return nil
 }
-func (tq *TransactionQuery) loadWallet(ctx context.Context, query *WalletQuery, nodes []*Transaction, init func(*Transaction), assign func(*Transaction, *Wallet)) error {
-	ids := make([]string, 0, len(nodes))
-	nodeids := make(map[string][]*Transaction)
-	for i := range nodes {
-		if nodes[i].transaction_wallet == nil {
-			continue
-		}
-		fk := *nodes[i].transaction_wallet
-		if _, ok := nodeids[fk]; !ok {
-			ids = append(ids, fk)
-		}
-		nodeids[fk] = append(nodeids[fk], nodes[i])
-	}
-	if len(ids) == 0 {
-		return nil
-	}
-	query.Where(wallet.IDIn(ids...))
-	neighbors, err := query.All(ctx)
-	if err != nil {
-		return err
-	}
-	for _, n := range neighbors {
-		nodes, ok := nodeids[n.ID]
-		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "transaction_wallet" returned %v`, n.ID)
-		}
-		for i := range nodes {
-			assign(nodes[i], n)
-		}
-	}
-	return nil
-}
 func (tq *TransactionQuery) loadStablecoinDeposit(ctx context.Context, query *StablecoinDepositQuery, nodes []*Transaction, init func(*Transaction), assign func(*Transaction, *StablecoinDeposit)) error {
 	fks := make([]driver.Value, 0, len(nodes))
 	nodeids := make(map[string]*Transaction)
@@ -812,7 +821,7 @@ func (tq *TransactionQuery) loadStablecoinWithdrawal(ctx context.Context, query 
 	}
 	return nil
 }
-func (tq *TransactionQuery) loadLedgerEntries(ctx context.Context, query *LedgerQuery, nodes []*Transaction, init func(*Transaction), assign func(*Transaction, *Ledger)) error {
+func (tq *TransactionQuery) loadFees(ctx context.Context, query *TransactionFeeQuery, nodes []*Transaction, init func(*Transaction), assign func(*Transaction, *TransactionFee)) error {
 	fks := make([]driver.Value, 0, len(nodes))
 	nodeids := make(map[string]*Transaction)
 	for i := range nodes {
@@ -822,11 +831,39 @@ func (tq *TransactionQuery) loadLedgerEntries(ctx context.Context, query *Ledger
 			init(nodes[i])
 		}
 	}
+	query.withFKs = true
+	query.Where(predicate.TransactionFee(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(transaction.FeesColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.transaction_fees
+		if fk == nil {
+			return fmt.Errorf(`foreign-key "transaction_fees" is nil for node %v`, n.ID)
+		}
+		node, ok := nodeids[*fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "transaction_fees" returned %v for node %v`, *fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (tq *TransactionQuery) loadLedgerEntry(ctx context.Context, query *LedgerQuery, nodes []*Transaction, init func(*Transaction), assign func(*Transaction, *Ledger)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[string]*Transaction)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+	}
 	if len(query.ctx.Fields) > 0 {
 		query.ctx.AppendFieldOnce(ledger.FieldTransactionID)
 	}
 	query.Where(predicate.Ledger(func(s *sql.Selector) {
-		s.Where(sql.InValues(s.C(transaction.LedgerEntriesColumn), fks...))
+		s.Where(sql.InValues(s.C(transaction.LedgerEntryColumn), fks...))
 	}))
 	neighbors, err := query.All(ctx)
 	if err != nil {
@@ -872,9 +909,43 @@ func (tq *TransactionQuery) loadReversalLedgerEntries(ctx context.Context, query
 	}
 	return nil
 }
+func (tq *TransactionQuery) loadInvoice(ctx context.Context, query *InvoiceQuery, nodes []*Transaction, init func(*Transaction), assign func(*Transaction, *Invoice)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[string]*Transaction)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	query.withFKs = true
+	query.Where(predicate.Invoice(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(transaction.InvoiceColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.transaction_invoice
+		if fk == nil {
+			return fmt.Errorf(`foreign-key "transaction_invoice" is nil for node %v`, n.ID)
+		}
+		node, ok := nodeids[*fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "transaction_invoice" returned %v for node %v`, *fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
 
 func (tq *TransactionQuery) sqlCount(ctx context.Context) (int, error) {
 	_spec := tq.querySpec()
+	if len(tq.modifiers) > 0 {
+		_spec.Modifiers = tq.modifiers
+	}
 	_spec.Node.Columns = tq.ctx.Fields
 	if len(tq.ctx.Fields) > 0 {
 		_spec.Unique = tq.ctx.Unique != nil && *tq.ctx.Unique
@@ -937,6 +1008,9 @@ func (tq *TransactionQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	if tq.ctx.Unique != nil && *tq.ctx.Unique {
 		selector.Distinct()
 	}
+	for _, m := range tq.modifiers {
+		m(selector)
+	}
 	for _, p := range tq.predicates {
 		p(selector)
 	}
@@ -952,6 +1026,32 @@ func (tq *TransactionQuery) sqlQuery(ctx context.Context) *sql.Selector {
 		selector.Limit(*limit)
 	}
 	return selector
+}
+
+// ForUpdate locks the selected rows against concurrent updates, and prevent them from being
+// updated, deleted or "selected ... for update" by other sessions, until the transaction is
+// either committed or rolled-back.
+func (tq *TransactionQuery) ForUpdate(opts ...sql.LockOption) *TransactionQuery {
+	if tq.driver.Dialect() == dialect.Postgres {
+		tq.Unique(false)
+	}
+	tq.modifiers = append(tq.modifiers, func(s *sql.Selector) {
+		s.ForUpdate(opts...)
+	})
+	return tq
+}
+
+// ForShare behaves similarly to ForUpdate, except that it acquires a shared mode lock
+// on any rows that are read. Other sessions can read the rows, but cannot modify them
+// until your transaction commits.
+func (tq *TransactionQuery) ForShare(opts ...sql.LockOption) *TransactionQuery {
+	if tq.driver.Dialect() == dialect.Postgres {
+		tq.Unique(false)
+	}
+	tq.modifiers = append(tq.modifiers, func(s *sql.Selector) {
+		s.ForShare(opts...)
+	})
+	return tq
 }
 
 // TransactionGroupBy is the group-by builder for Transaction entities.

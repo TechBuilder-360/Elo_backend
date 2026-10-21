@@ -47,20 +47,20 @@ func main() {
 	runtime.InitializeDI()
 
 	// register providers
-	runtime.Register(runtime.Injector)
+	runtime.Register(runtime.GetInjector())
 
 	// close database
-	db := do.MustInvoke[*ent.Client](runtime.Injector)
+	db := do.MustInvoke[*ent.Client](runtime.GetInjector())
 	defer db.Close()
 
 	// close redis database
-	rdb := do.MustInvoke[*r.Client](runtime.Injector)
+	rdb := do.MustInvoke[*r.Client](runtime.GetInjector())
 	defer rdb.Close()
 
-	queueClient := do.MustInvoke[*queue.Client](runtime.Injector)
+	queueClient := do.MustInvoke[*queue.Client](runtime.GetInjector())
 	defer queueClient.Close()
 
-	queueServer := do.MustInvoke[*qserver.Server](runtime.Injector)
+	queueServer := do.MustInvoke[*qserver.Server](runtime.GetInjector())
 	defer queueServer.Shutdown()
 
 	go func() {
@@ -69,19 +69,19 @@ func main() {
 		}
 	}()
 
-	defer runtime.Injector.Shutdown()
+	defer runtime.GetInjector().Shutdown()
 
 	// http engine
-	engine := do.MustInvoke[*gin.Engine](runtime.Injector)
+	engine := do.MustInvoke[*gin.Engine](runtime.GetInjector())
 
 	// initialaze Middlewares
-	middlewares.InitializeMiddleWares(runtime.Injector)
+	middlewares.InitializeMiddleWares(runtime.GetInjector())
 
 	// initialize routes
 	router.InitializeRoutes(engine)
 
 	// initialize Sentry
-	// sentry.InitializeSentry(runtime.Injector, l)
+	// sentry.InitializeSentry(runtime.GetInjector(), l)
 
 	port := configuration.Instance.Port
 	addr := fmt.Sprintf("%s:%s", configuration.Instance.BASEURL, port)

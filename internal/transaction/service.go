@@ -1,11 +1,15 @@
 package transaction
 
 import (
+	"context"
+
 	"github.com/Toflex/directory_v2/ent"
+	"github.com/Toflex/directory_v2/graph/model"
 	"github.com/samber/do/v2"
 )
 
 type IService interface {
+	GetTransactionByID(ctx context.Context, id string, ownerID string) (*model.TransactionDetail, error)
 }
 
 type service struct {

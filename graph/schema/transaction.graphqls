@@ -1,0 +1,40 @@
+type TransactionFeeDetail {
+    id: String!
+    amount: Float!
+    rate: Float
+    type: String!
+    currency: String!
+}
+
+type NubanTransferDetail {
+    id: String!
+    amount: Float!
+    recipient_account_name: String!
+    recipient_account_number: String!
+    bank_name: String
+    bank_code: String
+    session_id: String
+    provider_reference: String
+}
+
+union TransferDetail = NubanTransferDetail
+
+type TransactionDetail {
+    id: String!
+    reference: String!
+    type: String!
+    channel: String!
+    status: String!
+    currency: String!
+    summary: String
+    amount: Float!
+    net_amount: Float
+    entry: String!
+    created_at: String!
+    fees: [TransactionFeeDetail!]!
+    transfer: TransferDetail
+}
+
+extend type Query {
+    transaction(id: String!): TransactionDetail @hasRole(role: ADMIN)
+}

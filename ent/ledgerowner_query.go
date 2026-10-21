@@ -9,11 +9,13 @@ import (
 	"math"
 
 	"entgo.io/ent"
+	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/Toflex/directory_v2/ent/business"
 	"github.com/Toflex/directory_v2/ent/ledgerowner"
+	"github.com/Toflex/directory_v2/ent/nubanbeneficiary"
 	"github.com/Toflex/directory_v2/ent/predicate"
 	"github.com/Toflex/directory_v2/ent/user"
 	"github.com/Toflex/directory_v2/ent/vault"
@@ -22,14 +24,16 @@ import (
 // LedgerOwnerQuery is the builder for querying LedgerOwner entities.
 type LedgerOwnerQuery struct {
 	config
-	ctx          *QueryContext
-	order        []ledgerowner.OrderOption
-	inters       []Interceptor
-	predicates   []predicate.LedgerOwner
-	withVaults   *VaultQuery
-	withBusiness *BusinessQuery
-	withUser     *UserQuery
-	withFKs      bool
+	ctx                    *QueryContext
+	order                  []ledgerowner.OrderOption
+	inters                 []Interceptor
+	predicates             []predicate.LedgerOwner
+	withVaults             *VaultQuery
+	withBusiness           *BusinessQuery
+	withUser               *UserQuery
+	withNubanBeneficiaries *NubanBeneficiaryQuery
+	withFKs                bool
+	modifiers              []func(*sql.Selector)
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -125,6 +129,28 @@ func (loq *LedgerOwnerQuery) QueryUser() *UserQuery {
 			sqlgraph.From(ledgerowner.Table, ledgerowner.FieldID, selector),
 			sqlgraph.To(user.Table, user.FieldID),
 			sqlgraph.Edge(sqlgraph.O2O, true, ledgerowner.UserTable, ledgerowner.UserColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(loq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryNubanBeneficiaries chains the current query on the "nuban_beneficiaries" edge.
+func (loq *LedgerOwnerQuery) QueryNubanBeneficiaries() *NubanBeneficiaryQuery {
+	query := (&NubanBeneficiaryClient{config: loq.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := loq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := loq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(ledgerowner.Table, ledgerowner.FieldID, selector),
+			sqlgraph.To(nubanbeneficiary.Table, nubanbeneficiary.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, ledgerowner.NubanBeneficiariesTable, ledgerowner.NubanBeneficiariesColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(loq.driver.Dialect(), step)
 		return fromU, nil
@@ -319,14 +345,15 @@ func (loq *LedgerOwnerQuery) Clone() *LedgerOwnerQuery {
 		return nil
 	}
 	return &LedgerOwnerQuery{
-		config:       loq.config,
-		ctx:          loq.ctx.Clone(),
-		order:        append([]ledgerowner.OrderOption{}, loq.order...),
-		inters:       append([]Interceptor{}, loq.inters...),
-		predicates:   append([]predicate.LedgerOwner{}, loq.predicates...),
-		withVaults:   loq.withVaults.Clone(),
-		withBusiness: loq.withBusiness.Clone(),
-		withUser:     loq.withUser.Clone(),
+		config:                 loq.config,
+		ctx:                    loq.ctx.Clone(),
+		order:                  append([]ledgerowner.OrderOption{}, loq.order...),
+		inters:                 append([]Interceptor{}, loq.inters...),
+		predicates:             append([]predicate.LedgerOwner{}, loq.predicates...),
+		withVaults:             loq.withVaults.Clone(),
+		withBusiness:           loq.withBusiness.Clone(),
+		withUser:               loq.withUser.Clone(),
+		withNubanBeneficiaries: loq.withNubanBeneficiaries.Clone(),
 		// clone intermediate query.
 		sql:  loq.sql.Clone(),
 		path: loq.path,
@@ -363,6 +390,17 @@ func (loq *LedgerOwnerQuery) WithUser(opts ...func(*UserQuery)) *LedgerOwnerQuer
 		opt(query)
 	}
 	loq.withUser = query
+	return loq
+}
+
+// WithNubanBeneficiaries tells the query-builder to eager-load the nodes that are connected to
+// the "nuban_beneficiaries" edge. The optional arguments are used to configure the query builder of the edge.
+func (loq *LedgerOwnerQuery) WithNubanBeneficiaries(opts ...func(*NubanBeneficiaryQuery)) *LedgerOwnerQuery {
+	query := (&NubanBeneficiaryClient{config: loq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	loq.withNubanBeneficiaries = query
 	return loq
 }
 
@@ -445,10 +483,11 @@ func (loq *LedgerOwnerQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]
 		nodes       = []*LedgerOwner{}
 		withFKs     = loq.withFKs
 		_spec       = loq.querySpec()
-		loadedTypes = [3]bool{
+		loadedTypes = [4]bool{
 			loq.withVaults != nil,
 			loq.withBusiness != nil,
 			loq.withUser != nil,
+			loq.withNubanBeneficiaries != nil,
 		}
 	)
 	if loq.withBusiness != nil || loq.withUser != nil {
@@ -465,6 +504,9 @@ func (loq *LedgerOwnerQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]
 		nodes = append(nodes, node)
 		node.Edges.loadedTypes = loadedTypes
 		return node.assignValues(columns, values)
+	}
+	if len(loq.modifiers) > 0 {
+		_spec.Modifiers = loq.modifiers
 	}
 	for i := range hooks {
 		hooks[i](ctx, _spec)
@@ -491,6 +533,15 @@ func (loq *LedgerOwnerQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]
 	if query := loq.withUser; query != nil {
 		if err := loq.loadUser(ctx, query, nodes, nil,
 			func(n *LedgerOwner, e *User) { n.Edges.User = e }); err != nil {
+			return nil, err
+		}
+	}
+	if query := loq.withNubanBeneficiaries; query != nil {
+		if err := loq.loadNubanBeneficiaries(ctx, query, nodes,
+			func(n *LedgerOwner) { n.Edges.NubanBeneficiaries = []*NubanBeneficiary{} },
+			func(n *LedgerOwner, e *NubanBeneficiary) {
+				n.Edges.NubanBeneficiaries = append(n.Edges.NubanBeneficiaries, e)
+			}); err != nil {
 			return nil, err
 		}
 	}
@@ -592,9 +643,42 @@ func (loq *LedgerOwnerQuery) loadUser(ctx context.Context, query *UserQuery, nod
 	}
 	return nil
 }
+func (loq *LedgerOwnerQuery) loadNubanBeneficiaries(ctx context.Context, query *NubanBeneficiaryQuery, nodes []*LedgerOwner, init func(*LedgerOwner), assign func(*LedgerOwner, *NubanBeneficiary)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[string]*LedgerOwner)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(nubanbeneficiary.FieldOwnerID)
+	}
+	query.Where(predicate.NubanBeneficiary(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(ledgerowner.NubanBeneficiariesColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.OwnerID
+		node, ok := nodeids[fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "owner_id" returned %v for node %v`, fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
 
 func (loq *LedgerOwnerQuery) sqlCount(ctx context.Context) (int, error) {
 	_spec := loq.querySpec()
+	if len(loq.modifiers) > 0 {
+		_spec.Modifiers = loq.modifiers
+	}
 	_spec.Node.Columns = loq.ctx.Fields
 	if len(loq.ctx.Fields) > 0 {
 		_spec.Unique = loq.ctx.Unique != nil && *loq.ctx.Unique
@@ -657,6 +741,9 @@ func (loq *LedgerOwnerQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	if loq.ctx.Unique != nil && *loq.ctx.Unique {
 		selector.Distinct()
 	}
+	for _, m := range loq.modifiers {
+		m(selector)
+	}
 	for _, p := range loq.predicates {
 		p(selector)
 	}
@@ -672,6 +759,32 @@ func (loq *LedgerOwnerQuery) sqlQuery(ctx context.Context) *sql.Selector {
 		selector.Limit(*limit)
 	}
 	return selector
+}
+
+// ForUpdate locks the selected rows against concurrent updates, and prevent them from being
+// updated, deleted or "selected ... for update" by other sessions, until the transaction is
+// either committed or rolled-back.
+func (loq *LedgerOwnerQuery) ForUpdate(opts ...sql.LockOption) *LedgerOwnerQuery {
+	if loq.driver.Dialect() == dialect.Postgres {
+		loq.Unique(false)
+	}
+	loq.modifiers = append(loq.modifiers, func(s *sql.Selector) {
+		s.ForUpdate(opts...)
+	})
+	return loq
+}
+
+// ForShare behaves similarly to ForUpdate, except that it acquires a shared mode lock
+// on any rows that are read. Other sessions can read the rows, but cannot modify them
+// until your transaction commits.
+func (loq *LedgerOwnerQuery) ForShare(opts ...sql.LockOption) *LedgerOwnerQuery {
+	if loq.driver.Dialect() == dialect.Postgres {
+		loq.Unique(false)
+	}
+	loq.modifiers = append(loq.modifiers, func(s *sql.Selector) {
+		s.ForShare(opts...)
+	})
+	return loq
 }
 
 // LedgerOwnerGroupBy is the group-by builder for LedgerOwner entities.

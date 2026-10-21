@@ -32,12 +32,12 @@ func InitialiseNewRelic(l *logrus.Logger) {
 	)
 
 	if err != nil {
-		log.Error(err.Error())
+		log.Error("%s", err.Error())
 	}
 
 	err = app.WaitForConnection(10 * time.Second)
 	if err != nil {
-		log.Error(err.Error())
+		log.Error("%s", err.Error())
 	}
 
 }

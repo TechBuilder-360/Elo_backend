@@ -50,4 +50,4 @@ func (m *mock) GenerateDynamicNUBANAccountNumber(ctx context.Context, payload *n
 	}, nil
 }
 
-var _ nuban.NUBANProvider = (*mock)(nil)
+var _ nuban.NUBANDepositProvider = (*mock)(nil)

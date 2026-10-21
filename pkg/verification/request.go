@@ -77,7 +77,7 @@ func (s *Service) RequestVerificationLink(ctx context.Context, payload *Verifica
 		return nil, errors.New(errors.ErrFailed, "request failed")
 	}
 
-	impl, ok := provider.GetImpl(serv.ActiveProvider.Slug)
+	impl, ok := provider.GetProviderImpl(serv.ActiveProvider.Slug)
 	if !ok {
 		logger.WithField("provider", serv.ActiveProvider.Slug).Error("provider not implemented")
 		return nil, errors.New(errors.ErrFailed, "request failed")

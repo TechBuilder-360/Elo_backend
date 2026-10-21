@@ -3,14 +3,12 @@
 package ent
 
 import (
-	"encoding/json"
 	"fmt"
 	"strings"
 	"time"
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
-	"github.com/Toflex/directory_v2/ent/schema"
 	"github.com/Toflex/directory_v2/ent/service"
 )
 
@@ -35,13 +33,32 @@ type Service struct {
 	RequireSubscription bool `json:"require_subscription,omitempty"`
 	// Active holds the value of the "active" field.
 	Active bool `json:"active,omitempty"`
-	// Min holds the value of the "min" field.
-	Min int `json:"min,omitempty"`
-	// Max holds the value of the "max" field.
-	Max int `json:"max,omitempty"`
-	// Fee holds the value of the "fee" field.
-	Fee          *schema.Fee `json:"fee,omitempty"`
+	// MinValue holds the value of the "min_value" field.
+	MinValue int `json:"min_value,omitempty"`
+	// MaxValue holds the value of the "max_value" field.
+	MaxValue int `json:"max_value,omitempty"`
+	// Edges holds the relations/edges for other nodes in the graph.
+	// The values are being populated by the ServiceQuery when eager-loading is set.
+	Edges        ServiceEdges `json:"edges"`
 	selectValues sql.SelectValues
+}
+
+// ServiceEdges holds the relations/edges for other nodes in the graph.
+type ServiceEdges struct {
+	// FeeRules holds the value of the fee_rules edge.
+	FeeRules []*FeeRule `json:"fee_rules,omitempty"`
+	// loadedTypes holds the information for reporting if a
+	// type was loaded (or requested) in eager-loading or not.
+	loadedTypes [1]bool
+}
+
+// FeeRulesOrErr returns the FeeRules value or an error if the edge
+// was not loaded in eager-loading.
+func (e ServiceEdges) FeeRulesOrErr() ([]*FeeRule, error) {
+	if e.loadedTypes[0] {
+		return e.FeeRules, nil
+	}
+	return nil, &NotLoadedError{edge: "fee_rules"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -49,11 +66,9 @@ func (*Service) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case service.FieldFee:
-			values[i] = new([]byte)
 		case service.FieldRequireSubscription, service.FieldActive:
 			values[i] = new(sql.NullBool)
-		case service.FieldMin, service.FieldMax:
+		case service.FieldMinValue, service.FieldMaxValue:
 			values[i] = new(sql.NullInt64)
 		case service.FieldID, service.FieldName, service.FieldIdentifier, service.FieldProvider:
 			values[i] = new(sql.NullString)
@@ -129,25 +144,17 @@ func (s *Service) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				s.Active = value.Bool
 			}
-		case service.FieldMin:
+		case service.FieldMinValue:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for field min", values[i])
+				return fmt.Errorf("unexpected type %T for field min_value", values[i])
 			} else if value.Valid {
-				s.Min = int(value.Int64)
+				s.MinValue = int(value.Int64)
 			}
-		case service.FieldMax:
+		case service.FieldMaxValue:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for field max", values[i])
+				return fmt.Errorf("unexpected type %T for field max_value", values[i])
 			} else if value.Valid {
-				s.Max = int(value.Int64)
-			}
-		case service.FieldFee:
-			if value, ok := values[i].(*[]byte); !ok {
-				return fmt.Errorf("unexpected type %T for field fee", values[i])
-			} else if value != nil && len(*value) > 0 {
-				if err := json.Unmarshal(*value, &s.Fee); err != nil {
-					return fmt.Errorf("unmarshal field fee: %w", err)
-				}
+				s.MaxValue = int(value.Int64)
 			}
 		default:
 			s.selectValues.Set(columns[i], values[i])
@@ -160,6 +167,11 @@ func (s *Service) assignValues(columns []string, values []any) error {
 // This includes values selected through modifiers, order, etc.
 func (s *Service) Value(name string) (ent.Value, error) {
 	return s.selectValues.Get(name)
+}
+
+// QueryFeeRules queries the "fee_rules" edge of the Service entity.
+func (s *Service) QueryFeeRules() *FeeRuleQuery {
+	return NewServiceClient(s.config).QueryFeeRules(s)
 }
 
 // Update returns a builder for updating this Service.
@@ -211,14 +223,11 @@ func (s *Service) String() string {
 	builder.WriteString("active=")
 	builder.WriteString(fmt.Sprintf("%v", s.Active))
 	builder.WriteString(", ")
-	builder.WriteString("min=")
-	builder.WriteString(fmt.Sprintf("%v", s.Min))
+	builder.WriteString("min_value=")
+	builder.WriteString(fmt.Sprintf("%v", s.MinValue))
 	builder.WriteString(", ")
-	builder.WriteString("max=")
-	builder.WriteString(fmt.Sprintf("%v", s.Max))
-	builder.WriteString(", ")
-	builder.WriteString("fee=")
-	builder.WriteString(fmt.Sprintf("%v", s.Fee))
+	builder.WriteString("max_value=")
+	builder.WriteString(fmt.Sprintf("%v", s.MaxValue))
 	builder.WriteByte(')')
 	return builder.String()
 }

@@ -7,21 +7,27 @@ import (
 
 	"github.com/Toflex/directory_v2/ent/business"
 	"github.com/Toflex/directory_v2/ent/businessdocument"
-	"github.com/Toflex/directory_v2/ent/businessfeature"
 	"github.com/Toflex/directory_v2/ent/businesslocation"
 	"github.com/Toflex/directory_v2/ent/businessservices"
 	"github.com/Toflex/directory_v2/ent/currency"
+	"github.com/Toflex/directory_v2/ent/feerule"
+	"github.com/Toflex/directory_v2/ent/feetier"
+	"github.com/Toflex/directory_v2/ent/invoice"
 	"github.com/Toflex/directory_v2/ent/kybdocument"
 	"github.com/Toflex/directory_v2/ent/kybmessage"
 	"github.com/Toflex/directory_v2/ent/ledger"
 	"github.com/Toflex/directory_v2/ent/ledgerowner"
 	"github.com/Toflex/directory_v2/ent/manager"
+	"github.com/Toflex/directory_v2/ent/nubanbank"
+	"github.com/Toflex/directory_v2/ent/nubanbeneficiary"
+	"github.com/Toflex/directory_v2/ent/nubanblacklist"
 	"github.com/Toflex/directory_v2/ent/nubandeposit"
 	"github.com/Toflex/directory_v2/ent/nubandynamicaccount"
 	"github.com/Toflex/directory_v2/ent/nubanstaticaccount"
 	"github.com/Toflex/directory_v2/ent/nubantransfer"
 	"github.com/Toflex/directory_v2/ent/permission"
 	"github.com/Toflex/directory_v2/ent/provider"
+	"github.com/Toflex/directory_v2/ent/providerbank"
 	"github.com/Toflex/directory_v2/ent/requestverification"
 	"github.com/Toflex/directory_v2/ent/role"
 	"github.com/Toflex/directory_v2/ent/rolepermission"
@@ -33,7 +39,10 @@ import (
 	"github.com/Toflex/directory_v2/ent/stablecoinsupportednetwork"
 	"github.com/Toflex/directory_v2/ent/stablecoinwallet"
 	"github.com/Toflex/directory_v2/ent/stablecoinwithdrawal"
+	"github.com/Toflex/directory_v2/ent/subscription"
+	"github.com/Toflex/directory_v2/ent/subscriptionplan"
 	"github.com/Toflex/directory_v2/ent/transaction"
+	"github.com/Toflex/directory_v2/ent/transactionfee"
 	"github.com/Toflex/directory_v2/ent/user"
 	"github.com/Toflex/directory_v2/ent/userdocument"
 	"github.com/Toflex/directory_v2/ent/vault"
@@ -157,49 +166,6 @@ func init() {
 	businessdocumentDescID := businessdocumentMixinFields0[0].Descriptor()
 	// businessdocument.DefaultID holds the default value on creation for the id field.
 	businessdocument.DefaultID = businessdocumentDescID.Default.(func() string)
-	businessfeatureMixin := schema.BusinessFeature{}.Mixin()
-	businessfeatureMixinFields0 := businessfeatureMixin[0].Fields()
-	_ = businessfeatureMixinFields0
-	businessfeatureFields := schema.BusinessFeature{}.Fields()
-	_ = businessfeatureFields
-	// businessfeatureDescCreatedAt is the schema descriptor for created_at field.
-	businessfeatureDescCreatedAt := businessfeatureMixinFields0[1].Descriptor()
-	// businessfeature.DefaultCreatedAt holds the default value on creation for the created_at field.
-	businessfeature.DefaultCreatedAt = businessfeatureDescCreatedAt.Default.(func() time.Time)
-	// businessfeatureDescUpdatedAt is the schema descriptor for updated_at field.
-	businessfeatureDescUpdatedAt := businessfeatureMixinFields0[2].Descriptor()
-	// businessfeature.DefaultUpdatedAt holds the default value on creation for the updated_at field.
-	businessfeature.DefaultUpdatedAt = businessfeatureDescUpdatedAt.Default.(func() time.Time)
-	// businessfeature.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
-	businessfeature.UpdateDefaultUpdatedAt = businessfeatureDescUpdatedAt.UpdateDefault.(func() time.Time)
-	// businessfeatureDescName is the schema descriptor for name field.
-	businessfeatureDescName := businessfeatureFields[0].Descriptor()
-	// businessfeature.NameValidator is a validator for the "name" field. It is called by the builders before save.
-	businessfeature.NameValidator = businessfeatureDescName.Validators[0].(func(string) error)
-	// businessfeatureDescIdentifier is the schema descriptor for identifier field.
-	businessfeatureDescIdentifier := businessfeatureFields[1].Descriptor()
-	// businessfeature.IdentifierValidator is a validator for the "identifier" field. It is called by the builders before save.
-	businessfeature.IdentifierValidator = businessfeatureDescIdentifier.Validators[0].(func(string) error)
-	// businessfeatureDescRequireSubscription is the schema descriptor for require_subscription field.
-	businessfeatureDescRequireSubscription := businessfeatureFields[2].Descriptor()
-	// businessfeature.DefaultRequireSubscription holds the default value on creation for the require_subscription field.
-	businessfeature.DefaultRequireSubscription = businessfeatureDescRequireSubscription.Default.(bool)
-	// businessfeatureDescActive is the schema descriptor for active field.
-	businessfeatureDescActive := businessfeatureFields[3].Descriptor()
-	// businessfeature.DefaultActive holds the default value on creation for the active field.
-	businessfeature.DefaultActive = businessfeatureDescActive.Default.(bool)
-	// businessfeatureDescMin is the schema descriptor for min field.
-	businessfeatureDescMin := businessfeatureFields[4].Descriptor()
-	// businessfeature.DefaultMin holds the default value on creation for the min field.
-	businessfeature.DefaultMin = businessfeatureDescMin.Default.(int)
-	// businessfeatureDescMax is the schema descriptor for max field.
-	businessfeatureDescMax := businessfeatureFields[5].Descriptor()
-	// businessfeature.DefaultMax holds the default value on creation for the max field.
-	businessfeature.DefaultMax = businessfeatureDescMax.Default.(int)
-	// businessfeatureDescID is the schema descriptor for id field.
-	businessfeatureDescID := businessfeatureMixinFields0[0].Descriptor()
-	// businessfeature.DefaultID holds the default value on creation for the id field.
-	businessfeature.DefaultID = businessfeatureDescID.Default.(func() string)
 	businesslocationMixin := schema.BusinessLocation{}.Mixin()
 	businesslocationMixinFields0 := businesslocationMixin[0].Fields()
 	_ = businesslocationMixinFields0
@@ -300,6 +266,123 @@ func init() {
 	currencyDescID := currencyMixinFields0[0].Descriptor()
 	// currency.DefaultID holds the default value on creation for the id field.
 	currency.DefaultID = currencyDescID.Default.(func() string)
+	feeruleMixin := schema.FeeRule{}.Mixin()
+	feeruleMixinFields0 := feeruleMixin[0].Fields()
+	_ = feeruleMixinFields0
+	feeruleFields := schema.FeeRule{}.Fields()
+	_ = feeruleFields
+	// feeruleDescCreatedAt is the schema descriptor for created_at field.
+	feeruleDescCreatedAt := feeruleMixinFields0[1].Descriptor()
+	// feerule.DefaultCreatedAt holds the default value on creation for the created_at field.
+	feerule.DefaultCreatedAt = feeruleDescCreatedAt.Default.(func() time.Time)
+	// feeruleDescUpdatedAt is the schema descriptor for updated_at field.
+	feeruleDescUpdatedAt := feeruleMixinFields0[2].Descriptor()
+	// feerule.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	feerule.DefaultUpdatedAt = feeruleDescUpdatedAt.Default.(func() time.Time)
+	// feerule.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	feerule.UpdateDefaultUpdatedAt = feeruleDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// feeruleDescFlatAmount is the schema descriptor for flat_amount field.
+	feeruleDescFlatAmount := feeruleFields[4].Descriptor()
+	// feerule.DefaultFlatAmount holds the default value on creation for the flat_amount field.
+	feerule.DefaultFlatAmount = feeruleDescFlatAmount.Default.(int64)
+	// feeruleDescPercentageRate is the schema descriptor for percentage_rate field.
+	feeruleDescPercentageRate := feeruleFields[5].Descriptor()
+	// feerule.DefaultPercentageRate holds the default value on creation for the percentage_rate field.
+	feerule.DefaultPercentageRate = feeruleDescPercentageRate.Default.(float64)
+	// feerule.PercentageRateValidator is a validator for the "percentage_rate" field. It is called by the builders before save.
+	feerule.PercentageRateValidator = feeruleDescPercentageRate.Validators[0].(func(float64) error)
+	// feeruleDescCurrency is the schema descriptor for currency field.
+	feeruleDescCurrency := feeruleFields[6].Descriptor()
+	// feerule.CurrencyValidator is a validator for the "currency" field. It is called by the builders before save.
+	feerule.CurrencyValidator = feeruleDescCurrency.Validators[0].(func(string) error)
+	// feeruleDescIsActive is the schema descriptor for is_active field.
+	feeruleDescIsActive := feeruleFields[7].Descriptor()
+	// feerule.DefaultIsActive holds the default value on creation for the is_active field.
+	feerule.DefaultIsActive = feeruleDescIsActive.Default.(bool)
+	// feeruleDescEffectiveFrom is the schema descriptor for effective_from field.
+	feeruleDescEffectiveFrom := feeruleFields[8].Descriptor()
+	// feerule.DefaultEffectiveFrom holds the default value on creation for the effective_from field.
+	feerule.DefaultEffectiveFrom = feeruleDescEffectiveFrom.Default.(func() time.Time)
+	// feeruleDescMinValue is the schema descriptor for min_value field.
+	feeruleDescMinValue := feeruleFields[10].Descriptor()
+	// feerule.MinValueValidator is a validator for the "min_value" field. It is called by the builders before save.
+	feerule.MinValueValidator = feeruleDescMinValue.Validators[0].(func(int64) error)
+	// feeruleDescMaxValue is the schema descriptor for max_value field.
+	feeruleDescMaxValue := feeruleFields[11].Descriptor()
+	// feerule.MaxValueValidator is a validator for the "max_value" field. It is called by the builders before save.
+	feerule.MaxValueValidator = feeruleDescMaxValue.Validators[0].(func(int64) error)
+	// feeruleDescMinFee is the schema descriptor for min_fee field.
+	feeruleDescMinFee := feeruleFields[12].Descriptor()
+	// feerule.MinFeeValidator is a validator for the "min_fee" field. It is called by the builders before save.
+	feerule.MinFeeValidator = feeruleDescMinFee.Validators[0].(func(int64) error)
+	// feeruleDescMaxFee is the schema descriptor for max_fee field.
+	feeruleDescMaxFee := feeruleFields[13].Descriptor()
+	// feerule.MaxFeeValidator is a validator for the "max_fee" field. It is called by the builders before save.
+	feerule.MaxFeeValidator = feeruleDescMaxFee.Validators[0].(func(int64) error)
+	// feeruleDescID is the schema descriptor for id field.
+	feeruleDescID := feeruleMixinFields0[0].Descriptor()
+	// feerule.DefaultID holds the default value on creation for the id field.
+	feerule.DefaultID = feeruleDescID.Default.(func() string)
+	feetierMixin := schema.FeeTier{}.Mixin()
+	feetierMixinFields0 := feetierMixin[0].Fields()
+	_ = feetierMixinFields0
+	feetierFields := schema.FeeTier{}.Fields()
+	_ = feetierFields
+	// feetierDescCreatedAt is the schema descriptor for created_at field.
+	feetierDescCreatedAt := feetierMixinFields0[1].Descriptor()
+	// feetier.DefaultCreatedAt holds the default value on creation for the created_at field.
+	feetier.DefaultCreatedAt = feetierDescCreatedAt.Default.(func() time.Time)
+	// feetierDescUpdatedAt is the schema descriptor for updated_at field.
+	feetierDescUpdatedAt := feetierMixinFields0[2].Descriptor()
+	// feetier.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	feetier.DefaultUpdatedAt = feetierDescUpdatedAt.Default.(func() time.Time)
+	// feetier.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	feetier.UpdateDefaultUpdatedAt = feetierDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// feetierDescMinAmount is the schema descriptor for min_amount field.
+	feetierDescMinAmount := feetierFields[0].Descriptor()
+	// feetier.DefaultMinAmount holds the default value on creation for the min_amount field.
+	feetier.DefaultMinAmount = feetierDescMinAmount.Default.(int64)
+	// feetierDescFlatAmount is the schema descriptor for flat_amount field.
+	feetierDescFlatAmount := feetierFields[3].Descriptor()
+	// feetier.DefaultFlatAmount holds the default value on creation for the flat_amount field.
+	feetier.DefaultFlatAmount = feetierDescFlatAmount.Default.(int64)
+	// feetierDescPercentageRate is the schema descriptor for percentage_rate field.
+	feetierDescPercentageRate := feetierFields[4].Descriptor()
+	// feetier.DefaultPercentageRate holds the default value on creation for the percentage_rate field.
+	feetier.DefaultPercentageRate = feetierDescPercentageRate.Default.(float64)
+	// feetier.PercentageRateValidator is a validator for the "percentage_rate" field. It is called by the builders before save.
+	feetier.PercentageRateValidator = feetierDescPercentageRate.Validators[0].(func(float64) error)
+	// feetierDescPriority is the schema descriptor for priority field.
+	feetierDescPriority := feetierFields[5].Descriptor()
+	// feetier.DefaultPriority holds the default value on creation for the priority field.
+	feetier.DefaultPriority = feetierDescPriority.Default.(int)
+	// feetierDescID is the schema descriptor for id field.
+	feetierDescID := feetierMixinFields0[0].Descriptor()
+	// feetier.DefaultID holds the default value on creation for the id field.
+	feetier.DefaultID = feetierDescID.Default.(func() string)
+	invoiceMixin := schema.Invoice{}.Mixin()
+	invoiceMixinFields0 := invoiceMixin[0].Fields()
+	_ = invoiceMixinFields0
+	invoiceFields := schema.Invoice{}.Fields()
+	_ = invoiceFields
+	// invoiceDescCreatedAt is the schema descriptor for created_at field.
+	invoiceDescCreatedAt := invoiceMixinFields0[1].Descriptor()
+	// invoice.DefaultCreatedAt holds the default value on creation for the created_at field.
+	invoice.DefaultCreatedAt = invoiceDescCreatedAt.Default.(func() time.Time)
+	// invoiceDescUpdatedAt is the schema descriptor for updated_at field.
+	invoiceDescUpdatedAt := invoiceMixinFields0[2].Descriptor()
+	// invoice.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	invoice.DefaultUpdatedAt = invoiceDescUpdatedAt.Default.(func() time.Time)
+	// invoice.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	invoice.UpdateDefaultUpdatedAt = invoiceDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// invoiceDescCurrency is the schema descriptor for currency field.
+	invoiceDescCurrency := invoiceFields[3].Descriptor()
+	// invoice.CurrencyValidator is a validator for the "currency" field. It is called by the builders before save.
+	invoice.CurrencyValidator = invoiceDescCurrency.Validators[0].(func(string) error)
+	// invoiceDescID is the schema descriptor for id field.
+	invoiceDescID := invoiceMixinFields0[0].Descriptor()
+	// invoice.DefaultID holds the default value on creation for the id field.
+	invoice.DefaultID = invoiceDescID.Default.(func() string)
 	kybdocumentMixin := schema.KYBDocument{}.Mixin()
 	kybdocumentMixinFields0 := kybdocumentMixin[0].Fields()
 	_ = kybdocumentMixinFields0
@@ -378,23 +461,23 @@ func init() {
 	// ledger.WalletIDValidator is a validator for the "wallet_id" field. It is called by the builders before save.
 	ledger.WalletIDValidator = ledgerDescWalletID.Validators[0].(func(string) error)
 	// ledgerDescDebit is the schema descriptor for debit field.
-	ledgerDescDebit := ledgerFields[3].Descriptor()
+	ledgerDescDebit := ledgerFields[4].Descriptor()
 	// ledger.DefaultDebit holds the default value on creation for the debit field.
 	ledger.DefaultDebit = ledgerDescDebit.Default.(int64)
 	// ledgerDescCredit is the schema descriptor for credit field.
-	ledgerDescCredit := ledgerFields[4].Descriptor()
+	ledgerDescCredit := ledgerFields[5].Descriptor()
 	// ledger.DefaultCredit holds the default value on creation for the credit field.
 	ledger.DefaultCredit = ledgerDescCredit.Default.(int64)
 	// ledgerDescCurrentBalance is the schema descriptor for current_balance field.
-	ledgerDescCurrentBalance := ledgerFields[5].Descriptor()
+	ledgerDescCurrentBalance := ledgerFields[6].Descriptor()
 	// ledger.DefaultCurrentBalance holds the default value on creation for the current_balance field.
 	ledger.DefaultCurrentBalance = ledgerDescCurrentBalance.Default.(int64)
 	// ledgerDescPreviousBalance is the schema descriptor for previous_balance field.
-	ledgerDescPreviousBalance := ledgerFields[6].Descriptor()
+	ledgerDescPreviousBalance := ledgerFields[7].Descriptor()
 	// ledger.DefaultPreviousBalance holds the default value on creation for the previous_balance field.
 	ledger.DefaultPreviousBalance = ledgerDescPreviousBalance.Default.(int64)
 	// ledgerDescIsReversal is the schema descriptor for is_reversal field.
-	ledgerDescIsReversal := ledgerFields[7].Descriptor()
+	ledgerDescIsReversal := ledgerFields[8].Descriptor()
 	// ledger.DefaultIsReversal holds the default value on creation for the is_reversal field.
 	ledger.DefaultIsReversal = ledgerDescIsReversal.Default.(bool)
 	// ledgerDescID is the schema descriptor for id field.
@@ -451,6 +534,131 @@ func init() {
 	managerDescID := managerMixinFields0[0].Descriptor()
 	// manager.DefaultID holds the default value on creation for the id field.
 	manager.DefaultID = managerDescID.Default.(func() string)
+	nubanbankMixin := schema.NubanBank{}.Mixin()
+	nubanbankMixinFields0 := nubanbankMixin[0].Fields()
+	_ = nubanbankMixinFields0
+	nubanbankFields := schema.NubanBank{}.Fields()
+	_ = nubanbankFields
+	// nubanbankDescCreatedAt is the schema descriptor for created_at field.
+	nubanbankDescCreatedAt := nubanbankMixinFields0[1].Descriptor()
+	// nubanbank.DefaultCreatedAt holds the default value on creation for the created_at field.
+	nubanbank.DefaultCreatedAt = nubanbankDescCreatedAt.Default.(func() time.Time)
+	// nubanbankDescUpdatedAt is the schema descriptor for updated_at field.
+	nubanbankDescUpdatedAt := nubanbankMixinFields0[2].Descriptor()
+	// nubanbank.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	nubanbank.DefaultUpdatedAt = nubanbankDescUpdatedAt.Default.(func() time.Time)
+	// nubanbank.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	nubanbank.UpdateDefaultUpdatedAt = nubanbankDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// nubanbankDescName is the schema descriptor for name field.
+	nubanbankDescName := nubanbankFields[0].Descriptor()
+	// nubanbank.NameValidator is a validator for the "name" field. It is called by the builders before save.
+	nubanbank.NameValidator = nubanbankDescName.Validators[0].(func(string) error)
+	// nubanbankDescCbnCode is the schema descriptor for cbn_code field.
+	nubanbankDescCbnCode := nubanbankFields[1].Descriptor()
+	// nubanbank.CbnCodeValidator is a validator for the "cbn_code" field. It is called by the builders before save.
+	nubanbank.CbnCodeValidator = nubanbankDescCbnCode.Validators[0].(func(string) error)
+	// nubanbankDescShortName is the schema descriptor for short_name field.
+	nubanbankDescShortName := nubanbankFields[2].Descriptor()
+	// nubanbank.ShortNameValidator is a validator for the "short_name" field. It is called by the builders before save.
+	nubanbank.ShortNameValidator = nubanbankDescShortName.Validators[0].(func(string) error)
+	// nubanbankDescSlug is the schema descriptor for slug field.
+	nubanbankDescSlug := nubanbankFields[3].Descriptor()
+	// nubanbank.SlugValidator is a validator for the "slug" field. It is called by the builders before save.
+	nubanbank.SlugValidator = nubanbankDescSlug.Validators[0].(func(string) error)
+	// nubanbankDescActive is the schema descriptor for active field.
+	nubanbankDescActive := nubanbankFields[4].Descriptor()
+	// nubanbank.DefaultActive holds the default value on creation for the active field.
+	nubanbank.DefaultActive = nubanbankDescActive.Default.(bool)
+	// nubanbankDescID is the schema descriptor for id field.
+	nubanbankDescID := nubanbankMixinFields0[0].Descriptor()
+	// nubanbank.DefaultID holds the default value on creation for the id field.
+	nubanbank.DefaultID = nubanbankDescID.Default.(func() string)
+	nubanbeneficiaryMixin := schema.NubanBeneficiary{}.Mixin()
+	nubanbeneficiaryMixinFields0 := nubanbeneficiaryMixin[0].Fields()
+	_ = nubanbeneficiaryMixinFields0
+	nubanbeneficiaryFields := schema.NubanBeneficiary{}.Fields()
+	_ = nubanbeneficiaryFields
+	// nubanbeneficiaryDescCreatedAt is the schema descriptor for created_at field.
+	nubanbeneficiaryDescCreatedAt := nubanbeneficiaryMixinFields0[1].Descriptor()
+	// nubanbeneficiary.DefaultCreatedAt holds the default value on creation for the created_at field.
+	nubanbeneficiary.DefaultCreatedAt = nubanbeneficiaryDescCreatedAt.Default.(func() time.Time)
+	// nubanbeneficiaryDescUpdatedAt is the schema descriptor for updated_at field.
+	nubanbeneficiaryDescUpdatedAt := nubanbeneficiaryMixinFields0[2].Descriptor()
+	// nubanbeneficiary.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	nubanbeneficiary.DefaultUpdatedAt = nubanbeneficiaryDescUpdatedAt.Default.(func() time.Time)
+	// nubanbeneficiary.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	nubanbeneficiary.UpdateDefaultUpdatedAt = nubanbeneficiaryDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// nubanbeneficiaryDescAccountName is the schema descriptor for account_name field.
+	nubanbeneficiaryDescAccountName := nubanbeneficiaryFields[0].Descriptor()
+	// nubanbeneficiary.AccountNameValidator is a validator for the "account_name" field. It is called by the builders before save.
+	nubanbeneficiary.AccountNameValidator = nubanbeneficiaryDescAccountName.Validators[0].(func(string) error)
+	// nubanbeneficiaryDescAccountNumber is the schema descriptor for account_number field.
+	nubanbeneficiaryDescAccountNumber := nubanbeneficiaryFields[1].Descriptor()
+	// nubanbeneficiary.AccountNumberValidator is a validator for the "account_number" field. It is called by the builders before save.
+	nubanbeneficiary.AccountNumberValidator = nubanbeneficiaryDescAccountNumber.Validators[0].(func(string) error)
+	// nubanbeneficiaryDescBankName is the schema descriptor for bank_name field.
+	nubanbeneficiaryDescBankName := nubanbeneficiaryFields[2].Descriptor()
+	// nubanbeneficiary.BankNameValidator is a validator for the "bank_name" field. It is called by the builders before save.
+	nubanbeneficiary.BankNameValidator = nubanbeneficiaryDescBankName.Validators[0].(func(string) error)
+	// nubanbeneficiaryDescNubanBankID is the schema descriptor for nuban_bank_id field.
+	nubanbeneficiaryDescNubanBankID := nubanbeneficiaryFields[3].Descriptor()
+	// nubanbeneficiary.NubanBankIDValidator is a validator for the "nuban_bank_id" field. It is called by the builders before save.
+	nubanbeneficiary.NubanBankIDValidator = nubanbeneficiaryDescNubanBankID.Validators[0].(func(string) error)
+	// nubanbeneficiaryDescOwnerID is the schema descriptor for owner_id field.
+	nubanbeneficiaryDescOwnerID := nubanbeneficiaryFields[4].Descriptor()
+	// nubanbeneficiary.OwnerIDValidator is a validator for the "owner_id" field. It is called by the builders before save.
+	nubanbeneficiary.OwnerIDValidator = nubanbeneficiaryDescOwnerID.Validators[0].(func(string) error)
+	// nubanbeneficiaryDescDisabled is the schema descriptor for disabled field.
+	nubanbeneficiaryDescDisabled := nubanbeneficiaryFields[6].Descriptor()
+	// nubanbeneficiary.DefaultDisabled holds the default value on creation for the disabled field.
+	nubanbeneficiary.DefaultDisabled = nubanbeneficiaryDescDisabled.Default.(bool)
+	// nubanbeneficiaryDescID is the schema descriptor for id field.
+	nubanbeneficiaryDescID := nubanbeneficiaryMixinFields0[0].Descriptor()
+	// nubanbeneficiary.DefaultID holds the default value on creation for the id field.
+	nubanbeneficiary.DefaultID = nubanbeneficiaryDescID.Default.(func() string)
+	nubanblacklistMixin := schema.NubanBlacklist{}.Mixin()
+	nubanblacklistMixinFields0 := nubanblacklistMixin[0].Fields()
+	_ = nubanblacklistMixinFields0
+	nubanblacklistFields := schema.NubanBlacklist{}.Fields()
+	_ = nubanblacklistFields
+	// nubanblacklistDescCreatedAt is the schema descriptor for created_at field.
+	nubanblacklistDescCreatedAt := nubanblacklistMixinFields0[1].Descriptor()
+	// nubanblacklist.DefaultCreatedAt holds the default value on creation for the created_at field.
+	nubanblacklist.DefaultCreatedAt = nubanblacklistDescCreatedAt.Default.(func() time.Time)
+	// nubanblacklistDescUpdatedAt is the schema descriptor for updated_at field.
+	nubanblacklistDescUpdatedAt := nubanblacklistMixinFields0[2].Descriptor()
+	// nubanblacklist.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	nubanblacklist.DefaultUpdatedAt = nubanblacklistDescUpdatedAt.Default.(func() time.Time)
+	// nubanblacklist.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	nubanblacklist.UpdateDefaultUpdatedAt = nubanblacklistDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// nubanblacklistDescAccountName is the schema descriptor for account_name field.
+	nubanblacklistDescAccountName := nubanblacklistFields[0].Descriptor()
+	// nubanblacklist.AccountNameValidator is a validator for the "account_name" field. It is called by the builders before save.
+	nubanblacklist.AccountNameValidator = nubanblacklistDescAccountName.Validators[0].(func(string) error)
+	// nubanblacklistDescAccountNumber is the schema descriptor for account_number field.
+	nubanblacklistDescAccountNumber := nubanblacklistFields[1].Descriptor()
+	// nubanblacklist.AccountNumberValidator is a validator for the "account_number" field. It is called by the builders before save.
+	nubanblacklist.AccountNumberValidator = nubanblacklistDescAccountNumber.Validators[0].(func(string) error)
+	// nubanblacklistDescBankName is the schema descriptor for bank_name field.
+	nubanblacklistDescBankName := nubanblacklistFields[2].Descriptor()
+	// nubanblacklist.BankNameValidator is a validator for the "bank_name" field. It is called by the builders before save.
+	nubanblacklist.BankNameValidator = nubanblacklistDescBankName.Validators[0].(func(string) error)
+	// nubanblacklistDescNubanBankID is the schema descriptor for nuban_bank_id field.
+	nubanblacklistDescNubanBankID := nubanblacklistFields[3].Descriptor()
+	// nubanblacklist.NubanBankIDValidator is a validator for the "nuban_bank_id" field. It is called by the builders before save.
+	nubanblacklist.NubanBankIDValidator = nubanblacklistDescNubanBankID.Validators[0].(func(string) error)
+	// nubanblacklistDescReason is the schema descriptor for reason field.
+	nubanblacklistDescReason := nubanblacklistFields[4].Descriptor()
+	// nubanblacklist.ReasonValidator is a validator for the "reason" field. It is called by the builders before save.
+	nubanblacklist.ReasonValidator = nubanblacklistDescReason.Validators[0].(func(string) error)
+	// nubanblacklistDescDisabled is the schema descriptor for disabled field.
+	nubanblacklistDescDisabled := nubanblacklistFields[5].Descriptor()
+	// nubanblacklist.DefaultDisabled holds the default value on creation for the disabled field.
+	nubanblacklist.DefaultDisabled = nubanblacklistDescDisabled.Default.(bool)
+	// nubanblacklistDescID is the schema descriptor for id field.
+	nubanblacklistDescID := nubanblacklistMixinFields0[0].Descriptor()
+	// nubanblacklist.DefaultID holds the default value on creation for the id field.
+	nubanblacklist.DefaultID = nubanblacklistDescID.Default.(func() string)
 	nubandepositMixin := schema.NubanDeposit{}.Mixin()
 	nubandepositMixinFields0 := nubandepositMixin[0].Fields()
 	_ = nubandepositMixinFields0
@@ -611,36 +819,16 @@ func init() {
 	nubantransferDescRecipientAccountNumber := nubantransferFields[1].Descriptor()
 	// nubantransfer.RecipientAccountNumberValidator is a validator for the "recipient_account_number" field. It is called by the builders before save.
 	nubantransfer.RecipientAccountNumberValidator = nubantransferDescRecipientAccountNumber.Validators[0].(func(string) error)
-	// nubantransferDescSenderAccountName is the schema descriptor for sender_account_name field.
-	nubantransferDescSenderAccountName := nubantransferFields[2].Descriptor()
-	// nubantransfer.SenderAccountNameValidator is a validator for the "sender_account_name" field. It is called by the builders before save.
-	nubantransfer.SenderAccountNameValidator = nubantransferDescSenderAccountName.Validators[0].(func(string) error)
-	// nubantransferDescSenderAccountNumber is the schema descriptor for sender_account_number field.
-	nubantransferDescSenderAccountNumber := nubantransferFields[3].Descriptor()
-	// nubantransfer.SenderAccountNumberValidator is a validator for the "sender_account_number" field. It is called by the builders before save.
-	nubantransfer.SenderAccountNumberValidator = nubantransferDescSenderAccountNumber.Validators[0].(func(string) error)
-	// nubantransferDescSenderBankName is the schema descriptor for sender_bank_name field.
-	nubantransferDescSenderBankName := nubantransferFields[4].Descriptor()
-	// nubantransfer.SenderBankNameValidator is a validator for the "sender_bank_name" field. It is called by the builders before save.
-	nubantransfer.SenderBankNameValidator = nubantransferDescSenderBankName.Validators[0].(func(string) error)
-	// nubantransferDescSenderBankCode is the schema descriptor for sender_bank_code field.
-	nubantransferDescSenderBankCode := nubantransferFields[5].Descriptor()
-	// nubantransfer.SenderBankCodeValidator is a validator for the "sender_bank_code" field. It is called by the builders before save.
-	nubantransfer.SenderBankCodeValidator = nubantransferDescSenderBankCode.Validators[0].(func(string) error)
+	// nubantransferDescNubanBankID is the schema descriptor for nuban_bank_id field.
+	nubantransferDescNubanBankID := nubantransferFields[2].Descriptor()
+	// nubantransfer.NubanBankIDValidator is a validator for the "nuban_bank_id" field. It is called by the builders before save.
+	nubantransfer.NubanBankIDValidator = nubantransferDescNubanBankID.Validators[0].(func(string) error)
 	// nubantransferDescAmount is the schema descriptor for amount field.
-	nubantransferDescAmount := nubantransferFields[6].Descriptor()
+	nubantransferDescAmount := nubantransferFields[3].Descriptor()
 	// nubantransfer.DefaultAmount holds the default value on creation for the amount field.
 	nubantransfer.DefaultAmount = nubantransferDescAmount.Default.(int64)
-	// nubantransferDescSessionID is the schema descriptor for session_id field.
-	nubantransferDescSessionID := nubantransferFields[7].Descriptor()
-	// nubantransfer.SessionIDValidator is a validator for the "session_id" field. It is called by the builders before save.
-	nubantransfer.SessionIDValidator = nubantransferDescSessionID.Validators[0].(func(string) error)
-	// nubantransferDescProviderReference is the schema descriptor for provider_reference field.
-	nubantransferDescProviderReference := nubantransferFields[8].Descriptor()
-	// nubantransfer.ProviderReferenceValidator is a validator for the "provider_reference" field. It is called by the builders before save.
-	nubantransfer.ProviderReferenceValidator = nubantransferDescProviderReference.Validators[0].(func(string) error)
 	// nubantransferDescProvider is the schema descriptor for provider field.
-	nubantransferDescProvider := nubantransferFields[9].Descriptor()
+	nubantransferDescProvider := nubantransferFields[6].Descriptor()
 	// nubantransfer.ProviderValidator is a validator for the "provider" field. It is called by the builders before save.
 	nubantransfer.ProviderValidator = nubantransferDescProvider.Validators[0].(func(string) error)
 	// nubantransferDescID is the schema descriptor for id field.
@@ -701,6 +889,24 @@ func init() {
 	providerDescID := providerMixinFields0[0].Descriptor()
 	// provider.DefaultID holds the default value on creation for the id field.
 	provider.DefaultID = providerDescID.Default.(func() string)
+	providerbankFields := schema.ProviderBank{}.Fields()
+	_ = providerbankFields
+	// providerbankDescNubanBankID is the schema descriptor for nuban_bank_id field.
+	providerbankDescNubanBankID := providerbankFields[0].Descriptor()
+	// providerbank.NubanBankIDValidator is a validator for the "nuban_bank_id" field. It is called by the builders before save.
+	providerbank.NubanBankIDValidator = providerbankDescNubanBankID.Validators[0].(func(string) error)
+	// providerbankDescProviderCode is the schema descriptor for provider_code field.
+	providerbankDescProviderCode := providerbankFields[1].Descriptor()
+	// providerbank.ProviderCodeValidator is a validator for the "provider_code" field. It is called by the builders before save.
+	providerbank.ProviderCodeValidator = providerbankDescProviderCode.Validators[0].(func(string) error)
+	// providerbankDescProvider is the schema descriptor for provider field.
+	providerbankDescProvider := providerbankFields[2].Descriptor()
+	// providerbank.ProviderValidator is a validator for the "provider" field. It is called by the builders before save.
+	providerbank.ProviderValidator = providerbankDescProvider.Validators[0].(func(string) error)
+	// providerbankDescActive is the schema descriptor for active field.
+	providerbankDescActive := providerbankFields[3].Descriptor()
+	// providerbank.DefaultActive holds the default value on creation for the active field.
+	providerbank.DefaultActive = providerbankDescActive.Default.(bool)
 	requestverificationMixin := schema.RequestVerification{}.Mixin()
 	requestverificationMixinFields0 := requestverificationMixin[0].Fields()
 	_ = requestverificationMixinFields0
@@ -835,14 +1041,14 @@ func init() {
 	serviceDescActive := serviceFields[4].Descriptor()
 	// service.DefaultActive holds the default value on creation for the active field.
 	service.DefaultActive = serviceDescActive.Default.(bool)
-	// serviceDescMin is the schema descriptor for min field.
-	serviceDescMin := serviceFields[5].Descriptor()
-	// service.DefaultMin holds the default value on creation for the min field.
-	service.DefaultMin = serviceDescMin.Default.(int)
-	// serviceDescMax is the schema descriptor for max field.
-	serviceDescMax := serviceFields[6].Descriptor()
-	// service.DefaultMax holds the default value on creation for the max field.
-	service.DefaultMax = serviceDescMax.Default.(int)
+	// serviceDescMinValue is the schema descriptor for min_value field.
+	serviceDescMinValue := serviceFields[5].Descriptor()
+	// service.DefaultMinValue holds the default value on creation for the min_value field.
+	service.DefaultMinValue = serviceDescMinValue.Default.(int)
+	// serviceDescMaxValue is the schema descriptor for max_value field.
+	serviceDescMaxValue := serviceFields[6].Descriptor()
+	// service.DefaultMaxValue holds the default value on creation for the max_value field.
+	service.DefaultMaxValue = serviceDescMaxValue.Default.(int)
 	// serviceDescID is the schema descriptor for id field.
 	serviceDescID := serviceMixinFields0[0].Descriptor()
 	// service.DefaultID holds the default value on creation for the id field.
@@ -1089,6 +1295,68 @@ func init() {
 	stablecoinwithdrawalDescID := stablecoinwithdrawalMixinFields0[0].Descriptor()
 	// stablecoinwithdrawal.DefaultID holds the default value on creation for the id field.
 	stablecoinwithdrawal.DefaultID = stablecoinwithdrawalDescID.Default.(func() string)
+	subscriptionMixin := schema.Subscription{}.Mixin()
+	subscriptionMixinFields0 := subscriptionMixin[0].Fields()
+	_ = subscriptionMixinFields0
+	subscriptionFields := schema.Subscription{}.Fields()
+	_ = subscriptionFields
+	// subscriptionDescCreatedAt is the schema descriptor for created_at field.
+	subscriptionDescCreatedAt := subscriptionMixinFields0[1].Descriptor()
+	// subscription.DefaultCreatedAt holds the default value on creation for the created_at field.
+	subscription.DefaultCreatedAt = subscriptionDescCreatedAt.Default.(func() time.Time)
+	// subscriptionDescUpdatedAt is the schema descriptor for updated_at field.
+	subscriptionDescUpdatedAt := subscriptionMixinFields0[2].Descriptor()
+	// subscription.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	subscription.DefaultUpdatedAt = subscriptionDescUpdatedAt.Default.(func() time.Time)
+	// subscription.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	subscription.UpdateDefaultUpdatedAt = subscriptionDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// subscriptionDescLockedCurrency is the schema descriptor for locked_currency field.
+	subscriptionDescLockedCurrency := subscriptionFields[2].Descriptor()
+	// subscription.LockedCurrencyValidator is a validator for the "locked_currency" field. It is called by the builders before save.
+	subscription.LockedCurrencyValidator = subscriptionDescLockedCurrency.Validators[0].(func(string) error)
+	// subscriptionDescID is the schema descriptor for id field.
+	subscriptionDescID := subscriptionMixinFields0[0].Descriptor()
+	// subscription.DefaultID holds the default value on creation for the id field.
+	subscription.DefaultID = subscriptionDescID.Default.(func() string)
+	subscriptionplanMixin := schema.SubscriptionPlan{}.Mixin()
+	subscriptionplanMixinFields0 := subscriptionplanMixin[0].Fields()
+	_ = subscriptionplanMixinFields0
+	subscriptionplanFields := schema.SubscriptionPlan{}.Fields()
+	_ = subscriptionplanFields
+	// subscriptionplanDescCreatedAt is the schema descriptor for created_at field.
+	subscriptionplanDescCreatedAt := subscriptionplanMixinFields0[1].Descriptor()
+	// subscriptionplan.DefaultCreatedAt holds the default value on creation for the created_at field.
+	subscriptionplan.DefaultCreatedAt = subscriptionplanDescCreatedAt.Default.(func() time.Time)
+	// subscriptionplanDescUpdatedAt is the schema descriptor for updated_at field.
+	subscriptionplanDescUpdatedAt := subscriptionplanMixinFields0[2].Descriptor()
+	// subscriptionplan.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	subscriptionplan.DefaultUpdatedAt = subscriptionplanDescUpdatedAt.Default.(func() time.Time)
+	// subscriptionplan.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	subscriptionplan.UpdateDefaultUpdatedAt = subscriptionplanDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// subscriptionplanDescIntervalCount is the schema descriptor for interval_count field.
+	subscriptionplanDescIntervalCount := subscriptionplanFields[4].Descriptor()
+	// subscriptionplan.DefaultIntervalCount holds the default value on creation for the interval_count field.
+	subscriptionplan.DefaultIntervalCount = subscriptionplanDescIntervalCount.Default.(int)
+	// subscriptionplanDescCurrency is the schema descriptor for currency field.
+	subscriptionplanDescCurrency := subscriptionplanFields[6].Descriptor()
+	// subscriptionplan.CurrencyValidator is a validator for the "currency" field. It is called by the builders before save.
+	subscriptionplan.CurrencyValidator = subscriptionplanDescCurrency.Validators[0].(func(string) error)
+	// subscriptionplanDescTrialPeriodDays is the schema descriptor for trial_period_days field.
+	subscriptionplanDescTrialPeriodDays := subscriptionplanFields[7].Descriptor()
+	// subscriptionplan.DefaultTrialPeriodDays holds the default value on creation for the trial_period_days field.
+	subscriptionplan.DefaultTrialPeriodDays = subscriptionplanDescTrialPeriodDays.Default.(int)
+	// subscriptionplanDescIsActive is the schema descriptor for is_active field.
+	subscriptionplanDescIsActive := subscriptionplanFields[10].Descriptor()
+	// subscriptionplan.DefaultIsActive holds the default value on creation for the is_active field.
+	subscriptionplan.DefaultIsActive = subscriptionplanDescIsActive.Default.(bool)
+	// subscriptionplanDescIsPublic is the schema descriptor for is_public field.
+	subscriptionplanDescIsPublic := subscriptionplanFields[11].Descriptor()
+	// subscriptionplan.DefaultIsPublic holds the default value on creation for the is_public field.
+	subscriptionplan.DefaultIsPublic = subscriptionplanDescIsPublic.Default.(bool)
+	// subscriptionplanDescID is the schema descriptor for id field.
+	subscriptionplanDescID := subscriptionplanMixinFields0[0].Descriptor()
+	// subscriptionplan.DefaultID holds the default value on creation for the id field.
+	subscriptionplan.DefaultID = subscriptionplanDescID.Default.(func() string)
 	transactionMixin := schema.Transaction{}.Mixin()
 	transactionMixinFields0 := transactionMixin[0].Fields()
 	_ = transactionMixinFields0
@@ -1112,14 +1380,33 @@ func init() {
 	transactionDescAmount := transactionFields[8].Descriptor()
 	// transaction.DefaultAmount holds the default value on creation for the amount field.
 	transaction.DefaultAmount = transactionDescAmount.Default.(int64)
-	// transactionDescFee is the schema descriptor for fee field.
-	transactionDescFee := transactionFields[9].Descriptor()
-	// transaction.DefaultFee holds the default value on creation for the fee field.
-	transaction.DefaultFee = transactionDescFee.Default.(int64)
 	// transactionDescID is the schema descriptor for id field.
 	transactionDescID := transactionMixinFields0[0].Descriptor()
 	// transaction.DefaultID holds the default value on creation for the id field.
 	transaction.DefaultID = transactionDescID.Default.(func() string)
+	transactionfeeMixin := schema.TransactionFee{}.Mixin()
+	transactionfeeMixinFields0 := transactionfeeMixin[0].Fields()
+	_ = transactionfeeMixinFields0
+	transactionfeeFields := schema.TransactionFee{}.Fields()
+	_ = transactionfeeFields
+	// transactionfeeDescCreatedAt is the schema descriptor for created_at field.
+	transactionfeeDescCreatedAt := transactionfeeMixinFields0[1].Descriptor()
+	// transactionfee.DefaultCreatedAt holds the default value on creation for the created_at field.
+	transactionfee.DefaultCreatedAt = transactionfeeDescCreatedAt.Default.(func() time.Time)
+	// transactionfeeDescUpdatedAt is the schema descriptor for updated_at field.
+	transactionfeeDescUpdatedAt := transactionfeeMixinFields0[2].Descriptor()
+	// transactionfee.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	transactionfee.DefaultUpdatedAt = transactionfeeDescUpdatedAt.Default.(func() time.Time)
+	// transactionfee.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	transactionfee.UpdateDefaultUpdatedAt = transactionfeeDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// transactionfeeDescCurrency is the schema descriptor for currency field.
+	transactionfeeDescCurrency := transactionfeeFields[2].Descriptor()
+	// transactionfee.CurrencyValidator is a validator for the "currency" field. It is called by the builders before save.
+	transactionfee.CurrencyValidator = transactionfeeDescCurrency.Validators[0].(func(string) error)
+	// transactionfeeDescID is the schema descriptor for id field.
+	transactionfeeDescID := transactionfeeMixinFields0[0].Descriptor()
+	// transactionfee.DefaultID holds the default value on creation for the id field.
+	transactionfee.DefaultID = transactionfeeDescID.Default.(func() string)
 	userMixin := schema.User{}.Mixin()
 	userMixinFields0 := userMixin[0].Fields()
 	_ = userMixinFields0

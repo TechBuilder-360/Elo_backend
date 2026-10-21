@@ -11,6 +11,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/Toflex/directory_v2/ent/invoice"
 	"github.com/Toflex/directory_v2/ent/ledger"
 	"github.com/Toflex/directory_v2/ent/nubandeposit"
 	"github.com/Toflex/directory_v2/ent/nubantransfer"
@@ -18,7 +19,7 @@ import (
 	"github.com/Toflex/directory_v2/ent/stablecoindeposit"
 	"github.com/Toflex/directory_v2/ent/stablecoinwithdrawal"
 	"github.com/Toflex/directory_v2/ent/transaction"
-	"github.com/Toflex/directory_v2/ent/wallet"
+	"github.com/Toflex/directory_v2/ent/transactionfee"
 )
 
 // TransactionUpdate is the builder for updating Transaction entities.
@@ -85,6 +86,12 @@ func (tu *TransactionUpdate) SetNillableExternalReference(s *string) *Transactio
 	if s != nil {
 		tu.SetExternalReference(*s)
 	}
+	return tu
+}
+
+// ClearExternalReference clears the value of the "external_reference" field.
+func (tu *TransactionUpdate) ClearExternalReference() *TransactionUpdate {
+	tu.mutation.ClearExternalReference()
 	return tu
 }
 
@@ -205,24 +212,44 @@ func (tu *TransactionUpdate) AddAmount(i int64) *TransactionUpdate {
 	return tu
 }
 
-// SetFee sets the "fee" field.
-func (tu *TransactionUpdate) SetFee(i int64) *TransactionUpdate {
-	tu.mutation.ResetFee()
-	tu.mutation.SetFee(i)
+// SetNetAmount sets the "net_amount" field.
+func (tu *TransactionUpdate) SetNetAmount(i int64) *TransactionUpdate {
+	tu.mutation.ResetNetAmount()
+	tu.mutation.SetNetAmount(i)
 	return tu
 }
 
-// SetNillableFee sets the "fee" field if the given value is not nil.
-func (tu *TransactionUpdate) SetNillableFee(i *int64) *TransactionUpdate {
+// SetNillableNetAmount sets the "net_amount" field if the given value is not nil.
+func (tu *TransactionUpdate) SetNillableNetAmount(i *int64) *TransactionUpdate {
 	if i != nil {
-		tu.SetFee(*i)
+		tu.SetNetAmount(*i)
 	}
 	return tu
 }
 
-// AddFee adds i to the "fee" field.
-func (tu *TransactionUpdate) AddFee(i int64) *TransactionUpdate {
-	tu.mutation.AddFee(i)
+// AddNetAmount adds i to the "net_amount" field.
+func (tu *TransactionUpdate) AddNetAmount(i int64) *TransactionUpdate {
+	tu.mutation.AddNetAmount(i)
+	return tu
+}
+
+// ClearNetAmount clears the value of the "net_amount" field.
+func (tu *TransactionUpdate) ClearNetAmount() *TransactionUpdate {
+	tu.mutation.ClearNetAmount()
+	return tu
+}
+
+// SetEntry sets the "entry" field.
+func (tu *TransactionUpdate) SetEntry(t transaction.Entry) *TransactionUpdate {
+	tu.mutation.SetEntry(t)
+	return tu
+}
+
+// SetNillableEntry sets the "entry" field if the given value is not nil.
+func (tu *TransactionUpdate) SetNillableEntry(t *transaction.Entry) *TransactionUpdate {
+	if t != nil {
+		tu.SetEntry(*t)
+	}
 	return tu
 }
 
@@ -264,17 +291,6 @@ func (tu *TransactionUpdate) SetNubanTransfer(n *NubanTransfer) *TransactionUpda
 	return tu.SetNubanTransferID(n.ID)
 }
 
-// SetWalletID sets the "wallet" edge to the Wallet entity by ID.
-func (tu *TransactionUpdate) SetWalletID(id string) *TransactionUpdate {
-	tu.mutation.SetWalletID(id)
-	return tu
-}
-
-// SetWallet sets the "wallet" edge to the Wallet entity.
-func (tu *TransactionUpdate) SetWallet(w *Wallet) *TransactionUpdate {
-	return tu.SetWalletID(w.ID)
-}
-
 // SetStablecoinDepositID sets the "stablecoin_deposit" edge to the StablecoinDeposit entity by ID.
 func (tu *TransactionUpdate) SetStablecoinDepositID(id string) *TransactionUpdate {
 	tu.mutation.SetStablecoinDepositID(id)
@@ -313,19 +329,38 @@ func (tu *TransactionUpdate) SetStablecoinWithdrawal(s *StablecoinWithdrawal) *T
 	return tu.SetStablecoinWithdrawalID(s.ID)
 }
 
-// AddLedgerEntryIDs adds the "ledger_entries" edge to the Ledger entity by IDs.
-func (tu *TransactionUpdate) AddLedgerEntryIDs(ids ...string) *TransactionUpdate {
-	tu.mutation.AddLedgerEntryIDs(ids...)
+// AddFeeIDs adds the "fees" edge to the TransactionFee entity by IDs.
+func (tu *TransactionUpdate) AddFeeIDs(ids ...string) *TransactionUpdate {
+	tu.mutation.AddFeeIDs(ids...)
 	return tu
 }
 
-// AddLedgerEntries adds the "ledger_entries" edges to the Ledger entity.
-func (tu *TransactionUpdate) AddLedgerEntries(l ...*Ledger) *TransactionUpdate {
-	ids := make([]string, len(l))
-	for i := range l {
-		ids[i] = l[i].ID
+// AddFees adds the "fees" edges to the TransactionFee entity.
+func (tu *TransactionUpdate) AddFees(t ...*TransactionFee) *TransactionUpdate {
+	ids := make([]string, len(t))
+	for i := range t {
+		ids[i] = t[i].ID
 	}
-	return tu.AddLedgerEntryIDs(ids...)
+	return tu.AddFeeIDs(ids...)
+}
+
+// SetLedgerEntryID sets the "ledger_entry" edge to the Ledger entity by ID.
+func (tu *TransactionUpdate) SetLedgerEntryID(id string) *TransactionUpdate {
+	tu.mutation.SetLedgerEntryID(id)
+	return tu
+}
+
+// SetNillableLedgerEntryID sets the "ledger_entry" edge to the Ledger entity by ID if the given value is not nil.
+func (tu *TransactionUpdate) SetNillableLedgerEntryID(id *string) *TransactionUpdate {
+	if id != nil {
+		tu = tu.SetLedgerEntryID(*id)
+	}
+	return tu
+}
+
+// SetLedgerEntry sets the "ledger_entry" edge to the Ledger entity.
+func (tu *TransactionUpdate) SetLedgerEntry(l *Ledger) *TransactionUpdate {
+	return tu.SetLedgerEntryID(l.ID)
 }
 
 // AddReversalLedgerEntryIDs adds the "reversal_ledger_entries" edge to the Ledger entity by IDs.
@@ -341,6 +376,21 @@ func (tu *TransactionUpdate) AddReversalLedgerEntries(l ...*Ledger) *Transaction
 		ids[i] = l[i].ID
 	}
 	return tu.AddReversalLedgerEntryIDs(ids...)
+}
+
+// AddInvoiceIDs adds the "invoice" edge to the Invoice entity by IDs.
+func (tu *TransactionUpdate) AddInvoiceIDs(ids ...string) *TransactionUpdate {
+	tu.mutation.AddInvoiceIDs(ids...)
+	return tu
+}
+
+// AddInvoice adds the "invoice" edges to the Invoice entity.
+func (tu *TransactionUpdate) AddInvoice(i ...*Invoice) *TransactionUpdate {
+	ids := make([]string, len(i))
+	for j := range i {
+		ids[j] = i[j].ID
+	}
+	return tu.AddInvoiceIDs(ids...)
 }
 
 // Mutation returns the TransactionMutation object of the builder.
@@ -360,12 +410,6 @@ func (tu *TransactionUpdate) ClearNubanTransfer() *TransactionUpdate {
 	return tu
 }
 
-// ClearWallet clears the "wallet" edge to the Wallet entity.
-func (tu *TransactionUpdate) ClearWallet() *TransactionUpdate {
-	tu.mutation.ClearWallet()
-	return tu
-}
-
 // ClearStablecoinDeposit clears the "stablecoin_deposit" edge to the StablecoinDeposit entity.
 func (tu *TransactionUpdate) ClearStablecoinDeposit() *TransactionUpdate {
 	tu.mutation.ClearStablecoinDeposit()
@@ -378,25 +422,31 @@ func (tu *TransactionUpdate) ClearStablecoinWithdrawal() *TransactionUpdate {
 	return tu
 }
 
-// ClearLedgerEntries clears all "ledger_entries" edges to the Ledger entity.
-func (tu *TransactionUpdate) ClearLedgerEntries() *TransactionUpdate {
-	tu.mutation.ClearLedgerEntries()
+// ClearFees clears all "fees" edges to the TransactionFee entity.
+func (tu *TransactionUpdate) ClearFees() *TransactionUpdate {
+	tu.mutation.ClearFees()
 	return tu
 }
 
-// RemoveLedgerEntryIDs removes the "ledger_entries" edge to Ledger entities by IDs.
-func (tu *TransactionUpdate) RemoveLedgerEntryIDs(ids ...string) *TransactionUpdate {
-	tu.mutation.RemoveLedgerEntryIDs(ids...)
+// RemoveFeeIDs removes the "fees" edge to TransactionFee entities by IDs.
+func (tu *TransactionUpdate) RemoveFeeIDs(ids ...string) *TransactionUpdate {
+	tu.mutation.RemoveFeeIDs(ids...)
 	return tu
 }
 
-// RemoveLedgerEntries removes "ledger_entries" edges to Ledger entities.
-func (tu *TransactionUpdate) RemoveLedgerEntries(l ...*Ledger) *TransactionUpdate {
-	ids := make([]string, len(l))
-	for i := range l {
-		ids[i] = l[i].ID
+// RemoveFees removes "fees" edges to TransactionFee entities.
+func (tu *TransactionUpdate) RemoveFees(t ...*TransactionFee) *TransactionUpdate {
+	ids := make([]string, len(t))
+	for i := range t {
+		ids[i] = t[i].ID
 	}
-	return tu.RemoveLedgerEntryIDs(ids...)
+	return tu.RemoveFeeIDs(ids...)
+}
+
+// ClearLedgerEntry clears the "ledger_entry" edge to the Ledger entity.
+func (tu *TransactionUpdate) ClearLedgerEntry() *TransactionUpdate {
+	tu.mutation.ClearLedgerEntry()
+	return tu
 }
 
 // ClearReversalLedgerEntries clears all "reversal_ledger_entries" edges to the Ledger entity.
@@ -418,6 +468,27 @@ func (tu *TransactionUpdate) RemoveReversalLedgerEntries(l ...*Ledger) *Transact
 		ids[i] = l[i].ID
 	}
 	return tu.RemoveReversalLedgerEntryIDs(ids...)
+}
+
+// ClearInvoice clears all "invoice" edges to the Invoice entity.
+func (tu *TransactionUpdate) ClearInvoice() *TransactionUpdate {
+	tu.mutation.ClearInvoice()
+	return tu
+}
+
+// RemoveInvoiceIDs removes the "invoice" edge to Invoice entities by IDs.
+func (tu *TransactionUpdate) RemoveInvoiceIDs(ids ...string) *TransactionUpdate {
+	tu.mutation.RemoveInvoiceIDs(ids...)
+	return tu
+}
+
+// RemoveInvoice removes "invoice" edges to Invoice entities.
+func (tu *TransactionUpdate) RemoveInvoice(i ...*Invoice) *TransactionUpdate {
+	ids := make([]string, len(i))
+	for j := range i {
+		ids[j] = i[j].ID
+	}
+	return tu.RemoveInvoiceIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -478,8 +549,10 @@ func (tu *TransactionUpdate) check() error {
 			return &ValidationError{Name: "currency", err: fmt.Errorf(`ent: validator failed for field "Transaction.currency": %w`, err)}
 		}
 	}
-	if tu.mutation.WalletCleared() && len(tu.mutation.WalletIDs()) > 0 {
-		return errors.New(`ent: clearing a required unique edge "Transaction.wallet"`)
+	if v, ok := tu.mutation.Entry(); ok {
+		if err := transaction.EntryValidator(v); err != nil {
+			return &ValidationError{Name: "entry", err: fmt.Errorf(`ent: validator failed for field "Transaction.entry": %w`, err)}
+		}
 	}
 	return nil
 }
@@ -511,6 +584,9 @@ func (tu *TransactionUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if value, ok := tu.mutation.ExternalReference(); ok {
 		_spec.SetField(transaction.FieldExternalReference, field.TypeString, value)
 	}
+	if tu.mutation.ExternalReferenceCleared() {
+		_spec.ClearField(transaction.FieldExternalReference, field.TypeString)
+	}
 	if value, ok := tu.mutation.GetType(); ok {
 		_spec.SetField(transaction.FieldType, field.TypeEnum, value)
 	}
@@ -541,11 +617,17 @@ func (tu *TransactionUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if value, ok := tu.mutation.AddedAmount(); ok {
 		_spec.AddField(transaction.FieldAmount, field.TypeInt64, value)
 	}
-	if value, ok := tu.mutation.Fee(); ok {
-		_spec.SetField(transaction.FieldFee, field.TypeInt64, value)
+	if value, ok := tu.mutation.NetAmount(); ok {
+		_spec.SetField(transaction.FieldNetAmount, field.TypeInt64, value)
 	}
-	if value, ok := tu.mutation.AddedFee(); ok {
-		_spec.AddField(transaction.FieldFee, field.TypeInt64, value)
+	if value, ok := tu.mutation.AddedNetAmount(); ok {
+		_spec.AddField(transaction.FieldNetAmount, field.TypeInt64, value)
+	}
+	if tu.mutation.NetAmountCleared() {
+		_spec.ClearField(transaction.FieldNetAmount, field.TypeInt64)
+	}
+	if value, ok := tu.mutation.Entry(); ok {
+		_spec.SetField(transaction.FieldEntry, field.TypeEnum, value)
 	}
 	if tu.mutation.NubanDepositCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -598,35 +680,6 @@ func (tu *TransactionUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(nubantransfer.FieldID, field.TypeString),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
-	}
-	if tu.mutation.WalletCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: false,
-			Table:   transaction.WalletTable,
-			Columns: []string{transaction.WalletColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(wallet.FieldID, field.TypeString),
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := tu.mutation.WalletIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: false,
-			Table:   transaction.WalletTable,
-			Columns: []string{transaction.WalletColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(wallet.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {
@@ -692,28 +745,28 @@ func (tu *TransactionUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if tu.mutation.LedgerEntriesCleared() {
+	if tu.mutation.FeesCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   transaction.LedgerEntriesTable,
-			Columns: []string{transaction.LedgerEntriesColumn},
+			Table:   transaction.FeesTable,
+			Columns: []string{transaction.FeesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(ledger.FieldID, field.TypeString),
+				IDSpec: sqlgraph.NewFieldSpec(transactionfee.FieldID, field.TypeString),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := tu.mutation.RemovedLedgerEntriesIDs(); len(nodes) > 0 && !tu.mutation.LedgerEntriesCleared() {
+	if nodes := tu.mutation.RemovedFeesIDs(); len(nodes) > 0 && !tu.mutation.FeesCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   transaction.LedgerEntriesTable,
-			Columns: []string{transaction.LedgerEntriesColumn},
+			Table:   transaction.FeesTable,
+			Columns: []string{transaction.FeesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(ledger.FieldID, field.TypeString),
+				IDSpec: sqlgraph.NewFieldSpec(transactionfee.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {
@@ -721,12 +774,41 @@ func (tu *TransactionUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := tu.mutation.LedgerEntriesIDs(); len(nodes) > 0 {
+	if nodes := tu.mutation.FeesIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   transaction.LedgerEntriesTable,
-			Columns: []string{transaction.LedgerEntriesColumn},
+			Table:   transaction.FeesTable,
+			Columns: []string{transaction.FeesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(transactionfee.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if tu.mutation.LedgerEntryCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2O,
+			Inverse: false,
+			Table:   transaction.LedgerEntryTable,
+			Columns: []string{transaction.LedgerEntryColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(ledger.FieldID, field.TypeString),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := tu.mutation.LedgerEntryIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2O,
+			Inverse: false,
+			Table:   transaction.LedgerEntryTable,
+			Columns: []string{transaction.LedgerEntryColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(ledger.FieldID, field.TypeString),
@@ -775,6 +857,51 @@ func (tu *TransactionUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(ledger.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if tu.mutation.InvoiceCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   transaction.InvoiceTable,
+			Columns: []string{transaction.InvoiceColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(invoice.FieldID, field.TypeString),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := tu.mutation.RemovedInvoiceIDs(); len(nodes) > 0 && !tu.mutation.InvoiceCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   transaction.InvoiceTable,
+			Columns: []string{transaction.InvoiceColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(invoice.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := tu.mutation.InvoiceIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   transaction.InvoiceTable,
+			Columns: []string{transaction.InvoiceColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(invoice.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {
@@ -853,6 +980,12 @@ func (tuo *TransactionUpdateOne) SetNillableExternalReference(s *string) *Transa
 	if s != nil {
 		tuo.SetExternalReference(*s)
 	}
+	return tuo
+}
+
+// ClearExternalReference clears the value of the "external_reference" field.
+func (tuo *TransactionUpdateOne) ClearExternalReference() *TransactionUpdateOne {
+	tuo.mutation.ClearExternalReference()
 	return tuo
 }
 
@@ -973,24 +1106,44 @@ func (tuo *TransactionUpdateOne) AddAmount(i int64) *TransactionUpdateOne {
 	return tuo
 }
 
-// SetFee sets the "fee" field.
-func (tuo *TransactionUpdateOne) SetFee(i int64) *TransactionUpdateOne {
-	tuo.mutation.ResetFee()
-	tuo.mutation.SetFee(i)
+// SetNetAmount sets the "net_amount" field.
+func (tuo *TransactionUpdateOne) SetNetAmount(i int64) *TransactionUpdateOne {
+	tuo.mutation.ResetNetAmount()
+	tuo.mutation.SetNetAmount(i)
 	return tuo
 }
 
-// SetNillableFee sets the "fee" field if the given value is not nil.
-func (tuo *TransactionUpdateOne) SetNillableFee(i *int64) *TransactionUpdateOne {
+// SetNillableNetAmount sets the "net_amount" field if the given value is not nil.
+func (tuo *TransactionUpdateOne) SetNillableNetAmount(i *int64) *TransactionUpdateOne {
 	if i != nil {
-		tuo.SetFee(*i)
+		tuo.SetNetAmount(*i)
 	}
 	return tuo
 }
 
-// AddFee adds i to the "fee" field.
-func (tuo *TransactionUpdateOne) AddFee(i int64) *TransactionUpdateOne {
-	tuo.mutation.AddFee(i)
+// AddNetAmount adds i to the "net_amount" field.
+func (tuo *TransactionUpdateOne) AddNetAmount(i int64) *TransactionUpdateOne {
+	tuo.mutation.AddNetAmount(i)
+	return tuo
+}
+
+// ClearNetAmount clears the value of the "net_amount" field.
+func (tuo *TransactionUpdateOne) ClearNetAmount() *TransactionUpdateOne {
+	tuo.mutation.ClearNetAmount()
+	return tuo
+}
+
+// SetEntry sets the "entry" field.
+func (tuo *TransactionUpdateOne) SetEntry(t transaction.Entry) *TransactionUpdateOne {
+	tuo.mutation.SetEntry(t)
+	return tuo
+}
+
+// SetNillableEntry sets the "entry" field if the given value is not nil.
+func (tuo *TransactionUpdateOne) SetNillableEntry(t *transaction.Entry) *TransactionUpdateOne {
+	if t != nil {
+		tuo.SetEntry(*t)
+	}
 	return tuo
 }
 
@@ -1032,17 +1185,6 @@ func (tuo *TransactionUpdateOne) SetNubanTransfer(n *NubanTransfer) *Transaction
 	return tuo.SetNubanTransferID(n.ID)
 }
 
-// SetWalletID sets the "wallet" edge to the Wallet entity by ID.
-func (tuo *TransactionUpdateOne) SetWalletID(id string) *TransactionUpdateOne {
-	tuo.mutation.SetWalletID(id)
-	return tuo
-}
-
-// SetWallet sets the "wallet" edge to the Wallet entity.
-func (tuo *TransactionUpdateOne) SetWallet(w *Wallet) *TransactionUpdateOne {
-	return tuo.SetWalletID(w.ID)
-}
-
 // SetStablecoinDepositID sets the "stablecoin_deposit" edge to the StablecoinDeposit entity by ID.
 func (tuo *TransactionUpdateOne) SetStablecoinDepositID(id string) *TransactionUpdateOne {
 	tuo.mutation.SetStablecoinDepositID(id)
@@ -1081,19 +1223,38 @@ func (tuo *TransactionUpdateOne) SetStablecoinWithdrawal(s *StablecoinWithdrawal
 	return tuo.SetStablecoinWithdrawalID(s.ID)
 }
 
-// AddLedgerEntryIDs adds the "ledger_entries" edge to the Ledger entity by IDs.
-func (tuo *TransactionUpdateOne) AddLedgerEntryIDs(ids ...string) *TransactionUpdateOne {
-	tuo.mutation.AddLedgerEntryIDs(ids...)
+// AddFeeIDs adds the "fees" edge to the TransactionFee entity by IDs.
+func (tuo *TransactionUpdateOne) AddFeeIDs(ids ...string) *TransactionUpdateOne {
+	tuo.mutation.AddFeeIDs(ids...)
 	return tuo
 }
 
-// AddLedgerEntries adds the "ledger_entries" edges to the Ledger entity.
-func (tuo *TransactionUpdateOne) AddLedgerEntries(l ...*Ledger) *TransactionUpdateOne {
-	ids := make([]string, len(l))
-	for i := range l {
-		ids[i] = l[i].ID
+// AddFees adds the "fees" edges to the TransactionFee entity.
+func (tuo *TransactionUpdateOne) AddFees(t ...*TransactionFee) *TransactionUpdateOne {
+	ids := make([]string, len(t))
+	for i := range t {
+		ids[i] = t[i].ID
 	}
-	return tuo.AddLedgerEntryIDs(ids...)
+	return tuo.AddFeeIDs(ids...)
+}
+
+// SetLedgerEntryID sets the "ledger_entry" edge to the Ledger entity by ID.
+func (tuo *TransactionUpdateOne) SetLedgerEntryID(id string) *TransactionUpdateOne {
+	tuo.mutation.SetLedgerEntryID(id)
+	return tuo
+}
+
+// SetNillableLedgerEntryID sets the "ledger_entry" edge to the Ledger entity by ID if the given value is not nil.
+func (tuo *TransactionUpdateOne) SetNillableLedgerEntryID(id *string) *TransactionUpdateOne {
+	if id != nil {
+		tuo = tuo.SetLedgerEntryID(*id)
+	}
+	return tuo
+}
+
+// SetLedgerEntry sets the "ledger_entry" edge to the Ledger entity.
+func (tuo *TransactionUpdateOne) SetLedgerEntry(l *Ledger) *TransactionUpdateOne {
+	return tuo.SetLedgerEntryID(l.ID)
 }
 
 // AddReversalLedgerEntryIDs adds the "reversal_ledger_entries" edge to the Ledger entity by IDs.
@@ -1109,6 +1270,21 @@ func (tuo *TransactionUpdateOne) AddReversalLedgerEntries(l ...*Ledger) *Transac
 		ids[i] = l[i].ID
 	}
 	return tuo.AddReversalLedgerEntryIDs(ids...)
+}
+
+// AddInvoiceIDs adds the "invoice" edge to the Invoice entity by IDs.
+func (tuo *TransactionUpdateOne) AddInvoiceIDs(ids ...string) *TransactionUpdateOne {
+	tuo.mutation.AddInvoiceIDs(ids...)
+	return tuo
+}
+
+// AddInvoice adds the "invoice" edges to the Invoice entity.
+func (tuo *TransactionUpdateOne) AddInvoice(i ...*Invoice) *TransactionUpdateOne {
+	ids := make([]string, len(i))
+	for j := range i {
+		ids[j] = i[j].ID
+	}
+	return tuo.AddInvoiceIDs(ids...)
 }
 
 // Mutation returns the TransactionMutation object of the builder.
@@ -1128,12 +1304,6 @@ func (tuo *TransactionUpdateOne) ClearNubanTransfer() *TransactionUpdateOne {
 	return tuo
 }
 
-// ClearWallet clears the "wallet" edge to the Wallet entity.
-func (tuo *TransactionUpdateOne) ClearWallet() *TransactionUpdateOne {
-	tuo.mutation.ClearWallet()
-	return tuo
-}
-
 // ClearStablecoinDeposit clears the "stablecoin_deposit" edge to the StablecoinDeposit entity.
 func (tuo *TransactionUpdateOne) ClearStablecoinDeposit() *TransactionUpdateOne {
 	tuo.mutation.ClearStablecoinDeposit()
@@ -1146,25 +1316,31 @@ func (tuo *TransactionUpdateOne) ClearStablecoinWithdrawal() *TransactionUpdateO
 	return tuo
 }
 
-// ClearLedgerEntries clears all "ledger_entries" edges to the Ledger entity.
-func (tuo *TransactionUpdateOne) ClearLedgerEntries() *TransactionUpdateOne {
-	tuo.mutation.ClearLedgerEntries()
+// ClearFees clears all "fees" edges to the TransactionFee entity.
+func (tuo *TransactionUpdateOne) ClearFees() *TransactionUpdateOne {
+	tuo.mutation.ClearFees()
 	return tuo
 }
 
-// RemoveLedgerEntryIDs removes the "ledger_entries" edge to Ledger entities by IDs.
-func (tuo *TransactionUpdateOne) RemoveLedgerEntryIDs(ids ...string) *TransactionUpdateOne {
-	tuo.mutation.RemoveLedgerEntryIDs(ids...)
+// RemoveFeeIDs removes the "fees" edge to TransactionFee entities by IDs.
+func (tuo *TransactionUpdateOne) RemoveFeeIDs(ids ...string) *TransactionUpdateOne {
+	tuo.mutation.RemoveFeeIDs(ids...)
 	return tuo
 }
 
-// RemoveLedgerEntries removes "ledger_entries" edges to Ledger entities.
-func (tuo *TransactionUpdateOne) RemoveLedgerEntries(l ...*Ledger) *TransactionUpdateOne {
-	ids := make([]string, len(l))
-	for i := range l {
-		ids[i] = l[i].ID
+// RemoveFees removes "fees" edges to TransactionFee entities.
+func (tuo *TransactionUpdateOne) RemoveFees(t ...*TransactionFee) *TransactionUpdateOne {
+	ids := make([]string, len(t))
+	for i := range t {
+		ids[i] = t[i].ID
 	}
-	return tuo.RemoveLedgerEntryIDs(ids...)
+	return tuo.RemoveFeeIDs(ids...)
+}
+
+// ClearLedgerEntry clears the "ledger_entry" edge to the Ledger entity.
+func (tuo *TransactionUpdateOne) ClearLedgerEntry() *TransactionUpdateOne {
+	tuo.mutation.ClearLedgerEntry()
+	return tuo
 }
 
 // ClearReversalLedgerEntries clears all "reversal_ledger_entries" edges to the Ledger entity.
@@ -1186,6 +1362,27 @@ func (tuo *TransactionUpdateOne) RemoveReversalLedgerEntries(l ...*Ledger) *Tran
 		ids[i] = l[i].ID
 	}
 	return tuo.RemoveReversalLedgerEntryIDs(ids...)
+}
+
+// ClearInvoice clears all "invoice" edges to the Invoice entity.
+func (tuo *TransactionUpdateOne) ClearInvoice() *TransactionUpdateOne {
+	tuo.mutation.ClearInvoice()
+	return tuo
+}
+
+// RemoveInvoiceIDs removes the "invoice" edge to Invoice entities by IDs.
+func (tuo *TransactionUpdateOne) RemoveInvoiceIDs(ids ...string) *TransactionUpdateOne {
+	tuo.mutation.RemoveInvoiceIDs(ids...)
+	return tuo
+}
+
+// RemoveInvoice removes "invoice" edges to Invoice entities.
+func (tuo *TransactionUpdateOne) RemoveInvoice(i ...*Invoice) *TransactionUpdateOne {
+	ids := make([]string, len(i))
+	for j := range i {
+		ids[j] = i[j].ID
+	}
+	return tuo.RemoveInvoiceIDs(ids...)
 }
 
 // Where appends a list predicates to the TransactionUpdate builder.
@@ -1259,8 +1456,10 @@ func (tuo *TransactionUpdateOne) check() error {
 			return &ValidationError{Name: "currency", err: fmt.Errorf(`ent: validator failed for field "Transaction.currency": %w`, err)}
 		}
 	}
-	if tuo.mutation.WalletCleared() && len(tuo.mutation.WalletIDs()) > 0 {
-		return errors.New(`ent: clearing a required unique edge "Transaction.wallet"`)
+	if v, ok := tuo.mutation.Entry(); ok {
+		if err := transaction.EntryValidator(v); err != nil {
+			return &ValidationError{Name: "entry", err: fmt.Errorf(`ent: validator failed for field "Transaction.entry": %w`, err)}
+		}
 	}
 	return nil
 }
@@ -1309,6 +1508,9 @@ func (tuo *TransactionUpdateOne) sqlSave(ctx context.Context) (_node *Transactio
 	if value, ok := tuo.mutation.ExternalReference(); ok {
 		_spec.SetField(transaction.FieldExternalReference, field.TypeString, value)
 	}
+	if tuo.mutation.ExternalReferenceCleared() {
+		_spec.ClearField(transaction.FieldExternalReference, field.TypeString)
+	}
 	if value, ok := tuo.mutation.GetType(); ok {
 		_spec.SetField(transaction.FieldType, field.TypeEnum, value)
 	}
@@ -1339,11 +1541,17 @@ func (tuo *TransactionUpdateOne) sqlSave(ctx context.Context) (_node *Transactio
 	if value, ok := tuo.mutation.AddedAmount(); ok {
 		_spec.AddField(transaction.FieldAmount, field.TypeInt64, value)
 	}
-	if value, ok := tuo.mutation.Fee(); ok {
-		_spec.SetField(transaction.FieldFee, field.TypeInt64, value)
+	if value, ok := tuo.mutation.NetAmount(); ok {
+		_spec.SetField(transaction.FieldNetAmount, field.TypeInt64, value)
 	}
-	if value, ok := tuo.mutation.AddedFee(); ok {
-		_spec.AddField(transaction.FieldFee, field.TypeInt64, value)
+	if value, ok := tuo.mutation.AddedNetAmount(); ok {
+		_spec.AddField(transaction.FieldNetAmount, field.TypeInt64, value)
+	}
+	if tuo.mutation.NetAmountCleared() {
+		_spec.ClearField(transaction.FieldNetAmount, field.TypeInt64)
+	}
+	if value, ok := tuo.mutation.Entry(); ok {
+		_spec.SetField(transaction.FieldEntry, field.TypeEnum, value)
 	}
 	if tuo.mutation.NubanDepositCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -1396,35 +1604,6 @@ func (tuo *TransactionUpdateOne) sqlSave(ctx context.Context) (_node *Transactio
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(nubantransfer.FieldID, field.TypeString),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
-	}
-	if tuo.mutation.WalletCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: false,
-			Table:   transaction.WalletTable,
-			Columns: []string{transaction.WalletColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(wallet.FieldID, field.TypeString),
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := tuo.mutation.WalletIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: false,
-			Table:   transaction.WalletTable,
-			Columns: []string{transaction.WalletColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(wallet.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {
@@ -1490,28 +1669,28 @@ func (tuo *TransactionUpdateOne) sqlSave(ctx context.Context) (_node *Transactio
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if tuo.mutation.LedgerEntriesCleared() {
+	if tuo.mutation.FeesCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   transaction.LedgerEntriesTable,
-			Columns: []string{transaction.LedgerEntriesColumn},
+			Table:   transaction.FeesTable,
+			Columns: []string{transaction.FeesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(ledger.FieldID, field.TypeString),
+				IDSpec: sqlgraph.NewFieldSpec(transactionfee.FieldID, field.TypeString),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := tuo.mutation.RemovedLedgerEntriesIDs(); len(nodes) > 0 && !tuo.mutation.LedgerEntriesCleared() {
+	if nodes := tuo.mutation.RemovedFeesIDs(); len(nodes) > 0 && !tuo.mutation.FeesCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   transaction.LedgerEntriesTable,
-			Columns: []string{transaction.LedgerEntriesColumn},
+			Table:   transaction.FeesTable,
+			Columns: []string{transaction.FeesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(ledger.FieldID, field.TypeString),
+				IDSpec: sqlgraph.NewFieldSpec(transactionfee.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {
@@ -1519,12 +1698,41 @@ func (tuo *TransactionUpdateOne) sqlSave(ctx context.Context) (_node *Transactio
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := tuo.mutation.LedgerEntriesIDs(); len(nodes) > 0 {
+	if nodes := tuo.mutation.FeesIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   transaction.LedgerEntriesTable,
-			Columns: []string{transaction.LedgerEntriesColumn},
+			Table:   transaction.FeesTable,
+			Columns: []string{transaction.FeesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(transactionfee.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if tuo.mutation.LedgerEntryCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2O,
+			Inverse: false,
+			Table:   transaction.LedgerEntryTable,
+			Columns: []string{transaction.LedgerEntryColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(ledger.FieldID, field.TypeString),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := tuo.mutation.LedgerEntryIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2O,
+			Inverse: false,
+			Table:   transaction.LedgerEntryTable,
+			Columns: []string{transaction.LedgerEntryColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(ledger.FieldID, field.TypeString),
@@ -1573,6 +1781,51 @@ func (tuo *TransactionUpdateOne) sqlSave(ctx context.Context) (_node *Transactio
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(ledger.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if tuo.mutation.InvoiceCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   transaction.InvoiceTable,
+			Columns: []string{transaction.InvoiceColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(invoice.FieldID, field.TypeString),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := tuo.mutation.RemovedInvoiceIDs(); len(nodes) > 0 && !tuo.mutation.InvoiceCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   transaction.InvoiceTable,
+			Columns: []string{transaction.InvoiceColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(invoice.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := tuo.mutation.InvoiceIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   transaction.InvoiceTable,
+			Columns: []string{transaction.InvoiceColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(invoice.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {

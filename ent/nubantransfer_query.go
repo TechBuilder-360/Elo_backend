@@ -4,13 +4,17 @@ package ent
 
 import (
 	"context"
+	"database/sql/driver"
 	"fmt"
 	"math"
 
 	"entgo.io/ent"
+	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/Toflex/directory_v2/ent/nubanbank"
+	"github.com/Toflex/directory_v2/ent/nubanbeneficiary"
 	"github.com/Toflex/directory_v2/ent/nubantransfer"
 	"github.com/Toflex/directory_v2/ent/predicate"
 	"github.com/Toflex/directory_v2/ent/transaction"
@@ -19,12 +23,15 @@ import (
 // NubanTransferQuery is the builder for querying NubanTransfer entities.
 type NubanTransferQuery struct {
 	config
-	ctx             *QueryContext
-	order           []nubantransfer.OrderOption
-	inters          []Interceptor
-	predicates      []predicate.NubanTransfer
-	withTransaction *TransactionQuery
-	withFKs         bool
+	ctx               *QueryContext
+	order             []nubantransfer.OrderOption
+	inters            []Interceptor
+	predicates        []predicate.NubanTransfer
+	withTransaction   *TransactionQuery
+	withNubanBank     *NubanBankQuery
+	withBeneficiaries *NubanBeneficiaryQuery
+	withFKs           bool
+	modifiers         []func(*sql.Selector)
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -76,6 +83,50 @@ func (ntq *NubanTransferQuery) QueryTransaction() *TransactionQuery {
 			sqlgraph.From(nubantransfer.Table, nubantransfer.FieldID, selector),
 			sqlgraph.To(transaction.Table, transaction.FieldID),
 			sqlgraph.Edge(sqlgraph.O2O, true, nubantransfer.TransactionTable, nubantransfer.TransactionColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(ntq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryNubanBank chains the current query on the "nuban_bank" edge.
+func (ntq *NubanTransferQuery) QueryNubanBank() *NubanBankQuery {
+	query := (&NubanBankClient{config: ntq.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := ntq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := ntq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(nubantransfer.Table, nubantransfer.FieldID, selector),
+			sqlgraph.To(nubanbank.Table, nubanbank.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, nubantransfer.NubanBankTable, nubantransfer.NubanBankColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(ntq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryBeneficiaries chains the current query on the "beneficiaries" edge.
+func (ntq *NubanTransferQuery) QueryBeneficiaries() *NubanBeneficiaryQuery {
+	query := (&NubanBeneficiaryClient{config: ntq.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := ntq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := ntq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(nubantransfer.Table, nubantransfer.FieldID, selector),
+			sqlgraph.To(nubanbeneficiary.Table, nubanbeneficiary.FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, true, nubantransfer.BeneficiariesTable, nubantransfer.BeneficiariesPrimaryKey...),
 		)
 		fromU = sqlgraph.SetNeighbors(ntq.driver.Dialect(), step)
 		return fromU, nil
@@ -270,12 +321,14 @@ func (ntq *NubanTransferQuery) Clone() *NubanTransferQuery {
 		return nil
 	}
 	return &NubanTransferQuery{
-		config:          ntq.config,
-		ctx:             ntq.ctx.Clone(),
-		order:           append([]nubantransfer.OrderOption{}, ntq.order...),
-		inters:          append([]Interceptor{}, ntq.inters...),
-		predicates:      append([]predicate.NubanTransfer{}, ntq.predicates...),
-		withTransaction: ntq.withTransaction.Clone(),
+		config:            ntq.config,
+		ctx:               ntq.ctx.Clone(),
+		order:             append([]nubantransfer.OrderOption{}, ntq.order...),
+		inters:            append([]Interceptor{}, ntq.inters...),
+		predicates:        append([]predicate.NubanTransfer{}, ntq.predicates...),
+		withTransaction:   ntq.withTransaction.Clone(),
+		withNubanBank:     ntq.withNubanBank.Clone(),
+		withBeneficiaries: ntq.withBeneficiaries.Clone(),
 		// clone intermediate query.
 		sql:  ntq.sql.Clone(),
 		path: ntq.path,
@@ -290,6 +343,28 @@ func (ntq *NubanTransferQuery) WithTransaction(opts ...func(*TransactionQuery)) 
 		opt(query)
 	}
 	ntq.withTransaction = query
+	return ntq
+}
+
+// WithNubanBank tells the query-builder to eager-load the nodes that are connected to
+// the "nuban_bank" edge. The optional arguments are used to configure the query builder of the edge.
+func (ntq *NubanTransferQuery) WithNubanBank(opts ...func(*NubanBankQuery)) *NubanTransferQuery {
+	query := (&NubanBankClient{config: ntq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	ntq.withNubanBank = query
+	return ntq
+}
+
+// WithBeneficiaries tells the query-builder to eager-load the nodes that are connected to
+// the "beneficiaries" edge. The optional arguments are used to configure the query builder of the edge.
+func (ntq *NubanTransferQuery) WithBeneficiaries(opts ...func(*NubanBeneficiaryQuery)) *NubanTransferQuery {
+	query := (&NubanBeneficiaryClient{config: ntq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	ntq.withBeneficiaries = query
 	return ntq
 }
 
@@ -372,8 +447,10 @@ func (ntq *NubanTransferQuery) sqlAll(ctx context.Context, hooks ...queryHook) (
 		nodes       = []*NubanTransfer{}
 		withFKs     = ntq.withFKs
 		_spec       = ntq.querySpec()
-		loadedTypes = [1]bool{
+		loadedTypes = [3]bool{
 			ntq.withTransaction != nil,
+			ntq.withNubanBank != nil,
+			ntq.withBeneficiaries != nil,
 		}
 	)
 	if ntq.withTransaction != nil {
@@ -391,6 +468,9 @@ func (ntq *NubanTransferQuery) sqlAll(ctx context.Context, hooks ...queryHook) (
 		node.Edges.loadedTypes = loadedTypes
 		return node.assignValues(columns, values)
 	}
+	if len(ntq.modifiers) > 0 {
+		_spec.Modifiers = ntq.modifiers
+	}
 	for i := range hooks {
 		hooks[i](ctx, _spec)
 	}
@@ -403,6 +483,19 @@ func (ntq *NubanTransferQuery) sqlAll(ctx context.Context, hooks ...queryHook) (
 	if query := ntq.withTransaction; query != nil {
 		if err := ntq.loadTransaction(ctx, query, nodes, nil,
 			func(n *NubanTransfer, e *Transaction) { n.Edges.Transaction = e }); err != nil {
+			return nil, err
+		}
+	}
+	if query := ntq.withNubanBank; query != nil {
+		if err := ntq.loadNubanBank(ctx, query, nodes, nil,
+			func(n *NubanTransfer, e *NubanBank) { n.Edges.NubanBank = e }); err != nil {
+			return nil, err
+		}
+	}
+	if query := ntq.withBeneficiaries; query != nil {
+		if err := ntq.loadBeneficiaries(ctx, query, nodes,
+			func(n *NubanTransfer) { n.Edges.Beneficiaries = []*NubanBeneficiary{} },
+			func(n *NubanTransfer, e *NubanBeneficiary) { n.Edges.Beneficiaries = append(n.Edges.Beneficiaries, e) }); err != nil {
 			return nil, err
 		}
 	}
@@ -441,9 +534,102 @@ func (ntq *NubanTransferQuery) loadTransaction(ctx context.Context, query *Trans
 	}
 	return nil
 }
+func (ntq *NubanTransferQuery) loadNubanBank(ctx context.Context, query *NubanBankQuery, nodes []*NubanTransfer, init func(*NubanTransfer), assign func(*NubanTransfer, *NubanBank)) error {
+	ids := make([]string, 0, len(nodes))
+	nodeids := make(map[string][]*NubanTransfer)
+	for i := range nodes {
+		fk := nodes[i].NubanBankID
+		if _, ok := nodeids[fk]; !ok {
+			ids = append(ids, fk)
+		}
+		nodeids[fk] = append(nodeids[fk], nodes[i])
+	}
+	if len(ids) == 0 {
+		return nil
+	}
+	query.Where(nubanbank.IDIn(ids...))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		nodes, ok := nodeids[n.ID]
+		if !ok {
+			return fmt.Errorf(`unexpected foreign-key "nuban_bank_id" returned %v`, n.ID)
+		}
+		for i := range nodes {
+			assign(nodes[i], n)
+		}
+	}
+	return nil
+}
+func (ntq *NubanTransferQuery) loadBeneficiaries(ctx context.Context, query *NubanBeneficiaryQuery, nodes []*NubanTransfer, init func(*NubanTransfer), assign func(*NubanTransfer, *NubanBeneficiary)) error {
+	edgeIDs := make([]driver.Value, len(nodes))
+	byID := make(map[string]*NubanTransfer)
+	nids := make(map[string]map[*NubanTransfer]struct{})
+	for i, node := range nodes {
+		edgeIDs[i] = node.ID
+		byID[node.ID] = node
+		if init != nil {
+			init(node)
+		}
+	}
+	query.Where(func(s *sql.Selector) {
+		joinT := sql.Table(nubantransfer.BeneficiariesTable)
+		s.Join(joinT).On(s.C(nubanbeneficiary.FieldID), joinT.C(nubantransfer.BeneficiariesPrimaryKey[0]))
+		s.Where(sql.InValues(joinT.C(nubantransfer.BeneficiariesPrimaryKey[1]), edgeIDs...))
+		columns := s.SelectedColumns()
+		s.Select(joinT.C(nubantransfer.BeneficiariesPrimaryKey[1]))
+		s.AppendSelect(columns...)
+		s.SetDistinct(false)
+	})
+	if err := query.prepareQuery(ctx); err != nil {
+		return err
+	}
+	qr := QuerierFunc(func(ctx context.Context, q Query) (Value, error) {
+		return query.sqlAll(ctx, func(_ context.Context, spec *sqlgraph.QuerySpec) {
+			assign := spec.Assign
+			values := spec.ScanValues
+			spec.ScanValues = func(columns []string) ([]any, error) {
+				values, err := values(columns[1:])
+				if err != nil {
+					return nil, err
+				}
+				return append([]any{new(sql.NullString)}, values...), nil
+			}
+			spec.Assign = func(columns []string, values []any) error {
+				outValue := values[0].(*sql.NullString).String
+				inValue := values[1].(*sql.NullString).String
+				if nids[inValue] == nil {
+					nids[inValue] = map[*NubanTransfer]struct{}{byID[outValue]: {}}
+					return assign(columns[1:], values[1:])
+				}
+				nids[inValue][byID[outValue]] = struct{}{}
+				return nil
+			}
+		})
+	})
+	neighbors, err := withInterceptors[[]*NubanBeneficiary](ctx, query, qr, query.inters)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		nodes, ok := nids[n.ID]
+		if !ok {
+			return fmt.Errorf(`unexpected "beneficiaries" node returned %v`, n.ID)
+		}
+		for kn := range nodes {
+			assign(kn, n)
+		}
+	}
+	return nil
+}
 
 func (ntq *NubanTransferQuery) sqlCount(ctx context.Context) (int, error) {
 	_spec := ntq.querySpec()
+	if len(ntq.modifiers) > 0 {
+		_spec.Modifiers = ntq.modifiers
+	}
 	_spec.Node.Columns = ntq.ctx.Fields
 	if len(ntq.ctx.Fields) > 0 {
 		_spec.Unique = ntq.ctx.Unique != nil && *ntq.ctx.Unique
@@ -466,6 +652,9 @@ func (ntq *NubanTransferQuery) querySpec() *sqlgraph.QuerySpec {
 			if fields[i] != nubantransfer.FieldID {
 				_spec.Node.Columns = append(_spec.Node.Columns, fields[i])
 			}
+		}
+		if ntq.withNubanBank != nil {
+			_spec.Node.AddColumnOnce(nubantransfer.FieldNubanBankID)
 		}
 	}
 	if ps := ntq.predicates; len(ps) > 0 {
@@ -506,6 +695,9 @@ func (ntq *NubanTransferQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	if ntq.ctx.Unique != nil && *ntq.ctx.Unique {
 		selector.Distinct()
 	}
+	for _, m := range ntq.modifiers {
+		m(selector)
+	}
 	for _, p := range ntq.predicates {
 		p(selector)
 	}
@@ -521,6 +713,32 @@ func (ntq *NubanTransferQuery) sqlQuery(ctx context.Context) *sql.Selector {
 		selector.Limit(*limit)
 	}
 	return selector
+}
+
+// ForUpdate locks the selected rows against concurrent updates, and prevent them from being
+// updated, deleted or "selected ... for update" by other sessions, until the transaction is
+// either committed or rolled-back.
+func (ntq *NubanTransferQuery) ForUpdate(opts ...sql.LockOption) *NubanTransferQuery {
+	if ntq.driver.Dialect() == dialect.Postgres {
+		ntq.Unique(false)
+	}
+	ntq.modifiers = append(ntq.modifiers, func(s *sql.Selector) {
+		s.ForUpdate(opts...)
+	})
+	return ntq
+}
+
+// ForShare behaves similarly to ForUpdate, except that it acquires a shared mode lock
+// on any rows that are read. Other sessions can read the rows, but cannot modify them
+// until your transaction commits.
+func (ntq *NubanTransferQuery) ForShare(opts ...sql.LockOption) *NubanTransferQuery {
+	if ntq.driver.Dialect() == dialect.Postgres {
+		ntq.Unique(false)
+	}
+	ntq.modifiers = append(ntq.modifiers, func(s *sql.Selector) {
+		s.ForShare(opts...)
+	})
+	return ntq
 }
 
 // NubanTransferGroupBy is the group-by builder for NubanTransfer entities.

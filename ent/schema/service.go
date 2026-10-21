@@ -2,6 +2,7 @@ package schema
 
 import (
 	"entgo.io/ent"
+	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
 	"entgo.io/ent/schema/index"
 )
@@ -11,28 +12,32 @@ type Service struct {
 	ent.Schema
 }
 
-type FeeType string
+// type FeeType string
 
-const (
-	TierFeeType       FeeType = "TIER"
-	PercentageFeeType FeeType = "PERCENTAGE"
-	FlatFeeType       FeeType = "FLAT"
-)
+// const (
+// 	TierFeeType       FeeType = "TIER"
+// 	PercentageFeeType FeeType = "PERCENTAGE"
+// 	FlatFeeType       FeeType = "FLAT"
+// )
 
-type Tier struct {
-	From  uint
-	To    uint
-	Type  FeeType
-	Value float64
-}
+// type Tier struct {
+// 	From  uint
+// 	To    uint
+// 	Type  FeeType
+// 	Value float64
+// }
 
-type Fee struct {
-	Type  FeeType
-	Value float64
-	Min   int
-	Max   int
-	Tiers []Tier
-}
+// type Fee struct {
+// 	Type  FeeType
+// 	Value float64
+// 	Min   int
+// 	Max   int
+// 	Tiers []Tier
+// }
+
+// type Fees struct {
+// 	Fees []Fee
+// }
 
 func (Service) Mixin() []ent.Mixin {
 	return []ent.Mixin{
@@ -55,17 +60,18 @@ func (Service) Fields() []ent.Field {
 			Default(false),
 		field.Bool("active").
 			Default(true),
-		field.Int("min").
+		field.Int("min_value").
 			Default(0),
-		field.Int("max").
+		field.Int("max_value").
 			Default(0),
-		field.JSON("fee", &Fee{}),
 	}
 }
 
 // Edges of the Service.
 func (Service) Edges() []ent.Edge {
-	return nil
+	return []ent.Edge{
+		edge.To("fee_rules", FeeRule.Type),
+	}
 }
 
 // Indexes of the Service.

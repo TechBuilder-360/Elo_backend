@@ -23,6 +23,10 @@ func (Ledger) Fields() []ent.Field {
 		field.String("transaction_id").NotEmpty().Unique(),
 		field.String("reversal_transaction_id").Optional(),
 		field.String("wallet_id").NotEmpty().Unique(),
+		field.Enum("affected_balance").
+			Values("HOLDING_BALANCE",
+				"AVAILABLE_BALANCE",
+				"LEDGER_BALANCE"),
 		field.Int64("debit").Default(0),
 		field.Int64("credit").Default(0),
 		field.Int64("current_balance").Default(0),
@@ -35,9 +39,9 @@ func (Ledger) Fields() []ent.Field {
 // Edges of the Ledger.
 func (Ledger) Edges() []ent.Edge {
 	return []ent.Edge{
-		// Many LedgerEntries → One Transaction
+		// One LedgerEntry → One Transaction
 		edge.From("transaction", Transaction.Type).
-			Ref("ledger_entries").
+			Ref("ledger_entry").
 			Field("transaction_id").
 			Unique().
 			Required(),

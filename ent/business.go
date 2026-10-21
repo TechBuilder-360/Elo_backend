@@ -95,9 +95,11 @@ type BusinessEdges struct {
 	KybMessages []*KYBMessage `json:"kyb_messages,omitempty"`
 	// Owner holds the value of the owner edge.
 	Owner *LedgerOwner `json:"owner,omitempty"`
+	// Subscriptions holds the value of the subscriptions edge.
+	Subscriptions []*Subscription `json:"subscriptions,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [10]bool
+	loadedTypes [11]bool
 }
 
 // SocialsOrErr returns the Socials value or an error if the edge
@@ -192,6 +194,15 @@ func (e BusinessEdges) OwnerOrErr() (*LedgerOwner, error) {
 		return nil, &NotFoundError{label: ledgerowner.Label}
 	}
 	return nil, &NotLoadedError{edge: "owner"}
+}
+
+// SubscriptionsOrErr returns the Subscriptions value or an error if the edge
+// was not loaded in eager-loading.
+func (e BusinessEdges) SubscriptionsOrErr() ([]*Subscription, error) {
+	if e.loadedTypes[10] {
+		return e.Subscriptions, nil
+	}
+	return nil, &NotLoadedError{edge: "subscriptions"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -437,6 +448,11 @@ func (b *Business) QueryKybMessages() *KYBMessageQuery {
 // QueryOwner queries the "owner" edge of the Business entity.
 func (b *Business) QueryOwner() *LedgerOwnerQuery {
 	return NewBusinessClient(b.config).QueryOwner(b)
+}
+
+// QuerySubscriptions queries the "subscriptions" edge of the Business entity.
+func (b *Business) QuerySubscriptions() *SubscriptionQuery {
+	return NewBusinessClient(b.config).QuerySubscriptions(b)
 }
 
 // Update returns a builder for updating this Business.

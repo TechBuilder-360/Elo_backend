@@ -19,7 +19,7 @@ func (Vault) Mixin() []ent.Mixin {
 func (Vault) Fields() []ent.Field {
 	return []ent.Field{
 		field.Enum("type").
-			Values("TREASURY").
+			Values("TREASURY", "FROZEN", "HOLDING").
 			Default("TREASURY"),
 
 		field.Enum("status").

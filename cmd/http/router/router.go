@@ -199,7 +199,7 @@ func hasRoleDirective(a authentication.IService) func(
 
 func initalizeGQLRoute(engine *gin.Engine, basicAuth gin.HandlerFunc) {
 	resolverStruct := resolver.Resolver{
-		Services: runtime.NewService(runtime.Injector),
+		Services: runtime.NewService(runtime.GetInjector()),
 	}
 
 	c := generated.Config{Resolvers: &resolverStruct}
@@ -228,31 +228,43 @@ func initalizeGQLRoute(engine *gin.Engine, basicAuth gin.HandlerFunc) {
 	})
 
 	gqlHandler.SetErrorPresenter(func(ctx context.Context, err error) *gqlerror.Error {
+		var safe *apperrors.SafeError
+		if stderrors.As(err, &safe) {
+			log.WithError(safe).Error("gql error presenter")
+			return &gqlerror.Error{
+				Message: apperrors.SanitizeMessage(safe.Message),
+				Extensions: map[string]any{
+					"code": string(safe.Code),
+				},
+			}
+		}
+
 		var gqlErr *gqlerror.Error
 		if stderrors.As(err, &gqlErr) {
 			log.WithError(gqlErr).Error("gql error presenter")
 			return &gqlerror.Error{
-				Message: gqlErr.Message,
+				Message: apperrors.SanitizeMessage(gqlErr.Message),
 				Extensions: map[string]any{
 					"code": string(errors.ErrFailed),
 				},
 			}
 		}
 
-		var safe *apperrors.SafeError
-		if stderrors.As(err, &safe) {
-			log.WithError(safe).Error("gql error presenter")
+		log.WithError(err).Error("gql error presenter")
+		if apperrors.IsDBError(err) {
 			return &gqlerror.Error{
-				Message: safe.Message,
+				Message: "request failed",
 				Extensions: map[string]any{
-					"code":  string(safe.Code),
-					"stack": safe.Stack,
+					"code": string(errors.ErrFailed),
 				},
 			}
 		}
 
-		log.WithError(err).Error("gql error presenter")
-		return graphql.DefaultErrorPresenter(ctx, err)
+		res := graphql.DefaultErrorPresenter(ctx, err)
+		if res != nil && apperrors.IsDBErrorMessage(res.Message) {
+			res.Message = "request failed"
+		}
+		return res
 	})
 
 	// GraphQL endpoint
@@ -310,8 +322,8 @@ func initializeAsynqServer(engine *gin.Engine, basicAuth gin.HandlerFunc) {
 func initializeRestAPI(engine *gin.Engine) {
 	var (
 		// verificationController = verification.NewVerificationController(verification.NewService())
-		dojahController    = dojah.New(runtime.Injector)
-		mapleradController = maplerad.New(runtime.Injector)
+		dojahController    = dojah.New(runtime.GetInjector())
+		mapleradController = maplerad.New(runtime.GetInjector())
 	)
 
 	// ****************************************

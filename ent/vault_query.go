@@ -9,6 +9,7 @@ import (
 	"math"
 
 	"entgo.io/ent"
+	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
@@ -28,6 +29,7 @@ type VaultQuery struct {
 	withOwner   *LedgerOwnerQuery
 	withWallets *WalletQuery
 	withFKs     bool
+	modifiers   []func(*sql.Selector)
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -429,6 +431,9 @@ func (vq *VaultQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Vault,
 		node.Edges.loadedTypes = loadedTypes
 		return node.assignValues(columns, values)
 	}
+	if len(vq.modifiers) > 0 {
+		_spec.Modifiers = vq.modifiers
+	}
 	for i := range hooks {
 		hooks[i](ctx, _spec)
 	}
@@ -520,6 +525,9 @@ func (vq *VaultQuery) loadWallets(ctx context.Context, query *WalletQuery, nodes
 
 func (vq *VaultQuery) sqlCount(ctx context.Context) (int, error) {
 	_spec := vq.querySpec()
+	if len(vq.modifiers) > 0 {
+		_spec.Modifiers = vq.modifiers
+	}
 	_spec.Node.Columns = vq.ctx.Fields
 	if len(vq.ctx.Fields) > 0 {
 		_spec.Unique = vq.ctx.Unique != nil && *vq.ctx.Unique
@@ -582,6 +590,9 @@ func (vq *VaultQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	if vq.ctx.Unique != nil && *vq.ctx.Unique {
 		selector.Distinct()
 	}
+	for _, m := range vq.modifiers {
+		m(selector)
+	}
 	for _, p := range vq.predicates {
 		p(selector)
 	}
@@ -597,6 +608,32 @@ func (vq *VaultQuery) sqlQuery(ctx context.Context) *sql.Selector {
 		selector.Limit(*limit)
 	}
 	return selector
+}
+
+// ForUpdate locks the selected rows against concurrent updates, and prevent them from being
+// updated, deleted or "selected ... for update" by other sessions, until the transaction is
+// either committed or rolled-back.
+func (vq *VaultQuery) ForUpdate(opts ...sql.LockOption) *VaultQuery {
+	if vq.driver.Dialect() == dialect.Postgres {
+		vq.Unique(false)
+	}
+	vq.modifiers = append(vq.modifiers, func(s *sql.Selector) {
+		s.ForUpdate(opts...)
+	})
+	return vq
+}
+
+// ForShare behaves similarly to ForUpdate, except that it acquires a shared mode lock
+// on any rows that are read. Other sessions can read the rows, but cannot modify them
+// until your transaction commits.
+func (vq *VaultQuery) ForShare(opts ...sql.LockOption) *VaultQuery {
+	if vq.driver.Dialect() == dialect.Postgres {
+		vq.Unique(false)
+	}
+	vq.modifiers = append(vq.modifiers, func(s *sql.Selector) {
+		s.ForShare(opts...)
+	})
+	return vq
 }
 
 // VaultGroupBy is the group-by builder for Vault entities.

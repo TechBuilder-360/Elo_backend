@@ -110,9 +110,9 @@ func Amount(v int64) predicate.Transaction {
 	return predicate.Transaction(sql.FieldEQ(FieldAmount, v))
 }
 
-// Fee applies equality check predicate on the "fee" field. It's identical to FeeEQ.
-func Fee(v int64) predicate.Transaction {
-	return predicate.Transaction(sql.FieldEQ(FieldFee, v))
+// NetAmount applies equality check predicate on the "net_amount" field. It's identical to NetAmountEQ.
+func NetAmount(v int64) predicate.Transaction {
+	return predicate.Transaction(sql.FieldEQ(FieldNetAmount, v))
 }
 
 // CreatedAtEQ applies the EQ predicate on the "created_at" field.
@@ -363,6 +363,16 @@ func ExternalReferenceHasPrefix(v string) predicate.Transaction {
 // ExternalReferenceHasSuffix applies the HasSuffix predicate on the "external_reference" field.
 func ExternalReferenceHasSuffix(v string) predicate.Transaction {
 	return predicate.Transaction(sql.FieldHasSuffix(FieldExternalReference, v))
+}
+
+// ExternalReferenceIsNil applies the IsNil predicate on the "external_reference" field.
+func ExternalReferenceIsNil() predicate.Transaction {
+	return predicate.Transaction(sql.FieldIsNull(FieldExternalReference))
+}
+
+// ExternalReferenceNotNil applies the NotNil predicate on the "external_reference" field.
+func ExternalReferenceNotNil() predicate.Transaction {
+	return predicate.Transaction(sql.FieldNotNull(FieldExternalReference))
 }
 
 // ExternalReferenceEqualFold applies the EqualFold predicate on the "external_reference" field.
@@ -690,44 +700,74 @@ func AmountLTE(v int64) predicate.Transaction {
 	return predicate.Transaction(sql.FieldLTE(FieldAmount, v))
 }
 
-// FeeEQ applies the EQ predicate on the "fee" field.
-func FeeEQ(v int64) predicate.Transaction {
-	return predicate.Transaction(sql.FieldEQ(FieldFee, v))
+// NetAmountEQ applies the EQ predicate on the "net_amount" field.
+func NetAmountEQ(v int64) predicate.Transaction {
+	return predicate.Transaction(sql.FieldEQ(FieldNetAmount, v))
 }
 
-// FeeNEQ applies the NEQ predicate on the "fee" field.
-func FeeNEQ(v int64) predicate.Transaction {
-	return predicate.Transaction(sql.FieldNEQ(FieldFee, v))
+// NetAmountNEQ applies the NEQ predicate on the "net_amount" field.
+func NetAmountNEQ(v int64) predicate.Transaction {
+	return predicate.Transaction(sql.FieldNEQ(FieldNetAmount, v))
 }
 
-// FeeIn applies the In predicate on the "fee" field.
-func FeeIn(vs ...int64) predicate.Transaction {
-	return predicate.Transaction(sql.FieldIn(FieldFee, vs...))
+// NetAmountIn applies the In predicate on the "net_amount" field.
+func NetAmountIn(vs ...int64) predicate.Transaction {
+	return predicate.Transaction(sql.FieldIn(FieldNetAmount, vs...))
 }
 
-// FeeNotIn applies the NotIn predicate on the "fee" field.
-func FeeNotIn(vs ...int64) predicate.Transaction {
-	return predicate.Transaction(sql.FieldNotIn(FieldFee, vs...))
+// NetAmountNotIn applies the NotIn predicate on the "net_amount" field.
+func NetAmountNotIn(vs ...int64) predicate.Transaction {
+	return predicate.Transaction(sql.FieldNotIn(FieldNetAmount, vs...))
 }
 
-// FeeGT applies the GT predicate on the "fee" field.
-func FeeGT(v int64) predicate.Transaction {
-	return predicate.Transaction(sql.FieldGT(FieldFee, v))
+// NetAmountGT applies the GT predicate on the "net_amount" field.
+func NetAmountGT(v int64) predicate.Transaction {
+	return predicate.Transaction(sql.FieldGT(FieldNetAmount, v))
 }
 
-// FeeGTE applies the GTE predicate on the "fee" field.
-func FeeGTE(v int64) predicate.Transaction {
-	return predicate.Transaction(sql.FieldGTE(FieldFee, v))
+// NetAmountGTE applies the GTE predicate on the "net_amount" field.
+func NetAmountGTE(v int64) predicate.Transaction {
+	return predicate.Transaction(sql.FieldGTE(FieldNetAmount, v))
 }
 
-// FeeLT applies the LT predicate on the "fee" field.
-func FeeLT(v int64) predicate.Transaction {
-	return predicate.Transaction(sql.FieldLT(FieldFee, v))
+// NetAmountLT applies the LT predicate on the "net_amount" field.
+func NetAmountLT(v int64) predicate.Transaction {
+	return predicate.Transaction(sql.FieldLT(FieldNetAmount, v))
 }
 
-// FeeLTE applies the LTE predicate on the "fee" field.
-func FeeLTE(v int64) predicate.Transaction {
-	return predicate.Transaction(sql.FieldLTE(FieldFee, v))
+// NetAmountLTE applies the LTE predicate on the "net_amount" field.
+func NetAmountLTE(v int64) predicate.Transaction {
+	return predicate.Transaction(sql.FieldLTE(FieldNetAmount, v))
+}
+
+// NetAmountIsNil applies the IsNil predicate on the "net_amount" field.
+func NetAmountIsNil() predicate.Transaction {
+	return predicate.Transaction(sql.FieldIsNull(FieldNetAmount))
+}
+
+// NetAmountNotNil applies the NotNil predicate on the "net_amount" field.
+func NetAmountNotNil() predicate.Transaction {
+	return predicate.Transaction(sql.FieldNotNull(FieldNetAmount))
+}
+
+// EntryEQ applies the EQ predicate on the "entry" field.
+func EntryEQ(v Entry) predicate.Transaction {
+	return predicate.Transaction(sql.FieldEQ(FieldEntry, v))
+}
+
+// EntryNEQ applies the NEQ predicate on the "entry" field.
+func EntryNEQ(v Entry) predicate.Transaction {
+	return predicate.Transaction(sql.FieldNEQ(FieldEntry, v))
+}
+
+// EntryIn applies the In predicate on the "entry" field.
+func EntryIn(vs ...Entry) predicate.Transaction {
+	return predicate.Transaction(sql.FieldIn(FieldEntry, vs...))
+}
+
+// EntryNotIn applies the NotIn predicate on the "entry" field.
+func EntryNotIn(vs ...Entry) predicate.Transaction {
+	return predicate.Transaction(sql.FieldNotIn(FieldEntry, vs...))
 }
 
 // HasNubanDeposit applies the HasEdge predicate on the "nuban_deposit" edge.
@@ -768,29 +808,6 @@ func HasNubanTransfer() predicate.Transaction {
 func HasNubanTransferWith(preds ...predicate.NubanTransfer) predicate.Transaction {
 	return predicate.Transaction(func(s *sql.Selector) {
 		step := newNubanTransferStep()
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
-		})
-	})
-}
-
-// HasWallet applies the HasEdge predicate on the "wallet" edge.
-func HasWallet() predicate.Transaction {
-	return predicate.Transaction(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, false, WalletTable, WalletColumn),
-		)
-		sqlgraph.HasNeighbors(s, step)
-	})
-}
-
-// HasWalletWith applies the HasEdge predicate on the "wallet" edge with a given conditions (other predicates).
-func HasWalletWith(preds ...predicate.Wallet) predicate.Transaction {
-	return predicate.Transaction(func(s *sql.Selector) {
-		step := newWalletStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)
@@ -845,21 +862,44 @@ func HasStablecoinWithdrawalWith(preds ...predicate.StablecoinWithdrawal) predic
 	})
 }
 
-// HasLedgerEntries applies the HasEdge predicate on the "ledger_entries" edge.
-func HasLedgerEntries() predicate.Transaction {
+// HasFees applies the HasEdge predicate on the "fees" edge.
+func HasFees() predicate.Transaction {
 	return predicate.Transaction(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, LedgerEntriesTable, LedgerEntriesColumn),
+			sqlgraph.Edge(sqlgraph.O2M, false, FeesTable, FeesColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})
 }
 
-// HasLedgerEntriesWith applies the HasEdge predicate on the "ledger_entries" edge with a given conditions (other predicates).
-func HasLedgerEntriesWith(preds ...predicate.Ledger) predicate.Transaction {
+// HasFeesWith applies the HasEdge predicate on the "fees" edge with a given conditions (other predicates).
+func HasFeesWith(preds ...predicate.TransactionFee) predicate.Transaction {
 	return predicate.Transaction(func(s *sql.Selector) {
-		step := newLedgerEntriesStep()
+		step := newFeesStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasLedgerEntry applies the HasEdge predicate on the "ledger_entry" edge.
+func HasLedgerEntry() predicate.Transaction {
+	return predicate.Transaction(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, false, LedgerEntryTable, LedgerEntryColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasLedgerEntryWith applies the HasEdge predicate on the "ledger_entry" edge with a given conditions (other predicates).
+func HasLedgerEntryWith(preds ...predicate.Ledger) predicate.Transaction {
+	return predicate.Transaction(func(s *sql.Selector) {
+		step := newLedgerEntryStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)
@@ -883,6 +923,29 @@ func HasReversalLedgerEntries() predicate.Transaction {
 func HasReversalLedgerEntriesWith(preds ...predicate.Ledger) predicate.Transaction {
 	return predicate.Transaction(func(s *sql.Selector) {
 		step := newReversalLedgerEntriesStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasInvoice applies the HasEdge predicate on the "invoice" edge.
+func HasInvoice() predicate.Transaction {
+	return predicate.Transaction(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, InvoiceTable, InvoiceColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasInvoiceWith applies the HasEdge predicate on the "invoice" edge with a given conditions (other predicates).
+func HasInvoiceWith(preds ...predicate.Invoice) predicate.Transaction {
+	return predicate.Transaction(func(s *sql.Selector) {
+		step := newInvoiceStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)

@@ -9,6 +9,7 @@ import (
 	"math"
 
 	"entgo.io/ent"
+	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
@@ -25,6 +26,7 @@ type KYBDocumentQuery struct {
 	inters           []Interceptor
 	predicates       []predicate.KYBDocument
 	withKybDocuments *BusinessDocumentQuery
+	modifiers        []func(*sql.Selector)
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -384,6 +386,9 @@ func (kdq *KYBDocumentQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]
 		node.Edges.loadedTypes = loadedTypes
 		return node.assignValues(columns, values)
 	}
+	if len(kdq.modifiers) > 0 {
+		_spec.Modifiers = kdq.modifiers
+	}
 	for i := range hooks {
 		hooks[i](ctx, _spec)
 	}
@@ -467,6 +472,9 @@ func (kdq *KYBDocumentQuery) loadKybDocuments(ctx context.Context, query *Busine
 
 func (kdq *KYBDocumentQuery) sqlCount(ctx context.Context) (int, error) {
 	_spec := kdq.querySpec()
+	if len(kdq.modifiers) > 0 {
+		_spec.Modifiers = kdq.modifiers
+	}
 	_spec.Node.Columns = kdq.ctx.Fields
 	if len(kdq.ctx.Fields) > 0 {
 		_spec.Unique = kdq.ctx.Unique != nil && *kdq.ctx.Unique
@@ -529,6 +537,9 @@ func (kdq *KYBDocumentQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	if kdq.ctx.Unique != nil && *kdq.ctx.Unique {
 		selector.Distinct()
 	}
+	for _, m := range kdq.modifiers {
+		m(selector)
+	}
 	for _, p := range kdq.predicates {
 		p(selector)
 	}
@@ -544,6 +555,32 @@ func (kdq *KYBDocumentQuery) sqlQuery(ctx context.Context) *sql.Selector {
 		selector.Limit(*limit)
 	}
 	return selector
+}
+
+// ForUpdate locks the selected rows against concurrent updates, and prevent them from being
+// updated, deleted or "selected ... for update" by other sessions, until the transaction is
+// either committed or rolled-back.
+func (kdq *KYBDocumentQuery) ForUpdate(opts ...sql.LockOption) *KYBDocumentQuery {
+	if kdq.driver.Dialect() == dialect.Postgres {
+		kdq.Unique(false)
+	}
+	kdq.modifiers = append(kdq.modifiers, func(s *sql.Selector) {
+		s.ForUpdate(opts...)
+	})
+	return kdq
+}
+
+// ForShare behaves similarly to ForUpdate, except that it acquires a shared mode lock
+// on any rows that are read. Other sessions can read the rows, but cannot modify them
+// until your transaction commits.
+func (kdq *KYBDocumentQuery) ForShare(opts ...sql.LockOption) *KYBDocumentQuery {
+	if kdq.driver.Dialect() == dialect.Postgres {
+		kdq.Unique(false)
+	}
+	kdq.modifiers = append(kdq.modifiers, func(s *sql.Selector) {
+		s.ForShare(opts...)
+	})
+	return kdq
 }
 
 // KYBDocumentGroupBy is the group-by builder for KYBDocument entities.

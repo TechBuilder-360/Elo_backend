@@ -31,6 +31,8 @@ const (
 	EdgeBusiness = "business"
 	// EdgeUser holds the string denoting the user edge name in mutations.
 	EdgeUser = "user"
+	// EdgeNubanBeneficiaries holds the string denoting the nuban_beneficiaries edge name in mutations.
+	EdgeNubanBeneficiaries = "nuban_beneficiaries"
 	// Table holds the table name of the ledgerowner in the database.
 	Table = "ledger_owners"
 	// VaultsTable is the table that holds the vaults relation/edge.
@@ -54,6 +56,13 @@ const (
 	UserInverseTable = "users"
 	// UserColumn is the table column denoting the user relation/edge.
 	UserColumn = "user_owner"
+	// NubanBeneficiariesTable is the table that holds the nuban_beneficiaries relation/edge.
+	NubanBeneficiariesTable = "nuban_beneficiaries"
+	// NubanBeneficiariesInverseTable is the table name for the NubanBeneficiary entity.
+	// It exists in this package in order to avoid circular dependency with the "nubanbeneficiary" package.
+	NubanBeneficiariesInverseTable = "nuban_beneficiaries"
+	// NubanBeneficiariesColumn is the table column denoting the nuban_beneficiaries relation/edge.
+	NubanBeneficiariesColumn = "owner_id"
 )
 
 // Columns holds all SQL columns for ledgerowner fields.
@@ -209,6 +218,20 @@ func ByUserField(field string, opts ...sql.OrderTermOption) OrderOption {
 		sqlgraph.OrderByNeighborTerms(s, newUserStep(), sql.OrderByField(field, opts...))
 	}
 }
+
+// ByNubanBeneficiariesCount orders the results by nuban_beneficiaries count.
+func ByNubanBeneficiariesCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newNubanBeneficiariesStep(), opts...)
+	}
+}
+
+// ByNubanBeneficiaries orders the results by nuban_beneficiaries terms.
+func ByNubanBeneficiaries(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newNubanBeneficiariesStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
 func newVaultsStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
@@ -228,5 +251,12 @@ func newUserStep() *sqlgraph.Step {
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(UserInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.O2O, true, UserTable, UserColumn),
+	)
+}
+func newNubanBeneficiariesStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(NubanBeneficiariesInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, NubanBeneficiariesTable, NubanBeneficiariesColumn),
 	)
 }

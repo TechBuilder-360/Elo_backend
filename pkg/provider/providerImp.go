@@ -23,8 +23,8 @@ func RegisterProvider(provider ...Impl) {
 	}
 }
 
-// GetImpl returns a provider implementation
-func GetImpl(slug string) (Impl, bool) {
+// GetProviderImpl returns a provider implementation
+func GetProviderImpl(slug string) (Impl, bool) {
 	p, ok := providers[strings.ToLower(slug)]
 	return p, ok
 }
@@ -32,6 +32,22 @@ func GetImpl(slug string) (Impl, bool) {
 // ConformsTo checks if a provider conforms to a type
 func ConformsTo[T any](p Impl) (T, bool) {
 	var result T
+
+	if v, ok := p.(T); ok {
+		return v, true
+	}
+
+	return result, false
+}
+
+// GetImpl checks if a provider conforms to a type
+func GetImpl[T any](slug string) (T, bool) {
+	var result T
+
+	p, ok := providers[strings.ToLower(slug)]
+	if !ok {
+		return result, false
+	}
 
 	if v, ok := p.(T); ok {
 		return v, true

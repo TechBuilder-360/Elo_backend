@@ -9,12 +9,12 @@ import (
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
+	"github.com/Toflex/directory_v2/ent/ledger"
 	"github.com/Toflex/directory_v2/ent/nubandeposit"
 	"github.com/Toflex/directory_v2/ent/nubantransfer"
 	"github.com/Toflex/directory_v2/ent/stablecoindeposit"
 	"github.com/Toflex/directory_v2/ent/stablecoinwithdrawal"
 	"github.com/Toflex/directory_v2/ent/transaction"
-	"github.com/Toflex/directory_v2/ent/wallet"
 )
 
 // Transaction is the model entity for the Transaction schema.
@@ -46,13 +46,14 @@ type Transaction struct {
 	Provider string `json:"provider,omitempty"`
 	// Amount holds the value of the "amount" field.
 	Amount int64 `json:"amount,omitempty"`
-	// Fee holds the value of the "fee" field.
-	Fee int64 `json:"fee,omitempty"`
+	// NetAmount holds the value of the "net_amount" field.
+	NetAmount int64 `json:"net_amount,omitempty"`
+	// Entry holds the value of the "entry" field.
+	Entry transaction.Entry `json:"entry,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the TransactionQuery when eager-loading is set.
-	Edges              TransactionEdges `json:"edges"`
-	transaction_wallet *string
-	selectValues       sql.SelectValues
+	Edges        TransactionEdges `json:"edges"`
+	selectValues sql.SelectValues
 }
 
 // TransactionEdges holds the relations/edges for other nodes in the graph.
@@ -61,19 +62,21 @@ type TransactionEdges struct {
 	NubanDeposit *NubanDeposit `json:"nuban_deposit,omitempty"`
 	// NubanTransfer holds the value of the nuban_transfer edge.
 	NubanTransfer *NubanTransfer `json:"nuban_transfer,omitempty"`
-	// Wallet holds the value of the wallet edge.
-	Wallet *Wallet `json:"wallet,omitempty"`
 	// StablecoinDeposit holds the value of the stablecoin_deposit edge.
 	StablecoinDeposit *StablecoinDeposit `json:"stablecoin_deposit,omitempty"`
 	// StablecoinWithdrawal holds the value of the stablecoin_withdrawal edge.
 	StablecoinWithdrawal *StablecoinWithdrawal `json:"stablecoin_withdrawal,omitempty"`
-	// LedgerEntries holds the value of the ledger_entries edge.
-	LedgerEntries []*Ledger `json:"ledger_entries,omitempty"`
+	// Fees holds the value of the fees edge.
+	Fees []*TransactionFee `json:"fees,omitempty"`
+	// LedgerEntry holds the value of the ledger_entry edge.
+	LedgerEntry *Ledger `json:"ledger_entry,omitempty"`
 	// ReversalLedgerEntries holds the value of the reversal_ledger_entries edge.
 	ReversalLedgerEntries []*Ledger `json:"reversal_ledger_entries,omitempty"`
+	// Invoice holds the value of the invoice edge.
+	Invoice []*Invoice `json:"invoice,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [7]bool
+	loadedTypes [8]bool
 }
 
 // NubanDepositOrErr returns the NubanDeposit value or an error if the edge
@@ -98,23 +101,12 @@ func (e TransactionEdges) NubanTransferOrErr() (*NubanTransfer, error) {
 	return nil, &NotLoadedError{edge: "nuban_transfer"}
 }
 
-// WalletOrErr returns the Wallet value or an error if the edge
-// was not loaded in eager-loading, or loaded but was not found.
-func (e TransactionEdges) WalletOrErr() (*Wallet, error) {
-	if e.Wallet != nil {
-		return e.Wallet, nil
-	} else if e.loadedTypes[2] {
-		return nil, &NotFoundError{label: wallet.Label}
-	}
-	return nil, &NotLoadedError{edge: "wallet"}
-}
-
 // StablecoinDepositOrErr returns the StablecoinDeposit value or an error if the edge
 // was not loaded in eager-loading, or loaded but was not found.
 func (e TransactionEdges) StablecoinDepositOrErr() (*StablecoinDeposit, error) {
 	if e.StablecoinDeposit != nil {
 		return e.StablecoinDeposit, nil
-	} else if e.loadedTypes[3] {
+	} else if e.loadedTypes[2] {
 		return nil, &NotFoundError{label: stablecoindeposit.Label}
 	}
 	return nil, &NotLoadedError{edge: "stablecoin_deposit"}
@@ -125,19 +117,30 @@ func (e TransactionEdges) StablecoinDepositOrErr() (*StablecoinDeposit, error) {
 func (e TransactionEdges) StablecoinWithdrawalOrErr() (*StablecoinWithdrawal, error) {
 	if e.StablecoinWithdrawal != nil {
 		return e.StablecoinWithdrawal, nil
-	} else if e.loadedTypes[4] {
+	} else if e.loadedTypes[3] {
 		return nil, &NotFoundError{label: stablecoinwithdrawal.Label}
 	}
 	return nil, &NotLoadedError{edge: "stablecoin_withdrawal"}
 }
 
-// LedgerEntriesOrErr returns the LedgerEntries value or an error if the edge
+// FeesOrErr returns the Fees value or an error if the edge
 // was not loaded in eager-loading.
-func (e TransactionEdges) LedgerEntriesOrErr() ([]*Ledger, error) {
-	if e.loadedTypes[5] {
-		return e.LedgerEntries, nil
+func (e TransactionEdges) FeesOrErr() ([]*TransactionFee, error) {
+	if e.loadedTypes[4] {
+		return e.Fees, nil
 	}
-	return nil, &NotLoadedError{edge: "ledger_entries"}
+	return nil, &NotLoadedError{edge: "fees"}
+}
+
+// LedgerEntryOrErr returns the LedgerEntry value or an error if the edge
+// was not loaded in eager-loading, or loaded but was not found.
+func (e TransactionEdges) LedgerEntryOrErr() (*Ledger, error) {
+	if e.LedgerEntry != nil {
+		return e.LedgerEntry, nil
+	} else if e.loadedTypes[5] {
+		return nil, &NotFoundError{label: ledger.Label}
+	}
+	return nil, &NotLoadedError{edge: "ledger_entry"}
 }
 
 // ReversalLedgerEntriesOrErr returns the ReversalLedgerEntries value or an error if the edge
@@ -149,19 +152,26 @@ func (e TransactionEdges) ReversalLedgerEntriesOrErr() ([]*Ledger, error) {
 	return nil, &NotLoadedError{edge: "reversal_ledger_entries"}
 }
 
+// InvoiceOrErr returns the Invoice value or an error if the edge
+// was not loaded in eager-loading.
+func (e TransactionEdges) InvoiceOrErr() ([]*Invoice, error) {
+	if e.loadedTypes[7] {
+		return e.Invoice, nil
+	}
+	return nil, &NotLoadedError{edge: "invoice"}
+}
+
 // scanValues returns the types for scanning values from sql.Rows.
 func (*Transaction) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case transaction.FieldAmount, transaction.FieldFee:
+		case transaction.FieldAmount, transaction.FieldNetAmount:
 			values[i] = new(sql.NullInt64)
-		case transaction.FieldID, transaction.FieldReference, transaction.FieldExternalReference, transaction.FieldType, transaction.FieldChannel, transaction.FieldStatus, transaction.FieldCurrency, transaction.FieldSummary, transaction.FieldProvider:
+		case transaction.FieldID, transaction.FieldReference, transaction.FieldExternalReference, transaction.FieldType, transaction.FieldChannel, transaction.FieldStatus, transaction.FieldCurrency, transaction.FieldSummary, transaction.FieldProvider, transaction.FieldEntry:
 			values[i] = new(sql.NullString)
 		case transaction.FieldCreatedAt, transaction.FieldUpdatedAt, transaction.FieldDeletedAt:
 			values[i] = new(sql.NullTime)
-		case transaction.ForeignKeys[0]: // transaction_wallet
-			values[i] = new(sql.NullString)
 		default:
 			values[i] = new(sql.UnknownType)
 		}
@@ -257,18 +267,17 @@ func (t *Transaction) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				t.Amount = value.Int64
 			}
-		case transaction.FieldFee:
+		case transaction.FieldNetAmount:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for field fee", values[i])
+				return fmt.Errorf("unexpected type %T for field net_amount", values[i])
 			} else if value.Valid {
-				t.Fee = value.Int64
+				t.NetAmount = value.Int64
 			}
-		case transaction.ForeignKeys[0]:
+		case transaction.FieldEntry:
 			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field transaction_wallet", values[i])
+				return fmt.Errorf("unexpected type %T for field entry", values[i])
 			} else if value.Valid {
-				t.transaction_wallet = new(string)
-				*t.transaction_wallet = value.String
+				t.Entry = transaction.Entry(value.String)
 			}
 		default:
 			t.selectValues.Set(columns[i], values[i])
@@ -293,11 +302,6 @@ func (t *Transaction) QueryNubanTransfer() *NubanTransferQuery {
 	return NewTransactionClient(t.config).QueryNubanTransfer(t)
 }
 
-// QueryWallet queries the "wallet" edge of the Transaction entity.
-func (t *Transaction) QueryWallet() *WalletQuery {
-	return NewTransactionClient(t.config).QueryWallet(t)
-}
-
 // QueryStablecoinDeposit queries the "stablecoin_deposit" edge of the Transaction entity.
 func (t *Transaction) QueryStablecoinDeposit() *StablecoinDepositQuery {
 	return NewTransactionClient(t.config).QueryStablecoinDeposit(t)
@@ -308,14 +312,24 @@ func (t *Transaction) QueryStablecoinWithdrawal() *StablecoinWithdrawalQuery {
 	return NewTransactionClient(t.config).QueryStablecoinWithdrawal(t)
 }
 
-// QueryLedgerEntries queries the "ledger_entries" edge of the Transaction entity.
-func (t *Transaction) QueryLedgerEntries() *LedgerQuery {
-	return NewTransactionClient(t.config).QueryLedgerEntries(t)
+// QueryFees queries the "fees" edge of the Transaction entity.
+func (t *Transaction) QueryFees() *TransactionFeeQuery {
+	return NewTransactionClient(t.config).QueryFees(t)
+}
+
+// QueryLedgerEntry queries the "ledger_entry" edge of the Transaction entity.
+func (t *Transaction) QueryLedgerEntry() *LedgerQuery {
+	return NewTransactionClient(t.config).QueryLedgerEntry(t)
 }
 
 // QueryReversalLedgerEntries queries the "reversal_ledger_entries" edge of the Transaction entity.
 func (t *Transaction) QueryReversalLedgerEntries() *LedgerQuery {
 	return NewTransactionClient(t.config).QueryReversalLedgerEntries(t)
+}
+
+// QueryInvoice queries the "invoice" edge of the Transaction entity.
+func (t *Transaction) QueryInvoice() *InvoiceQuery {
+	return NewTransactionClient(t.config).QueryInvoice(t)
 }
 
 // Update returns a builder for updating this Transaction.
@@ -381,8 +395,11 @@ func (t *Transaction) String() string {
 	builder.WriteString("amount=")
 	builder.WriteString(fmt.Sprintf("%v", t.Amount))
 	builder.WriteString(", ")
-	builder.WriteString("fee=")
-	builder.WriteString(fmt.Sprintf("%v", t.Fee))
+	builder.WriteString("net_amount=")
+	builder.WriteString(fmt.Sprintf("%v", t.NetAmount))
+	builder.WriteString(", ")
+	builder.WriteString("entry=")
+	builder.WriteString(fmt.Sprintf("%v", t.Entry))
 	builder.WriteByte(')')
 	return builder.String()
 }

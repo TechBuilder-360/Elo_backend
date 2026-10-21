@@ -4,13 +4,16 @@ package ent
 
 import (
 	"context"
+	"database/sql/driver"
 	"fmt"
 	"math"
 
 	"entgo.io/ent"
+	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/Toflex/directory_v2/ent/feerule"
 	"github.com/Toflex/directory_v2/ent/predicate"
 	"github.com/Toflex/directory_v2/ent/service"
 )
@@ -18,10 +21,12 @@ import (
 // ServiceQuery is the builder for querying Service entities.
 type ServiceQuery struct {
 	config
-	ctx        *QueryContext
-	order      []service.OrderOption
-	inters     []Interceptor
-	predicates []predicate.Service
+	ctx          *QueryContext
+	order        []service.OrderOption
+	inters       []Interceptor
+	predicates   []predicate.Service
+	withFeeRules *FeeRuleQuery
+	modifiers    []func(*sql.Selector)
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -56,6 +61,28 @@ func (sq *ServiceQuery) Unique(unique bool) *ServiceQuery {
 func (sq *ServiceQuery) Order(o ...service.OrderOption) *ServiceQuery {
 	sq.order = append(sq.order, o...)
 	return sq
+}
+
+// QueryFeeRules chains the current query on the "fee_rules" edge.
+func (sq *ServiceQuery) QueryFeeRules() *FeeRuleQuery {
+	query := (&FeeRuleClient{config: sq.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := sq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := sq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(service.Table, service.FieldID, selector),
+			sqlgraph.To(feerule.Table, feerule.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, service.FeeRulesTable, service.FeeRulesColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(sq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
 }
 
 // First returns the first Service entity from the query.
@@ -245,15 +272,27 @@ func (sq *ServiceQuery) Clone() *ServiceQuery {
 		return nil
 	}
 	return &ServiceQuery{
-		config:     sq.config,
-		ctx:        sq.ctx.Clone(),
-		order:      append([]service.OrderOption{}, sq.order...),
-		inters:     append([]Interceptor{}, sq.inters...),
-		predicates: append([]predicate.Service{}, sq.predicates...),
+		config:       sq.config,
+		ctx:          sq.ctx.Clone(),
+		order:        append([]service.OrderOption{}, sq.order...),
+		inters:       append([]Interceptor{}, sq.inters...),
+		predicates:   append([]predicate.Service{}, sq.predicates...),
+		withFeeRules: sq.withFeeRules.Clone(),
 		// clone intermediate query.
 		sql:  sq.sql.Clone(),
 		path: sq.path,
 	}
+}
+
+// WithFeeRules tells the query-builder to eager-load the nodes that are connected to
+// the "fee_rules" edge. The optional arguments are used to configure the query builder of the edge.
+func (sq *ServiceQuery) WithFeeRules(opts ...func(*FeeRuleQuery)) *ServiceQuery {
+	query := (&FeeRuleClient{config: sq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	sq.withFeeRules = query
+	return sq
 }
 
 // GroupBy is used to group vertices by one or more fields/columns.
@@ -332,8 +371,11 @@ func (sq *ServiceQuery) prepareQuery(ctx context.Context) error {
 
 func (sq *ServiceQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Service, error) {
 	var (
-		nodes = []*Service{}
-		_spec = sq.querySpec()
+		nodes       = []*Service{}
+		_spec       = sq.querySpec()
+		loadedTypes = [1]bool{
+			sq.withFeeRules != nil,
+		}
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
 		return (*Service).scanValues(nil, columns)
@@ -341,7 +383,11 @@ func (sq *ServiceQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Serv
 	_spec.Assign = func(columns []string, values []any) error {
 		node := &Service{config: sq.config}
 		nodes = append(nodes, node)
+		node.Edges.loadedTypes = loadedTypes
 		return node.assignValues(columns, values)
+	}
+	if len(sq.modifiers) > 0 {
+		_spec.Modifiers = sq.modifiers
 	}
 	for i := range hooks {
 		hooks[i](ctx, _spec)
@@ -352,11 +398,52 @@ func (sq *ServiceQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Serv
 	if len(nodes) == 0 {
 		return nodes, nil
 	}
+	if query := sq.withFeeRules; query != nil {
+		if err := sq.loadFeeRules(ctx, query, nodes,
+			func(n *Service) { n.Edges.FeeRules = []*FeeRule{} },
+			func(n *Service, e *FeeRule) { n.Edges.FeeRules = append(n.Edges.FeeRules, e) }); err != nil {
+			return nil, err
+		}
+	}
 	return nodes, nil
+}
+
+func (sq *ServiceQuery) loadFeeRules(ctx context.Context, query *FeeRuleQuery, nodes []*Service, init func(*Service), assign func(*Service, *FeeRule)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[string]*Service)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	if len(query.ctx.Fields) > 0 {
+		query.ctx.AppendFieldOnce(feerule.FieldServiceID)
+	}
+	query.Where(predicate.FeeRule(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(service.FeeRulesColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.ServiceID
+		node, ok := nodeids[fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "service_id" returned %v for node %v`, fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
 }
 
 func (sq *ServiceQuery) sqlCount(ctx context.Context) (int, error) {
 	_spec := sq.querySpec()
+	if len(sq.modifiers) > 0 {
+		_spec.Modifiers = sq.modifiers
+	}
 	_spec.Node.Columns = sq.ctx.Fields
 	if len(sq.ctx.Fields) > 0 {
 		_spec.Unique = sq.ctx.Unique != nil && *sq.ctx.Unique
@@ -419,6 +506,9 @@ func (sq *ServiceQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	if sq.ctx.Unique != nil && *sq.ctx.Unique {
 		selector.Distinct()
 	}
+	for _, m := range sq.modifiers {
+		m(selector)
+	}
 	for _, p := range sq.predicates {
 		p(selector)
 	}
@@ -434,6 +524,32 @@ func (sq *ServiceQuery) sqlQuery(ctx context.Context) *sql.Selector {
 		selector.Limit(*limit)
 	}
 	return selector
+}
+
+// ForUpdate locks the selected rows against concurrent updates, and prevent them from being
+// updated, deleted or "selected ... for update" by other sessions, until the transaction is
+// either committed or rolled-back.
+func (sq *ServiceQuery) ForUpdate(opts ...sql.LockOption) *ServiceQuery {
+	if sq.driver.Dialect() == dialect.Postgres {
+		sq.Unique(false)
+	}
+	sq.modifiers = append(sq.modifiers, func(s *sql.Selector) {
+		s.ForUpdate(opts...)
+	})
+	return sq
+}
+
+// ForShare behaves similarly to ForUpdate, except that it acquires a shared mode lock
+// on any rows that are read. Other sessions can read the rows, but cannot modify them
+// until your transaction commits.
+func (sq *ServiceQuery) ForShare(opts ...sql.LockOption) *ServiceQuery {
+	if sq.driver.Dialect() == dialect.Postgres {
+		sq.Unique(false)
+	}
+	sq.modifiers = append(sq.modifiers, func(s *sql.Selector) {
+		s.ForShare(opts...)
+	})
+	return sq
 }
 
 // ServiceGroupBy is the group-by builder for Service entities.

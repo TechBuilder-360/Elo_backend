@@ -5,6 +5,7 @@ import (
 
 	"github.com/Toflex/directory_v2/ent"
 	"github.com/Toflex/directory_v2/pkg/configuration"
+	"github.com/Toflex/directory_v2/pkg/ent/hook"
 	"github.com/Toflex/directory_v2/pkg/log"
 	"github.com/samber/do/v2"
 
@@ -33,6 +34,8 @@ func initializeDB() {
 	}
 
 	dbInstance = client
+
+	hook.RegisterHooks(client)
 }
 
 func NewClient(i do.Injector) (*ent.Client, error) {

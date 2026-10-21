@@ -1,7 +1,7 @@
 # Run project requirements
 
 generate-ent-schema:
-	 go run -mod=mod entgo.io/ent/cmd/ent generate --feature sql/upsert ./ent/schema
+	 go run -mod=mod entgo.io/ent/cmd/ent generate --feature sql/upsert ./ent/schema --feature sql/lock
 
 migrate-schema:
 	set -a; . ./.env; set +a; \

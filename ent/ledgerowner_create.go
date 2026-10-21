@@ -14,6 +14,7 @@ import (
 	"entgo.io/ent/schema/field"
 	"github.com/Toflex/directory_v2/ent/business"
 	"github.com/Toflex/directory_v2/ent/ledgerowner"
+	"github.com/Toflex/directory_v2/ent/nubanbeneficiary"
 	"github.com/Toflex/directory_v2/ent/user"
 	"github.com/Toflex/directory_v2/ent/vault"
 )
@@ -153,6 +154,21 @@ func (loc *LedgerOwnerCreate) SetNillableUserID(id *string) *LedgerOwnerCreate {
 // SetUser sets the "user" edge to the User entity.
 func (loc *LedgerOwnerCreate) SetUser(u *User) *LedgerOwnerCreate {
 	return loc.SetUserID(u.ID)
+}
+
+// AddNubanBeneficiaryIDs adds the "nuban_beneficiaries" edge to the NubanBeneficiary entity by IDs.
+func (loc *LedgerOwnerCreate) AddNubanBeneficiaryIDs(ids ...string) *LedgerOwnerCreate {
+	loc.mutation.AddNubanBeneficiaryIDs(ids...)
+	return loc
+}
+
+// AddNubanBeneficiaries adds the "nuban_beneficiaries" edges to the NubanBeneficiary entity.
+func (loc *LedgerOwnerCreate) AddNubanBeneficiaries(n ...*NubanBeneficiary) *LedgerOwnerCreate {
+	ids := make([]string, len(n))
+	for i := range n {
+		ids[i] = n[i].ID
+	}
+	return loc.AddNubanBeneficiaryIDs(ids...)
 }
 
 // Mutation returns the LedgerOwnerMutation object of the builder.
@@ -336,6 +352,22 @@ func (loc *LedgerOwnerCreate) createSpec() (*LedgerOwner, *sqlgraph.CreateSpec) 
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_node.user_owner = &nodes[0]
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := loc.mutation.NubanBeneficiariesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   ledgerowner.NubanBeneficiariesTable,
+			Columns: []string{ledgerowner.NubanBeneficiariesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(nubanbeneficiary.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec

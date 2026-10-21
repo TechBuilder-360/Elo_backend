@@ -11,8 +11,8 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/Toflex/directory_v2/ent/feerule"
 	"github.com/Toflex/directory_v2/ent/predicate"
-	"github.com/Toflex/directory_v2/ent/schema"
 	"github.com/Toflex/directory_v2/ent/service"
 )
 
@@ -125,57 +125,87 @@ func (su *ServiceUpdate) SetNillableActive(b *bool) *ServiceUpdate {
 	return su
 }
 
-// SetMin sets the "min" field.
-func (su *ServiceUpdate) SetMin(i int) *ServiceUpdate {
-	su.mutation.ResetMin()
-	su.mutation.SetMin(i)
+// SetMinValue sets the "min_value" field.
+func (su *ServiceUpdate) SetMinValue(i int) *ServiceUpdate {
+	su.mutation.ResetMinValue()
+	su.mutation.SetMinValue(i)
 	return su
 }
 
-// SetNillableMin sets the "min" field if the given value is not nil.
-func (su *ServiceUpdate) SetNillableMin(i *int) *ServiceUpdate {
+// SetNillableMinValue sets the "min_value" field if the given value is not nil.
+func (su *ServiceUpdate) SetNillableMinValue(i *int) *ServiceUpdate {
 	if i != nil {
-		su.SetMin(*i)
+		su.SetMinValue(*i)
 	}
 	return su
 }
 
-// AddMin adds i to the "min" field.
-func (su *ServiceUpdate) AddMin(i int) *ServiceUpdate {
-	su.mutation.AddMin(i)
+// AddMinValue adds i to the "min_value" field.
+func (su *ServiceUpdate) AddMinValue(i int) *ServiceUpdate {
+	su.mutation.AddMinValue(i)
 	return su
 }
 
-// SetMax sets the "max" field.
-func (su *ServiceUpdate) SetMax(i int) *ServiceUpdate {
-	su.mutation.ResetMax()
-	su.mutation.SetMax(i)
+// SetMaxValue sets the "max_value" field.
+func (su *ServiceUpdate) SetMaxValue(i int) *ServiceUpdate {
+	su.mutation.ResetMaxValue()
+	su.mutation.SetMaxValue(i)
 	return su
 }
 
-// SetNillableMax sets the "max" field if the given value is not nil.
-func (su *ServiceUpdate) SetNillableMax(i *int) *ServiceUpdate {
+// SetNillableMaxValue sets the "max_value" field if the given value is not nil.
+func (su *ServiceUpdate) SetNillableMaxValue(i *int) *ServiceUpdate {
 	if i != nil {
-		su.SetMax(*i)
+		su.SetMaxValue(*i)
 	}
 	return su
 }
 
-// AddMax adds i to the "max" field.
-func (su *ServiceUpdate) AddMax(i int) *ServiceUpdate {
-	su.mutation.AddMax(i)
+// AddMaxValue adds i to the "max_value" field.
+func (su *ServiceUpdate) AddMaxValue(i int) *ServiceUpdate {
+	su.mutation.AddMaxValue(i)
 	return su
 }
 
-// SetFee sets the "fee" field.
-func (su *ServiceUpdate) SetFee(s *schema.Fee) *ServiceUpdate {
-	su.mutation.SetFee(s)
+// AddFeeRuleIDs adds the "fee_rules" edge to the FeeRule entity by IDs.
+func (su *ServiceUpdate) AddFeeRuleIDs(ids ...string) *ServiceUpdate {
+	su.mutation.AddFeeRuleIDs(ids...)
 	return su
+}
+
+// AddFeeRules adds the "fee_rules" edges to the FeeRule entity.
+func (su *ServiceUpdate) AddFeeRules(f ...*FeeRule) *ServiceUpdate {
+	ids := make([]string, len(f))
+	for i := range f {
+		ids[i] = f[i].ID
+	}
+	return su.AddFeeRuleIDs(ids...)
 }
 
 // Mutation returns the ServiceMutation object of the builder.
 func (su *ServiceUpdate) Mutation() *ServiceMutation {
 	return su.mutation
+}
+
+// ClearFeeRules clears all "fee_rules" edges to the FeeRule entity.
+func (su *ServiceUpdate) ClearFeeRules() *ServiceUpdate {
+	su.mutation.ClearFeeRules()
+	return su
+}
+
+// RemoveFeeRuleIDs removes the "fee_rules" edge to FeeRule entities by IDs.
+func (su *ServiceUpdate) RemoveFeeRuleIDs(ids ...string) *ServiceUpdate {
+	su.mutation.RemoveFeeRuleIDs(ids...)
+	return su
+}
+
+// RemoveFeeRules removes "fee_rules" edges to FeeRule entities.
+func (su *ServiceUpdate) RemoveFeeRules(f ...*FeeRule) *ServiceUpdate {
+	ids := make([]string, len(f))
+	for i := range f {
+		ids[i] = f[i].ID
+	}
+	return su.RemoveFeeRuleIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -270,20 +300,62 @@ func (su *ServiceUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if value, ok := su.mutation.Active(); ok {
 		_spec.SetField(service.FieldActive, field.TypeBool, value)
 	}
-	if value, ok := su.mutation.Min(); ok {
-		_spec.SetField(service.FieldMin, field.TypeInt, value)
+	if value, ok := su.mutation.MinValue(); ok {
+		_spec.SetField(service.FieldMinValue, field.TypeInt, value)
 	}
-	if value, ok := su.mutation.AddedMin(); ok {
-		_spec.AddField(service.FieldMin, field.TypeInt, value)
+	if value, ok := su.mutation.AddedMinValue(); ok {
+		_spec.AddField(service.FieldMinValue, field.TypeInt, value)
 	}
-	if value, ok := su.mutation.Max(); ok {
-		_spec.SetField(service.FieldMax, field.TypeInt, value)
+	if value, ok := su.mutation.MaxValue(); ok {
+		_spec.SetField(service.FieldMaxValue, field.TypeInt, value)
 	}
-	if value, ok := su.mutation.AddedMax(); ok {
-		_spec.AddField(service.FieldMax, field.TypeInt, value)
+	if value, ok := su.mutation.AddedMaxValue(); ok {
+		_spec.AddField(service.FieldMaxValue, field.TypeInt, value)
 	}
-	if value, ok := su.mutation.Fee(); ok {
-		_spec.SetField(service.FieldFee, field.TypeJSON, value)
+	if su.mutation.FeeRulesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   service.FeeRulesTable,
+			Columns: []string{service.FeeRulesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(feerule.FieldID, field.TypeString),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := su.mutation.RemovedFeeRulesIDs(); len(nodes) > 0 && !su.mutation.FeeRulesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   service.FeeRulesTable,
+			Columns: []string{service.FeeRulesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(feerule.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := su.mutation.FeeRulesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   service.FeeRulesTable,
+			Columns: []string{service.FeeRulesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(feerule.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
 	if n, err = sqlgraph.UpdateNodes(ctx, su.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
@@ -401,57 +473,87 @@ func (suo *ServiceUpdateOne) SetNillableActive(b *bool) *ServiceUpdateOne {
 	return suo
 }
 
-// SetMin sets the "min" field.
-func (suo *ServiceUpdateOne) SetMin(i int) *ServiceUpdateOne {
-	suo.mutation.ResetMin()
-	suo.mutation.SetMin(i)
+// SetMinValue sets the "min_value" field.
+func (suo *ServiceUpdateOne) SetMinValue(i int) *ServiceUpdateOne {
+	suo.mutation.ResetMinValue()
+	suo.mutation.SetMinValue(i)
 	return suo
 }
 
-// SetNillableMin sets the "min" field if the given value is not nil.
-func (suo *ServiceUpdateOne) SetNillableMin(i *int) *ServiceUpdateOne {
+// SetNillableMinValue sets the "min_value" field if the given value is not nil.
+func (suo *ServiceUpdateOne) SetNillableMinValue(i *int) *ServiceUpdateOne {
 	if i != nil {
-		suo.SetMin(*i)
+		suo.SetMinValue(*i)
 	}
 	return suo
 }
 
-// AddMin adds i to the "min" field.
-func (suo *ServiceUpdateOne) AddMin(i int) *ServiceUpdateOne {
-	suo.mutation.AddMin(i)
+// AddMinValue adds i to the "min_value" field.
+func (suo *ServiceUpdateOne) AddMinValue(i int) *ServiceUpdateOne {
+	suo.mutation.AddMinValue(i)
 	return suo
 }
 
-// SetMax sets the "max" field.
-func (suo *ServiceUpdateOne) SetMax(i int) *ServiceUpdateOne {
-	suo.mutation.ResetMax()
-	suo.mutation.SetMax(i)
+// SetMaxValue sets the "max_value" field.
+func (suo *ServiceUpdateOne) SetMaxValue(i int) *ServiceUpdateOne {
+	suo.mutation.ResetMaxValue()
+	suo.mutation.SetMaxValue(i)
 	return suo
 }
 
-// SetNillableMax sets the "max" field if the given value is not nil.
-func (suo *ServiceUpdateOne) SetNillableMax(i *int) *ServiceUpdateOne {
+// SetNillableMaxValue sets the "max_value" field if the given value is not nil.
+func (suo *ServiceUpdateOne) SetNillableMaxValue(i *int) *ServiceUpdateOne {
 	if i != nil {
-		suo.SetMax(*i)
+		suo.SetMaxValue(*i)
 	}
 	return suo
 }
 
-// AddMax adds i to the "max" field.
-func (suo *ServiceUpdateOne) AddMax(i int) *ServiceUpdateOne {
-	suo.mutation.AddMax(i)
+// AddMaxValue adds i to the "max_value" field.
+func (suo *ServiceUpdateOne) AddMaxValue(i int) *ServiceUpdateOne {
+	suo.mutation.AddMaxValue(i)
 	return suo
 }
 
-// SetFee sets the "fee" field.
-func (suo *ServiceUpdateOne) SetFee(s *schema.Fee) *ServiceUpdateOne {
-	suo.mutation.SetFee(s)
+// AddFeeRuleIDs adds the "fee_rules" edge to the FeeRule entity by IDs.
+func (suo *ServiceUpdateOne) AddFeeRuleIDs(ids ...string) *ServiceUpdateOne {
+	suo.mutation.AddFeeRuleIDs(ids...)
 	return suo
+}
+
+// AddFeeRules adds the "fee_rules" edges to the FeeRule entity.
+func (suo *ServiceUpdateOne) AddFeeRules(f ...*FeeRule) *ServiceUpdateOne {
+	ids := make([]string, len(f))
+	for i := range f {
+		ids[i] = f[i].ID
+	}
+	return suo.AddFeeRuleIDs(ids...)
 }
 
 // Mutation returns the ServiceMutation object of the builder.
 func (suo *ServiceUpdateOne) Mutation() *ServiceMutation {
 	return suo.mutation
+}
+
+// ClearFeeRules clears all "fee_rules" edges to the FeeRule entity.
+func (suo *ServiceUpdateOne) ClearFeeRules() *ServiceUpdateOne {
+	suo.mutation.ClearFeeRules()
+	return suo
+}
+
+// RemoveFeeRuleIDs removes the "fee_rules" edge to FeeRule entities by IDs.
+func (suo *ServiceUpdateOne) RemoveFeeRuleIDs(ids ...string) *ServiceUpdateOne {
+	suo.mutation.RemoveFeeRuleIDs(ids...)
+	return suo
+}
+
+// RemoveFeeRules removes "fee_rules" edges to FeeRule entities.
+func (suo *ServiceUpdateOne) RemoveFeeRules(f ...*FeeRule) *ServiceUpdateOne {
+	ids := make([]string, len(f))
+	for i := range f {
+		ids[i] = f[i].ID
+	}
+	return suo.RemoveFeeRuleIDs(ids...)
 }
 
 // Where appends a list predicates to the ServiceUpdate builder.
@@ -576,20 +678,62 @@ func (suo *ServiceUpdateOne) sqlSave(ctx context.Context) (_node *Service, err e
 	if value, ok := suo.mutation.Active(); ok {
 		_spec.SetField(service.FieldActive, field.TypeBool, value)
 	}
-	if value, ok := suo.mutation.Min(); ok {
-		_spec.SetField(service.FieldMin, field.TypeInt, value)
+	if value, ok := suo.mutation.MinValue(); ok {
+		_spec.SetField(service.FieldMinValue, field.TypeInt, value)
 	}
-	if value, ok := suo.mutation.AddedMin(); ok {
-		_spec.AddField(service.FieldMin, field.TypeInt, value)
+	if value, ok := suo.mutation.AddedMinValue(); ok {
+		_spec.AddField(service.FieldMinValue, field.TypeInt, value)
 	}
-	if value, ok := suo.mutation.Max(); ok {
-		_spec.SetField(service.FieldMax, field.TypeInt, value)
+	if value, ok := suo.mutation.MaxValue(); ok {
+		_spec.SetField(service.FieldMaxValue, field.TypeInt, value)
 	}
-	if value, ok := suo.mutation.AddedMax(); ok {
-		_spec.AddField(service.FieldMax, field.TypeInt, value)
+	if value, ok := suo.mutation.AddedMaxValue(); ok {
+		_spec.AddField(service.FieldMaxValue, field.TypeInt, value)
 	}
-	if value, ok := suo.mutation.Fee(); ok {
-		_spec.SetField(service.FieldFee, field.TypeJSON, value)
+	if suo.mutation.FeeRulesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   service.FeeRulesTable,
+			Columns: []string{service.FeeRulesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(feerule.FieldID, field.TypeString),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := suo.mutation.RemovedFeeRulesIDs(); len(nodes) > 0 && !suo.mutation.FeeRulesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   service.FeeRulesTable,
+			Columns: []string{service.FeeRulesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(feerule.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := suo.mutation.FeeRulesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   service.FeeRulesTable,
+			Columns: []string{service.FeeRulesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(feerule.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
 	_node = &Service{config: suo.config}
 	_spec.Assign = _node.assignValues

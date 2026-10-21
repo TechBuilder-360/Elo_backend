@@ -3,6 +3,8 @@ package nuban
 import (
 	"context"
 	"time"
+
+	"github.com/Toflex/directory_v2/pkg/types"
 )
 
 type AccountType string
@@ -12,7 +14,7 @@ const (
 	DynamicNUBANAccountType AccountType = "dynamic"
 )
 
-type NUBANProvider interface {
+type NUBANDepositProvider interface {
 	GenerateStaticNUBANAccountNumber(ctx context.Context, payload *StaticNubanRequest) (*StaticNubanResponse, error)
 	GenerateDynamicNUBANAccountNumber(ctx context.Context, payload *DynamicNubanRequest) (*DynamicNubanResponse, error)
 }
@@ -55,4 +57,37 @@ type StaticNubanResponse struct {
 	BankName         string      `json:"bank_name"`
 	PartnerReference string      `json:"partner_reference"`
 	Type             AccountType `json:"type"`
+}
+
+type ResolveAccountPayload struct {
+	AccountNumber string
+	BankCode      string
+}
+
+type ResolveAccountResult struct {
+	AccountNumber string
+	AccountName   string
+	BankCode      string
+}
+
+type NubanTransferPayload struct {
+	Reference     string
+	Narration     string
+	Amount        uint64
+	AccountName   string
+	AccountNumber string
+	BankCode      string
+}
+
+type NubanTransferResult struct {
+	PartnerID string
+	SessionID *string
+	Reference string
+	Status    types.TransactionStatus
+}
+
+type NUBANTransferProvider interface {
+	ResolveAccount(ctx context.Context, payload ResolveAccountPayload) (*ResolveAccountResult, error)
+	Transfer(ctx context.Context, payload *NubanTransferPayload) (*NubanTransferResult, error)
+	GetTransactionStatus(ctx context.Context, id string) (*NubanTransferResult, error)
 }

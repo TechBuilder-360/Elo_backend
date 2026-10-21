@@ -31,6 +31,8 @@ type Ledger struct {
 	ReversalTransactionID string `json:"reversal_transaction_id,omitempty"`
 	// WalletID holds the value of the "wallet_id" field.
 	WalletID string `json:"wallet_id,omitempty"`
+	// AffectedBalance holds the value of the "affected_balance" field.
+	AffectedBalance ledger.AffectedBalance `json:"affected_balance,omitempty"`
 	// Debit holds the value of the "debit" field.
 	Debit int64 `json:"debit,omitempty"`
 	// Credit holds the value of the "credit" field.
@@ -102,7 +104,7 @@ func (*Ledger) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullBool)
 		case ledger.FieldDebit, ledger.FieldCredit, ledger.FieldCurrentBalance, ledger.FieldPreviousBalance:
 			values[i] = new(sql.NullInt64)
-		case ledger.FieldID, ledger.FieldTransactionID, ledger.FieldReversalTransactionID, ledger.FieldWalletID:
+		case ledger.FieldID, ledger.FieldTransactionID, ledger.FieldReversalTransactionID, ledger.FieldWalletID, ledger.FieldAffectedBalance:
 			values[i] = new(sql.NullString)
 		case ledger.FieldCreatedAt, ledger.FieldUpdatedAt, ledger.FieldDeletedAt:
 			values[i] = new(sql.NullTime)
@@ -163,6 +165,12 @@ func (l *Ledger) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field wallet_id", values[i])
 			} else if value.Valid {
 				l.WalletID = value.String
+			}
+		case ledger.FieldAffectedBalance:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field affected_balance", values[i])
+			} else if value.Valid {
+				l.AffectedBalance = ledger.AffectedBalance(value.String)
 			}
 		case ledger.FieldDebit:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
@@ -264,6 +272,9 @@ func (l *Ledger) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("wallet_id=")
 	builder.WriteString(l.WalletID)
+	builder.WriteString(", ")
+	builder.WriteString("affected_balance=")
+	builder.WriteString(fmt.Sprintf("%v", l.AffectedBalance))
 	builder.WriteString(", ")
 	builder.WriteString("debit=")
 	builder.WriteString(fmt.Sprintf("%v", l.Debit))

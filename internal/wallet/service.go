@@ -17,6 +17,11 @@ type IService interface {
 	GetWallet(ctx context.Context, ownerID, walletType, currencyCode string) (*model.Wallet, error)
 	AddWallet(ctx context.Context, ownerID, walletType, currencyCode string) (*model.Wallet, error)
 	GetWalletOwnerWithID(ctx context.Context, ownerID, walletID string) (*model.Wallet, error)
+	DebitWallet(ctx context.Context, payload *DebitWalletPayload) error
+	CreditWallet(ctx context.Context, payload *CreditWalletPayload) error
+	ReverseFund(ctx context.Context, tx *ent.Tx, transactionID string) error
+	ValidateWalletForDebit(ctx context.Context, payload *ValidateWalletPayload) (*WalletResponse, error)
+	ValidateWalletForCredit(ctx context.Context, payload *ValidateWalletPayload) (*WalletResponse, error)
 }
 
 type service struct {

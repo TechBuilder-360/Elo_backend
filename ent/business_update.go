@@ -21,6 +21,7 @@ import (
 	"github.com/Toflex/directory_v2/ent/predicate"
 	"github.com/Toflex/directory_v2/ent/requestverification"
 	"github.com/Toflex/directory_v2/ent/social"
+	"github.com/Toflex/directory_v2/ent/subscription"
 	"github.com/Toflex/directory_v2/ent/user"
 	"github.com/Toflex/directory_v2/ent/verification"
 )
@@ -568,6 +569,21 @@ func (bu *BusinessUpdate) SetOwner(l *LedgerOwner) *BusinessUpdate {
 	return bu.SetOwnerID(l.ID)
 }
 
+// AddSubscriptionIDs adds the "subscriptions" edge to the Subscription entity by IDs.
+func (bu *BusinessUpdate) AddSubscriptionIDs(ids ...string) *BusinessUpdate {
+	bu.mutation.AddSubscriptionIDs(ids...)
+	return bu
+}
+
+// AddSubscriptions adds the "subscriptions" edges to the Subscription entity.
+func (bu *BusinessUpdate) AddSubscriptions(s ...*Subscription) *BusinessUpdate {
+	ids := make([]string, len(s))
+	for i := range s {
+		ids[i] = s[i].ID
+	}
+	return bu.AddSubscriptionIDs(ids...)
+}
+
 // Mutation returns the BusinessMutation object of the builder.
 func (bu *BusinessUpdate) Mutation() *BusinessMutation {
 	return bu.mutation
@@ -751,6 +767,27 @@ func (bu *BusinessUpdate) RemoveKybMessages(k ...*KYBMessage) *BusinessUpdate {
 func (bu *BusinessUpdate) ClearOwner() *BusinessUpdate {
 	bu.mutation.ClearOwner()
 	return bu
+}
+
+// ClearSubscriptions clears all "subscriptions" edges to the Subscription entity.
+func (bu *BusinessUpdate) ClearSubscriptions() *BusinessUpdate {
+	bu.mutation.ClearSubscriptions()
+	return bu
+}
+
+// RemoveSubscriptionIDs removes the "subscriptions" edge to Subscription entities by IDs.
+func (bu *BusinessUpdate) RemoveSubscriptionIDs(ids ...string) *BusinessUpdate {
+	bu.mutation.RemoveSubscriptionIDs(ids...)
+	return bu
+}
+
+// RemoveSubscriptions removes "subscriptions" edges to Subscription entities.
+func (bu *BusinessUpdate) RemoveSubscriptions(s ...*Subscription) *BusinessUpdate {
+	ids := make([]string, len(s))
+	for i := range s {
+		ids[i] = s[i].ID
+	}
+	return bu.RemoveSubscriptionIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -1348,6 +1385,51 @@ func (bu *BusinessUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	if bu.mutation.SubscriptionsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   business.SubscriptionsTable,
+			Columns: []string{business.SubscriptionsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(subscription.FieldID, field.TypeString),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := bu.mutation.RemovedSubscriptionsIDs(); len(nodes) > 0 && !bu.mutation.SubscriptionsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   business.SubscriptionsTable,
+			Columns: []string{business.SubscriptionsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(subscription.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := bu.mutation.SubscriptionsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   business.SubscriptionsTable,
+			Columns: []string{business.SubscriptionsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(subscription.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
 	if n, err = sqlgraph.UpdateNodes(ctx, bu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{business.Label}
@@ -1898,6 +1980,21 @@ func (buo *BusinessUpdateOne) SetOwner(l *LedgerOwner) *BusinessUpdateOne {
 	return buo.SetOwnerID(l.ID)
 }
 
+// AddSubscriptionIDs adds the "subscriptions" edge to the Subscription entity by IDs.
+func (buo *BusinessUpdateOne) AddSubscriptionIDs(ids ...string) *BusinessUpdateOne {
+	buo.mutation.AddSubscriptionIDs(ids...)
+	return buo
+}
+
+// AddSubscriptions adds the "subscriptions" edges to the Subscription entity.
+func (buo *BusinessUpdateOne) AddSubscriptions(s ...*Subscription) *BusinessUpdateOne {
+	ids := make([]string, len(s))
+	for i := range s {
+		ids[i] = s[i].ID
+	}
+	return buo.AddSubscriptionIDs(ids...)
+}
+
 // Mutation returns the BusinessMutation object of the builder.
 func (buo *BusinessUpdateOne) Mutation() *BusinessMutation {
 	return buo.mutation
@@ -2081,6 +2178,27 @@ func (buo *BusinessUpdateOne) RemoveKybMessages(k ...*KYBMessage) *BusinessUpdat
 func (buo *BusinessUpdateOne) ClearOwner() *BusinessUpdateOne {
 	buo.mutation.ClearOwner()
 	return buo
+}
+
+// ClearSubscriptions clears all "subscriptions" edges to the Subscription entity.
+func (buo *BusinessUpdateOne) ClearSubscriptions() *BusinessUpdateOne {
+	buo.mutation.ClearSubscriptions()
+	return buo
+}
+
+// RemoveSubscriptionIDs removes the "subscriptions" edge to Subscription entities by IDs.
+func (buo *BusinessUpdateOne) RemoveSubscriptionIDs(ids ...string) *BusinessUpdateOne {
+	buo.mutation.RemoveSubscriptionIDs(ids...)
+	return buo
+}
+
+// RemoveSubscriptions removes "subscriptions" edges to Subscription entities.
+func (buo *BusinessUpdateOne) RemoveSubscriptions(s ...*Subscription) *BusinessUpdateOne {
+	ids := make([]string, len(s))
+	for i := range s {
+		ids[i] = s[i].ID
+	}
+	return buo.RemoveSubscriptionIDs(ids...)
 }
 
 // Where appends a list predicates to the BusinessUpdate builder.
@@ -2701,6 +2819,51 @@ func (buo *BusinessUpdateOne) sqlSave(ctx context.Context) (_node *Business, err
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(ledgerowner.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if buo.mutation.SubscriptionsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   business.SubscriptionsTable,
+			Columns: []string{business.SubscriptionsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(subscription.FieldID, field.TypeString),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := buo.mutation.RemovedSubscriptionsIDs(); len(nodes) > 0 && !buo.mutation.SubscriptionsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   business.SubscriptionsTable,
+			Columns: []string{business.SubscriptionsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(subscription.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := buo.mutation.SubscriptionsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   business.SubscriptionsTable,
+			Columns: []string{business.SubscriptionsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(subscription.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {

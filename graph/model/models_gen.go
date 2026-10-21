@@ -9,6 +9,10 @@ import (
 	"strconv"
 )
 
+type TransferDetail interface {
+	IsTransferDetail()
+}
+
 type VerificationResponse interface {
 	IsVerificationResponse()
 }
@@ -96,6 +100,19 @@ type LoginResponse struct {
 type Mutation struct {
 }
 
+type NubanTransferDetail struct {
+	ID                     string  `json:"id"`
+	Amount                 float64 `json:"amount"`
+	RecipientAccountName   string  `json:"recipient_account_name"`
+	RecipientAccountNumber string  `json:"recipient_account_number"`
+	BankName               *string `json:"bank_name,omitempty"`
+	BankCode               *string `json:"bank_code,omitempty"`
+	SessionID              *string `json:"session_id,omitempty"`
+	ProviderReference      *string `json:"provider_reference,omitempty"`
+}
+
+func (NubanTransferDetail) IsTransferDetail() {}
+
 type OTPResponse struct {
 	Identifier string `json:"Identifier"`
 }
@@ -171,13 +188,59 @@ type StaticNubanAccountDetail struct {
 	ID            string `json:"id"`
 }
 
+type TransactionDetail struct {
+	ID        string                  `json:"id"`
+	Reference string                  `json:"reference"`
+	Type      string                  `json:"type"`
+	Channel   string                  `json:"channel"`
+	Status    string                  `json:"status"`
+	Currency  string                  `json:"currency"`
+	Summary   *string                 `json:"summary,omitempty"`
+	Amount    float64                 `json:"amount"`
+	NetAmount *float64                `json:"net_amount,omitempty"`
+	Entry     string                  `json:"entry"`
+	CreatedAt string                  `json:"created_at"`
+	Fees      []*TransactionFeeDetail `json:"fees"`
+	Transfer  TransferDetail          `json:"transfer,omitempty"`
+}
+
+type TransactionFeeDetail struct {
+	ID       string   `json:"id"`
+	Amount   float64  `json:"amount"`
+	Rate     *float64 `json:"rate,omitempty"`
+	Type     string   `json:"type"`
+	Currency string   `json:"currency"`
+}
+
+type TransferPayload struct {
+	AccountNumber string  `json:"account_number"`
+	BankSlug      string  `json:"bank_slug"`
+	Narration     *string `json:"narration,omitempty"`
+	Amount        int32   `json:"amount"`
+	Reference     string  `json:"reference"`
+	Currency      string  `json:"currency"`
+}
+
+type TransferResult struct {
+	ID     string `json:"id"`
+	Status string `json:"status"`
+}
+
+type UpdateProfileInput struct {
+	FirstName    *string `json:"first_name,omitempty"`
+	LastName     *string `json:"last_name,omitempty"`
+	DisplayName  *string `json:"display_name,omitempty"`
+	EmailAddress *string `json:"email_address,omitempty"`
+}
+
 type User struct {
-	FirstName     string `json:"first_name"`
-	LastName      string `json:"last_name"`
-	DisplayName   string `json:"display_name"`
-	IsVerified    bool   `json:"is_verified"`
-	Disabled      bool   `json:"disabled"`
-	DisableReason string `json:"disable_reason"`
+	FirstName     string  `json:"first_name"`
+	LastName      string  `json:"last_name"`
+	DisplayName   string  `json:"display_name"`
+	EmailAddress  *string `json:"email_address,omitempty"`
+	IsVerified    bool    `json:"is_verified"`
+	Disabled      bool    `json:"disabled"`
+	DisableReason string  `json:"disable_reason"`
 }
 
 type UserBusiness struct {

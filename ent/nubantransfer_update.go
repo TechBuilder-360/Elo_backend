@@ -11,6 +11,8 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/Toflex/directory_v2/ent/nubanbank"
+	"github.com/Toflex/directory_v2/ent/nubanbeneficiary"
 	"github.com/Toflex/directory_v2/ent/nubantransfer"
 	"github.com/Toflex/directory_v2/ent/predicate"
 	"github.com/Toflex/directory_v2/ent/transaction"
@@ -83,58 +85,16 @@ func (ntu *NubanTransferUpdate) SetNillableRecipientAccountNumber(s *string) *Nu
 	return ntu
 }
 
-// SetSenderAccountName sets the "sender_account_name" field.
-func (ntu *NubanTransferUpdate) SetSenderAccountName(s string) *NubanTransferUpdate {
-	ntu.mutation.SetSenderAccountName(s)
+// SetNubanBankID sets the "nuban_bank_id" field.
+func (ntu *NubanTransferUpdate) SetNubanBankID(s string) *NubanTransferUpdate {
+	ntu.mutation.SetNubanBankID(s)
 	return ntu
 }
 
-// SetNillableSenderAccountName sets the "sender_account_name" field if the given value is not nil.
-func (ntu *NubanTransferUpdate) SetNillableSenderAccountName(s *string) *NubanTransferUpdate {
+// SetNillableNubanBankID sets the "nuban_bank_id" field if the given value is not nil.
+func (ntu *NubanTransferUpdate) SetNillableNubanBankID(s *string) *NubanTransferUpdate {
 	if s != nil {
-		ntu.SetSenderAccountName(*s)
-	}
-	return ntu
-}
-
-// SetSenderAccountNumber sets the "sender_account_number" field.
-func (ntu *NubanTransferUpdate) SetSenderAccountNumber(s string) *NubanTransferUpdate {
-	ntu.mutation.SetSenderAccountNumber(s)
-	return ntu
-}
-
-// SetNillableSenderAccountNumber sets the "sender_account_number" field if the given value is not nil.
-func (ntu *NubanTransferUpdate) SetNillableSenderAccountNumber(s *string) *NubanTransferUpdate {
-	if s != nil {
-		ntu.SetSenderAccountNumber(*s)
-	}
-	return ntu
-}
-
-// SetSenderBankName sets the "sender_bank_name" field.
-func (ntu *NubanTransferUpdate) SetSenderBankName(s string) *NubanTransferUpdate {
-	ntu.mutation.SetSenderBankName(s)
-	return ntu
-}
-
-// SetNillableSenderBankName sets the "sender_bank_name" field if the given value is not nil.
-func (ntu *NubanTransferUpdate) SetNillableSenderBankName(s *string) *NubanTransferUpdate {
-	if s != nil {
-		ntu.SetSenderBankName(*s)
-	}
-	return ntu
-}
-
-// SetSenderBankCode sets the "sender_bank_code" field.
-func (ntu *NubanTransferUpdate) SetSenderBankCode(s string) *NubanTransferUpdate {
-	ntu.mutation.SetSenderBankCode(s)
-	return ntu
-}
-
-// SetNillableSenderBankCode sets the "sender_bank_code" field if the given value is not nil.
-func (ntu *NubanTransferUpdate) SetNillableSenderBankCode(s *string) *NubanTransferUpdate {
-	if s != nil {
-		ntu.SetSenderBankCode(*s)
+		ntu.SetNubanBankID(*s)
 	}
 	return ntu
 }
@@ -174,6 +134,12 @@ func (ntu *NubanTransferUpdate) SetNillableSessionID(s *string) *NubanTransferUp
 	return ntu
 }
 
+// ClearSessionID clears the value of the "session_id" field.
+func (ntu *NubanTransferUpdate) ClearSessionID() *NubanTransferUpdate {
+	ntu.mutation.ClearSessionID()
+	return ntu
+}
+
 // SetProviderReference sets the "provider_reference" field.
 func (ntu *NubanTransferUpdate) SetProviderReference(s string) *NubanTransferUpdate {
 	ntu.mutation.SetProviderReference(s)
@@ -185,6 +151,12 @@ func (ntu *NubanTransferUpdate) SetNillableProviderReference(s *string) *NubanTr
 	if s != nil {
 		ntu.SetProviderReference(*s)
 	}
+	return ntu
+}
+
+// ClearProviderReference clears the value of the "provider_reference" field.
+func (ntu *NubanTransferUpdate) ClearProviderReference() *NubanTransferUpdate {
+	ntu.mutation.ClearProviderReference()
 	return ntu
 }
 
@@ -213,6 +185,26 @@ func (ntu *NubanTransferUpdate) SetTransaction(t *Transaction) *NubanTransferUpd
 	return ntu.SetTransactionID(t.ID)
 }
 
+// SetNubanBank sets the "nuban_bank" edge to the NubanBank entity.
+func (ntu *NubanTransferUpdate) SetNubanBank(n *NubanBank) *NubanTransferUpdate {
+	return ntu.SetNubanBankID(n.ID)
+}
+
+// AddBeneficiaryIDs adds the "beneficiaries" edge to the NubanBeneficiary entity by IDs.
+func (ntu *NubanTransferUpdate) AddBeneficiaryIDs(ids ...string) *NubanTransferUpdate {
+	ntu.mutation.AddBeneficiaryIDs(ids...)
+	return ntu
+}
+
+// AddBeneficiaries adds the "beneficiaries" edges to the NubanBeneficiary entity.
+func (ntu *NubanTransferUpdate) AddBeneficiaries(n ...*NubanBeneficiary) *NubanTransferUpdate {
+	ids := make([]string, len(n))
+	for i := range n {
+		ids[i] = n[i].ID
+	}
+	return ntu.AddBeneficiaryIDs(ids...)
+}
+
 // Mutation returns the NubanTransferMutation object of the builder.
 func (ntu *NubanTransferUpdate) Mutation() *NubanTransferMutation {
 	return ntu.mutation
@@ -222,6 +214,33 @@ func (ntu *NubanTransferUpdate) Mutation() *NubanTransferMutation {
 func (ntu *NubanTransferUpdate) ClearTransaction() *NubanTransferUpdate {
 	ntu.mutation.ClearTransaction()
 	return ntu
+}
+
+// ClearNubanBank clears the "nuban_bank" edge to the NubanBank entity.
+func (ntu *NubanTransferUpdate) ClearNubanBank() *NubanTransferUpdate {
+	ntu.mutation.ClearNubanBank()
+	return ntu
+}
+
+// ClearBeneficiaries clears all "beneficiaries" edges to the NubanBeneficiary entity.
+func (ntu *NubanTransferUpdate) ClearBeneficiaries() *NubanTransferUpdate {
+	ntu.mutation.ClearBeneficiaries()
+	return ntu
+}
+
+// RemoveBeneficiaryIDs removes the "beneficiaries" edge to NubanBeneficiary entities by IDs.
+func (ntu *NubanTransferUpdate) RemoveBeneficiaryIDs(ids ...string) *NubanTransferUpdate {
+	ntu.mutation.RemoveBeneficiaryIDs(ids...)
+	return ntu
+}
+
+// RemoveBeneficiaries removes "beneficiaries" edges to NubanBeneficiary entities.
+func (ntu *NubanTransferUpdate) RemoveBeneficiaries(n ...*NubanBeneficiary) *NubanTransferUpdate {
+	ids := make([]string, len(n))
+	for i := range n {
+		ids[i] = n[i].ID
+	}
+	return ntu.RemoveBeneficiaryIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -272,34 +291,9 @@ func (ntu *NubanTransferUpdate) check() error {
 			return &ValidationError{Name: "recipient_account_number", err: fmt.Errorf(`ent: validator failed for field "NubanTransfer.recipient_account_number": %w`, err)}
 		}
 	}
-	if v, ok := ntu.mutation.SenderAccountName(); ok {
-		if err := nubantransfer.SenderAccountNameValidator(v); err != nil {
-			return &ValidationError{Name: "sender_account_name", err: fmt.Errorf(`ent: validator failed for field "NubanTransfer.sender_account_name": %w`, err)}
-		}
-	}
-	if v, ok := ntu.mutation.SenderAccountNumber(); ok {
-		if err := nubantransfer.SenderAccountNumberValidator(v); err != nil {
-			return &ValidationError{Name: "sender_account_number", err: fmt.Errorf(`ent: validator failed for field "NubanTransfer.sender_account_number": %w`, err)}
-		}
-	}
-	if v, ok := ntu.mutation.SenderBankName(); ok {
-		if err := nubantransfer.SenderBankNameValidator(v); err != nil {
-			return &ValidationError{Name: "sender_bank_name", err: fmt.Errorf(`ent: validator failed for field "NubanTransfer.sender_bank_name": %w`, err)}
-		}
-	}
-	if v, ok := ntu.mutation.SenderBankCode(); ok {
-		if err := nubantransfer.SenderBankCodeValidator(v); err != nil {
-			return &ValidationError{Name: "sender_bank_code", err: fmt.Errorf(`ent: validator failed for field "NubanTransfer.sender_bank_code": %w`, err)}
-		}
-	}
-	if v, ok := ntu.mutation.SessionID(); ok {
-		if err := nubantransfer.SessionIDValidator(v); err != nil {
-			return &ValidationError{Name: "session_id", err: fmt.Errorf(`ent: validator failed for field "NubanTransfer.session_id": %w`, err)}
-		}
-	}
-	if v, ok := ntu.mutation.ProviderReference(); ok {
-		if err := nubantransfer.ProviderReferenceValidator(v); err != nil {
-			return &ValidationError{Name: "provider_reference", err: fmt.Errorf(`ent: validator failed for field "NubanTransfer.provider_reference": %w`, err)}
+	if v, ok := ntu.mutation.NubanBankID(); ok {
+		if err := nubantransfer.NubanBankIDValidator(v); err != nil {
+			return &ValidationError{Name: "nuban_bank_id", err: fmt.Errorf(`ent: validator failed for field "NubanTransfer.nuban_bank_id": %w`, err)}
 		}
 	}
 	if v, ok := ntu.mutation.Provider(); ok {
@@ -309,6 +303,9 @@ func (ntu *NubanTransferUpdate) check() error {
 	}
 	if ntu.mutation.TransactionCleared() && len(ntu.mutation.TransactionIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "NubanTransfer.transaction"`)
+	}
+	if ntu.mutation.NubanBankCleared() && len(ntu.mutation.NubanBankIDs()) > 0 {
+		return errors.New(`ent: clearing a required unique edge "NubanTransfer.nuban_bank"`)
 	}
 	return nil
 }
@@ -340,18 +337,6 @@ func (ntu *NubanTransferUpdate) sqlSave(ctx context.Context) (n int, err error) 
 	if value, ok := ntu.mutation.RecipientAccountNumber(); ok {
 		_spec.SetField(nubantransfer.FieldRecipientAccountNumber, field.TypeString, value)
 	}
-	if value, ok := ntu.mutation.SenderAccountName(); ok {
-		_spec.SetField(nubantransfer.FieldSenderAccountName, field.TypeString, value)
-	}
-	if value, ok := ntu.mutation.SenderAccountNumber(); ok {
-		_spec.SetField(nubantransfer.FieldSenderAccountNumber, field.TypeString, value)
-	}
-	if value, ok := ntu.mutation.SenderBankName(); ok {
-		_spec.SetField(nubantransfer.FieldSenderBankName, field.TypeString, value)
-	}
-	if value, ok := ntu.mutation.SenderBankCode(); ok {
-		_spec.SetField(nubantransfer.FieldSenderBankCode, field.TypeString, value)
-	}
 	if value, ok := ntu.mutation.Amount(); ok {
 		_spec.SetField(nubantransfer.FieldAmount, field.TypeInt64, value)
 	}
@@ -361,8 +346,14 @@ func (ntu *NubanTransferUpdate) sqlSave(ctx context.Context) (n int, err error) 
 	if value, ok := ntu.mutation.SessionID(); ok {
 		_spec.SetField(nubantransfer.FieldSessionID, field.TypeString, value)
 	}
+	if ntu.mutation.SessionIDCleared() {
+		_spec.ClearField(nubantransfer.FieldSessionID, field.TypeString)
+	}
 	if value, ok := ntu.mutation.ProviderReference(); ok {
 		_spec.SetField(nubantransfer.FieldProviderReference, field.TypeString, value)
+	}
+	if ntu.mutation.ProviderReferenceCleared() {
+		_spec.ClearField(nubantransfer.FieldProviderReference, field.TypeString)
 	}
 	if value, ok := ntu.mutation.Provider(); ok {
 		_spec.SetField(nubantransfer.FieldProvider, field.TypeString, value)
@@ -389,6 +380,80 @@ func (ntu *NubanTransferUpdate) sqlSave(ctx context.Context) (n int, err error) 
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(transaction.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if ntu.mutation.NubanBankCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   nubantransfer.NubanBankTable,
+			Columns: []string{nubantransfer.NubanBankColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(nubanbank.FieldID, field.TypeString),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := ntu.mutation.NubanBankIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   nubantransfer.NubanBankTable,
+			Columns: []string{nubantransfer.NubanBankColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(nubanbank.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if ntu.mutation.BeneficiariesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   nubantransfer.BeneficiariesTable,
+			Columns: nubantransfer.BeneficiariesPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(nubanbeneficiary.FieldID, field.TypeString),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := ntu.mutation.RemovedBeneficiariesIDs(); len(nodes) > 0 && !ntu.mutation.BeneficiariesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   nubantransfer.BeneficiariesTable,
+			Columns: nubantransfer.BeneficiariesPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(nubanbeneficiary.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := ntu.mutation.BeneficiariesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   nubantransfer.BeneficiariesTable,
+			Columns: nubantransfer.BeneficiariesPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(nubanbeneficiary.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {
@@ -470,58 +535,16 @@ func (ntuo *NubanTransferUpdateOne) SetNillableRecipientAccountNumber(s *string)
 	return ntuo
 }
 
-// SetSenderAccountName sets the "sender_account_name" field.
-func (ntuo *NubanTransferUpdateOne) SetSenderAccountName(s string) *NubanTransferUpdateOne {
-	ntuo.mutation.SetSenderAccountName(s)
+// SetNubanBankID sets the "nuban_bank_id" field.
+func (ntuo *NubanTransferUpdateOne) SetNubanBankID(s string) *NubanTransferUpdateOne {
+	ntuo.mutation.SetNubanBankID(s)
 	return ntuo
 }
 
-// SetNillableSenderAccountName sets the "sender_account_name" field if the given value is not nil.
-func (ntuo *NubanTransferUpdateOne) SetNillableSenderAccountName(s *string) *NubanTransferUpdateOne {
+// SetNillableNubanBankID sets the "nuban_bank_id" field if the given value is not nil.
+func (ntuo *NubanTransferUpdateOne) SetNillableNubanBankID(s *string) *NubanTransferUpdateOne {
 	if s != nil {
-		ntuo.SetSenderAccountName(*s)
-	}
-	return ntuo
-}
-
-// SetSenderAccountNumber sets the "sender_account_number" field.
-func (ntuo *NubanTransferUpdateOne) SetSenderAccountNumber(s string) *NubanTransferUpdateOne {
-	ntuo.mutation.SetSenderAccountNumber(s)
-	return ntuo
-}
-
-// SetNillableSenderAccountNumber sets the "sender_account_number" field if the given value is not nil.
-func (ntuo *NubanTransferUpdateOne) SetNillableSenderAccountNumber(s *string) *NubanTransferUpdateOne {
-	if s != nil {
-		ntuo.SetSenderAccountNumber(*s)
-	}
-	return ntuo
-}
-
-// SetSenderBankName sets the "sender_bank_name" field.
-func (ntuo *NubanTransferUpdateOne) SetSenderBankName(s string) *NubanTransferUpdateOne {
-	ntuo.mutation.SetSenderBankName(s)
-	return ntuo
-}
-
-// SetNillableSenderBankName sets the "sender_bank_name" field if the given value is not nil.
-func (ntuo *NubanTransferUpdateOne) SetNillableSenderBankName(s *string) *NubanTransferUpdateOne {
-	if s != nil {
-		ntuo.SetSenderBankName(*s)
-	}
-	return ntuo
-}
-
-// SetSenderBankCode sets the "sender_bank_code" field.
-func (ntuo *NubanTransferUpdateOne) SetSenderBankCode(s string) *NubanTransferUpdateOne {
-	ntuo.mutation.SetSenderBankCode(s)
-	return ntuo
-}
-
-// SetNillableSenderBankCode sets the "sender_bank_code" field if the given value is not nil.
-func (ntuo *NubanTransferUpdateOne) SetNillableSenderBankCode(s *string) *NubanTransferUpdateOne {
-	if s != nil {
-		ntuo.SetSenderBankCode(*s)
+		ntuo.SetNubanBankID(*s)
 	}
 	return ntuo
 }
@@ -561,6 +584,12 @@ func (ntuo *NubanTransferUpdateOne) SetNillableSessionID(s *string) *NubanTransf
 	return ntuo
 }
 
+// ClearSessionID clears the value of the "session_id" field.
+func (ntuo *NubanTransferUpdateOne) ClearSessionID() *NubanTransferUpdateOne {
+	ntuo.mutation.ClearSessionID()
+	return ntuo
+}
+
 // SetProviderReference sets the "provider_reference" field.
 func (ntuo *NubanTransferUpdateOne) SetProviderReference(s string) *NubanTransferUpdateOne {
 	ntuo.mutation.SetProviderReference(s)
@@ -572,6 +601,12 @@ func (ntuo *NubanTransferUpdateOne) SetNillableProviderReference(s *string) *Nub
 	if s != nil {
 		ntuo.SetProviderReference(*s)
 	}
+	return ntuo
+}
+
+// ClearProviderReference clears the value of the "provider_reference" field.
+func (ntuo *NubanTransferUpdateOne) ClearProviderReference() *NubanTransferUpdateOne {
+	ntuo.mutation.ClearProviderReference()
 	return ntuo
 }
 
@@ -600,6 +635,26 @@ func (ntuo *NubanTransferUpdateOne) SetTransaction(t *Transaction) *NubanTransfe
 	return ntuo.SetTransactionID(t.ID)
 }
 
+// SetNubanBank sets the "nuban_bank" edge to the NubanBank entity.
+func (ntuo *NubanTransferUpdateOne) SetNubanBank(n *NubanBank) *NubanTransferUpdateOne {
+	return ntuo.SetNubanBankID(n.ID)
+}
+
+// AddBeneficiaryIDs adds the "beneficiaries" edge to the NubanBeneficiary entity by IDs.
+func (ntuo *NubanTransferUpdateOne) AddBeneficiaryIDs(ids ...string) *NubanTransferUpdateOne {
+	ntuo.mutation.AddBeneficiaryIDs(ids...)
+	return ntuo
+}
+
+// AddBeneficiaries adds the "beneficiaries" edges to the NubanBeneficiary entity.
+func (ntuo *NubanTransferUpdateOne) AddBeneficiaries(n ...*NubanBeneficiary) *NubanTransferUpdateOne {
+	ids := make([]string, len(n))
+	for i := range n {
+		ids[i] = n[i].ID
+	}
+	return ntuo.AddBeneficiaryIDs(ids...)
+}
+
 // Mutation returns the NubanTransferMutation object of the builder.
 func (ntuo *NubanTransferUpdateOne) Mutation() *NubanTransferMutation {
 	return ntuo.mutation
@@ -609,6 +664,33 @@ func (ntuo *NubanTransferUpdateOne) Mutation() *NubanTransferMutation {
 func (ntuo *NubanTransferUpdateOne) ClearTransaction() *NubanTransferUpdateOne {
 	ntuo.mutation.ClearTransaction()
 	return ntuo
+}
+
+// ClearNubanBank clears the "nuban_bank" edge to the NubanBank entity.
+func (ntuo *NubanTransferUpdateOne) ClearNubanBank() *NubanTransferUpdateOne {
+	ntuo.mutation.ClearNubanBank()
+	return ntuo
+}
+
+// ClearBeneficiaries clears all "beneficiaries" edges to the NubanBeneficiary entity.
+func (ntuo *NubanTransferUpdateOne) ClearBeneficiaries() *NubanTransferUpdateOne {
+	ntuo.mutation.ClearBeneficiaries()
+	return ntuo
+}
+
+// RemoveBeneficiaryIDs removes the "beneficiaries" edge to NubanBeneficiary entities by IDs.
+func (ntuo *NubanTransferUpdateOne) RemoveBeneficiaryIDs(ids ...string) *NubanTransferUpdateOne {
+	ntuo.mutation.RemoveBeneficiaryIDs(ids...)
+	return ntuo
+}
+
+// RemoveBeneficiaries removes "beneficiaries" edges to NubanBeneficiary entities.
+func (ntuo *NubanTransferUpdateOne) RemoveBeneficiaries(n ...*NubanBeneficiary) *NubanTransferUpdateOne {
+	ids := make([]string, len(n))
+	for i := range n {
+		ids[i] = n[i].ID
+	}
+	return ntuo.RemoveBeneficiaryIDs(ids...)
 }
 
 // Where appends a list predicates to the NubanTransferUpdate builder.
@@ -672,34 +754,9 @@ func (ntuo *NubanTransferUpdateOne) check() error {
 			return &ValidationError{Name: "recipient_account_number", err: fmt.Errorf(`ent: validator failed for field "NubanTransfer.recipient_account_number": %w`, err)}
 		}
 	}
-	if v, ok := ntuo.mutation.SenderAccountName(); ok {
-		if err := nubantransfer.SenderAccountNameValidator(v); err != nil {
-			return &ValidationError{Name: "sender_account_name", err: fmt.Errorf(`ent: validator failed for field "NubanTransfer.sender_account_name": %w`, err)}
-		}
-	}
-	if v, ok := ntuo.mutation.SenderAccountNumber(); ok {
-		if err := nubantransfer.SenderAccountNumberValidator(v); err != nil {
-			return &ValidationError{Name: "sender_account_number", err: fmt.Errorf(`ent: validator failed for field "NubanTransfer.sender_account_number": %w`, err)}
-		}
-	}
-	if v, ok := ntuo.mutation.SenderBankName(); ok {
-		if err := nubantransfer.SenderBankNameValidator(v); err != nil {
-			return &ValidationError{Name: "sender_bank_name", err: fmt.Errorf(`ent: validator failed for field "NubanTransfer.sender_bank_name": %w`, err)}
-		}
-	}
-	if v, ok := ntuo.mutation.SenderBankCode(); ok {
-		if err := nubantransfer.SenderBankCodeValidator(v); err != nil {
-			return &ValidationError{Name: "sender_bank_code", err: fmt.Errorf(`ent: validator failed for field "NubanTransfer.sender_bank_code": %w`, err)}
-		}
-	}
-	if v, ok := ntuo.mutation.SessionID(); ok {
-		if err := nubantransfer.SessionIDValidator(v); err != nil {
-			return &ValidationError{Name: "session_id", err: fmt.Errorf(`ent: validator failed for field "NubanTransfer.session_id": %w`, err)}
-		}
-	}
-	if v, ok := ntuo.mutation.ProviderReference(); ok {
-		if err := nubantransfer.ProviderReferenceValidator(v); err != nil {
-			return &ValidationError{Name: "provider_reference", err: fmt.Errorf(`ent: validator failed for field "NubanTransfer.provider_reference": %w`, err)}
+	if v, ok := ntuo.mutation.NubanBankID(); ok {
+		if err := nubantransfer.NubanBankIDValidator(v); err != nil {
+			return &ValidationError{Name: "nuban_bank_id", err: fmt.Errorf(`ent: validator failed for field "NubanTransfer.nuban_bank_id": %w`, err)}
 		}
 	}
 	if v, ok := ntuo.mutation.Provider(); ok {
@@ -709,6 +766,9 @@ func (ntuo *NubanTransferUpdateOne) check() error {
 	}
 	if ntuo.mutation.TransactionCleared() && len(ntuo.mutation.TransactionIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "NubanTransfer.transaction"`)
+	}
+	if ntuo.mutation.NubanBankCleared() && len(ntuo.mutation.NubanBankIDs()) > 0 {
+		return errors.New(`ent: clearing a required unique edge "NubanTransfer.nuban_bank"`)
 	}
 	return nil
 }
@@ -757,18 +817,6 @@ func (ntuo *NubanTransferUpdateOne) sqlSave(ctx context.Context) (_node *NubanTr
 	if value, ok := ntuo.mutation.RecipientAccountNumber(); ok {
 		_spec.SetField(nubantransfer.FieldRecipientAccountNumber, field.TypeString, value)
 	}
-	if value, ok := ntuo.mutation.SenderAccountName(); ok {
-		_spec.SetField(nubantransfer.FieldSenderAccountName, field.TypeString, value)
-	}
-	if value, ok := ntuo.mutation.SenderAccountNumber(); ok {
-		_spec.SetField(nubantransfer.FieldSenderAccountNumber, field.TypeString, value)
-	}
-	if value, ok := ntuo.mutation.SenderBankName(); ok {
-		_spec.SetField(nubantransfer.FieldSenderBankName, field.TypeString, value)
-	}
-	if value, ok := ntuo.mutation.SenderBankCode(); ok {
-		_spec.SetField(nubantransfer.FieldSenderBankCode, field.TypeString, value)
-	}
 	if value, ok := ntuo.mutation.Amount(); ok {
 		_spec.SetField(nubantransfer.FieldAmount, field.TypeInt64, value)
 	}
@@ -778,8 +826,14 @@ func (ntuo *NubanTransferUpdateOne) sqlSave(ctx context.Context) (_node *NubanTr
 	if value, ok := ntuo.mutation.SessionID(); ok {
 		_spec.SetField(nubantransfer.FieldSessionID, field.TypeString, value)
 	}
+	if ntuo.mutation.SessionIDCleared() {
+		_spec.ClearField(nubantransfer.FieldSessionID, field.TypeString)
+	}
 	if value, ok := ntuo.mutation.ProviderReference(); ok {
 		_spec.SetField(nubantransfer.FieldProviderReference, field.TypeString, value)
+	}
+	if ntuo.mutation.ProviderReferenceCleared() {
+		_spec.ClearField(nubantransfer.FieldProviderReference, field.TypeString)
 	}
 	if value, ok := ntuo.mutation.Provider(); ok {
 		_spec.SetField(nubantransfer.FieldProvider, field.TypeString, value)
@@ -806,6 +860,80 @@ func (ntuo *NubanTransferUpdateOne) sqlSave(ctx context.Context) (_node *NubanTr
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(transaction.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if ntuo.mutation.NubanBankCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   nubantransfer.NubanBankTable,
+			Columns: []string{nubantransfer.NubanBankColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(nubanbank.FieldID, field.TypeString),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := ntuo.mutation.NubanBankIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   nubantransfer.NubanBankTable,
+			Columns: []string{nubantransfer.NubanBankColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(nubanbank.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if ntuo.mutation.BeneficiariesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   nubantransfer.BeneficiariesTable,
+			Columns: nubantransfer.BeneficiariesPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(nubanbeneficiary.FieldID, field.TypeString),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := ntuo.mutation.RemovedBeneficiariesIDs(); len(nodes) > 0 && !ntuo.mutation.BeneficiariesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   nubantransfer.BeneficiariesTable,
+			Columns: nubantransfer.BeneficiariesPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(nubanbeneficiary.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := ntuo.mutation.BeneficiariesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   nubantransfer.BeneficiariesTable,
+			Columns: nubantransfer.BeneficiariesPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(nubanbeneficiary.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {

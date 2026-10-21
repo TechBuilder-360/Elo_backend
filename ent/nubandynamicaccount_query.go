@@ -8,6 +8,7 @@ import (
 	"math"
 
 	"entgo.io/ent"
+	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
@@ -25,6 +26,7 @@ type NubanDynamicAccountQuery struct {
 	predicates []predicate.NubanDynamicAccount
 	withWallet *WalletQuery
 	withFKs    bool
+	modifiers  []func(*sql.Selector)
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -391,6 +393,9 @@ func (ndaq *NubanDynamicAccountQuery) sqlAll(ctx context.Context, hooks ...query
 		node.Edges.loadedTypes = loadedTypes
 		return node.assignValues(columns, values)
 	}
+	if len(ndaq.modifiers) > 0 {
+		_spec.Modifiers = ndaq.modifiers
+	}
 	for i := range hooks {
 		hooks[i](ctx, _spec)
 	}
@@ -444,6 +449,9 @@ func (ndaq *NubanDynamicAccountQuery) loadWallet(ctx context.Context, query *Wal
 
 func (ndaq *NubanDynamicAccountQuery) sqlCount(ctx context.Context) (int, error) {
 	_spec := ndaq.querySpec()
+	if len(ndaq.modifiers) > 0 {
+		_spec.Modifiers = ndaq.modifiers
+	}
 	_spec.Node.Columns = ndaq.ctx.Fields
 	if len(ndaq.ctx.Fields) > 0 {
 		_spec.Unique = ndaq.ctx.Unique != nil && *ndaq.ctx.Unique
@@ -506,6 +514,9 @@ func (ndaq *NubanDynamicAccountQuery) sqlQuery(ctx context.Context) *sql.Selecto
 	if ndaq.ctx.Unique != nil && *ndaq.ctx.Unique {
 		selector.Distinct()
 	}
+	for _, m := range ndaq.modifiers {
+		m(selector)
+	}
 	for _, p := range ndaq.predicates {
 		p(selector)
 	}
@@ -521,6 +532,32 @@ func (ndaq *NubanDynamicAccountQuery) sqlQuery(ctx context.Context) *sql.Selecto
 		selector.Limit(*limit)
 	}
 	return selector
+}
+
+// ForUpdate locks the selected rows against concurrent updates, and prevent them from being
+// updated, deleted or "selected ... for update" by other sessions, until the transaction is
+// either committed or rolled-back.
+func (ndaq *NubanDynamicAccountQuery) ForUpdate(opts ...sql.LockOption) *NubanDynamicAccountQuery {
+	if ndaq.driver.Dialect() == dialect.Postgres {
+		ndaq.Unique(false)
+	}
+	ndaq.modifiers = append(ndaq.modifiers, func(s *sql.Selector) {
+		s.ForUpdate(opts...)
+	})
+	return ndaq
+}
+
+// ForShare behaves similarly to ForUpdate, except that it acquires a shared mode lock
+// on any rows that are read. Other sessions can read the rows, but cannot modify them
+// until your transaction commits.
+func (ndaq *NubanDynamicAccountQuery) ForShare(opts ...sql.LockOption) *NubanDynamicAccountQuery {
+	if ndaq.driver.Dialect() == dialect.Postgres {
+		ndaq.Unique(false)
+	}
+	ndaq.modifiers = append(ndaq.modifiers, func(s *sql.Selector) {
+		s.ForShare(opts...)
+	})
+	return ndaq
 }
 
 // NubanDynamicAccountGroupBy is the group-by builder for NubanDynamicAccount entities.

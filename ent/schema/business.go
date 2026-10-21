@@ -75,6 +75,7 @@ func (Business) Edges() []ent.Edge {
 		edge.To("owner", LedgerOwner.Type).
 			Unique().
 			Required(),
+		edge.To("subscriptions", Subscription.Type),
 	}
 }
 

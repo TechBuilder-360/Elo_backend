@@ -9,6 +9,7 @@ import (
 
 type IService interface {
 	CreateVault(ctx context.Context, ownerID string) (*Vault, error)
+	CreateVaultWithType(ctx context.Context, ownerID, vaultType string) (*Vault, error)
 	GetVault(ctx context.Context, ownerID string) (*Vault, error)
 	GetOwnerVault(ctx context.Context, ownerID, vaultType string) (*Vault, error)
 }

@@ -8,6 +8,7 @@ import (
 	"math"
 
 	"entgo.io/ent"
+	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
@@ -25,6 +26,7 @@ type UserDocumentQuery struct {
 	predicates       []predicate.UserDocument
 	withUserDocument *UserQuery
 	withFKs          bool
+	modifiers        []func(*sql.Selector)
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -391,6 +393,9 @@ func (udq *UserDocumentQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([
 		node.Edges.loadedTypes = loadedTypes
 		return node.assignValues(columns, values)
 	}
+	if len(udq.modifiers) > 0 {
+		_spec.Modifiers = udq.modifiers
+	}
 	for i := range hooks {
 		hooks[i](ctx, _spec)
 	}
@@ -444,6 +449,9 @@ func (udq *UserDocumentQuery) loadUserDocument(ctx context.Context, query *UserQ
 
 func (udq *UserDocumentQuery) sqlCount(ctx context.Context) (int, error) {
 	_spec := udq.querySpec()
+	if len(udq.modifiers) > 0 {
+		_spec.Modifiers = udq.modifiers
+	}
 	_spec.Node.Columns = udq.ctx.Fields
 	if len(udq.ctx.Fields) > 0 {
 		_spec.Unique = udq.ctx.Unique != nil && *udq.ctx.Unique
@@ -506,6 +514,9 @@ func (udq *UserDocumentQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	if udq.ctx.Unique != nil && *udq.ctx.Unique {
 		selector.Distinct()
 	}
+	for _, m := range udq.modifiers {
+		m(selector)
+	}
 	for _, p := range udq.predicates {
 		p(selector)
 	}
@@ -521,6 +532,32 @@ func (udq *UserDocumentQuery) sqlQuery(ctx context.Context) *sql.Selector {
 		selector.Limit(*limit)
 	}
 	return selector
+}
+
+// ForUpdate locks the selected rows against concurrent updates, and prevent them from being
+// updated, deleted or "selected ... for update" by other sessions, until the transaction is
+// either committed or rolled-back.
+func (udq *UserDocumentQuery) ForUpdate(opts ...sql.LockOption) *UserDocumentQuery {
+	if udq.driver.Dialect() == dialect.Postgres {
+		udq.Unique(false)
+	}
+	udq.modifiers = append(udq.modifiers, func(s *sql.Selector) {
+		s.ForUpdate(opts...)
+	})
+	return udq
+}
+
+// ForShare behaves similarly to ForUpdate, except that it acquires a shared mode lock
+// on any rows that are read. Other sessions can read the rows, but cannot modify them
+// until your transaction commits.
+func (udq *UserDocumentQuery) ForShare(opts ...sql.LockOption) *UserDocumentQuery {
+	if udq.driver.Dialect() == dialect.Postgres {
+		udq.Unique(false)
+	}
+	udq.modifiers = append(udq.modifiers, func(s *sql.Selector) {
+		s.ForShare(opts...)
+	})
+	return udq
 }
 
 // UserDocumentGroupBy is the group-by builder for UserDocument entities.

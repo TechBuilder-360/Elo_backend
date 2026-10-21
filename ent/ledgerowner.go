@@ -45,9 +45,11 @@ type LedgerOwnerEdges struct {
 	Business *Business `json:"business,omitempty"`
 	// User holds the value of the user edge.
 	User *User `json:"user,omitempty"`
+	// NubanBeneficiaries holds the value of the nuban_beneficiaries edge.
+	NubanBeneficiaries []*NubanBeneficiary `json:"nuban_beneficiaries,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [3]bool
+	loadedTypes [4]bool
 }
 
 // VaultsOrErr returns the Vaults value or an error if the edge
@@ -79,6 +81,15 @@ func (e LedgerOwnerEdges) UserOrErr() (*User, error) {
 		return nil, &NotFoundError{label: user.Label}
 	}
 	return nil, &NotLoadedError{edge: "user"}
+}
+
+// NubanBeneficiariesOrErr returns the NubanBeneficiaries value or an error if the edge
+// was not loaded in eager-loading.
+func (e LedgerOwnerEdges) NubanBeneficiariesOrErr() ([]*NubanBeneficiary, error) {
+	if e.loadedTypes[3] {
+		return e.NubanBeneficiaries, nil
+	}
+	return nil, &NotLoadedError{edge: "nuban_beneficiaries"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -186,6 +197,11 @@ func (lo *LedgerOwner) QueryBusiness() *BusinessQuery {
 // QueryUser queries the "user" edge of the LedgerOwner entity.
 func (lo *LedgerOwner) QueryUser() *UserQuery {
 	return NewLedgerOwnerClient(lo.config).QueryUser(lo)
+}
+
+// QueryNubanBeneficiaries queries the "nuban_beneficiaries" edge of the LedgerOwner entity.
+func (lo *LedgerOwner) QueryNubanBeneficiaries() *NubanBeneficiaryQuery {
+	return NewLedgerOwnerClient(lo.config).QueryNubanBeneficiaries(lo)
 }
 
 // Update returns a builder for updating this LedgerOwner.

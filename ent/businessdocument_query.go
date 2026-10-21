@@ -9,6 +9,7 @@ import (
 	"math"
 
 	"entgo.io/ent"
+	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
@@ -28,6 +29,7 @@ type BusinessDocumentQuery struct {
 	withBusiness    *BusinessQuery
 	withKybDocument *KYBDocumentQuery
 	withFKs         bool
+	modifiers       []func(*sql.Selector)
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -429,6 +431,9 @@ func (bdq *BusinessDocumentQuery) sqlAll(ctx context.Context, hooks ...queryHook
 		node.Edges.loadedTypes = loadedTypes
 		return node.assignValues(columns, values)
 	}
+	if len(bdq.modifiers) > 0 {
+		_spec.Modifiers = bdq.modifiers
+	}
 	for i := range hooks {
 		hooks[i](ctx, _spec)
 	}
@@ -550,6 +555,9 @@ func (bdq *BusinessDocumentQuery) loadKybDocument(ctx context.Context, query *KY
 
 func (bdq *BusinessDocumentQuery) sqlCount(ctx context.Context) (int, error) {
 	_spec := bdq.querySpec()
+	if len(bdq.modifiers) > 0 {
+		_spec.Modifiers = bdq.modifiers
+	}
 	_spec.Node.Columns = bdq.ctx.Fields
 	if len(bdq.ctx.Fields) > 0 {
 		_spec.Unique = bdq.ctx.Unique != nil && *bdq.ctx.Unique
@@ -612,6 +620,9 @@ func (bdq *BusinessDocumentQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	if bdq.ctx.Unique != nil && *bdq.ctx.Unique {
 		selector.Distinct()
 	}
+	for _, m := range bdq.modifiers {
+		m(selector)
+	}
 	for _, p := range bdq.predicates {
 		p(selector)
 	}
@@ -627,6 +638,32 @@ func (bdq *BusinessDocumentQuery) sqlQuery(ctx context.Context) *sql.Selector {
 		selector.Limit(*limit)
 	}
 	return selector
+}
+
+// ForUpdate locks the selected rows against concurrent updates, and prevent them from being
+// updated, deleted or "selected ... for update" by other sessions, until the transaction is
+// either committed or rolled-back.
+func (bdq *BusinessDocumentQuery) ForUpdate(opts ...sql.LockOption) *BusinessDocumentQuery {
+	if bdq.driver.Dialect() == dialect.Postgres {
+		bdq.Unique(false)
+	}
+	bdq.modifiers = append(bdq.modifiers, func(s *sql.Selector) {
+		s.ForUpdate(opts...)
+	})
+	return bdq
+}
+
+// ForShare behaves similarly to ForUpdate, except that it acquires a shared mode lock
+// on any rows that are read. Other sessions can read the rows, but cannot modify them
+// until your transaction commits.
+func (bdq *BusinessDocumentQuery) ForShare(opts ...sql.LockOption) *BusinessDocumentQuery {
+	if bdq.driver.Dialect() == dialect.Postgres {
+		bdq.Unique(false)
+	}
+	bdq.modifiers = append(bdq.modifiers, func(s *sql.Selector) {
+		s.ForShare(opts...)
+	})
+	return bdq
 }
 
 // BusinessDocumentGroupBy is the group-by builder for BusinessDocument entities.

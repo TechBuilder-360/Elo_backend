@@ -81,7 +81,7 @@ func (s *service) GenerateCryptoAddress(ctx context.Context, b *ent.Business, bo
 		return nil, errors.New(errors.ErrFailed, "request failed")
 	}
 
-	impl, ok := provider.GetImpl(serv.ActiveProvider.Slug)
+	impl, ok := provider.GetProviderImpl(serv.ActiveProvider.Slug)
 	if !ok {
 		logger.WithField("provider", serv.ActiveProvider.Slug).WithError(err).Error("failed to fetch stablecoin address implementation")
 		return nil, errors.New(errors.ErrFailed, "request failed")

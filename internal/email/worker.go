@@ -23,7 +23,7 @@ func GetEmailProvider(ctx context.Context, logger log.Entry) (IEmailProvider, er
 		return nil, errors.New(errors.ErrFailed, "request failed")
 	}
 
-	activeProvider, ok := provider.GetImpl(serviceLocator.ActiveProvider.Slug)
+	activeProvider, ok := provider.GetProviderImpl(serviceLocator.ActiveProvider.Slug)
 	if !ok {
 		logger.Error("provider not supported for Email service")
 		return nil, errors.New(errors.ErrFailed, "request failed")
