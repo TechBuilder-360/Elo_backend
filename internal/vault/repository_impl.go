@@ -51,8 +51,16 @@ func (r *repository) GetBusinessVaultByType(ctx context.Context, b *ent.Business
 }
 
 func (r *repository) Create(ctx context.Context, ownerID string) (*ent.Vault, error) {
-	// create default Treasury vault
-	v, err := r.db.Vault.Create().SetType(vault.DefaultType).SetOwnerID(ownerID).Save(ctx)
+	return r.CreateWithType(ctx, ownerID, string(vault.DefaultType))
+}
+
+func (r *repository) CreateWithType(ctx context.Context, ownerID, vaultType string) (*ent.Vault, error) {
+	vt := vault.Type(vaultType)
+	if vaultType == "" {
+		vt = vault.DefaultType
+	}
+
+	v, err := r.db.Vault.Create().SetType(vt).SetOwnerID(ownerID).Save(ctx)
 	if err != nil || v == nil {
 		return nil, err
 	}

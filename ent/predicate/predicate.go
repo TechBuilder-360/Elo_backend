@@ -12,9 +12,6 @@ type Business func(*sql.Selector)
 // BusinessDocument is the predicate function for businessdocument builders.
 type BusinessDocument func(*sql.Selector)
 
-// BusinessFeature is the predicate function for businessfeature builders.
-type BusinessFeature func(*sql.Selector)
-
 // BusinessLocation is the predicate function for businesslocation builders.
 type BusinessLocation func(*sql.Selector)
 
@@ -23,6 +20,15 @@ type BusinessServices func(*sql.Selector)
 
 // Currency is the predicate function for currency builders.
 type Currency func(*sql.Selector)
+
+// FeeRule is the predicate function for feerule builders.
+type FeeRule func(*sql.Selector)
+
+// FeeTier is the predicate function for feetier builders.
+type FeeTier func(*sql.Selector)
+
+// Invoice is the predicate function for invoice builders.
+type Invoice func(*sql.Selector)
 
 // KYBDocument is the predicate function for kybdocument builders.
 type KYBDocument func(*sql.Selector)
@@ -38,6 +44,15 @@ type LedgerOwner func(*sql.Selector)
 
 // Manager is the predicate function for manager builders.
 type Manager func(*sql.Selector)
+
+// NubanBank is the predicate function for nubanbank builders.
+type NubanBank func(*sql.Selector)
+
+// NubanBeneficiary is the predicate function for nubanbeneficiary builders.
+type NubanBeneficiary func(*sql.Selector)
+
+// NubanBlacklist is the predicate function for nubanblacklist builders.
+type NubanBlacklist func(*sql.Selector)
 
 // NubanDeposit is the predicate function for nubandeposit builders.
 type NubanDeposit func(*sql.Selector)
@@ -56,6 +71,9 @@ type Permission func(*sql.Selector)
 
 // Provider is the predicate function for provider builders.
 type Provider func(*sql.Selector)
+
+// ProviderBank is the predicate function for providerbank builders.
+type ProviderBank func(*sql.Selector)
 
 // RequestVerification is the predicate function for requestverification builders.
 type RequestVerification func(*sql.Selector)
@@ -87,8 +105,17 @@ type StablecoinWallet func(*sql.Selector)
 // StablecoinWithdrawal is the predicate function for stablecoinwithdrawal builders.
 type StablecoinWithdrawal func(*sql.Selector)
 
+// Subscription is the predicate function for subscription builders.
+type Subscription func(*sql.Selector)
+
+// SubscriptionPlan is the predicate function for subscriptionplan builders.
+type SubscriptionPlan func(*sql.Selector)
+
 // Transaction is the predicate function for transaction builders.
 type Transaction func(*sql.Selector)
+
+// TransactionFee is the predicate function for transactionfee builders.
+type TransactionFee func(*sql.Selector)
 
 // User is the predicate function for user builders.
 type User func(*sql.Selector)

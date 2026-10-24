@@ -16,11 +16,26 @@ type DynamicNubanAccountDetail {
     id: String!
 }
 
+input TransferPayload {
+    account_number: String!
+bank_slug: String!
+narration: String
+amount: Int!
+reference: String!
+currency: String!
+}
+
+type TransferResult {
+    id: String!
+    status: String!
+}
+
 extend type Query {
     business_nuban_accounts: [StaticNubanAccountDetail!]! @hasRole(role: ADMIN)
 }
 
 extend type Mutation {
-    generateStaticNubanAccount(wallet_type): StaticNubanAccountDetail! @hasRole(role: ADMIN)
+    nubanTransfer(input: TransferPayload!): TransferResult! @hasRole(role: ADMIN)
+    generateStaticNubanAccount(wallet_type: WalletType): StaticNubanAccountDetail! @hasRole(role: ADMIN)
     # generateDynamicNubanAccount: DynamicNubanAccountDetail! @hasRole(role: ADMIN)
 }

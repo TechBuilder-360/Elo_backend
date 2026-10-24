@@ -93,6 +93,12 @@ func (lc *LedgerCreate) SetWalletID(s string) *LedgerCreate {
 	return lc
 }
 
+// SetAffectedBalance sets the "affected_balance" field.
+func (lc *LedgerCreate) SetAffectedBalance(lb ledger.AffectedBalance) *LedgerCreate {
+	lc.mutation.SetAffectedBalance(lb)
+	return lc
+}
+
 // SetDebit sets the "debit" field.
 func (lc *LedgerCreate) SetDebit(i int64) *LedgerCreate {
 	lc.mutation.SetDebit(i)
@@ -285,6 +291,14 @@ func (lc *LedgerCreate) check() error {
 			return &ValidationError{Name: "wallet_id", err: fmt.Errorf(`ent: validator failed for field "Ledger.wallet_id": %w`, err)}
 		}
 	}
+	if _, ok := lc.mutation.AffectedBalance(); !ok {
+		return &ValidationError{Name: "affected_balance", err: errors.New(`ent: missing required field "Ledger.affected_balance"`)}
+	}
+	if v, ok := lc.mutation.AffectedBalance(); ok {
+		if err := ledger.AffectedBalanceValidator(v); err != nil {
+			return &ValidationError{Name: "affected_balance", err: fmt.Errorf(`ent: validator failed for field "Ledger.affected_balance": %w`, err)}
+		}
+	}
 	if _, ok := lc.mutation.Debit(); !ok {
 		return &ValidationError{Name: "debit", err: errors.New(`ent: missing required field "Ledger.debit"`)}
 	}
@@ -354,6 +368,10 @@ func (lc *LedgerCreate) createSpec() (*Ledger, *sqlgraph.CreateSpec) {
 		_spec.SetField(ledger.FieldDeletedAt, field.TypeTime, value)
 		_node.DeletedAt = &value
 	}
+	if value, ok := lc.mutation.AffectedBalance(); ok {
+		_spec.SetField(ledger.FieldAffectedBalance, field.TypeEnum, value)
+		_node.AffectedBalance = value
+	}
 	if value, ok := lc.mutation.Debit(); ok {
 		_spec.SetField(ledger.FieldDebit, field.TypeInt64, value)
 		_node.Debit = value
@@ -376,7 +394,7 @@ func (lc *LedgerCreate) createSpec() (*Ledger, *sqlgraph.CreateSpec) {
 	}
 	if nodes := lc.mutation.TransactionIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
+			Rel:     sqlgraph.O2O,
 			Inverse: true,
 			Table:   ledger.TransactionTable,
 			Columns: []string{ledger.TransactionColumn},
@@ -546,6 +564,18 @@ func (u *LedgerUpsert) SetWalletID(v string) *LedgerUpsert {
 // UpdateWalletID sets the "wallet_id" field to the value that was provided on create.
 func (u *LedgerUpsert) UpdateWalletID() *LedgerUpsert {
 	u.SetExcluded(ledger.FieldWalletID)
+	return u
+}
+
+// SetAffectedBalance sets the "affected_balance" field.
+func (u *LedgerUpsert) SetAffectedBalance(v ledger.AffectedBalance) *LedgerUpsert {
+	u.Set(ledger.FieldAffectedBalance, v)
+	return u
+}
+
+// UpdateAffectedBalance sets the "affected_balance" field to the value that was provided on create.
+func (u *LedgerUpsert) UpdateAffectedBalance() *LedgerUpsert {
+	u.SetExcluded(ledger.FieldAffectedBalance)
 	return u
 }
 
@@ -765,6 +795,20 @@ func (u *LedgerUpsertOne) SetWalletID(v string) *LedgerUpsertOne {
 func (u *LedgerUpsertOne) UpdateWalletID() *LedgerUpsertOne {
 	return u.Update(func(s *LedgerUpsert) {
 		s.UpdateWalletID()
+	})
+}
+
+// SetAffectedBalance sets the "affected_balance" field.
+func (u *LedgerUpsertOne) SetAffectedBalance(v ledger.AffectedBalance) *LedgerUpsertOne {
+	return u.Update(func(s *LedgerUpsert) {
+		s.SetAffectedBalance(v)
+	})
+}
+
+// UpdateAffectedBalance sets the "affected_balance" field to the value that was provided on create.
+func (u *LedgerUpsertOne) UpdateAffectedBalance() *LedgerUpsertOne {
+	return u.Update(func(s *LedgerUpsert) {
+		s.UpdateAffectedBalance()
 	})
 }
 
@@ -1165,6 +1209,20 @@ func (u *LedgerUpsertBulk) SetWalletID(v string) *LedgerUpsertBulk {
 func (u *LedgerUpsertBulk) UpdateWalletID() *LedgerUpsertBulk {
 	return u.Update(func(s *LedgerUpsert) {
 		s.UpdateWalletID()
+	})
+}
+
+// SetAffectedBalance sets the "affected_balance" field.
+func (u *LedgerUpsertBulk) SetAffectedBalance(v ledger.AffectedBalance) *LedgerUpsertBulk {
+	return u.Update(func(s *LedgerUpsert) {
+		s.SetAffectedBalance(v)
+	})
+}
+
+// UpdateAffectedBalance sets the "affected_balance" field to the value that was provided on create.
+func (u *LedgerUpsertBulk) UpdateAffectedBalance() *LedgerUpsertBulk {
+	return u.Update(func(s *LedgerUpsert) {
+		s.UpdateAffectedBalance()
 	})
 }
 

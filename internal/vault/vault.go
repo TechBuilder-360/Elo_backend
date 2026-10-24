@@ -8,53 +8,57 @@ import (
 )
 
 func (s *Service) CreateVault(ctx context.Context, ownerID string) (*Vault, error) {
+	return s.CreateVaultWithType(ctx, ownerID, string(Treasury))
+}
+
+func (s *Service) CreateVaultWithType(ctx context.Context, ownerID, vaultType string) (*Vault, error) {
 	logger := log.LoggerInContext(ctx)
 
-	vault, err := s.repo.Create(ctx, ownerID)
+	v, err := s.repo.CreateWithType(ctx, ownerID, vaultType)
 	if err != nil {
 		logger.WithError(err).Error("failed to create vault")
 		return nil, errors.New(errors.ErrFailed, "something went wrong")
 	}
 
 	return &Vault{
-		ID:     vault.ID,
-		Type:   string(vault.Type),
-		Status: string(vault.Status),
+		ID:     v.ID,
+		Type:   string(v.Type),
+		Status: string(v.Status),
 	}, nil
 }
 
 func (s *Service) GetVault(ctx context.Context, id string) (*Vault, error) {
 	logger := log.LoggerInContext(ctx)
 
-	vault, err := s.repo.GetByID(ctx, id)
+	v, err := s.repo.GetByID(ctx, id)
 	if err != nil {
 		logger.WithError(err).Error("failed to fetch vault")
 		return nil, errors.New(errors.ErrFailed, "something went wrong")
 	}
 
 	return &Vault{
-		ID:     vault.ID,
-		Type:   string(vault.Type),
-		Status: string(vault.Status),
+		ID:     v.ID,
+		Type:   string(v.Type),
+		Status: string(v.Status),
 	}, nil
 }
 
 func (s *Service) GetOwnerVault(ctx context.Context, ownerID, vaultType string) (*Vault, error) {
 	logger := log.LoggerInContext(ctx)
 
-	vault, err := s.repo.GetByOwner(ctx, ownerID, vaultType)
+	v, err := s.repo.GetByOwner(ctx, ownerID, vaultType)
 	if err != nil {
 		logger.WithError(err).Error("failed to fetch vault")
 		return nil, errors.New(errors.ErrFailed, "something went wrong")
 	}
 
-	if vault == nil {
-		return s.CreateVault(ctx, ownerID)
+	if v == nil {
+		return s.CreateVaultWithType(ctx, ownerID, vaultType)
 	}
 
 	return &Vault{
-		ID:     vault.ID,
-		Type:   string(vault.Type),
-		Status: string(vault.Status),
+		ID:     v.ID,
+		Type:   string(v.Type),
+		Status: string(v.Status),
 	}, nil
 }

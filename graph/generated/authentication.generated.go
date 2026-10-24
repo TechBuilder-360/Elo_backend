@@ -21,15 +21,16 @@ type MutationResolver interface {
 	Login(ctx context.Context, input model.Login) (*model.LoginResponse, error)
 	RequestOtp(ctx context.Context, input *model.RequestOtp) (*model.OTPResponse, error)
 	Logout(ctx context.Context) (bool, error)
+	NubanTransfer(ctx context.Context, input model.TransferPayload) (*model.TransferResult, error)
+	GenerateStaticNubanAccount(ctx context.Context, walletType *model.WalletType) (*model.StaticNubanAccountDetail, error)
+	GenerateStablecoin(ctx context.Context, input *model.StablecoinInput) (*model.Stablecoin, error)
+	AddBusinessWallet(ctx context.Context, currencyCode string, walletType model.WalletType) (*model.Wallet, error)
+	UpdateProfile(ctx context.Context, input model.UpdateProfileInput) (*model.User, error)
+	RequestUserVerification(ctx context.Context, input model.VerificationPayload) (model.VerificationResponse, error)
 	RegisterBusiness(ctx context.Context, input model.RegisterBusinessInput) (bool, error)
 	UploadDocument(ctx context.Context, input model.DocumentInput) (bool, error)
 	DeleteDocument(ctx context.Context, input model.RemoveDocumentInput) (bool, error)
 	BusinessDetail(ctx context.Context, input model.BusinessDetail) (bool, error)
-	GenerateStaticNubanAccount(ctx context.Context) (*model.StaticNubanAccountDetail, error)
-	GenerateDynamicNubanAccount(ctx context.Context) (*model.DynamicNubanAccountDetail, error)
-	GenerateStablecoin(ctx context.Context, input *model.StablecoinInput) (*model.Stablecoin, error)
-	RequestUserVerification(ctx context.Context, input model.VerificationPayload) (model.VerificationResponse, error)
-	AddBusinessWallet(ctx context.Context, currencyCode string, walletType model.WalletType) (*model.Wallet, error)
 }
 
 // endregion ************************** generated!.gotpl **************************
@@ -85,10 +86,32 @@ func (ec *executionContext) field_Mutation_generateStablecoin_args(ctx context.C
 	return args, nil
 }
 
+func (ec *executionContext) field_Mutation_generateStaticNubanAccount_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "wallet_type", ec.unmarshalOWalletType2ᚖgithubᚗcomᚋToflexᚋdirectory_v2ᚋgraphᚋmodelᚐWalletType)
+	if err != nil {
+		return nil, err
+	}
+	args["wallet_type"] = arg0
+	return args, nil
+}
+
 func (ec *executionContext) field_Mutation_login_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
 	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input", ec.unmarshalNLogin2githubᚗcomᚋToflexᚋdirectory_v2ᚋgraphᚋmodelᚐLogin)
+	if err != nil {
+		return nil, err
+	}
+	args["input"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_nubanTransfer_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input", ec.unmarshalNTransferPayload2githubᚗcomᚋToflexᚋdirectory_v2ᚋgraphᚋmodelᚐTransferPayload)
 	if err != nil {
 		return nil, err
 	}
@@ -133,6 +156,17 @@ func (ec *executionContext) field_Mutation_requestUserVerification_args(ctx cont
 	var err error
 	args := map[string]any{}
 	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input", ec.unmarshalNverificationPayload2githubᚗcomᚋToflexᚋdirectory_v2ᚋgraphᚋmodelᚐVerificationPayload)
+	if err != nil {
+		return nil, err
+	}
+	args["input"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_updateProfile_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input", ec.unmarshalNUpdateProfileInput2githubᚗcomᚋToflexᚋdirectory_v2ᚋgraphᚋmodelᚐUpdateProfileInput)
 	if err != nil {
 		return nil, err
 	}
@@ -247,6 +281,8 @@ func (ec *executionContext) fieldContext_LoginResponse_user(_ context.Context, f
 				return ec.fieldContext_User_last_name(ctx, field)
 			case "display_name":
 				return ec.fieldContext_User_display_name(ctx, field)
+			case "email_address":
+				return ec.fieldContext_User_email_address(ctx, field)
 			case "is_verified":
 				return ec.fieldContext_User_is_verified(ctx, field)
 			case "disabled":
@@ -437,6 +473,410 @@ func (ec *executionContext) fieldContext_Mutation_logout(_ context.Context, fiel
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return nil, errors.New("field of type Boolean does not have child fields")
 		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_nubanTransfer(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Mutation_nubanTransfer,
+		func(ctx context.Context) (any, error) {
+			fc := graphql.GetFieldContext(ctx)
+			return ec.resolvers.Mutation().NubanTransfer(ctx, fc.Args["input"].(model.TransferPayload))
+		},
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			directive0 := next
+
+			directive1 := func(ctx context.Context) (any, error) {
+				role, err := ec.unmarshalNRole2githubᚗcomᚋToflexᚋdirectory_v2ᚋgraphᚋmodelᚐRole0(ctx, "ADMIN")
+				if err != nil {
+					var zeroVal *model.TransferResult
+					return zeroVal, err
+				}
+				if ec.directives.HasRole == nil {
+					var zeroVal *model.TransferResult
+					return zeroVal, errors.New("directive hasRole is not implemented")
+				}
+				return ec.directives.HasRole(ctx, nil, directive0, role)
+			}
+
+			next = directive1
+			return next
+		},
+		ec.marshalNTransferResult2ᚖgithubᚗcomᚋToflexᚋdirectory_v2ᚋgraphᚋmodelᚐTransferResult,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Mutation_nubanTransfer(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_TransferResult_id(ctx, field)
+			case "status":
+				return ec.fieldContext_TransferResult_status(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type TransferResult", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_nubanTransfer_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_generateStaticNubanAccount(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Mutation_generateStaticNubanAccount,
+		func(ctx context.Context) (any, error) {
+			fc := graphql.GetFieldContext(ctx)
+			return ec.resolvers.Mutation().GenerateStaticNubanAccount(ctx, fc.Args["wallet_type"].(*model.WalletType))
+		},
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			directive0 := next
+
+			directive1 := func(ctx context.Context) (any, error) {
+				role, err := ec.unmarshalNRole2githubᚗcomᚋToflexᚋdirectory_v2ᚋgraphᚋmodelᚐRole0(ctx, "ADMIN")
+				if err != nil {
+					var zeroVal *model.StaticNubanAccountDetail
+					return zeroVal, err
+				}
+				if ec.directives.HasRole == nil {
+					var zeroVal *model.StaticNubanAccountDetail
+					return zeroVal, errors.New("directive hasRole is not implemented")
+				}
+				return ec.directives.HasRole(ctx, nil, directive0, role)
+			}
+
+			next = directive1
+			return next
+		},
+		ec.marshalNStaticNubanAccountDetail2ᚖgithubᚗcomᚋToflexᚋdirectory_v2ᚋgraphᚋmodelᚐStaticNubanAccountDetail,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Mutation_generateStaticNubanAccount(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "account_number":
+				return ec.fieldContext_StaticNubanAccountDetail_account_number(ctx, field)
+			case "account_name":
+				return ec.fieldContext_StaticNubanAccountDetail_account_name(ctx, field)
+			case "bank_name":
+				return ec.fieldContext_StaticNubanAccountDetail_bank_name(ctx, field)
+			case "currency":
+				return ec.fieldContext_StaticNubanAccountDetail_currency(ctx, field)
+			case "id":
+				return ec.fieldContext_StaticNubanAccountDetail_id(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type StaticNubanAccountDetail", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_generateStaticNubanAccount_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_generateStablecoin(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Mutation_generateStablecoin,
+		func(ctx context.Context) (any, error) {
+			fc := graphql.GetFieldContext(ctx)
+			return ec.resolvers.Mutation().GenerateStablecoin(ctx, fc.Args["input"].(*model.StablecoinInput))
+		},
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			directive0 := next
+
+			directive1 := func(ctx context.Context) (any, error) {
+				role, err := ec.unmarshalNRole2githubᚗcomᚋToflexᚋdirectory_v2ᚋgraphᚋmodelᚐRole0(ctx, "ADMIN")
+				if err != nil {
+					var zeroVal *model.Stablecoin
+					return zeroVal, err
+				}
+				if ec.directives.HasRole == nil {
+					var zeroVal *model.Stablecoin
+					return zeroVal, errors.New("directive hasRole is not implemented")
+				}
+				return ec.directives.HasRole(ctx, nil, directive0, role)
+			}
+
+			next = directive1
+			return next
+		},
+		ec.marshalNStablecoin2ᚖgithubᚗcomᚋToflexᚋdirectory_v2ᚋgraphᚋmodelᚐStablecoin,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Mutation_generateStablecoin(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_Stablecoin_id(ctx, field)
+			case "address":
+				return ec.fieldContext_Stablecoin_address(ctx, field)
+			case "coin":
+				return ec.fieldContext_Stablecoin_coin(ctx, field)
+			case "network":
+				return ec.fieldContext_Stablecoin_network(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Stablecoin", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_generateStablecoin_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_add_business_wallet(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Mutation_add_business_wallet,
+		func(ctx context.Context) (any, error) {
+			fc := graphql.GetFieldContext(ctx)
+			return ec.resolvers.Mutation().AddBusinessWallet(ctx, fc.Args["currency_code"].(string), fc.Args["wallet_type"].(model.WalletType))
+		},
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			directive0 := next
+
+			directive1 := func(ctx context.Context) (any, error) {
+				role, err := ec.unmarshalNRole2githubᚗcomᚋToflexᚋdirectory_v2ᚋgraphᚋmodelᚐRole0(ctx, "ADMIN")
+				if err != nil {
+					var zeroVal *model.Wallet
+					return zeroVal, err
+				}
+				if ec.directives.HasRole == nil {
+					var zeroVal *model.Wallet
+					return zeroVal, errors.New("directive hasRole is not implemented")
+				}
+				return ec.directives.HasRole(ctx, nil, directive0, role)
+			}
+
+			next = directive1
+			return next
+		},
+		ec.marshalNWallet2ᚖgithubᚗcomᚋToflexᚋdirectory_v2ᚋgraphᚋmodelᚐWallet,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Mutation_add_business_wallet(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "available_balance":
+				return ec.fieldContext_Wallet_available_balance(ctx, field)
+			case "ledger_balance":
+				return ec.fieldContext_Wallet_ledger_balance(ctx, field)
+			case "holding_balance":
+				return ec.fieldContext_Wallet_holding_balance(ctx, field)
+			case "id":
+				return ec.fieldContext_Wallet_id(ctx, field)
+			case "currency":
+				return ec.fieldContext_Wallet_currency(ctx, field)
+			case "active":
+				return ec.fieldContext_Wallet_active(ctx, field)
+			case "is_fiat":
+				return ec.fieldContext_Wallet_is_fiat(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Wallet", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_add_business_wallet_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_updateProfile(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Mutation_updateProfile,
+		func(ctx context.Context) (any, error) {
+			fc := graphql.GetFieldContext(ctx)
+			return ec.resolvers.Mutation().UpdateProfile(ctx, fc.Args["input"].(model.UpdateProfileInput))
+		},
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			directive0 := next
+
+			directive1 := func(ctx context.Context) (any, error) {
+				if ec.directives.AuthUser == nil {
+					var zeroVal *model.User
+					return zeroVal, errors.New("directive authUser is not implemented")
+				}
+				return ec.directives.AuthUser(ctx, nil, directive0)
+			}
+
+			next = directive1
+			return next
+		},
+		ec.marshalNUser2ᚖgithubᚗcomᚋToflexᚋdirectory_v2ᚋgraphᚋmodelᚐUser,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Mutation_updateProfile(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "first_name":
+				return ec.fieldContext_User_first_name(ctx, field)
+			case "last_name":
+				return ec.fieldContext_User_last_name(ctx, field)
+			case "display_name":
+				return ec.fieldContext_User_display_name(ctx, field)
+			case "email_address":
+				return ec.fieldContext_User_email_address(ctx, field)
+			case "is_verified":
+				return ec.fieldContext_User_is_verified(ctx, field)
+			case "disabled":
+				return ec.fieldContext_User_disabled(ctx, field)
+			case "disable_reason":
+				return ec.fieldContext_User_disable_reason(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type User", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_updateProfile_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_requestUserVerification(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Mutation_requestUserVerification,
+		func(ctx context.Context) (any, error) {
+			fc := graphql.GetFieldContext(ctx)
+			return ec.resolvers.Mutation().RequestUserVerification(ctx, fc.Args["input"].(model.VerificationPayload))
+		},
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			directive0 := next
+
+			directive1 := func(ctx context.Context) (any, error) {
+				if ec.directives.AuthUser == nil {
+					var zeroVal model.VerificationResponse
+					return zeroVal, errors.New("directive authUser is not implemented")
+				}
+				return ec.directives.AuthUser(ctx, nil, directive0)
+			}
+
+			next = directive1
+			return next
+		},
+		ec.marshalNVerificationResponse2githubᚗcomᚋToflexᚋdirectory_v2ᚋgraphᚋmodelᚐVerificationResponse,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Mutation_requestUserVerification(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type VerificationResponse does not have child fields")
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_requestUserVerification_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
 	}
 	return fc, nil
 }
@@ -666,326 +1106,6 @@ func (ec *executionContext) fieldContext_Mutation_businessDetail(ctx context.Con
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
 	if fc.Args, err = ec.field_Mutation_businessDetail_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
-		ec.Error(ctx, err)
-		return fc, err
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _Mutation_generateStaticNubanAccount(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	return graphql.ResolveField(
-		ctx,
-		ec.OperationContext,
-		field,
-		ec.fieldContext_Mutation_generateStaticNubanAccount,
-		func(ctx context.Context) (any, error) {
-			return ec.resolvers.Mutation().GenerateStaticNubanAccount(ctx)
-		},
-		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
-			directive0 := next
-
-			directive1 := func(ctx context.Context) (any, error) {
-				role, err := ec.unmarshalNRole2githubᚗcomᚋToflexᚋdirectory_v2ᚋgraphᚋmodelᚐRole0(ctx, "ADMIN")
-				if err != nil {
-					var zeroVal *model.StaticNubanAccountDetail
-					return zeroVal, err
-				}
-				if ec.directives.HasRole == nil {
-					var zeroVal *model.StaticNubanAccountDetail
-					return zeroVal, errors.New("directive hasRole is not implemented")
-				}
-				return ec.directives.HasRole(ctx, nil, directive0, role)
-			}
-
-			next = directive1
-			return next
-		},
-		ec.marshalNStaticNubanAccountDetail2ᚖgithubᚗcomᚋToflexᚋdirectory_v2ᚋgraphᚋmodelᚐStaticNubanAccountDetail,
-		true,
-		true,
-	)
-}
-
-func (ec *executionContext) fieldContext_Mutation_generateStaticNubanAccount(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Mutation",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "account_number":
-				return ec.fieldContext_StaticNubanAccountDetail_account_number(ctx, field)
-			case "account_name":
-				return ec.fieldContext_StaticNubanAccountDetail_account_name(ctx, field)
-			case "bank_name":
-				return ec.fieldContext_StaticNubanAccountDetail_bank_name(ctx, field)
-			case "currency":
-				return ec.fieldContext_StaticNubanAccountDetail_currency(ctx, field)
-			case "id":
-				return ec.fieldContext_StaticNubanAccountDetail_id(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type StaticNubanAccountDetail", field.Name)
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _Mutation_generateDynamicNubanAccount(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	return graphql.ResolveField(
-		ctx,
-		ec.OperationContext,
-		field,
-		ec.fieldContext_Mutation_generateDynamicNubanAccount,
-		func(ctx context.Context) (any, error) {
-			return ec.resolvers.Mutation().GenerateDynamicNubanAccount(ctx)
-		},
-		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
-			directive0 := next
-
-			directive1 := func(ctx context.Context) (any, error) {
-				role, err := ec.unmarshalNRole2githubᚗcomᚋToflexᚋdirectory_v2ᚋgraphᚋmodelᚐRole0(ctx, "ADMIN")
-				if err != nil {
-					var zeroVal *model.DynamicNubanAccountDetail
-					return zeroVal, err
-				}
-				if ec.directives.HasRole == nil {
-					var zeroVal *model.DynamicNubanAccountDetail
-					return zeroVal, errors.New("directive hasRole is not implemented")
-				}
-				return ec.directives.HasRole(ctx, nil, directive0, role)
-			}
-
-			next = directive1
-			return next
-		},
-		ec.marshalNDynamicNubanAccountDetail2ᚖgithubᚗcomᚋToflexᚋdirectory_v2ᚋgraphᚋmodelᚐDynamicNubanAccountDetail,
-		true,
-		true,
-	)
-}
-
-func (ec *executionContext) fieldContext_Mutation_generateDynamicNubanAccount(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Mutation",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "account_number":
-				return ec.fieldContext_DynamicNubanAccountDetail_account_number(ctx, field)
-			case "account_name":
-				return ec.fieldContext_DynamicNubanAccountDetail_account_name(ctx, field)
-			case "bank_name":
-				return ec.fieldContext_DynamicNubanAccountDetail_bank_name(ctx, field)
-			case "Amount":
-				return ec.fieldContext_DynamicNubanAccountDetail_Amount(ctx, field)
-			case "currency":
-				return ec.fieldContext_DynamicNubanAccountDetail_currency(ctx, field)
-			case "expiration_date":
-				return ec.fieldContext_DynamicNubanAccountDetail_expiration_date(ctx, field)
-			case "id":
-				return ec.fieldContext_DynamicNubanAccountDetail_id(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type DynamicNubanAccountDetail", field.Name)
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _Mutation_generateStablecoin(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	return graphql.ResolveField(
-		ctx,
-		ec.OperationContext,
-		field,
-		ec.fieldContext_Mutation_generateStablecoin,
-		func(ctx context.Context) (any, error) {
-			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Mutation().GenerateStablecoin(ctx, fc.Args["input"].(*model.StablecoinInput))
-		},
-		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
-			directive0 := next
-
-			directive1 := func(ctx context.Context) (any, error) {
-				role, err := ec.unmarshalNRole2githubᚗcomᚋToflexᚋdirectory_v2ᚋgraphᚋmodelᚐRole0(ctx, "ADMIN")
-				if err != nil {
-					var zeroVal *model.Stablecoin
-					return zeroVal, err
-				}
-				if ec.directives.HasRole == nil {
-					var zeroVal *model.Stablecoin
-					return zeroVal, errors.New("directive hasRole is not implemented")
-				}
-				return ec.directives.HasRole(ctx, nil, directive0, role)
-			}
-
-			next = directive1
-			return next
-		},
-		ec.marshalNStablecoin2ᚖgithubᚗcomᚋToflexᚋdirectory_v2ᚋgraphᚋmodelᚐStablecoin,
-		true,
-		true,
-	)
-}
-
-func (ec *executionContext) fieldContext_Mutation_generateStablecoin(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Mutation",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "id":
-				return ec.fieldContext_Stablecoin_id(ctx, field)
-			case "address":
-				return ec.fieldContext_Stablecoin_address(ctx, field)
-			case "coin":
-				return ec.fieldContext_Stablecoin_coin(ctx, field)
-			case "network":
-				return ec.fieldContext_Stablecoin_network(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type Stablecoin", field.Name)
-		},
-	}
-	defer func() {
-		if r := recover(); r != nil {
-			err = ec.Recover(ctx, r)
-			ec.Error(ctx, err)
-		}
-	}()
-	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Mutation_generateStablecoin_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
-		ec.Error(ctx, err)
-		return fc, err
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _Mutation_requestUserVerification(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	return graphql.ResolveField(
-		ctx,
-		ec.OperationContext,
-		field,
-		ec.fieldContext_Mutation_requestUserVerification,
-		func(ctx context.Context) (any, error) {
-			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Mutation().RequestUserVerification(ctx, fc.Args["input"].(model.VerificationPayload))
-		},
-		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
-			directive0 := next
-
-			directive1 := func(ctx context.Context) (any, error) {
-				if ec.directives.AuthUser == nil {
-					var zeroVal model.VerificationResponse
-					return zeroVal, errors.New("directive authUser is not implemented")
-				}
-				return ec.directives.AuthUser(ctx, nil, directive0)
-			}
-
-			next = directive1
-			return next
-		},
-		ec.marshalNVerificationResponse2githubᚗcomᚋToflexᚋdirectory_v2ᚋgraphᚋmodelᚐVerificationResponse,
-		true,
-		true,
-	)
-}
-
-func (ec *executionContext) fieldContext_Mutation_requestUserVerification(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Mutation",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type VerificationResponse does not have child fields")
-		},
-	}
-	defer func() {
-		if r := recover(); r != nil {
-			err = ec.Recover(ctx, r)
-			ec.Error(ctx, err)
-		}
-	}()
-	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Mutation_requestUserVerification_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
-		ec.Error(ctx, err)
-		return fc, err
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _Mutation_add_business_wallet(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	return graphql.ResolveField(
-		ctx,
-		ec.OperationContext,
-		field,
-		ec.fieldContext_Mutation_add_business_wallet,
-		func(ctx context.Context) (any, error) {
-			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Mutation().AddBusinessWallet(ctx, fc.Args["currency_code"].(string), fc.Args["wallet_type"].(model.WalletType))
-		},
-		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
-			directive0 := next
-
-			directive1 := func(ctx context.Context) (any, error) {
-				role, err := ec.unmarshalNRole2githubᚗcomᚋToflexᚋdirectory_v2ᚋgraphᚋmodelᚐRole0(ctx, "ADMIN")
-				if err != nil {
-					var zeroVal *model.Wallet
-					return zeroVal, err
-				}
-				if ec.directives.HasRole == nil {
-					var zeroVal *model.Wallet
-					return zeroVal, errors.New("directive hasRole is not implemented")
-				}
-				return ec.directives.HasRole(ctx, nil, directive0, role)
-			}
-
-			next = directive1
-			return next
-		},
-		ec.marshalNWallet2ᚖgithubᚗcomᚋToflexᚋdirectory_v2ᚋgraphᚋmodelᚐWallet,
-		true,
-		true,
-	)
-}
-
-func (ec *executionContext) fieldContext_Mutation_add_business_wallet(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Mutation",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "available_balance":
-				return ec.fieldContext_Wallet_available_balance(ctx, field)
-			case "ledger_balance":
-				return ec.fieldContext_Wallet_ledger_balance(ctx, field)
-			case "holding_balance":
-				return ec.fieldContext_Wallet_holding_balance(ctx, field)
-			case "id":
-				return ec.fieldContext_Wallet_id(ctx, field)
-			case "currency":
-				return ec.fieldContext_Wallet_currency(ctx, field)
-			case "active":
-				return ec.fieldContext_Wallet_active(ctx, field)
-			case "is_fiat":
-				return ec.fieldContext_Wallet_is_fiat(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type Wallet", field.Name)
-		},
-	}
-	defer func() {
-		if r := recover(); r != nil {
-			err = ec.Recover(ctx, r)
-			ec.Error(ctx, err)
-		}
-	}()
-	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Mutation_add_business_wallet_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
 	}
@@ -1274,6 +1394,48 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
+		case "nubanTransfer":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_nubanTransfer(ctx, field)
+			})
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "generateStaticNubanAccount":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_generateStaticNubanAccount(ctx, field)
+			})
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "generateStablecoin":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_generateStablecoin(ctx, field)
+			})
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "add_business_wallet":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_add_business_wallet(ctx, field)
+			})
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "updateProfile":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_updateProfile(ctx, field)
+			})
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "requestUserVerification":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_requestUserVerification(ctx, field)
+			})
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
 		case "registerBusiness":
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Mutation_registerBusiness(ctx, field)
@@ -1298,41 +1460,6 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 		case "businessDetail":
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Mutation_businessDetail(ctx, field)
-			})
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
-		case "generateStaticNubanAccount":
-			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
-				return ec._Mutation_generateStaticNubanAccount(ctx, field)
-			})
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
-		case "generateDynamicNubanAccount":
-			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
-				return ec._Mutation_generateDynamicNubanAccount(ctx, field)
-			})
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
-		case "generateStablecoin":
-			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
-				return ec._Mutation_generateStablecoin(ctx, field)
-			})
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
-		case "requestUserVerification":
-			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
-				return ec._Mutation_requestUserVerification(ctx, field)
-			})
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
-		case "add_business_wallet":
-			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
-				return ec._Mutation_add_business_wallet(ctx, field)
 			})
 			if out.Values[i] == graphql.Null {
 				out.Invalids++

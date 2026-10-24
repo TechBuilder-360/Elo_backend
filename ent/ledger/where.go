@@ -455,6 +455,26 @@ func WalletIDContainsFold(v string) predicate.Ledger {
 	return predicate.Ledger(sql.FieldContainsFold(FieldWalletID, v))
 }
 
+// AffectedBalanceEQ applies the EQ predicate on the "affected_balance" field.
+func AffectedBalanceEQ(v AffectedBalance) predicate.Ledger {
+	return predicate.Ledger(sql.FieldEQ(FieldAffectedBalance, v))
+}
+
+// AffectedBalanceNEQ applies the NEQ predicate on the "affected_balance" field.
+func AffectedBalanceNEQ(v AffectedBalance) predicate.Ledger {
+	return predicate.Ledger(sql.FieldNEQ(FieldAffectedBalance, v))
+}
+
+// AffectedBalanceIn applies the In predicate on the "affected_balance" field.
+func AffectedBalanceIn(vs ...AffectedBalance) predicate.Ledger {
+	return predicate.Ledger(sql.FieldIn(FieldAffectedBalance, vs...))
+}
+
+// AffectedBalanceNotIn applies the NotIn predicate on the "affected_balance" field.
+func AffectedBalanceNotIn(vs ...AffectedBalance) predicate.Ledger {
+	return predicate.Ledger(sql.FieldNotIn(FieldAffectedBalance, vs...))
+}
+
 // DebitEQ applies the EQ predicate on the "debit" field.
 func DebitEQ(v int64) predicate.Ledger {
 	return predicate.Ledger(sql.FieldEQ(FieldDebit, v))
@@ -630,7 +650,7 @@ func HasTransaction() predicate.Ledger {
 	return predicate.Ledger(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, TransactionTable, TransactionColumn),
+			sqlgraph.Edge(sqlgraph.O2O, true, TransactionTable, TransactionColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})

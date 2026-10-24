@@ -90,24 +90,9 @@ func RecipientAccountNumber(v string) predicate.NubanTransfer {
 	return predicate.NubanTransfer(sql.FieldEQ(FieldRecipientAccountNumber, v))
 }
 
-// SenderAccountName applies equality check predicate on the "sender_account_name" field. It's identical to SenderAccountNameEQ.
-func SenderAccountName(v string) predicate.NubanTransfer {
-	return predicate.NubanTransfer(sql.FieldEQ(FieldSenderAccountName, v))
-}
-
-// SenderAccountNumber applies equality check predicate on the "sender_account_number" field. It's identical to SenderAccountNumberEQ.
-func SenderAccountNumber(v string) predicate.NubanTransfer {
-	return predicate.NubanTransfer(sql.FieldEQ(FieldSenderAccountNumber, v))
-}
-
-// SenderBankName applies equality check predicate on the "sender_bank_name" field. It's identical to SenderBankNameEQ.
-func SenderBankName(v string) predicate.NubanTransfer {
-	return predicate.NubanTransfer(sql.FieldEQ(FieldSenderBankName, v))
-}
-
-// SenderBankCode applies equality check predicate on the "sender_bank_code" field. It's identical to SenderBankCodeEQ.
-func SenderBankCode(v string) predicate.NubanTransfer {
-	return predicate.NubanTransfer(sql.FieldEQ(FieldSenderBankCode, v))
+// NubanBankID applies equality check predicate on the "nuban_bank_id" field. It's identical to NubanBankIDEQ.
+func NubanBankID(v string) predicate.NubanTransfer {
+	return predicate.NubanTransfer(sql.FieldEQ(FieldNubanBankID, v))
 }
 
 // Amount applies equality check predicate on the "amount" field. It's identical to AmountEQ.
@@ -390,264 +375,69 @@ func RecipientAccountNumberContainsFold(v string) predicate.NubanTransfer {
 	return predicate.NubanTransfer(sql.FieldContainsFold(FieldRecipientAccountNumber, v))
 }
 
-// SenderAccountNameEQ applies the EQ predicate on the "sender_account_name" field.
-func SenderAccountNameEQ(v string) predicate.NubanTransfer {
-	return predicate.NubanTransfer(sql.FieldEQ(FieldSenderAccountName, v))
+// NubanBankIDEQ applies the EQ predicate on the "nuban_bank_id" field.
+func NubanBankIDEQ(v string) predicate.NubanTransfer {
+	return predicate.NubanTransfer(sql.FieldEQ(FieldNubanBankID, v))
 }
 
-// SenderAccountNameNEQ applies the NEQ predicate on the "sender_account_name" field.
-func SenderAccountNameNEQ(v string) predicate.NubanTransfer {
-	return predicate.NubanTransfer(sql.FieldNEQ(FieldSenderAccountName, v))
+// NubanBankIDNEQ applies the NEQ predicate on the "nuban_bank_id" field.
+func NubanBankIDNEQ(v string) predicate.NubanTransfer {
+	return predicate.NubanTransfer(sql.FieldNEQ(FieldNubanBankID, v))
 }
 
-// SenderAccountNameIn applies the In predicate on the "sender_account_name" field.
-func SenderAccountNameIn(vs ...string) predicate.NubanTransfer {
-	return predicate.NubanTransfer(sql.FieldIn(FieldSenderAccountName, vs...))
+// NubanBankIDIn applies the In predicate on the "nuban_bank_id" field.
+func NubanBankIDIn(vs ...string) predicate.NubanTransfer {
+	return predicate.NubanTransfer(sql.FieldIn(FieldNubanBankID, vs...))
 }
 
-// SenderAccountNameNotIn applies the NotIn predicate on the "sender_account_name" field.
-func SenderAccountNameNotIn(vs ...string) predicate.NubanTransfer {
-	return predicate.NubanTransfer(sql.FieldNotIn(FieldSenderAccountName, vs...))
+// NubanBankIDNotIn applies the NotIn predicate on the "nuban_bank_id" field.
+func NubanBankIDNotIn(vs ...string) predicate.NubanTransfer {
+	return predicate.NubanTransfer(sql.FieldNotIn(FieldNubanBankID, vs...))
 }
 
-// SenderAccountNameGT applies the GT predicate on the "sender_account_name" field.
-func SenderAccountNameGT(v string) predicate.NubanTransfer {
-	return predicate.NubanTransfer(sql.FieldGT(FieldSenderAccountName, v))
+// NubanBankIDGT applies the GT predicate on the "nuban_bank_id" field.
+func NubanBankIDGT(v string) predicate.NubanTransfer {
+	return predicate.NubanTransfer(sql.FieldGT(FieldNubanBankID, v))
 }
 
-// SenderAccountNameGTE applies the GTE predicate on the "sender_account_name" field.
-func SenderAccountNameGTE(v string) predicate.NubanTransfer {
-	return predicate.NubanTransfer(sql.FieldGTE(FieldSenderAccountName, v))
+// NubanBankIDGTE applies the GTE predicate on the "nuban_bank_id" field.
+func NubanBankIDGTE(v string) predicate.NubanTransfer {
+	return predicate.NubanTransfer(sql.FieldGTE(FieldNubanBankID, v))
 }
 
-// SenderAccountNameLT applies the LT predicate on the "sender_account_name" field.
-func SenderAccountNameLT(v string) predicate.NubanTransfer {
-	return predicate.NubanTransfer(sql.FieldLT(FieldSenderAccountName, v))
+// NubanBankIDLT applies the LT predicate on the "nuban_bank_id" field.
+func NubanBankIDLT(v string) predicate.NubanTransfer {
+	return predicate.NubanTransfer(sql.FieldLT(FieldNubanBankID, v))
 }
 
-// SenderAccountNameLTE applies the LTE predicate on the "sender_account_name" field.
-func SenderAccountNameLTE(v string) predicate.NubanTransfer {
-	return predicate.NubanTransfer(sql.FieldLTE(FieldSenderAccountName, v))
+// NubanBankIDLTE applies the LTE predicate on the "nuban_bank_id" field.
+func NubanBankIDLTE(v string) predicate.NubanTransfer {
+	return predicate.NubanTransfer(sql.FieldLTE(FieldNubanBankID, v))
 }
 
-// SenderAccountNameContains applies the Contains predicate on the "sender_account_name" field.
-func SenderAccountNameContains(v string) predicate.NubanTransfer {
-	return predicate.NubanTransfer(sql.FieldContains(FieldSenderAccountName, v))
+// NubanBankIDContains applies the Contains predicate on the "nuban_bank_id" field.
+func NubanBankIDContains(v string) predicate.NubanTransfer {
+	return predicate.NubanTransfer(sql.FieldContains(FieldNubanBankID, v))
 }
 
-// SenderAccountNameHasPrefix applies the HasPrefix predicate on the "sender_account_name" field.
-func SenderAccountNameHasPrefix(v string) predicate.NubanTransfer {
-	return predicate.NubanTransfer(sql.FieldHasPrefix(FieldSenderAccountName, v))
+// NubanBankIDHasPrefix applies the HasPrefix predicate on the "nuban_bank_id" field.
+func NubanBankIDHasPrefix(v string) predicate.NubanTransfer {
+	return predicate.NubanTransfer(sql.FieldHasPrefix(FieldNubanBankID, v))
 }
 
-// SenderAccountNameHasSuffix applies the HasSuffix predicate on the "sender_account_name" field.
-func SenderAccountNameHasSuffix(v string) predicate.NubanTransfer {
-	return predicate.NubanTransfer(sql.FieldHasSuffix(FieldSenderAccountName, v))
+// NubanBankIDHasSuffix applies the HasSuffix predicate on the "nuban_bank_id" field.
+func NubanBankIDHasSuffix(v string) predicate.NubanTransfer {
+	return predicate.NubanTransfer(sql.FieldHasSuffix(FieldNubanBankID, v))
 }
 
-// SenderAccountNameEqualFold applies the EqualFold predicate on the "sender_account_name" field.
-func SenderAccountNameEqualFold(v string) predicate.NubanTransfer {
-	return predicate.NubanTransfer(sql.FieldEqualFold(FieldSenderAccountName, v))
+// NubanBankIDEqualFold applies the EqualFold predicate on the "nuban_bank_id" field.
+func NubanBankIDEqualFold(v string) predicate.NubanTransfer {
+	return predicate.NubanTransfer(sql.FieldEqualFold(FieldNubanBankID, v))
 }
 
-// SenderAccountNameContainsFold applies the ContainsFold predicate on the "sender_account_name" field.
-func SenderAccountNameContainsFold(v string) predicate.NubanTransfer {
-	return predicate.NubanTransfer(sql.FieldContainsFold(FieldSenderAccountName, v))
-}
-
-// SenderAccountNumberEQ applies the EQ predicate on the "sender_account_number" field.
-func SenderAccountNumberEQ(v string) predicate.NubanTransfer {
-	return predicate.NubanTransfer(sql.FieldEQ(FieldSenderAccountNumber, v))
-}
-
-// SenderAccountNumberNEQ applies the NEQ predicate on the "sender_account_number" field.
-func SenderAccountNumberNEQ(v string) predicate.NubanTransfer {
-	return predicate.NubanTransfer(sql.FieldNEQ(FieldSenderAccountNumber, v))
-}
-
-// SenderAccountNumberIn applies the In predicate on the "sender_account_number" field.
-func SenderAccountNumberIn(vs ...string) predicate.NubanTransfer {
-	return predicate.NubanTransfer(sql.FieldIn(FieldSenderAccountNumber, vs...))
-}
-
-// SenderAccountNumberNotIn applies the NotIn predicate on the "sender_account_number" field.
-func SenderAccountNumberNotIn(vs ...string) predicate.NubanTransfer {
-	return predicate.NubanTransfer(sql.FieldNotIn(FieldSenderAccountNumber, vs...))
-}
-
-// SenderAccountNumberGT applies the GT predicate on the "sender_account_number" field.
-func SenderAccountNumberGT(v string) predicate.NubanTransfer {
-	return predicate.NubanTransfer(sql.FieldGT(FieldSenderAccountNumber, v))
-}
-
-// SenderAccountNumberGTE applies the GTE predicate on the "sender_account_number" field.
-func SenderAccountNumberGTE(v string) predicate.NubanTransfer {
-	return predicate.NubanTransfer(sql.FieldGTE(FieldSenderAccountNumber, v))
-}
-
-// SenderAccountNumberLT applies the LT predicate on the "sender_account_number" field.
-func SenderAccountNumberLT(v string) predicate.NubanTransfer {
-	return predicate.NubanTransfer(sql.FieldLT(FieldSenderAccountNumber, v))
-}
-
-// SenderAccountNumberLTE applies the LTE predicate on the "sender_account_number" field.
-func SenderAccountNumberLTE(v string) predicate.NubanTransfer {
-	return predicate.NubanTransfer(sql.FieldLTE(FieldSenderAccountNumber, v))
-}
-
-// SenderAccountNumberContains applies the Contains predicate on the "sender_account_number" field.
-func SenderAccountNumberContains(v string) predicate.NubanTransfer {
-	return predicate.NubanTransfer(sql.FieldContains(FieldSenderAccountNumber, v))
-}
-
-// SenderAccountNumberHasPrefix applies the HasPrefix predicate on the "sender_account_number" field.
-func SenderAccountNumberHasPrefix(v string) predicate.NubanTransfer {
-	return predicate.NubanTransfer(sql.FieldHasPrefix(FieldSenderAccountNumber, v))
-}
-
-// SenderAccountNumberHasSuffix applies the HasSuffix predicate on the "sender_account_number" field.
-func SenderAccountNumberHasSuffix(v string) predicate.NubanTransfer {
-	return predicate.NubanTransfer(sql.FieldHasSuffix(FieldSenderAccountNumber, v))
-}
-
-// SenderAccountNumberEqualFold applies the EqualFold predicate on the "sender_account_number" field.
-func SenderAccountNumberEqualFold(v string) predicate.NubanTransfer {
-	return predicate.NubanTransfer(sql.FieldEqualFold(FieldSenderAccountNumber, v))
-}
-
-// SenderAccountNumberContainsFold applies the ContainsFold predicate on the "sender_account_number" field.
-func SenderAccountNumberContainsFold(v string) predicate.NubanTransfer {
-	return predicate.NubanTransfer(sql.FieldContainsFold(FieldSenderAccountNumber, v))
-}
-
-// SenderBankNameEQ applies the EQ predicate on the "sender_bank_name" field.
-func SenderBankNameEQ(v string) predicate.NubanTransfer {
-	return predicate.NubanTransfer(sql.FieldEQ(FieldSenderBankName, v))
-}
-
-// SenderBankNameNEQ applies the NEQ predicate on the "sender_bank_name" field.
-func SenderBankNameNEQ(v string) predicate.NubanTransfer {
-	return predicate.NubanTransfer(sql.FieldNEQ(FieldSenderBankName, v))
-}
-
-// SenderBankNameIn applies the In predicate on the "sender_bank_name" field.
-func SenderBankNameIn(vs ...string) predicate.NubanTransfer {
-	return predicate.NubanTransfer(sql.FieldIn(FieldSenderBankName, vs...))
-}
-
-// SenderBankNameNotIn applies the NotIn predicate on the "sender_bank_name" field.
-func SenderBankNameNotIn(vs ...string) predicate.NubanTransfer {
-	return predicate.NubanTransfer(sql.FieldNotIn(FieldSenderBankName, vs...))
-}
-
-// SenderBankNameGT applies the GT predicate on the "sender_bank_name" field.
-func SenderBankNameGT(v string) predicate.NubanTransfer {
-	return predicate.NubanTransfer(sql.FieldGT(FieldSenderBankName, v))
-}
-
-// SenderBankNameGTE applies the GTE predicate on the "sender_bank_name" field.
-func SenderBankNameGTE(v string) predicate.NubanTransfer {
-	return predicate.NubanTransfer(sql.FieldGTE(FieldSenderBankName, v))
-}
-
-// SenderBankNameLT applies the LT predicate on the "sender_bank_name" field.
-func SenderBankNameLT(v string) predicate.NubanTransfer {
-	return predicate.NubanTransfer(sql.FieldLT(FieldSenderBankName, v))
-}
-
-// SenderBankNameLTE applies the LTE predicate on the "sender_bank_name" field.
-func SenderBankNameLTE(v string) predicate.NubanTransfer {
-	return predicate.NubanTransfer(sql.FieldLTE(FieldSenderBankName, v))
-}
-
-// SenderBankNameContains applies the Contains predicate on the "sender_bank_name" field.
-func SenderBankNameContains(v string) predicate.NubanTransfer {
-	return predicate.NubanTransfer(sql.FieldContains(FieldSenderBankName, v))
-}
-
-// SenderBankNameHasPrefix applies the HasPrefix predicate on the "sender_bank_name" field.
-func SenderBankNameHasPrefix(v string) predicate.NubanTransfer {
-	return predicate.NubanTransfer(sql.FieldHasPrefix(FieldSenderBankName, v))
-}
-
-// SenderBankNameHasSuffix applies the HasSuffix predicate on the "sender_bank_name" field.
-func SenderBankNameHasSuffix(v string) predicate.NubanTransfer {
-	return predicate.NubanTransfer(sql.FieldHasSuffix(FieldSenderBankName, v))
-}
-
-// SenderBankNameEqualFold applies the EqualFold predicate on the "sender_bank_name" field.
-func SenderBankNameEqualFold(v string) predicate.NubanTransfer {
-	return predicate.NubanTransfer(sql.FieldEqualFold(FieldSenderBankName, v))
-}
-
-// SenderBankNameContainsFold applies the ContainsFold predicate on the "sender_bank_name" field.
-func SenderBankNameContainsFold(v string) predicate.NubanTransfer {
-	return predicate.NubanTransfer(sql.FieldContainsFold(FieldSenderBankName, v))
-}
-
-// SenderBankCodeEQ applies the EQ predicate on the "sender_bank_code" field.
-func SenderBankCodeEQ(v string) predicate.NubanTransfer {
-	return predicate.NubanTransfer(sql.FieldEQ(FieldSenderBankCode, v))
-}
-
-// SenderBankCodeNEQ applies the NEQ predicate on the "sender_bank_code" field.
-func SenderBankCodeNEQ(v string) predicate.NubanTransfer {
-	return predicate.NubanTransfer(sql.FieldNEQ(FieldSenderBankCode, v))
-}
-
-// SenderBankCodeIn applies the In predicate on the "sender_bank_code" field.
-func SenderBankCodeIn(vs ...string) predicate.NubanTransfer {
-	return predicate.NubanTransfer(sql.FieldIn(FieldSenderBankCode, vs...))
-}
-
-// SenderBankCodeNotIn applies the NotIn predicate on the "sender_bank_code" field.
-func SenderBankCodeNotIn(vs ...string) predicate.NubanTransfer {
-	return predicate.NubanTransfer(sql.FieldNotIn(FieldSenderBankCode, vs...))
-}
-
-// SenderBankCodeGT applies the GT predicate on the "sender_bank_code" field.
-func SenderBankCodeGT(v string) predicate.NubanTransfer {
-	return predicate.NubanTransfer(sql.FieldGT(FieldSenderBankCode, v))
-}
-
-// SenderBankCodeGTE applies the GTE predicate on the "sender_bank_code" field.
-func SenderBankCodeGTE(v string) predicate.NubanTransfer {
-	return predicate.NubanTransfer(sql.FieldGTE(FieldSenderBankCode, v))
-}
-
-// SenderBankCodeLT applies the LT predicate on the "sender_bank_code" field.
-func SenderBankCodeLT(v string) predicate.NubanTransfer {
-	return predicate.NubanTransfer(sql.FieldLT(FieldSenderBankCode, v))
-}
-
-// SenderBankCodeLTE applies the LTE predicate on the "sender_bank_code" field.
-func SenderBankCodeLTE(v string) predicate.NubanTransfer {
-	return predicate.NubanTransfer(sql.FieldLTE(FieldSenderBankCode, v))
-}
-
-// SenderBankCodeContains applies the Contains predicate on the "sender_bank_code" field.
-func SenderBankCodeContains(v string) predicate.NubanTransfer {
-	return predicate.NubanTransfer(sql.FieldContains(FieldSenderBankCode, v))
-}
-
-// SenderBankCodeHasPrefix applies the HasPrefix predicate on the "sender_bank_code" field.
-func SenderBankCodeHasPrefix(v string) predicate.NubanTransfer {
-	return predicate.NubanTransfer(sql.FieldHasPrefix(FieldSenderBankCode, v))
-}
-
-// SenderBankCodeHasSuffix applies the HasSuffix predicate on the "sender_bank_code" field.
-func SenderBankCodeHasSuffix(v string) predicate.NubanTransfer {
-	return predicate.NubanTransfer(sql.FieldHasSuffix(FieldSenderBankCode, v))
-}
-
-// SenderBankCodeEqualFold applies the EqualFold predicate on the "sender_bank_code" field.
-func SenderBankCodeEqualFold(v string) predicate.NubanTransfer {
-	return predicate.NubanTransfer(sql.FieldEqualFold(FieldSenderBankCode, v))
-}
-
-// SenderBankCodeContainsFold applies the ContainsFold predicate on the "sender_bank_code" field.
-func SenderBankCodeContainsFold(v string) predicate.NubanTransfer {
-	return predicate.NubanTransfer(sql.FieldContainsFold(FieldSenderBankCode, v))
+// NubanBankIDContainsFold applies the ContainsFold predicate on the "nuban_bank_id" field.
+func NubanBankIDContainsFold(v string) predicate.NubanTransfer {
+	return predicate.NubanTransfer(sql.FieldContainsFold(FieldNubanBankID, v))
 }
 
 // AmountEQ applies the EQ predicate on the "amount" field.
@@ -745,6 +535,16 @@ func SessionIDHasSuffix(v string) predicate.NubanTransfer {
 	return predicate.NubanTransfer(sql.FieldHasSuffix(FieldSessionID, v))
 }
 
+// SessionIDIsNil applies the IsNil predicate on the "session_id" field.
+func SessionIDIsNil() predicate.NubanTransfer {
+	return predicate.NubanTransfer(sql.FieldIsNull(FieldSessionID))
+}
+
+// SessionIDNotNil applies the NotNil predicate on the "session_id" field.
+func SessionIDNotNil() predicate.NubanTransfer {
+	return predicate.NubanTransfer(sql.FieldNotNull(FieldSessionID))
+}
+
 // SessionIDEqualFold applies the EqualFold predicate on the "session_id" field.
 func SessionIDEqualFold(v string) predicate.NubanTransfer {
 	return predicate.NubanTransfer(sql.FieldEqualFold(FieldSessionID, v))
@@ -808,6 +608,16 @@ func ProviderReferenceHasPrefix(v string) predicate.NubanTransfer {
 // ProviderReferenceHasSuffix applies the HasSuffix predicate on the "provider_reference" field.
 func ProviderReferenceHasSuffix(v string) predicate.NubanTransfer {
 	return predicate.NubanTransfer(sql.FieldHasSuffix(FieldProviderReference, v))
+}
+
+// ProviderReferenceIsNil applies the IsNil predicate on the "provider_reference" field.
+func ProviderReferenceIsNil() predicate.NubanTransfer {
+	return predicate.NubanTransfer(sql.FieldIsNull(FieldProviderReference))
+}
+
+// ProviderReferenceNotNil applies the NotNil predicate on the "provider_reference" field.
+func ProviderReferenceNotNil() predicate.NubanTransfer {
+	return predicate.NubanTransfer(sql.FieldNotNull(FieldProviderReference))
 }
 
 // ProviderReferenceEqualFold applies the EqualFold predicate on the "provider_reference" field.
@@ -900,6 +710,52 @@ func HasTransaction() predicate.NubanTransfer {
 func HasTransactionWith(preds ...predicate.Transaction) predicate.NubanTransfer {
 	return predicate.NubanTransfer(func(s *sql.Selector) {
 		step := newTransactionStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasNubanBank applies the HasEdge predicate on the "nuban_bank" edge.
+func HasNubanBank() predicate.NubanTransfer {
+	return predicate.NubanTransfer(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, NubanBankTable, NubanBankColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasNubanBankWith applies the HasEdge predicate on the "nuban_bank" edge with a given conditions (other predicates).
+func HasNubanBankWith(preds ...predicate.NubanBank) predicate.NubanTransfer {
+	return predicate.NubanTransfer(func(s *sql.Selector) {
+		step := newNubanBankStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasBeneficiaries applies the HasEdge predicate on the "beneficiaries" edge.
+func HasBeneficiaries() predicate.NubanTransfer {
+	return predicate.NubanTransfer(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, true, BeneficiariesTable, BeneficiariesPrimaryKey...),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasBeneficiariesWith applies the HasEdge predicate on the "beneficiaries" edge with a given conditions (other predicates).
+func HasBeneficiariesWith(preds ...predicate.NubanBeneficiary) predicate.NubanTransfer {
+	return predicate.NubanTransfer(func(s *sql.Selector) {
+		step := newBeneficiariesStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)

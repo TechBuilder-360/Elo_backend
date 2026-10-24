@@ -3,6 +3,9 @@ package wallet
 import (
 	"context"
 
+	"github.com/Toflex/directory_v2/ent"
+	"github.com/Toflex/directory_v2/ent/ledgerowner"
+	"github.com/Toflex/directory_v2/ent/vault"
 	"github.com/Toflex/directory_v2/graph/model"
 	"github.com/Toflex/directory_v2/pkg/errors"
 	"github.com/Toflex/directory_v2/pkg/log"
@@ -110,4 +113,186 @@ func (s *service) GetWalletOwnerWithID(ctx context.Context, ownerID, walletID st
 
 	result := wallet.ToWallet()
 	return &result, nil
+}
+
+func (s *service) ValidateWalletForDebit(ctx context.Context, payload *ValidateWalletPayload) (*WalletResponse, error) {
+	logger := log.LoggerInContext(ctx)
+
+	repo := s.repo
+	if payload.DBTransaction != nil {
+		repo = s.repo.WithTransaction(payload.DBTransaction)
+	}
+
+	walletType := GetWalletType(payload.WalletType)
+
+	overview, err := repo.GetOwnerWalletOverview(ctx, payload.OwnerID, walletType)
+	if err != nil {
+		logger.WithError(err).Error("failed to get wallet overview for pre-debit action")
+		return nil, errors.New(errors.ErrFailed, "request failed")
+	}
+
+	if overview == nil {
+		logger.WithField("payload", payload).Error("ledger owner not found")
+		return nil, errors.New(errors.ErrNotFound, "ledger owner not found")
+	}
+
+	// 2. Ledger owner is active
+	if overview.LedgerOwnerStatus != ledgerowner.StatusACTIVE.String() {
+		logger.WithField("owner_status", overview.LedgerOwnerStatus).Error("wallet owner is not active")
+		return nil, errors.New(errors.ErrFailed, "ledger owner is not active")
+	}
+
+	// 3. Vault is active
+	if overview.VaultStatus != vault.StatusACTIVE.String() {
+		logger.WithField("vault_status", overview.VaultStatus).Error("vault is not active")
+		return nil, errors.New(errors.ErrFailed, "vault is not active")
+	}
+
+	// 1. Wallet is active
+	w, err := repo.GetWalletWithAtomicLock(ctx, payload.DBTransaction, payload.OwnerID, string(walletType), payload.Currency)
+	if err != nil {
+		return nil, err
+	}
+
+	if w == nil {
+		return nil, errors.New(errors.ErrNotFound, "wallet not found")
+	}
+
+	if !w.Active {
+		logger.Error("wallet is not active")
+		return nil, errors.New(errors.ErrFailed, "wallet is not active")
+	}
+
+	return w, nil
+}
+
+func (s *service) ValidateWalletForCredit(ctx context.Context, payload *ValidateWalletPayload) (*WalletResponse, error) {
+	logger := log.LoggerInContext(ctx)
+
+	repo := s.repo
+	if payload.DBTransaction != nil {
+		repo = s.repo.WithTransaction(payload.DBTransaction)
+	}
+
+	walletType := GetWalletType(payload.WalletType)
+
+	overview, err := repo.GetOwnerWalletOverview(ctx, payload.OwnerID, walletType)
+	if err != nil {
+		logger.WithError(err).Error("failed to get wallet overview for pre-credit action")
+		return nil, errors.New(errors.ErrFailed, "request failed")
+	}
+
+	if overview == nil {
+		logger.WithField("payload", payload).Error("ledger owner not found")
+		return nil, errors.New(errors.ErrNotFound, "ledger owner not found")
+	}
+
+	// Check conditions:
+	// 1. Wallet is active
+	// 2. Ledger owner is active
+	// 3. Vault is active
+	ownerActive := overview.LedgerOwnerStatus == ledgerowner.StatusACTIVE.String()
+	vaultActive := overview.VaultStatus == vault.StatusACTIVE.String()
+
+	walletActive := false
+	var targetWallet *WalletResponse
+
+	if ownerActive && vaultActive {
+		w, err := repo.GetWalletWithAtomicLock(ctx, payload.DBTransaction, payload.OwnerID, string(walletType), payload.Currency)
+		if err == nil && w != nil && w.Active {
+			walletActive = true
+			targetWallet = w
+		}
+	}
+
+	// If all conditions are met, return target wallet
+	if walletActive && ownerActive && vaultActive {
+		return targetWallet, nil
+	}
+
+	// If any of the conditions is not met, credit the user's Vault with type 'FROZEN'
+	logger.WithFields(map[string]interface{}{
+		"wallet_active": walletActive,
+		"owner_active":  ownerActive,
+		"vault_active":  vaultActive,
+		"owner_id":      payload.OwnerID,
+	}).Warning("credit condition not met; routing credit to user's FROZEN vault")
+
+	frozenWallet, err := s.getOrCreateFrozenWallet(ctx, payload.DBTransaction, payload.OwnerID, payload.Currency)
+	if err != nil {
+		logger.WithError(err).Error("failed to get or create frozen wallet for credit")
+		return nil, err
+	}
+
+	return frozenWallet, nil
+}
+
+func (s *service) getOrCreateFrozenWallet(ctx context.Context, tx *ent.Tx, ownerID string, currencyCode types.CurrencyCode) (*WalletResponse, error) {
+	logger := log.LoggerInContext(ctx)
+
+	repo := s.repo
+	if tx != nil {
+		repo = s.repo.WithTransaction(tx)
+	}
+
+	// 1. Check if wallet already exists in FROZEN vault
+	var w *WalletResponse
+	var err error
+	if tx != nil {
+		w, err = repo.GetWalletWithAtomicLock(ctx, tx, ownerID, string(FrozenWalletType), currencyCode)
+	} else {
+		w, err = repo.GetWalletWithCurrency(ctx, ownerID, string(FrozenWalletType), currencyCode)
+	}
+	if err != nil {
+		logger.WithError(err).Error("failed to query frozen wallet")
+		return nil, errors.New(errors.ErrFailed, "request failed")
+	}
+	if w != nil {
+		return w, nil
+	}
+
+	// 2. Ensure FROZEN vault exists
+	var vaultID string
+	overview, err := repo.GetOwnerWalletOverview(ctx, ownerID, FrozenWalletType)
+	if err != nil {
+		logger.WithError(err).Error("failed to get frozen vault overview")
+		return nil, errors.New(errors.ErrFailed, "request failed")
+	}
+
+	if overview != nil && overview.VaultID != "" {
+		vaultID = overview.VaultID
+	} else {
+		createdVault, err := repo.CreateVault(ctx, ownerID, FrozenWalletType)
+		if err != nil {
+			logger.WithError(err).Error("failed to create frozen vault")
+			return nil, errors.New(errors.ErrFailed, "request failed")
+		}
+		vaultID = createdVault.ID
+	}
+
+	// 3. Get currency details
+	curr, err := s.currencyService.GetCurrencyByCode(ctx, currencyCode)
+	if err != nil {
+		logger.WithError(err).Error("unable to fetch currency for frozen wallet")
+		return nil, errors.New(errors.ErrFailed, "request failed")
+	}
+
+	// 4. Create wallet in FROZEN vault
+	newWallet, err := repo.Create(ctx, &createWallet{
+		VaultID:  vaultID,
+		Currency: curr,
+	})
+	if err != nil {
+		logger.WithError(err).Error("unable to create wallet in frozen vault")
+		return nil, errors.New(errors.ErrFailed, "request failed")
+	}
+
+	if tx != nil {
+		lockedW, err := repo.GetWalletWithAtomicLock(ctx, tx, ownerID, string(FrozenWalletType), currencyCode)
+		if err == nil && lockedW != nil {
+			return lockedW, nil
+		}
+	}
+
+	return newWallet, nil
 }

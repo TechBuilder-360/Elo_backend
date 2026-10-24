@@ -9,6 +9,7 @@ import (
 	"math"
 
 	"entgo.io/ent"
+	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
@@ -22,6 +23,7 @@ import (
 	"github.com/Toflex/directory_v2/ent/predicate"
 	"github.com/Toflex/directory_v2/ent/requestverification"
 	"github.com/Toflex/directory_v2/ent/social"
+	"github.com/Toflex/directory_v2/ent/subscription"
 	"github.com/Toflex/directory_v2/ent/user"
 	"github.com/Toflex/directory_v2/ent/verification"
 )
@@ -43,6 +45,8 @@ type BusinessQuery struct {
 	withLocations            *BusinessLocationQuery
 	withKybMessages          *KYBMessageQuery
 	withOwner                *LedgerOwnerQuery
+	withSubscriptions        *SubscriptionQuery
+	modifiers                []func(*sql.Selector)
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -299,6 +303,28 @@ func (bq *BusinessQuery) QueryOwner() *LedgerOwnerQuery {
 	return query
 }
 
+// QuerySubscriptions chains the current query on the "subscriptions" edge.
+func (bq *BusinessQuery) QuerySubscriptions() *SubscriptionQuery {
+	query := (&SubscriptionClient{config: bq.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := bq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := bq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(business.Table, business.FieldID, selector),
+			sqlgraph.To(subscription.Table, subscription.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, business.SubscriptionsTable, business.SubscriptionsColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(bq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
 // First returns the first Business entity from the query.
 // Returns a *NotFoundError when no Business was found.
 func (bq *BusinessQuery) First(ctx context.Context) (*Business, error) {
@@ -501,6 +527,7 @@ func (bq *BusinessQuery) Clone() *BusinessQuery {
 		withLocations:            bq.withLocations.Clone(),
 		withKybMessages:          bq.withKybMessages.Clone(),
 		withOwner:                bq.withOwner.Clone(),
+		withSubscriptions:        bq.withSubscriptions.Clone(),
 		// clone intermediate query.
 		sql:  bq.sql.Clone(),
 		path: bq.path,
@@ -617,6 +644,17 @@ func (bq *BusinessQuery) WithOwner(opts ...func(*LedgerOwnerQuery)) *BusinessQue
 	return bq
 }
 
+// WithSubscriptions tells the query-builder to eager-load the nodes that are connected to
+// the "subscriptions" edge. The optional arguments are used to configure the query builder of the edge.
+func (bq *BusinessQuery) WithSubscriptions(opts ...func(*SubscriptionQuery)) *BusinessQuery {
+	query := (&SubscriptionClient{config: bq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	bq.withSubscriptions = query
+	return bq
+}
+
 // GroupBy is used to group vertices by one or more fields/columns.
 // It is often used with aggregate functions, like: count, max, mean, min, sum.
 //
@@ -695,7 +733,7 @@ func (bq *BusinessQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Bus
 	var (
 		nodes       = []*Business{}
 		_spec       = bq.querySpec()
-		loadedTypes = [10]bool{
+		loadedTypes = [11]bool{
 			bq.withSocials != nil,
 			bq.withServices != nil,
 			bq.withManages != nil,
@@ -706,6 +744,7 @@ func (bq *BusinessQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Bus
 			bq.withLocations != nil,
 			bq.withKybMessages != nil,
 			bq.withOwner != nil,
+			bq.withSubscriptions != nil,
 		}
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
@@ -716,6 +755,9 @@ func (bq *BusinessQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Bus
 		nodes = append(nodes, node)
 		node.Edges.loadedTypes = loadedTypes
 		return node.assignValues(columns, values)
+	}
+	if len(bq.modifiers) > 0 {
+		_spec.Modifiers = bq.modifiers
 	}
 	for i := range hooks {
 		hooks[i](ctx, _spec)
@@ -795,6 +837,13 @@ func (bq *BusinessQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Bus
 	if query := bq.withOwner; query != nil {
 		if err := bq.loadOwner(ctx, query, nodes, nil,
 			func(n *Business, e *LedgerOwner) { n.Edges.Owner = e }); err != nil {
+			return nil, err
+		}
+	}
+	if query := bq.withSubscriptions; query != nil {
+		if err := bq.loadSubscriptions(ctx, query, nodes,
+			func(n *Business) { n.Edges.Subscriptions = []*Subscription{} },
+			func(n *Business, e *Subscription) { n.Edges.Subscriptions = append(n.Edges.Subscriptions, e) }); err != nil {
 			return nil, err
 		}
 	}
@@ -1166,9 +1215,43 @@ func (bq *BusinessQuery) loadOwner(ctx context.Context, query *LedgerOwnerQuery,
 	}
 	return nil
 }
+func (bq *BusinessQuery) loadSubscriptions(ctx context.Context, query *SubscriptionQuery, nodes []*Business, init func(*Business), assign func(*Business, *Subscription)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[string]*Business)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	query.withFKs = true
+	query.Where(predicate.Subscription(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(business.SubscriptionsColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.business_subscriptions
+		if fk == nil {
+			return fmt.Errorf(`foreign-key "business_subscriptions" is nil for node %v`, n.ID)
+		}
+		node, ok := nodeids[*fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "business_subscriptions" returned %v for node %v`, *fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
 
 func (bq *BusinessQuery) sqlCount(ctx context.Context) (int, error) {
 	_spec := bq.querySpec()
+	if len(bq.modifiers) > 0 {
+		_spec.Modifiers = bq.modifiers
+	}
 	_spec.Node.Columns = bq.ctx.Fields
 	if len(bq.ctx.Fields) > 0 {
 		_spec.Unique = bq.ctx.Unique != nil && *bq.ctx.Unique
@@ -1234,6 +1317,9 @@ func (bq *BusinessQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	if bq.ctx.Unique != nil && *bq.ctx.Unique {
 		selector.Distinct()
 	}
+	for _, m := range bq.modifiers {
+		m(selector)
+	}
 	for _, p := range bq.predicates {
 		p(selector)
 	}
@@ -1249,6 +1335,32 @@ func (bq *BusinessQuery) sqlQuery(ctx context.Context) *sql.Selector {
 		selector.Limit(*limit)
 	}
 	return selector
+}
+
+// ForUpdate locks the selected rows against concurrent updates, and prevent them from being
+// updated, deleted or "selected ... for update" by other sessions, until the transaction is
+// either committed or rolled-back.
+func (bq *BusinessQuery) ForUpdate(opts ...sql.LockOption) *BusinessQuery {
+	if bq.driver.Dialect() == dialect.Postgres {
+		bq.Unique(false)
+	}
+	bq.modifiers = append(bq.modifiers, func(s *sql.Selector) {
+		s.ForUpdate(opts...)
+	})
+	return bq
+}
+
+// ForShare behaves similarly to ForUpdate, except that it acquires a shared mode lock
+// on any rows that are read. Other sessions can read the rows, but cannot modify them
+// until your transaction commits.
+func (bq *BusinessQuery) ForShare(opts ...sql.LockOption) *BusinessQuery {
+	if bq.driver.Dialect() == dialect.Postgres {
+		bq.Unique(false)
+	}
+	bq.modifiers = append(bq.modifiers, func(s *sql.Selector) {
+		s.ForShare(opts...)
+	})
+	return bq
 }
 
 // BusinessGroupBy is the group-by builder for Business entities.

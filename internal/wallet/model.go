@@ -7,6 +7,8 @@ import (
 
 const (
 	TreasuryWalletType WalletType = "TREASURY"
+	FrozenWalletType   WalletType = "FROZEN"
+	HoldingWalletType  WalletType = "HOLDING"
 )
 
 type WalletResponse struct {
@@ -23,4 +25,11 @@ type WalletResponse struct {
 type createWallet struct {
 	VaultID  string
 	Currency *currency.Currency
+}
+
+type OwnerVaultOverview struct {
+	LedgerOwnerStatus string
+	VaultStatus       string
+	VaultID           string
+	Wallet            *WalletResponse
 }

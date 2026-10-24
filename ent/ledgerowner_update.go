@@ -13,6 +13,7 @@ import (
 	"entgo.io/ent/schema/field"
 	"github.com/Toflex/directory_v2/ent/business"
 	"github.com/Toflex/directory_v2/ent/ledgerowner"
+	"github.com/Toflex/directory_v2/ent/nubanbeneficiary"
 	"github.com/Toflex/directory_v2/ent/predicate"
 	"github.com/Toflex/directory_v2/ent/user"
 	"github.com/Toflex/directory_v2/ent/vault"
@@ -138,6 +139,21 @@ func (lou *LedgerOwnerUpdate) SetUser(u *User) *LedgerOwnerUpdate {
 	return lou.SetUserID(u.ID)
 }
 
+// AddNubanBeneficiaryIDs adds the "nuban_beneficiaries" edge to the NubanBeneficiary entity by IDs.
+func (lou *LedgerOwnerUpdate) AddNubanBeneficiaryIDs(ids ...string) *LedgerOwnerUpdate {
+	lou.mutation.AddNubanBeneficiaryIDs(ids...)
+	return lou
+}
+
+// AddNubanBeneficiaries adds the "nuban_beneficiaries" edges to the NubanBeneficiary entity.
+func (lou *LedgerOwnerUpdate) AddNubanBeneficiaries(n ...*NubanBeneficiary) *LedgerOwnerUpdate {
+	ids := make([]string, len(n))
+	for i := range n {
+		ids[i] = n[i].ID
+	}
+	return lou.AddNubanBeneficiaryIDs(ids...)
+}
+
 // Mutation returns the LedgerOwnerMutation object of the builder.
 func (lou *LedgerOwnerUpdate) Mutation() *LedgerOwnerMutation {
 	return lou.mutation
@@ -174,6 +190,27 @@ func (lou *LedgerOwnerUpdate) ClearBusiness() *LedgerOwnerUpdate {
 func (lou *LedgerOwnerUpdate) ClearUser() *LedgerOwnerUpdate {
 	lou.mutation.ClearUser()
 	return lou
+}
+
+// ClearNubanBeneficiaries clears all "nuban_beneficiaries" edges to the NubanBeneficiary entity.
+func (lou *LedgerOwnerUpdate) ClearNubanBeneficiaries() *LedgerOwnerUpdate {
+	lou.mutation.ClearNubanBeneficiaries()
+	return lou
+}
+
+// RemoveNubanBeneficiaryIDs removes the "nuban_beneficiaries" edge to NubanBeneficiary entities by IDs.
+func (lou *LedgerOwnerUpdate) RemoveNubanBeneficiaryIDs(ids ...string) *LedgerOwnerUpdate {
+	lou.mutation.RemoveNubanBeneficiaryIDs(ids...)
+	return lou
+}
+
+// RemoveNubanBeneficiaries removes "nuban_beneficiaries" edges to NubanBeneficiary entities.
+func (lou *LedgerOwnerUpdate) RemoveNubanBeneficiaries(n ...*NubanBeneficiary) *LedgerOwnerUpdate {
+	ids := make([]string, len(n))
+	for i := range n {
+		ids[i] = n[i].ID
+	}
+	return lou.RemoveNubanBeneficiaryIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -357,6 +394,51 @@ func (lou *LedgerOwnerUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	if lou.mutation.NubanBeneficiariesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   ledgerowner.NubanBeneficiariesTable,
+			Columns: []string{ledgerowner.NubanBeneficiariesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(nubanbeneficiary.FieldID, field.TypeString),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := lou.mutation.RemovedNubanBeneficiariesIDs(); len(nodes) > 0 && !lou.mutation.NubanBeneficiariesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   ledgerowner.NubanBeneficiariesTable,
+			Columns: []string{ledgerowner.NubanBeneficiariesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(nubanbeneficiary.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := lou.mutation.NubanBeneficiariesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   ledgerowner.NubanBeneficiariesTable,
+			Columns: []string{ledgerowner.NubanBeneficiariesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(nubanbeneficiary.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
 	if n, err = sqlgraph.UpdateNodes(ctx, lou.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{ledgerowner.Label}
@@ -484,6 +566,21 @@ func (louo *LedgerOwnerUpdateOne) SetUser(u *User) *LedgerOwnerUpdateOne {
 	return louo.SetUserID(u.ID)
 }
 
+// AddNubanBeneficiaryIDs adds the "nuban_beneficiaries" edge to the NubanBeneficiary entity by IDs.
+func (louo *LedgerOwnerUpdateOne) AddNubanBeneficiaryIDs(ids ...string) *LedgerOwnerUpdateOne {
+	louo.mutation.AddNubanBeneficiaryIDs(ids...)
+	return louo
+}
+
+// AddNubanBeneficiaries adds the "nuban_beneficiaries" edges to the NubanBeneficiary entity.
+func (louo *LedgerOwnerUpdateOne) AddNubanBeneficiaries(n ...*NubanBeneficiary) *LedgerOwnerUpdateOne {
+	ids := make([]string, len(n))
+	for i := range n {
+		ids[i] = n[i].ID
+	}
+	return louo.AddNubanBeneficiaryIDs(ids...)
+}
+
 // Mutation returns the LedgerOwnerMutation object of the builder.
 func (louo *LedgerOwnerUpdateOne) Mutation() *LedgerOwnerMutation {
 	return louo.mutation
@@ -520,6 +617,27 @@ func (louo *LedgerOwnerUpdateOne) ClearBusiness() *LedgerOwnerUpdateOne {
 func (louo *LedgerOwnerUpdateOne) ClearUser() *LedgerOwnerUpdateOne {
 	louo.mutation.ClearUser()
 	return louo
+}
+
+// ClearNubanBeneficiaries clears all "nuban_beneficiaries" edges to the NubanBeneficiary entity.
+func (louo *LedgerOwnerUpdateOne) ClearNubanBeneficiaries() *LedgerOwnerUpdateOne {
+	louo.mutation.ClearNubanBeneficiaries()
+	return louo
+}
+
+// RemoveNubanBeneficiaryIDs removes the "nuban_beneficiaries" edge to NubanBeneficiary entities by IDs.
+func (louo *LedgerOwnerUpdateOne) RemoveNubanBeneficiaryIDs(ids ...string) *LedgerOwnerUpdateOne {
+	louo.mutation.RemoveNubanBeneficiaryIDs(ids...)
+	return louo
+}
+
+// RemoveNubanBeneficiaries removes "nuban_beneficiaries" edges to NubanBeneficiary entities.
+func (louo *LedgerOwnerUpdateOne) RemoveNubanBeneficiaries(n ...*NubanBeneficiary) *LedgerOwnerUpdateOne {
+	ids := make([]string, len(n))
+	for i := range n {
+		ids[i] = n[i].ID
+	}
+	return louo.RemoveNubanBeneficiaryIDs(ids...)
 }
 
 // Where appends a list predicates to the LedgerOwnerUpdate builder.
@@ -726,6 +844,51 @@ func (louo *LedgerOwnerUpdateOne) sqlSave(ctx context.Context) (_node *LedgerOwn
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if louo.mutation.NubanBeneficiariesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   ledgerowner.NubanBeneficiariesTable,
+			Columns: []string{ledgerowner.NubanBeneficiariesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(nubanbeneficiary.FieldID, field.TypeString),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := louo.mutation.RemovedNubanBeneficiariesIDs(); len(nodes) > 0 && !louo.mutation.NubanBeneficiariesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   ledgerowner.NubanBeneficiariesTable,
+			Columns: []string{ledgerowner.NubanBeneficiariesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(nubanbeneficiary.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := louo.mutation.NubanBeneficiariesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   ledgerowner.NubanBeneficiariesTable,
+			Columns: []string{ledgerowner.NubanBeneficiariesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(nubanbeneficiary.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {

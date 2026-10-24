@@ -104,6 +104,20 @@ func (lu *LedgerUpdate) SetNillableWalletID(s *string) *LedgerUpdate {
 	return lu
 }
 
+// SetAffectedBalance sets the "affected_balance" field.
+func (lu *LedgerUpdate) SetAffectedBalance(lb ledger.AffectedBalance) *LedgerUpdate {
+	lu.mutation.SetAffectedBalance(lb)
+	return lu
+}
+
+// SetNillableAffectedBalance sets the "affected_balance" field if the given value is not nil.
+func (lu *LedgerUpdate) SetNillableAffectedBalance(lb *ledger.AffectedBalance) *LedgerUpdate {
+	if lb != nil {
+		lu.SetAffectedBalance(*lb)
+	}
+	return lu
+}
+
 // SetDebit sets the "debit" field.
 func (lu *LedgerUpdate) SetDebit(i int64) *LedgerUpdate {
 	lu.mutation.ResetDebit()
@@ -288,6 +302,11 @@ func (lu *LedgerUpdate) check() error {
 			return &ValidationError{Name: "wallet_id", err: fmt.Errorf(`ent: validator failed for field "Ledger.wallet_id": %w`, err)}
 		}
 	}
+	if v, ok := lu.mutation.AffectedBalance(); ok {
+		if err := ledger.AffectedBalanceValidator(v); err != nil {
+			return &ValidationError{Name: "affected_balance", err: fmt.Errorf(`ent: validator failed for field "Ledger.affected_balance": %w`, err)}
+		}
+	}
 	if lu.mutation.TransactionCleared() && len(lu.mutation.TransactionIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "Ledger.transaction"`)
 	}
@@ -318,6 +337,9 @@ func (lu *LedgerUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if lu.mutation.DeletedAtCleared() {
 		_spec.ClearField(ledger.FieldDeletedAt, field.TypeTime)
 	}
+	if value, ok := lu.mutation.AffectedBalance(); ok {
+		_spec.SetField(ledger.FieldAffectedBalance, field.TypeEnum, value)
+	}
 	if value, ok := lu.mutation.Debit(); ok {
 		_spec.SetField(ledger.FieldDebit, field.TypeInt64, value)
 	}
@@ -347,7 +369,7 @@ func (lu *LedgerUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if lu.mutation.TransactionCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
+			Rel:     sqlgraph.O2O,
 			Inverse: true,
 			Table:   ledger.TransactionTable,
 			Columns: []string{ledger.TransactionColumn},
@@ -360,7 +382,7 @@ func (lu *LedgerUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if nodes := lu.mutation.TransactionIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
+			Rel:     sqlgraph.O2O,
 			Inverse: true,
 			Table:   ledger.TransactionTable,
 			Columns: []string{ledger.TransactionColumn},
@@ -522,6 +544,20 @@ func (luo *LedgerUpdateOne) SetWalletID(s string) *LedgerUpdateOne {
 func (luo *LedgerUpdateOne) SetNillableWalletID(s *string) *LedgerUpdateOne {
 	if s != nil {
 		luo.SetWalletID(*s)
+	}
+	return luo
+}
+
+// SetAffectedBalance sets the "affected_balance" field.
+func (luo *LedgerUpdateOne) SetAffectedBalance(lb ledger.AffectedBalance) *LedgerUpdateOne {
+	luo.mutation.SetAffectedBalance(lb)
+	return luo
+}
+
+// SetNillableAffectedBalance sets the "affected_balance" field if the given value is not nil.
+func (luo *LedgerUpdateOne) SetNillableAffectedBalance(lb *ledger.AffectedBalance) *LedgerUpdateOne {
+	if lb != nil {
+		luo.SetAffectedBalance(*lb)
 	}
 	return luo
 }
@@ -723,6 +759,11 @@ func (luo *LedgerUpdateOne) check() error {
 			return &ValidationError{Name: "wallet_id", err: fmt.Errorf(`ent: validator failed for field "Ledger.wallet_id": %w`, err)}
 		}
 	}
+	if v, ok := luo.mutation.AffectedBalance(); ok {
+		if err := ledger.AffectedBalanceValidator(v); err != nil {
+			return &ValidationError{Name: "affected_balance", err: fmt.Errorf(`ent: validator failed for field "Ledger.affected_balance": %w`, err)}
+		}
+	}
 	if luo.mutation.TransactionCleared() && len(luo.mutation.TransactionIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "Ledger.transaction"`)
 	}
@@ -770,6 +811,9 @@ func (luo *LedgerUpdateOne) sqlSave(ctx context.Context) (_node *Ledger, err err
 	if luo.mutation.DeletedAtCleared() {
 		_spec.ClearField(ledger.FieldDeletedAt, field.TypeTime)
 	}
+	if value, ok := luo.mutation.AffectedBalance(); ok {
+		_spec.SetField(ledger.FieldAffectedBalance, field.TypeEnum, value)
+	}
 	if value, ok := luo.mutation.Debit(); ok {
 		_spec.SetField(ledger.FieldDebit, field.TypeInt64, value)
 	}
@@ -799,7 +843,7 @@ func (luo *LedgerUpdateOne) sqlSave(ctx context.Context) (_node *Ledger, err err
 	}
 	if luo.mutation.TransactionCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
+			Rel:     sqlgraph.O2O,
 			Inverse: true,
 			Table:   ledger.TransactionTable,
 			Columns: []string{ledger.TransactionColumn},
@@ -812,7 +856,7 @@ func (luo *LedgerUpdateOne) sqlSave(ctx context.Context) (_node *Ledger, err err
 	}
 	if nodes := luo.mutation.TransactionIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
+			Rel:     sqlgraph.O2O,
 			Inverse: true,
 			Table:   ledger.TransactionTable,
 			Columns: []string{ledger.TransactionColumn},

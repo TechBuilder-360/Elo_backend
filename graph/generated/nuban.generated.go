@@ -376,9 +376,129 @@ func (ec *executionContext) fieldContext_StaticNubanAccountDetail_id(_ context.C
 	return fc, nil
 }
 
+func (ec *executionContext) _TransferResult_id(ctx context.Context, field graphql.CollectedField, obj *model.TransferResult) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_TransferResult_id,
+		func(ctx context.Context) (any, error) {
+			return obj.ID, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_TransferResult_id(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "TransferResult",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _TransferResult_status(ctx context.Context, field graphql.CollectedField, obj *model.TransferResult) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_TransferResult_status,
+		func(ctx context.Context) (any, error) {
+			return obj.Status, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_TransferResult_status(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "TransferResult",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
 // endregion **************************** field.gotpl *****************************
 
 // region    **************************** input.gotpl *****************************
+
+func (ec *executionContext) unmarshalInputTransferPayload(ctx context.Context, obj any) (model.TransferPayload, error) {
+	var it model.TransferPayload
+	asMap := map[string]any{}
+	for k, v := range obj.(map[string]any) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"account_number", "bank_slug", "narration", "amount", "reference", "currency"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "account_number":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("account_number"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.AccountNumber = data
+		case "bank_slug":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("bank_slug"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.BankSlug = data
+		case "narration":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("narration"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Narration = data
+		case "amount":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("amount"))
+			data, err := ec.unmarshalNInt2int32(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Amount = data
+		case "reference":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("reference"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Reference = data
+		case "currency":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("currency"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Currency = data
+		}
+	}
+
+	return it, nil
+}
 
 // endregion **************************** input.gotpl *****************************
 
@@ -516,23 +636,53 @@ func (ec *executionContext) _StaticNubanAccountDetail(ctx context.Context, sel a
 	return out
 }
 
+var transferResultImplementors = []string{"TransferResult"}
+
+func (ec *executionContext) _TransferResult(ctx context.Context, sel ast.SelectionSet, obj *model.TransferResult) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, transferResultImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("TransferResult")
+		case "id":
+			out.Values[i] = ec._TransferResult_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "status":
+			out.Values[i] = ec._TransferResult_status(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.processDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
 // endregion **************************** object.gotpl ****************************
 
 // region    ***************************** type.gotpl *****************************
-
-func (ec *executionContext) marshalNDynamicNubanAccountDetail2githubᚗcomᚋToflexᚋdirectory_v2ᚋgraphᚋmodelᚐDynamicNubanAccountDetail(ctx context.Context, sel ast.SelectionSet, v model.DynamicNubanAccountDetail) graphql.Marshaler {
-	return ec._DynamicNubanAccountDetail(ctx, sel, &v)
-}
-
-func (ec *executionContext) marshalNDynamicNubanAccountDetail2ᚖgithubᚗcomᚋToflexᚋdirectory_v2ᚋgraphᚋmodelᚐDynamicNubanAccountDetail(ctx context.Context, sel ast.SelectionSet, v *model.DynamicNubanAccountDetail) graphql.Marshaler {
-	if v == nil {
-		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
-		}
-		return graphql.Null
-	}
-	return ec._DynamicNubanAccountDetail(ctx, sel, v)
-}
 
 func (ec *executionContext) marshalNStaticNubanAccountDetail2githubᚗcomᚋToflexᚋdirectory_v2ᚋgraphᚋmodelᚐStaticNubanAccountDetail(ctx context.Context, sel ast.SelectionSet, v model.StaticNubanAccountDetail) graphql.Marshaler {
 	return ec._StaticNubanAccountDetail(ctx, sel, &v)
@@ -590,6 +740,25 @@ func (ec *executionContext) marshalNStaticNubanAccountDetail2ᚖgithubᚗcomᚋT
 		return graphql.Null
 	}
 	return ec._StaticNubanAccountDetail(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalNTransferPayload2githubᚗcomᚋToflexᚋdirectory_v2ᚋgraphᚋmodelᚐTransferPayload(ctx context.Context, v any) (model.TransferPayload, error) {
+	res, err := ec.unmarshalInputTransferPayload(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNTransferResult2githubᚗcomᚋToflexᚋdirectory_v2ᚋgraphᚋmodelᚐTransferResult(ctx context.Context, sel ast.SelectionSet, v model.TransferResult) graphql.Marshaler {
+	return ec._TransferResult(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNTransferResult2ᚖgithubᚗcomᚋToflexᚋdirectory_v2ᚋgraphᚋmodelᚐTransferResult(ctx context.Context, sel ast.SelectionSet, v *model.TransferResult) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._TransferResult(ctx, sel, v)
 }
 
 // endregion ***************************** type.gotpl *****************************

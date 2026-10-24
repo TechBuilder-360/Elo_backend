@@ -45,5 +45,7 @@ func (LedgerOwner) Edges() []ent.Edge {
 		edge.From("user", User.Type).
 			Ref("owner").
 			Unique(),
+
+		edge.To("nuban_beneficiaries", NubanBeneficiary.Type),
 	}
 }

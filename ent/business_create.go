@@ -21,6 +21,7 @@ import (
 	"github.com/Toflex/directory_v2/ent/manager"
 	"github.com/Toflex/directory_v2/ent/requestverification"
 	"github.com/Toflex/directory_v2/ent/social"
+	"github.com/Toflex/directory_v2/ent/subscription"
 	"github.com/Toflex/directory_v2/ent/user"
 	"github.com/Toflex/directory_v2/ent/verification"
 )
@@ -509,6 +510,21 @@ func (bc *BusinessCreate) SetOwner(l *LedgerOwner) *BusinessCreate {
 	return bc.SetOwnerID(l.ID)
 }
 
+// AddSubscriptionIDs adds the "subscriptions" edge to the Subscription entity by IDs.
+func (bc *BusinessCreate) AddSubscriptionIDs(ids ...string) *BusinessCreate {
+	bc.mutation.AddSubscriptionIDs(ids...)
+	return bc
+}
+
+// AddSubscriptions adds the "subscriptions" edges to the Subscription entity.
+func (bc *BusinessCreate) AddSubscriptions(s ...*Subscription) *BusinessCreate {
+	ids := make([]string, len(s))
+	for i := range s {
+		ids[i] = s[i].ID
+	}
+	return bc.AddSubscriptionIDs(ids...)
+}
+
 // Mutation returns the BusinessMutation object of the builder.
 func (bc *BusinessCreate) Mutation() *BusinessMutation {
 	return bc.mutation
@@ -941,6 +957,22 @@ func (bc *BusinessCreate) createSpec() (*Business, *sqlgraph.CreateSpec) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(ledgerowner.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := bc.mutation.SubscriptionsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   business.SubscriptionsTable,
+			Columns: []string{business.SubscriptionsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(subscription.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {

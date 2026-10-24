@@ -1,6 +1,9 @@
 package errors
 
-import "runtime/debug"
+import (
+	"runtime/debug"
+	"strings"
+)
 
 // SafeError is a structured error type with a code and message
 type SafeError struct {
@@ -47,3 +50,50 @@ func WrapCode(err error, code ErrorCode, message string) error {
 		Stack:   debug.Stack(),
 	}
 }
+
+// IsDBError checks if an error or its chain represents a database or SQL driver error.
+func IsDBError(err error) bool {
+	if err == nil {
+		return false
+	}
+	return IsDBErrorMessage(err.Error())
+}
+
+// IsDBErrorMessage reports whether an error message string contains internal database patterns.
+func IsDBErrorMessage(msg string) bool {
+	lower := strings.ToLower(msg)
+	patterns := []string{
+		"pq:",
+		"sql:",
+		"ent:",
+		"relation \"",
+		"column \"",
+		"table \"",
+		"duplicate key",
+		"violates foreign key",
+		"violates unique",
+		"violates not-null",
+		"violates check",
+		"syntax error at or near",
+		"driver: bad connection",
+		"connection refused",
+		"connection reset",
+		"deadlock detected",
+	}
+	for _, p := range patterns {
+		if strings.Contains(lower, p) {
+			return true
+		}
+	}
+	return false
+}
+
+// SanitizeMessage ensures database or raw internal driver error messages are not leaked to API responses.
+// If the message contains database error patterns, it replaces it with "request failed".
+func SanitizeMessage(msg string) string {
+	if IsDBErrorMessage(msg) {
+		return "request failed"
+	}
+	return msg
+}
+

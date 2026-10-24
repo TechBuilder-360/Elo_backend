@@ -12,6 +12,8 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/Toflex/directory_v2/ent/nubanbank"
+	"github.com/Toflex/directory_v2/ent/nubanbeneficiary"
 	"github.com/Toflex/directory_v2/ent/nubantransfer"
 	"github.com/Toflex/directory_v2/ent/transaction"
 )
@@ -78,27 +80,9 @@ func (ntc *NubanTransferCreate) SetRecipientAccountNumber(s string) *NubanTransf
 	return ntc
 }
 
-// SetSenderAccountName sets the "sender_account_name" field.
-func (ntc *NubanTransferCreate) SetSenderAccountName(s string) *NubanTransferCreate {
-	ntc.mutation.SetSenderAccountName(s)
-	return ntc
-}
-
-// SetSenderAccountNumber sets the "sender_account_number" field.
-func (ntc *NubanTransferCreate) SetSenderAccountNumber(s string) *NubanTransferCreate {
-	ntc.mutation.SetSenderAccountNumber(s)
-	return ntc
-}
-
-// SetSenderBankName sets the "sender_bank_name" field.
-func (ntc *NubanTransferCreate) SetSenderBankName(s string) *NubanTransferCreate {
-	ntc.mutation.SetSenderBankName(s)
-	return ntc
-}
-
-// SetSenderBankCode sets the "sender_bank_code" field.
-func (ntc *NubanTransferCreate) SetSenderBankCode(s string) *NubanTransferCreate {
-	ntc.mutation.SetSenderBankCode(s)
+// SetNubanBankID sets the "nuban_bank_id" field.
+func (ntc *NubanTransferCreate) SetNubanBankID(s string) *NubanTransferCreate {
+	ntc.mutation.SetNubanBankID(s)
 	return ntc
 }
 
@@ -122,9 +106,25 @@ func (ntc *NubanTransferCreate) SetSessionID(s string) *NubanTransferCreate {
 	return ntc
 }
 
+// SetNillableSessionID sets the "session_id" field if the given value is not nil.
+func (ntc *NubanTransferCreate) SetNillableSessionID(s *string) *NubanTransferCreate {
+	if s != nil {
+		ntc.SetSessionID(*s)
+	}
+	return ntc
+}
+
 // SetProviderReference sets the "provider_reference" field.
 func (ntc *NubanTransferCreate) SetProviderReference(s string) *NubanTransferCreate {
 	ntc.mutation.SetProviderReference(s)
+	return ntc
+}
+
+// SetNillableProviderReference sets the "provider_reference" field if the given value is not nil.
+func (ntc *NubanTransferCreate) SetNillableProviderReference(s *string) *NubanTransferCreate {
+	if s != nil {
+		ntc.SetProviderReference(*s)
+	}
 	return ntc
 }
 
@@ -157,6 +157,26 @@ func (ntc *NubanTransferCreate) SetTransactionID(id string) *NubanTransferCreate
 // SetTransaction sets the "transaction" edge to the Transaction entity.
 func (ntc *NubanTransferCreate) SetTransaction(t *Transaction) *NubanTransferCreate {
 	return ntc.SetTransactionID(t.ID)
+}
+
+// SetNubanBank sets the "nuban_bank" edge to the NubanBank entity.
+func (ntc *NubanTransferCreate) SetNubanBank(n *NubanBank) *NubanTransferCreate {
+	return ntc.SetNubanBankID(n.ID)
+}
+
+// AddBeneficiaryIDs adds the "beneficiaries" edge to the NubanBeneficiary entity by IDs.
+func (ntc *NubanTransferCreate) AddBeneficiaryIDs(ids ...string) *NubanTransferCreate {
+	ntc.mutation.AddBeneficiaryIDs(ids...)
+	return ntc
+}
+
+// AddBeneficiaries adds the "beneficiaries" edges to the NubanBeneficiary entity.
+func (ntc *NubanTransferCreate) AddBeneficiaries(n ...*NubanBeneficiary) *NubanTransferCreate {
+	ids := make([]string, len(n))
+	for i := range n {
+		ids[i] = n[i].ID
+	}
+	return ntc.AddBeneficiaryIDs(ids...)
 }
 
 // Mutation returns the NubanTransferMutation object of the builder.
@@ -236,56 +256,16 @@ func (ntc *NubanTransferCreate) check() error {
 			return &ValidationError{Name: "recipient_account_number", err: fmt.Errorf(`ent: validator failed for field "NubanTransfer.recipient_account_number": %w`, err)}
 		}
 	}
-	if _, ok := ntc.mutation.SenderAccountName(); !ok {
-		return &ValidationError{Name: "sender_account_name", err: errors.New(`ent: missing required field "NubanTransfer.sender_account_name"`)}
+	if _, ok := ntc.mutation.NubanBankID(); !ok {
+		return &ValidationError{Name: "nuban_bank_id", err: errors.New(`ent: missing required field "NubanTransfer.nuban_bank_id"`)}
 	}
-	if v, ok := ntc.mutation.SenderAccountName(); ok {
-		if err := nubantransfer.SenderAccountNameValidator(v); err != nil {
-			return &ValidationError{Name: "sender_account_name", err: fmt.Errorf(`ent: validator failed for field "NubanTransfer.sender_account_name": %w`, err)}
-		}
-	}
-	if _, ok := ntc.mutation.SenderAccountNumber(); !ok {
-		return &ValidationError{Name: "sender_account_number", err: errors.New(`ent: missing required field "NubanTransfer.sender_account_number"`)}
-	}
-	if v, ok := ntc.mutation.SenderAccountNumber(); ok {
-		if err := nubantransfer.SenderAccountNumberValidator(v); err != nil {
-			return &ValidationError{Name: "sender_account_number", err: fmt.Errorf(`ent: validator failed for field "NubanTransfer.sender_account_number": %w`, err)}
-		}
-	}
-	if _, ok := ntc.mutation.SenderBankName(); !ok {
-		return &ValidationError{Name: "sender_bank_name", err: errors.New(`ent: missing required field "NubanTransfer.sender_bank_name"`)}
-	}
-	if v, ok := ntc.mutation.SenderBankName(); ok {
-		if err := nubantransfer.SenderBankNameValidator(v); err != nil {
-			return &ValidationError{Name: "sender_bank_name", err: fmt.Errorf(`ent: validator failed for field "NubanTransfer.sender_bank_name": %w`, err)}
-		}
-	}
-	if _, ok := ntc.mutation.SenderBankCode(); !ok {
-		return &ValidationError{Name: "sender_bank_code", err: errors.New(`ent: missing required field "NubanTransfer.sender_bank_code"`)}
-	}
-	if v, ok := ntc.mutation.SenderBankCode(); ok {
-		if err := nubantransfer.SenderBankCodeValidator(v); err != nil {
-			return &ValidationError{Name: "sender_bank_code", err: fmt.Errorf(`ent: validator failed for field "NubanTransfer.sender_bank_code": %w`, err)}
+	if v, ok := ntc.mutation.NubanBankID(); ok {
+		if err := nubantransfer.NubanBankIDValidator(v); err != nil {
+			return &ValidationError{Name: "nuban_bank_id", err: fmt.Errorf(`ent: validator failed for field "NubanTransfer.nuban_bank_id": %w`, err)}
 		}
 	}
 	if _, ok := ntc.mutation.Amount(); !ok {
 		return &ValidationError{Name: "amount", err: errors.New(`ent: missing required field "NubanTransfer.amount"`)}
-	}
-	if _, ok := ntc.mutation.SessionID(); !ok {
-		return &ValidationError{Name: "session_id", err: errors.New(`ent: missing required field "NubanTransfer.session_id"`)}
-	}
-	if v, ok := ntc.mutation.SessionID(); ok {
-		if err := nubantransfer.SessionIDValidator(v); err != nil {
-			return &ValidationError{Name: "session_id", err: fmt.Errorf(`ent: validator failed for field "NubanTransfer.session_id": %w`, err)}
-		}
-	}
-	if _, ok := ntc.mutation.ProviderReference(); !ok {
-		return &ValidationError{Name: "provider_reference", err: errors.New(`ent: missing required field "NubanTransfer.provider_reference"`)}
-	}
-	if v, ok := ntc.mutation.ProviderReference(); ok {
-		if err := nubantransfer.ProviderReferenceValidator(v); err != nil {
-			return &ValidationError{Name: "provider_reference", err: fmt.Errorf(`ent: validator failed for field "NubanTransfer.provider_reference": %w`, err)}
-		}
 	}
 	if _, ok := ntc.mutation.Provider(); !ok {
 		return &ValidationError{Name: "provider", err: errors.New(`ent: missing required field "NubanTransfer.provider"`)}
@@ -297,6 +277,12 @@ func (ntc *NubanTransferCreate) check() error {
 	}
 	if len(ntc.mutation.TransactionIDs()) == 0 {
 		return &ValidationError{Name: "transaction", err: errors.New(`ent: missing required edge "NubanTransfer.transaction"`)}
+	}
+	if len(ntc.mutation.NubanBankIDs()) == 0 {
+		return &ValidationError{Name: "nuban_bank", err: errors.New(`ent: missing required edge "NubanTransfer.nuban_bank"`)}
+	}
+	if len(ntc.mutation.BeneficiariesIDs()) == 0 {
+		return &ValidationError{Name: "beneficiaries", err: errors.New(`ent: missing required edge "NubanTransfer.beneficiaries"`)}
 	}
 	return nil
 }
@@ -354,33 +340,17 @@ func (ntc *NubanTransferCreate) createSpec() (*NubanTransfer, *sqlgraph.CreateSp
 		_spec.SetField(nubantransfer.FieldRecipientAccountNumber, field.TypeString, value)
 		_node.RecipientAccountNumber = value
 	}
-	if value, ok := ntc.mutation.SenderAccountName(); ok {
-		_spec.SetField(nubantransfer.FieldSenderAccountName, field.TypeString, value)
-		_node.SenderAccountName = value
-	}
-	if value, ok := ntc.mutation.SenderAccountNumber(); ok {
-		_spec.SetField(nubantransfer.FieldSenderAccountNumber, field.TypeString, value)
-		_node.SenderAccountNumber = value
-	}
-	if value, ok := ntc.mutation.SenderBankName(); ok {
-		_spec.SetField(nubantransfer.FieldSenderBankName, field.TypeString, value)
-		_node.SenderBankName = value
-	}
-	if value, ok := ntc.mutation.SenderBankCode(); ok {
-		_spec.SetField(nubantransfer.FieldSenderBankCode, field.TypeString, value)
-		_node.SenderBankCode = value
-	}
 	if value, ok := ntc.mutation.Amount(); ok {
 		_spec.SetField(nubantransfer.FieldAmount, field.TypeInt64, value)
 		_node.Amount = value
 	}
 	if value, ok := ntc.mutation.SessionID(); ok {
 		_spec.SetField(nubantransfer.FieldSessionID, field.TypeString, value)
-		_node.SessionID = value
+		_node.SessionID = &value
 	}
 	if value, ok := ntc.mutation.ProviderReference(); ok {
 		_spec.SetField(nubantransfer.FieldProviderReference, field.TypeString, value)
-		_node.ProviderReference = value
+		_node.ProviderReference = &value
 	}
 	if value, ok := ntc.mutation.Provider(); ok {
 		_spec.SetField(nubantransfer.FieldProvider, field.TypeString, value)
@@ -401,6 +371,39 @@ func (ntc *NubanTransferCreate) createSpec() (*NubanTransfer, *sqlgraph.CreateSp
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_node.transaction_nuban_transfer = &nodes[0]
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := ntc.mutation.NubanBankIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   nubantransfer.NubanBankTable,
+			Columns: []string{nubantransfer.NubanBankColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(nubanbank.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_node.NubanBankID = nodes[0]
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := ntc.mutation.BeneficiariesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   nubantransfer.BeneficiariesTable,
+			Columns: nubantransfer.BeneficiariesPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(nubanbeneficiary.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec
@@ -509,51 +512,15 @@ func (u *NubanTransferUpsert) UpdateRecipientAccountNumber() *NubanTransferUpser
 	return u
 }
 
-// SetSenderAccountName sets the "sender_account_name" field.
-func (u *NubanTransferUpsert) SetSenderAccountName(v string) *NubanTransferUpsert {
-	u.Set(nubantransfer.FieldSenderAccountName, v)
+// SetNubanBankID sets the "nuban_bank_id" field.
+func (u *NubanTransferUpsert) SetNubanBankID(v string) *NubanTransferUpsert {
+	u.Set(nubantransfer.FieldNubanBankID, v)
 	return u
 }
 
-// UpdateSenderAccountName sets the "sender_account_name" field to the value that was provided on create.
-func (u *NubanTransferUpsert) UpdateSenderAccountName() *NubanTransferUpsert {
-	u.SetExcluded(nubantransfer.FieldSenderAccountName)
-	return u
-}
-
-// SetSenderAccountNumber sets the "sender_account_number" field.
-func (u *NubanTransferUpsert) SetSenderAccountNumber(v string) *NubanTransferUpsert {
-	u.Set(nubantransfer.FieldSenderAccountNumber, v)
-	return u
-}
-
-// UpdateSenderAccountNumber sets the "sender_account_number" field to the value that was provided on create.
-func (u *NubanTransferUpsert) UpdateSenderAccountNumber() *NubanTransferUpsert {
-	u.SetExcluded(nubantransfer.FieldSenderAccountNumber)
-	return u
-}
-
-// SetSenderBankName sets the "sender_bank_name" field.
-func (u *NubanTransferUpsert) SetSenderBankName(v string) *NubanTransferUpsert {
-	u.Set(nubantransfer.FieldSenderBankName, v)
-	return u
-}
-
-// UpdateSenderBankName sets the "sender_bank_name" field to the value that was provided on create.
-func (u *NubanTransferUpsert) UpdateSenderBankName() *NubanTransferUpsert {
-	u.SetExcluded(nubantransfer.FieldSenderBankName)
-	return u
-}
-
-// SetSenderBankCode sets the "sender_bank_code" field.
-func (u *NubanTransferUpsert) SetSenderBankCode(v string) *NubanTransferUpsert {
-	u.Set(nubantransfer.FieldSenderBankCode, v)
-	return u
-}
-
-// UpdateSenderBankCode sets the "sender_bank_code" field to the value that was provided on create.
-func (u *NubanTransferUpsert) UpdateSenderBankCode() *NubanTransferUpsert {
-	u.SetExcluded(nubantransfer.FieldSenderBankCode)
+// UpdateNubanBankID sets the "nuban_bank_id" field to the value that was provided on create.
+func (u *NubanTransferUpsert) UpdateNubanBankID() *NubanTransferUpsert {
+	u.SetExcluded(nubantransfer.FieldNubanBankID)
 	return u
 }
 
@@ -587,6 +554,12 @@ func (u *NubanTransferUpsert) UpdateSessionID() *NubanTransferUpsert {
 	return u
 }
 
+// ClearSessionID clears the value of the "session_id" field.
+func (u *NubanTransferUpsert) ClearSessionID() *NubanTransferUpsert {
+	u.SetNull(nubantransfer.FieldSessionID)
+	return u
+}
+
 // SetProviderReference sets the "provider_reference" field.
 func (u *NubanTransferUpsert) SetProviderReference(v string) *NubanTransferUpsert {
 	u.Set(nubantransfer.FieldProviderReference, v)
@@ -596,6 +569,12 @@ func (u *NubanTransferUpsert) SetProviderReference(v string) *NubanTransferUpser
 // UpdateProviderReference sets the "provider_reference" field to the value that was provided on create.
 func (u *NubanTransferUpsert) UpdateProviderReference() *NubanTransferUpsert {
 	u.SetExcluded(nubantransfer.FieldProviderReference)
+	return u
+}
+
+// ClearProviderReference clears the value of the "provider_reference" field.
+func (u *NubanTransferUpsert) ClearProviderReference() *NubanTransferUpsert {
+	u.SetNull(nubantransfer.FieldProviderReference)
 	return u
 }
 
@@ -725,59 +704,17 @@ func (u *NubanTransferUpsertOne) UpdateRecipientAccountNumber() *NubanTransferUp
 	})
 }
 
-// SetSenderAccountName sets the "sender_account_name" field.
-func (u *NubanTransferUpsertOne) SetSenderAccountName(v string) *NubanTransferUpsertOne {
+// SetNubanBankID sets the "nuban_bank_id" field.
+func (u *NubanTransferUpsertOne) SetNubanBankID(v string) *NubanTransferUpsertOne {
 	return u.Update(func(s *NubanTransferUpsert) {
-		s.SetSenderAccountName(v)
+		s.SetNubanBankID(v)
 	})
 }
 
-// UpdateSenderAccountName sets the "sender_account_name" field to the value that was provided on create.
-func (u *NubanTransferUpsertOne) UpdateSenderAccountName() *NubanTransferUpsertOne {
+// UpdateNubanBankID sets the "nuban_bank_id" field to the value that was provided on create.
+func (u *NubanTransferUpsertOne) UpdateNubanBankID() *NubanTransferUpsertOne {
 	return u.Update(func(s *NubanTransferUpsert) {
-		s.UpdateSenderAccountName()
-	})
-}
-
-// SetSenderAccountNumber sets the "sender_account_number" field.
-func (u *NubanTransferUpsertOne) SetSenderAccountNumber(v string) *NubanTransferUpsertOne {
-	return u.Update(func(s *NubanTransferUpsert) {
-		s.SetSenderAccountNumber(v)
-	})
-}
-
-// UpdateSenderAccountNumber sets the "sender_account_number" field to the value that was provided on create.
-func (u *NubanTransferUpsertOne) UpdateSenderAccountNumber() *NubanTransferUpsertOne {
-	return u.Update(func(s *NubanTransferUpsert) {
-		s.UpdateSenderAccountNumber()
-	})
-}
-
-// SetSenderBankName sets the "sender_bank_name" field.
-func (u *NubanTransferUpsertOne) SetSenderBankName(v string) *NubanTransferUpsertOne {
-	return u.Update(func(s *NubanTransferUpsert) {
-		s.SetSenderBankName(v)
-	})
-}
-
-// UpdateSenderBankName sets the "sender_bank_name" field to the value that was provided on create.
-func (u *NubanTransferUpsertOne) UpdateSenderBankName() *NubanTransferUpsertOne {
-	return u.Update(func(s *NubanTransferUpsert) {
-		s.UpdateSenderBankName()
-	})
-}
-
-// SetSenderBankCode sets the "sender_bank_code" field.
-func (u *NubanTransferUpsertOne) SetSenderBankCode(v string) *NubanTransferUpsertOne {
-	return u.Update(func(s *NubanTransferUpsert) {
-		s.SetSenderBankCode(v)
-	})
-}
-
-// UpdateSenderBankCode sets the "sender_bank_code" field to the value that was provided on create.
-func (u *NubanTransferUpsertOne) UpdateSenderBankCode() *NubanTransferUpsertOne {
-	return u.Update(func(s *NubanTransferUpsert) {
-		s.UpdateSenderBankCode()
+		s.UpdateNubanBankID()
 	})
 }
 
@@ -816,6 +753,13 @@ func (u *NubanTransferUpsertOne) UpdateSessionID() *NubanTransferUpsertOne {
 	})
 }
 
+// ClearSessionID clears the value of the "session_id" field.
+func (u *NubanTransferUpsertOne) ClearSessionID() *NubanTransferUpsertOne {
+	return u.Update(func(s *NubanTransferUpsert) {
+		s.ClearSessionID()
+	})
+}
+
 // SetProviderReference sets the "provider_reference" field.
 func (u *NubanTransferUpsertOne) SetProviderReference(v string) *NubanTransferUpsertOne {
 	return u.Update(func(s *NubanTransferUpsert) {
@@ -827,6 +771,13 @@ func (u *NubanTransferUpsertOne) SetProviderReference(v string) *NubanTransferUp
 func (u *NubanTransferUpsertOne) UpdateProviderReference() *NubanTransferUpsertOne {
 	return u.Update(func(s *NubanTransferUpsert) {
 		s.UpdateProviderReference()
+	})
+}
+
+// ClearProviderReference clears the value of the "provider_reference" field.
+func (u *NubanTransferUpsertOne) ClearProviderReference() *NubanTransferUpsertOne {
+	return u.Update(func(s *NubanTransferUpsert) {
+		s.ClearProviderReference()
 	})
 }
 
@@ -1125,59 +1076,17 @@ func (u *NubanTransferUpsertBulk) UpdateRecipientAccountNumber() *NubanTransferU
 	})
 }
 
-// SetSenderAccountName sets the "sender_account_name" field.
-func (u *NubanTransferUpsertBulk) SetSenderAccountName(v string) *NubanTransferUpsertBulk {
+// SetNubanBankID sets the "nuban_bank_id" field.
+func (u *NubanTransferUpsertBulk) SetNubanBankID(v string) *NubanTransferUpsertBulk {
 	return u.Update(func(s *NubanTransferUpsert) {
-		s.SetSenderAccountName(v)
+		s.SetNubanBankID(v)
 	})
 }
 
-// UpdateSenderAccountName sets the "sender_account_name" field to the value that was provided on create.
-func (u *NubanTransferUpsertBulk) UpdateSenderAccountName() *NubanTransferUpsertBulk {
+// UpdateNubanBankID sets the "nuban_bank_id" field to the value that was provided on create.
+func (u *NubanTransferUpsertBulk) UpdateNubanBankID() *NubanTransferUpsertBulk {
 	return u.Update(func(s *NubanTransferUpsert) {
-		s.UpdateSenderAccountName()
-	})
-}
-
-// SetSenderAccountNumber sets the "sender_account_number" field.
-func (u *NubanTransferUpsertBulk) SetSenderAccountNumber(v string) *NubanTransferUpsertBulk {
-	return u.Update(func(s *NubanTransferUpsert) {
-		s.SetSenderAccountNumber(v)
-	})
-}
-
-// UpdateSenderAccountNumber sets the "sender_account_number" field to the value that was provided on create.
-func (u *NubanTransferUpsertBulk) UpdateSenderAccountNumber() *NubanTransferUpsertBulk {
-	return u.Update(func(s *NubanTransferUpsert) {
-		s.UpdateSenderAccountNumber()
-	})
-}
-
-// SetSenderBankName sets the "sender_bank_name" field.
-func (u *NubanTransferUpsertBulk) SetSenderBankName(v string) *NubanTransferUpsertBulk {
-	return u.Update(func(s *NubanTransferUpsert) {
-		s.SetSenderBankName(v)
-	})
-}
-
-// UpdateSenderBankName sets the "sender_bank_name" field to the value that was provided on create.
-func (u *NubanTransferUpsertBulk) UpdateSenderBankName() *NubanTransferUpsertBulk {
-	return u.Update(func(s *NubanTransferUpsert) {
-		s.UpdateSenderBankName()
-	})
-}
-
-// SetSenderBankCode sets the "sender_bank_code" field.
-func (u *NubanTransferUpsertBulk) SetSenderBankCode(v string) *NubanTransferUpsertBulk {
-	return u.Update(func(s *NubanTransferUpsert) {
-		s.SetSenderBankCode(v)
-	})
-}
-
-// UpdateSenderBankCode sets the "sender_bank_code" field to the value that was provided on create.
-func (u *NubanTransferUpsertBulk) UpdateSenderBankCode() *NubanTransferUpsertBulk {
-	return u.Update(func(s *NubanTransferUpsert) {
-		s.UpdateSenderBankCode()
+		s.UpdateNubanBankID()
 	})
 }
 
@@ -1216,6 +1125,13 @@ func (u *NubanTransferUpsertBulk) UpdateSessionID() *NubanTransferUpsertBulk {
 	})
 }
 
+// ClearSessionID clears the value of the "session_id" field.
+func (u *NubanTransferUpsertBulk) ClearSessionID() *NubanTransferUpsertBulk {
+	return u.Update(func(s *NubanTransferUpsert) {
+		s.ClearSessionID()
+	})
+}
+
 // SetProviderReference sets the "provider_reference" field.
 func (u *NubanTransferUpsertBulk) SetProviderReference(v string) *NubanTransferUpsertBulk {
 	return u.Update(func(s *NubanTransferUpsert) {
@@ -1227,6 +1143,13 @@ func (u *NubanTransferUpsertBulk) SetProviderReference(v string) *NubanTransferU
 func (u *NubanTransferUpsertBulk) UpdateProviderReference() *NubanTransferUpsertBulk {
 	return u.Update(func(s *NubanTransferUpsert) {
 		s.UpdateProviderReference()
+	})
+}
+
+// ClearProviderReference clears the value of the "provider_reference" field.
+func (u *NubanTransferUpsertBulk) ClearProviderReference() *NubanTransferUpsertBulk {
+	return u.Update(func(s *NubanTransferUpsert) {
+		s.ClearProviderReference()
 	})
 }
 

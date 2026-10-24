@@ -39,22 +39,26 @@ const (
 	FieldProvider = "provider"
 	// FieldAmount holds the string denoting the amount field in the database.
 	FieldAmount = "amount"
-	// FieldFee holds the string denoting the fee field in the database.
-	FieldFee = "fee"
+	// FieldNetAmount holds the string denoting the net_amount field in the database.
+	FieldNetAmount = "net_amount"
+	// FieldEntry holds the string denoting the entry field in the database.
+	FieldEntry = "entry"
 	// EdgeNubanDeposit holds the string denoting the nuban_deposit edge name in mutations.
 	EdgeNubanDeposit = "nuban_deposit"
 	// EdgeNubanTransfer holds the string denoting the nuban_transfer edge name in mutations.
 	EdgeNubanTransfer = "nuban_transfer"
-	// EdgeWallet holds the string denoting the wallet edge name in mutations.
-	EdgeWallet = "wallet"
 	// EdgeStablecoinDeposit holds the string denoting the stablecoin_deposit edge name in mutations.
 	EdgeStablecoinDeposit = "stablecoin_deposit"
 	// EdgeStablecoinWithdrawal holds the string denoting the stablecoin_withdrawal edge name in mutations.
 	EdgeStablecoinWithdrawal = "stablecoin_withdrawal"
-	// EdgeLedgerEntries holds the string denoting the ledger_entries edge name in mutations.
-	EdgeLedgerEntries = "ledger_entries"
+	// EdgeFees holds the string denoting the fees edge name in mutations.
+	EdgeFees = "fees"
+	// EdgeLedgerEntry holds the string denoting the ledger_entry edge name in mutations.
+	EdgeLedgerEntry = "ledger_entry"
 	// EdgeReversalLedgerEntries holds the string denoting the reversal_ledger_entries edge name in mutations.
 	EdgeReversalLedgerEntries = "reversal_ledger_entries"
+	// EdgeInvoice holds the string denoting the invoice edge name in mutations.
+	EdgeInvoice = "invoice"
 	// Table holds the table name of the transaction in the database.
 	Table = "transactions"
 	// NubanDepositTable is the table that holds the nuban_deposit relation/edge.
@@ -71,13 +75,6 @@ const (
 	NubanTransferInverseTable = "nuban_transfers"
 	// NubanTransferColumn is the table column denoting the nuban_transfer relation/edge.
 	NubanTransferColumn = "transaction_nuban_transfer"
-	// WalletTable is the table that holds the wallet relation/edge.
-	WalletTable = "transactions"
-	// WalletInverseTable is the table name for the Wallet entity.
-	// It exists in this package in order to avoid circular dependency with the "wallet" package.
-	WalletInverseTable = "wallets"
-	// WalletColumn is the table column denoting the wallet relation/edge.
-	WalletColumn = "transaction_wallet"
 	// StablecoinDepositTable is the table that holds the stablecoin_deposit relation/edge.
 	StablecoinDepositTable = "stablecoin_deposits"
 	// StablecoinDepositInverseTable is the table name for the StablecoinDeposit entity.
@@ -92,13 +89,20 @@ const (
 	StablecoinWithdrawalInverseTable = "stablecoin_withdrawals"
 	// StablecoinWithdrawalColumn is the table column denoting the stablecoin_withdrawal relation/edge.
 	StablecoinWithdrawalColumn = "transaction_id"
-	// LedgerEntriesTable is the table that holds the ledger_entries relation/edge.
-	LedgerEntriesTable = "ledgers"
-	// LedgerEntriesInverseTable is the table name for the Ledger entity.
+	// FeesTable is the table that holds the fees relation/edge.
+	FeesTable = "transaction_fees"
+	// FeesInverseTable is the table name for the TransactionFee entity.
+	// It exists in this package in order to avoid circular dependency with the "transactionfee" package.
+	FeesInverseTable = "transaction_fees"
+	// FeesColumn is the table column denoting the fees relation/edge.
+	FeesColumn = "transaction_fees"
+	// LedgerEntryTable is the table that holds the ledger_entry relation/edge.
+	LedgerEntryTable = "ledgers"
+	// LedgerEntryInverseTable is the table name for the Ledger entity.
 	// It exists in this package in order to avoid circular dependency with the "ledger" package.
-	LedgerEntriesInverseTable = "ledgers"
-	// LedgerEntriesColumn is the table column denoting the ledger_entries relation/edge.
-	LedgerEntriesColumn = "transaction_id"
+	LedgerEntryInverseTable = "ledgers"
+	// LedgerEntryColumn is the table column denoting the ledger_entry relation/edge.
+	LedgerEntryColumn = "transaction_id"
 	// ReversalLedgerEntriesTable is the table that holds the reversal_ledger_entries relation/edge.
 	ReversalLedgerEntriesTable = "ledgers"
 	// ReversalLedgerEntriesInverseTable is the table name for the Ledger entity.
@@ -106,6 +110,13 @@ const (
 	ReversalLedgerEntriesInverseTable = "ledgers"
 	// ReversalLedgerEntriesColumn is the table column denoting the reversal_ledger_entries relation/edge.
 	ReversalLedgerEntriesColumn = "reversal_transaction_id"
+	// InvoiceTable is the table that holds the invoice relation/edge.
+	InvoiceTable = "invoices"
+	// InvoiceInverseTable is the table name for the Invoice entity.
+	// It exists in this package in order to avoid circular dependency with the "invoice" package.
+	InvoiceInverseTable = "invoices"
+	// InvoiceColumn is the table column denoting the invoice relation/edge.
+	InvoiceColumn = "transaction_invoice"
 )
 
 // Columns holds all SQL columns for transaction fields.
@@ -123,24 +134,14 @@ var Columns = []string{
 	FieldSummary,
 	FieldProvider,
 	FieldAmount,
-	FieldFee,
-}
-
-// ForeignKeys holds the SQL foreign-keys that are owned by the "transactions"
-// table and are not defined as standalone fields in the schema.
-var ForeignKeys = []string{
-	"transaction_wallet",
+	FieldNetAmount,
+	FieldEntry,
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
 func ValidColumn(column string) bool {
 	for i := range Columns {
 		if column == Columns[i] {
-			return true
-		}
-	}
-	for i := range ForeignKeys {
-		if column == ForeignKeys[i] {
 			return true
 		}
 	}
@@ -158,8 +159,6 @@ var (
 	CurrencyValidator func(string) error
 	// DefaultAmount holds the default value on creation for the "amount" field.
 	DefaultAmount int64
-	// DefaultFee holds the default value on creation for the "fee" field.
-	DefaultFee int64
 	// DefaultID holds the default value on creation for the "id" field.
 	DefaultID func() string
 )
@@ -229,6 +228,7 @@ const (
 	StatusPENDING    Status = "PENDING"
 	StatusPROCESSING Status = "PROCESSING"
 	StatusCOMPLETED  Status = "COMPLETED"
+	StatusSUCCESS    Status = "SUCCESS"
 	StatusFAILED     Status = "FAILED"
 	StatusREVERSED   Status = "REVERSED"
 	StatusCANCELLED  Status = "CANCELLED"
@@ -241,10 +241,36 @@ func (s Status) String() string {
 // StatusValidator is a validator for the "status" field enum values. It is called by the builders before save.
 func StatusValidator(s Status) error {
 	switch s {
-	case StatusPENDING, StatusPROCESSING, StatusCOMPLETED, StatusFAILED, StatusREVERSED, StatusCANCELLED:
+	case StatusPENDING, StatusPROCESSING, StatusCOMPLETED, StatusSUCCESS, StatusFAILED, StatusREVERSED, StatusCANCELLED:
 		return nil
 	default:
 		return fmt.Errorf("transaction: invalid enum value for status field: %q", s)
+	}
+}
+
+// Entry defines the type for the "entry" enum field.
+type Entry string
+
+// EntryDEBIT is the default value of the Entry enum.
+const DefaultEntry = EntryDEBIT
+
+// Entry values.
+const (
+	EntryDEBIT  Entry = "DEBIT"
+	EntryCREDIT Entry = "CREDIT"
+)
+
+func (e Entry) String() string {
+	return string(e)
+}
+
+// EntryValidator is a validator for the "entry" field enum values. It is called by the builders before save.
+func EntryValidator(e Entry) error {
+	switch e {
+	case EntryDEBIT, EntryCREDIT:
+		return nil
+	default:
+		return fmt.Errorf("transaction: invalid enum value for entry field: %q", e)
 	}
 }
 
@@ -316,9 +342,14 @@ func ByAmount(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldAmount, opts...).ToFunc()
 }
 
-// ByFee orders the results by the fee field.
-func ByFee(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldFee, opts...).ToFunc()
+// ByNetAmount orders the results by the net_amount field.
+func ByNetAmount(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldNetAmount, opts...).ToFunc()
+}
+
+// ByEntry orders the results by the entry field.
+func ByEntry(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldEntry, opts...).ToFunc()
 }
 
 // ByNubanDepositField orders the results by nuban_deposit field.
@@ -332,13 +363,6 @@ func ByNubanDepositField(field string, opts ...sql.OrderTermOption) OrderOption 
 func ByNubanTransferField(field string, opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
 		sqlgraph.OrderByNeighborTerms(s, newNubanTransferStep(), sql.OrderByField(field, opts...))
-	}
-}
-
-// ByWalletField orders the results by wallet field.
-func ByWalletField(field string, opts ...sql.OrderTermOption) OrderOption {
-	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newWalletStep(), sql.OrderByField(field, opts...))
 	}
 }
 
@@ -356,17 +380,24 @@ func ByStablecoinWithdrawalField(field string, opts ...sql.OrderTermOption) Orde
 	}
 }
 
-// ByLedgerEntriesCount orders the results by ledger_entries count.
-func ByLedgerEntriesCount(opts ...sql.OrderTermOption) OrderOption {
+// ByFeesCount orders the results by fees count.
+func ByFeesCount(opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborsCount(s, newLedgerEntriesStep(), opts...)
+		sqlgraph.OrderByNeighborsCount(s, newFeesStep(), opts...)
 	}
 }
 
-// ByLedgerEntries orders the results by ledger_entries terms.
-func ByLedgerEntries(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+// ByFees orders the results by fees terms.
+func ByFees(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newLedgerEntriesStep(), append([]sql.OrderTerm{term}, terms...)...)
+		sqlgraph.OrderByNeighborTerms(s, newFeesStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+
+// ByLedgerEntryField orders the results by ledger_entry field.
+func ByLedgerEntryField(field string, opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newLedgerEntryStep(), sql.OrderByField(field, opts...))
 	}
 }
 
@@ -383,6 +414,20 @@ func ByReversalLedgerEntries(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOp
 		sqlgraph.OrderByNeighborTerms(s, newReversalLedgerEntriesStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
+
+// ByInvoiceCount orders the results by invoice count.
+func ByInvoiceCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newInvoiceStep(), opts...)
+	}
+}
+
+// ByInvoice orders the results by invoice terms.
+func ByInvoice(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newInvoiceStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
 func newNubanDepositStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
@@ -395,13 +440,6 @@ func newNubanTransferStep() *sqlgraph.Step {
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(NubanTransferInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.O2O, false, NubanTransferTable, NubanTransferColumn),
-	)
-}
-func newWalletStep() *sqlgraph.Step {
-	return sqlgraph.NewStep(
-		sqlgraph.From(Table, FieldID),
-		sqlgraph.To(WalletInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.M2O, false, WalletTable, WalletColumn),
 	)
 }
 func newStablecoinDepositStep() *sqlgraph.Step {
@@ -418,11 +456,18 @@ func newStablecoinWithdrawalStep() *sqlgraph.Step {
 		sqlgraph.Edge(sqlgraph.O2O, false, StablecoinWithdrawalTable, StablecoinWithdrawalColumn),
 	)
 }
-func newLedgerEntriesStep() *sqlgraph.Step {
+func newFeesStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
-		sqlgraph.To(LedgerEntriesInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.O2M, false, LedgerEntriesTable, LedgerEntriesColumn),
+		sqlgraph.To(FeesInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, FeesTable, FeesColumn),
+	)
+}
+func newLedgerEntryStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(LedgerEntryInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2O, false, LedgerEntryTable, LedgerEntryColumn),
 	)
 }
 func newReversalLedgerEntriesStep() *sqlgraph.Step {
@@ -430,5 +475,12 @@ func newReversalLedgerEntriesStep() *sqlgraph.Step {
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(ReversalLedgerEntriesInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.O2M, false, ReversalLedgerEntriesTable, ReversalLedgerEntriesColumn),
+	)
+}
+func newInvoiceStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(InvoiceInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, InvoiceTable, InvoiceColumn),
 	)
 }

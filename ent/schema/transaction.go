@@ -20,9 +20,8 @@ func (Transaction) Mixin() []ent.Mixin {
 // Fields of the Transaction.
 func (Transaction) Fields() []ent.Field {
 	return []ent.Field{
-		field.String("reference").
-			Unique(),
-		field.String("external_reference").Nillable().
+		field.String("reference"),
+		field.String("external_reference").Optional().Nillable().
 			Unique(),
 		field.Enum("type").
 			Values(
@@ -47,6 +46,7 @@ func (Transaction) Fields() []ent.Field {
 				"PENDING",
 				"PROCESSING",
 				"COMPLETED",
+				"SUCCESS",
 				"FAILED",
 				"REVERSED",
 				"CANCELLED",
@@ -57,7 +57,13 @@ func (Transaction) Fields() []ent.Field {
 		field.String("provider").
 			Optional(),
 		field.Int64("amount").Default(0),
-		field.Int64("fee").Default(0),
+		field.Int64("net_amount").Optional(),
+		field.Enum("entry").
+			Values(
+				"DEBIT",
+				"CREDIT",
+			).
+			Default("DEBIT"),
 	}
 }
 
@@ -68,16 +74,17 @@ func (Transaction) Edges() []ent.Edge {
 			Unique(),
 		edge.To("nuban_transfer", NubanTransfer.Type).
 			Unique(),
-		edge.To("wallet", Wallet.Type).
-			Unique().
-			Required(),
 		edge.To("stablecoin_deposit", StablecoinDeposit.Type).
 			Unique(),
 		edge.To("stablecoin_withdrawal", StablecoinWithdrawal.Type).
 			Unique(),
+		edge.To("fees", TransactionFee.Type),
 
 		// LEDGER
-		edge.To("ledger_entries", Ledger.Type),
+		edge.To("ledger_entry", Ledger.Type).Unique(),
 		edge.To("reversal_ledger_entries", Ledger.Type),
+
+		// Subscription
+		edge.To("invoice", Invoice.Type),
 	}
 }

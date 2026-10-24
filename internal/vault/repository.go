@@ -8,6 +8,7 @@ import (
 
 type IRepository interface {
 	Create(ctx context.Context, ownerID string) (*ent.Vault, error)
+	CreateWithType(ctx context.Context, ownerID, vaultType string) (*ent.Vault, error)
 	GetByID(ctx context.Context, id string) (*ent.Vault, error)
 	GetByOwner(ctx context.Context, ownerID, vaultType string) (*ent.Vault, error)
 	GetBusinessVaultByType(ctx context.Context, b *ent.Business, vaultType string) (*ent.Vault, error)

@@ -9,6 +9,7 @@ import (
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
+	"github.com/Toflex/directory_v2/ent/nubanbank"
 	"github.com/Toflex/directory_v2/ent/nubantransfer"
 	"github.com/Toflex/directory_v2/ent/transaction"
 )
@@ -28,20 +29,14 @@ type NubanTransfer struct {
 	RecipientAccountName string `json:"recipient_account_name,omitempty"`
 	// RecipientAccountNumber holds the value of the "recipient_account_number" field.
 	RecipientAccountNumber string `json:"recipient_account_number,omitempty"`
-	// SenderAccountName holds the value of the "sender_account_name" field.
-	SenderAccountName string `json:"sender_account_name,omitempty"`
-	// SenderAccountNumber holds the value of the "sender_account_number" field.
-	SenderAccountNumber string `json:"sender_account_number,omitempty"`
-	// SenderBankName holds the value of the "sender_bank_name" field.
-	SenderBankName string `json:"sender_bank_name,omitempty"`
-	// SenderBankCode holds the value of the "sender_bank_code" field.
-	SenderBankCode string `json:"sender_bank_code,omitempty"`
+	// NubanBankID holds the value of the "nuban_bank_id" field.
+	NubanBankID string `json:"nuban_bank_id,omitempty"`
 	// Amount holds the value of the "amount" field.
 	Amount int64 `json:"amount,omitempty"`
 	// SessionID holds the value of the "session_id" field.
-	SessionID string `json:"session_id,omitempty"`
+	SessionID *string `json:"session_id,omitempty"`
 	// ProviderReference holds the value of the "provider_reference" field.
-	ProviderReference string `json:"provider_reference,omitempty"`
+	ProviderReference *string `json:"provider_reference,omitempty"`
 	// Provider holds the value of the "provider" field.
 	Provider string `json:"provider,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
@@ -55,9 +50,13 @@ type NubanTransfer struct {
 type NubanTransferEdges struct {
 	// Transaction holds the value of the transaction edge.
 	Transaction *Transaction `json:"transaction,omitempty"`
+	// NubanBank holds the value of the nuban_bank edge.
+	NubanBank *NubanBank `json:"nuban_bank,omitempty"`
+	// Beneficiaries holds the value of the beneficiaries edge.
+	Beneficiaries []*NubanBeneficiary `json:"beneficiaries,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [1]bool
+	loadedTypes [3]bool
 }
 
 // TransactionOrErr returns the Transaction value or an error if the edge
@@ -71,6 +70,26 @@ func (e NubanTransferEdges) TransactionOrErr() (*Transaction, error) {
 	return nil, &NotLoadedError{edge: "transaction"}
 }
 
+// NubanBankOrErr returns the NubanBank value or an error if the edge
+// was not loaded in eager-loading, or loaded but was not found.
+func (e NubanTransferEdges) NubanBankOrErr() (*NubanBank, error) {
+	if e.NubanBank != nil {
+		return e.NubanBank, nil
+	} else if e.loadedTypes[1] {
+		return nil, &NotFoundError{label: nubanbank.Label}
+	}
+	return nil, &NotLoadedError{edge: "nuban_bank"}
+}
+
+// BeneficiariesOrErr returns the Beneficiaries value or an error if the edge
+// was not loaded in eager-loading.
+func (e NubanTransferEdges) BeneficiariesOrErr() ([]*NubanBeneficiary, error) {
+	if e.loadedTypes[2] {
+		return e.Beneficiaries, nil
+	}
+	return nil, &NotLoadedError{edge: "beneficiaries"}
+}
+
 // scanValues returns the types for scanning values from sql.Rows.
 func (*NubanTransfer) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
@@ -78,7 +97,7 @@ func (*NubanTransfer) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case nubantransfer.FieldAmount:
 			values[i] = new(sql.NullInt64)
-		case nubantransfer.FieldID, nubantransfer.FieldRecipientAccountName, nubantransfer.FieldRecipientAccountNumber, nubantransfer.FieldSenderAccountName, nubantransfer.FieldSenderAccountNumber, nubantransfer.FieldSenderBankName, nubantransfer.FieldSenderBankCode, nubantransfer.FieldSessionID, nubantransfer.FieldProviderReference, nubantransfer.FieldProvider:
+		case nubantransfer.FieldID, nubantransfer.FieldRecipientAccountName, nubantransfer.FieldRecipientAccountNumber, nubantransfer.FieldNubanBankID, nubantransfer.FieldSessionID, nubantransfer.FieldProviderReference, nubantransfer.FieldProvider:
 			values[i] = new(sql.NullString)
 		case nubantransfer.FieldCreatedAt, nubantransfer.FieldUpdatedAt, nubantransfer.FieldDeletedAt:
 			values[i] = new(sql.NullTime)
@@ -136,29 +155,11 @@ func (nt *NubanTransfer) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				nt.RecipientAccountNumber = value.String
 			}
-		case nubantransfer.FieldSenderAccountName:
+		case nubantransfer.FieldNubanBankID:
 			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field sender_account_name", values[i])
+				return fmt.Errorf("unexpected type %T for field nuban_bank_id", values[i])
 			} else if value.Valid {
-				nt.SenderAccountName = value.String
-			}
-		case nubantransfer.FieldSenderAccountNumber:
-			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field sender_account_number", values[i])
-			} else if value.Valid {
-				nt.SenderAccountNumber = value.String
-			}
-		case nubantransfer.FieldSenderBankName:
-			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field sender_bank_name", values[i])
-			} else if value.Valid {
-				nt.SenderBankName = value.String
-			}
-		case nubantransfer.FieldSenderBankCode:
-			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field sender_bank_code", values[i])
-			} else if value.Valid {
-				nt.SenderBankCode = value.String
+				nt.NubanBankID = value.String
 			}
 		case nubantransfer.FieldAmount:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
@@ -170,13 +171,15 @@ func (nt *NubanTransfer) assignValues(columns []string, values []any) error {
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field session_id", values[i])
 			} else if value.Valid {
-				nt.SessionID = value.String
+				nt.SessionID = new(string)
+				*nt.SessionID = value.String
 			}
 		case nubantransfer.FieldProviderReference:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field provider_reference", values[i])
 			} else if value.Valid {
-				nt.ProviderReference = value.String
+				nt.ProviderReference = new(string)
+				*nt.ProviderReference = value.String
 			}
 		case nubantransfer.FieldProvider:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -207,6 +210,16 @@ func (nt *NubanTransfer) Value(name string) (ent.Value, error) {
 // QueryTransaction queries the "transaction" edge of the NubanTransfer entity.
 func (nt *NubanTransfer) QueryTransaction() *TransactionQuery {
 	return NewNubanTransferClient(nt.config).QueryTransaction(nt)
+}
+
+// QueryNubanBank queries the "nuban_bank" edge of the NubanTransfer entity.
+func (nt *NubanTransfer) QueryNubanBank() *NubanBankQuery {
+	return NewNubanTransferClient(nt.config).QueryNubanBank(nt)
+}
+
+// QueryBeneficiaries queries the "beneficiaries" edge of the NubanTransfer entity.
+func (nt *NubanTransfer) QueryBeneficiaries() *NubanBeneficiaryQuery {
+	return NewNubanTransferClient(nt.config).QueryBeneficiaries(nt)
 }
 
 // Update returns a builder for updating this NubanTransfer.
@@ -249,26 +262,21 @@ func (nt *NubanTransfer) String() string {
 	builder.WriteString("recipient_account_number=")
 	builder.WriteString(nt.RecipientAccountNumber)
 	builder.WriteString(", ")
-	builder.WriteString("sender_account_name=")
-	builder.WriteString(nt.SenderAccountName)
-	builder.WriteString(", ")
-	builder.WriteString("sender_account_number=")
-	builder.WriteString(nt.SenderAccountNumber)
-	builder.WriteString(", ")
-	builder.WriteString("sender_bank_name=")
-	builder.WriteString(nt.SenderBankName)
-	builder.WriteString(", ")
-	builder.WriteString("sender_bank_code=")
-	builder.WriteString(nt.SenderBankCode)
+	builder.WriteString("nuban_bank_id=")
+	builder.WriteString(nt.NubanBankID)
 	builder.WriteString(", ")
 	builder.WriteString("amount=")
 	builder.WriteString(fmt.Sprintf("%v", nt.Amount))
 	builder.WriteString(", ")
-	builder.WriteString("session_id=")
-	builder.WriteString(nt.SessionID)
+	if v := nt.SessionID; v != nil {
+		builder.WriteString("session_id=")
+		builder.WriteString(*v)
+	}
 	builder.WriteString(", ")
-	builder.WriteString("provider_reference=")
-	builder.WriteString(nt.ProviderReference)
+	if v := nt.ProviderReference; v != nil {
+		builder.WriteString("provider_reference=")
+		builder.WriteString(*v)
+	}
 	builder.WriteString(", ")
 	builder.WriteString("provider=")
 	builder.WriteString(nt.Provider)

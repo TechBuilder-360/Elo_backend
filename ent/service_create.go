@@ -12,7 +12,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/Toflex/directory_v2/ent/schema"
+	"github.com/Toflex/directory_v2/ent/feerule"
 	"github.com/Toflex/directory_v2/ent/service"
 )
 
@@ -112,37 +112,31 @@ func (sc *ServiceCreate) SetNillableActive(b *bool) *ServiceCreate {
 	return sc
 }
 
-// SetMin sets the "min" field.
-func (sc *ServiceCreate) SetMin(i int) *ServiceCreate {
-	sc.mutation.SetMin(i)
+// SetMinValue sets the "min_value" field.
+func (sc *ServiceCreate) SetMinValue(i int) *ServiceCreate {
+	sc.mutation.SetMinValue(i)
 	return sc
 }
 
-// SetNillableMin sets the "min" field if the given value is not nil.
-func (sc *ServiceCreate) SetNillableMin(i *int) *ServiceCreate {
+// SetNillableMinValue sets the "min_value" field if the given value is not nil.
+func (sc *ServiceCreate) SetNillableMinValue(i *int) *ServiceCreate {
 	if i != nil {
-		sc.SetMin(*i)
+		sc.SetMinValue(*i)
 	}
 	return sc
 }
 
-// SetMax sets the "max" field.
-func (sc *ServiceCreate) SetMax(i int) *ServiceCreate {
-	sc.mutation.SetMax(i)
+// SetMaxValue sets the "max_value" field.
+func (sc *ServiceCreate) SetMaxValue(i int) *ServiceCreate {
+	sc.mutation.SetMaxValue(i)
 	return sc
 }
 
-// SetNillableMax sets the "max" field if the given value is not nil.
-func (sc *ServiceCreate) SetNillableMax(i *int) *ServiceCreate {
+// SetNillableMaxValue sets the "max_value" field if the given value is not nil.
+func (sc *ServiceCreate) SetNillableMaxValue(i *int) *ServiceCreate {
 	if i != nil {
-		sc.SetMax(*i)
+		sc.SetMaxValue(*i)
 	}
-	return sc
-}
-
-// SetFee sets the "fee" field.
-func (sc *ServiceCreate) SetFee(s *schema.Fee) *ServiceCreate {
-	sc.mutation.SetFee(s)
 	return sc
 }
 
@@ -158,6 +152,21 @@ func (sc *ServiceCreate) SetNillableID(s *string) *ServiceCreate {
 		sc.SetID(*s)
 	}
 	return sc
+}
+
+// AddFeeRuleIDs adds the "fee_rules" edge to the FeeRule entity by IDs.
+func (sc *ServiceCreate) AddFeeRuleIDs(ids ...string) *ServiceCreate {
+	sc.mutation.AddFeeRuleIDs(ids...)
+	return sc
+}
+
+// AddFeeRules adds the "fee_rules" edges to the FeeRule entity.
+func (sc *ServiceCreate) AddFeeRules(f ...*FeeRule) *ServiceCreate {
+	ids := make([]string, len(f))
+	for i := range f {
+		ids[i] = f[i].ID
+	}
+	return sc.AddFeeRuleIDs(ids...)
 }
 
 // Mutation returns the ServiceMutation object of the builder.
@@ -211,13 +220,13 @@ func (sc *ServiceCreate) defaults() {
 		v := service.DefaultActive
 		sc.mutation.SetActive(v)
 	}
-	if _, ok := sc.mutation.Min(); !ok {
-		v := service.DefaultMin
-		sc.mutation.SetMin(v)
+	if _, ok := sc.mutation.MinValue(); !ok {
+		v := service.DefaultMinValue
+		sc.mutation.SetMinValue(v)
 	}
-	if _, ok := sc.mutation.Max(); !ok {
-		v := service.DefaultMax
-		sc.mutation.SetMax(v)
+	if _, ok := sc.mutation.MaxValue(); !ok {
+		v := service.DefaultMaxValue
+		sc.mutation.SetMaxValue(v)
 	}
 	if _, ok := sc.mutation.ID(); !ok {
 		v := service.DefaultID()
@@ -263,14 +272,11 @@ func (sc *ServiceCreate) check() error {
 	if _, ok := sc.mutation.Active(); !ok {
 		return &ValidationError{Name: "active", err: errors.New(`ent: missing required field "Service.active"`)}
 	}
-	if _, ok := sc.mutation.Min(); !ok {
-		return &ValidationError{Name: "min", err: errors.New(`ent: missing required field "Service.min"`)}
+	if _, ok := sc.mutation.MinValue(); !ok {
+		return &ValidationError{Name: "min_value", err: errors.New(`ent: missing required field "Service.min_value"`)}
 	}
-	if _, ok := sc.mutation.Max(); !ok {
-		return &ValidationError{Name: "max", err: errors.New(`ent: missing required field "Service.max"`)}
-	}
-	if _, ok := sc.mutation.Fee(); !ok {
-		return &ValidationError{Name: "fee", err: errors.New(`ent: missing required field "Service.fee"`)}
+	if _, ok := sc.mutation.MaxValue(); !ok {
+		return &ValidationError{Name: "max_value", err: errors.New(`ent: missing required field "Service.max_value"`)}
 	}
 	return nil
 }
@@ -340,17 +346,29 @@ func (sc *ServiceCreate) createSpec() (*Service, *sqlgraph.CreateSpec) {
 		_spec.SetField(service.FieldActive, field.TypeBool, value)
 		_node.Active = value
 	}
-	if value, ok := sc.mutation.Min(); ok {
-		_spec.SetField(service.FieldMin, field.TypeInt, value)
-		_node.Min = value
+	if value, ok := sc.mutation.MinValue(); ok {
+		_spec.SetField(service.FieldMinValue, field.TypeInt, value)
+		_node.MinValue = value
 	}
-	if value, ok := sc.mutation.Max(); ok {
-		_spec.SetField(service.FieldMax, field.TypeInt, value)
-		_node.Max = value
+	if value, ok := sc.mutation.MaxValue(); ok {
+		_spec.SetField(service.FieldMaxValue, field.TypeInt, value)
+		_node.MaxValue = value
 	}
-	if value, ok := sc.mutation.Fee(); ok {
-		_spec.SetField(service.FieldFee, field.TypeJSON, value)
-		_node.Fee = value
+	if nodes := sc.mutation.FeeRulesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   service.FeeRulesTable,
+			Columns: []string{service.FeeRulesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(feerule.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec
 }
@@ -494,51 +512,39 @@ func (u *ServiceUpsert) UpdateActive() *ServiceUpsert {
 	return u
 }
 
-// SetMin sets the "min" field.
-func (u *ServiceUpsert) SetMin(v int) *ServiceUpsert {
-	u.Set(service.FieldMin, v)
+// SetMinValue sets the "min_value" field.
+func (u *ServiceUpsert) SetMinValue(v int) *ServiceUpsert {
+	u.Set(service.FieldMinValue, v)
 	return u
 }
 
-// UpdateMin sets the "min" field to the value that was provided on create.
-func (u *ServiceUpsert) UpdateMin() *ServiceUpsert {
-	u.SetExcluded(service.FieldMin)
+// UpdateMinValue sets the "min_value" field to the value that was provided on create.
+func (u *ServiceUpsert) UpdateMinValue() *ServiceUpsert {
+	u.SetExcluded(service.FieldMinValue)
 	return u
 }
 
-// AddMin adds v to the "min" field.
-func (u *ServiceUpsert) AddMin(v int) *ServiceUpsert {
-	u.Add(service.FieldMin, v)
+// AddMinValue adds v to the "min_value" field.
+func (u *ServiceUpsert) AddMinValue(v int) *ServiceUpsert {
+	u.Add(service.FieldMinValue, v)
 	return u
 }
 
-// SetMax sets the "max" field.
-func (u *ServiceUpsert) SetMax(v int) *ServiceUpsert {
-	u.Set(service.FieldMax, v)
+// SetMaxValue sets the "max_value" field.
+func (u *ServiceUpsert) SetMaxValue(v int) *ServiceUpsert {
+	u.Set(service.FieldMaxValue, v)
 	return u
 }
 
-// UpdateMax sets the "max" field to the value that was provided on create.
-func (u *ServiceUpsert) UpdateMax() *ServiceUpsert {
-	u.SetExcluded(service.FieldMax)
+// UpdateMaxValue sets the "max_value" field to the value that was provided on create.
+func (u *ServiceUpsert) UpdateMaxValue() *ServiceUpsert {
+	u.SetExcluded(service.FieldMaxValue)
 	return u
 }
 
-// AddMax adds v to the "max" field.
-func (u *ServiceUpsert) AddMax(v int) *ServiceUpsert {
-	u.Add(service.FieldMax, v)
-	return u
-}
-
-// SetFee sets the "fee" field.
-func (u *ServiceUpsert) SetFee(v *schema.Fee) *ServiceUpsert {
-	u.Set(service.FieldFee, v)
-	return u
-}
-
-// UpdateFee sets the "fee" field to the value that was provided on create.
-func (u *ServiceUpsert) UpdateFee() *ServiceUpsert {
-	u.SetExcluded(service.FieldFee)
+// AddMaxValue adds v to the "max_value" field.
+func (u *ServiceUpsert) AddMaxValue(v int) *ServiceUpsert {
+	u.Add(service.FieldMaxValue, v)
 	return u
 }
 
@@ -698,59 +704,45 @@ func (u *ServiceUpsertOne) UpdateActive() *ServiceUpsertOne {
 	})
 }
 
-// SetMin sets the "min" field.
-func (u *ServiceUpsertOne) SetMin(v int) *ServiceUpsertOne {
+// SetMinValue sets the "min_value" field.
+func (u *ServiceUpsertOne) SetMinValue(v int) *ServiceUpsertOne {
 	return u.Update(func(s *ServiceUpsert) {
-		s.SetMin(v)
+		s.SetMinValue(v)
 	})
 }
 
-// AddMin adds v to the "min" field.
-func (u *ServiceUpsertOne) AddMin(v int) *ServiceUpsertOne {
+// AddMinValue adds v to the "min_value" field.
+func (u *ServiceUpsertOne) AddMinValue(v int) *ServiceUpsertOne {
 	return u.Update(func(s *ServiceUpsert) {
-		s.AddMin(v)
+		s.AddMinValue(v)
 	})
 }
 
-// UpdateMin sets the "min" field to the value that was provided on create.
-func (u *ServiceUpsertOne) UpdateMin() *ServiceUpsertOne {
+// UpdateMinValue sets the "min_value" field to the value that was provided on create.
+func (u *ServiceUpsertOne) UpdateMinValue() *ServiceUpsertOne {
 	return u.Update(func(s *ServiceUpsert) {
-		s.UpdateMin()
+		s.UpdateMinValue()
 	})
 }
 
-// SetMax sets the "max" field.
-func (u *ServiceUpsertOne) SetMax(v int) *ServiceUpsertOne {
+// SetMaxValue sets the "max_value" field.
+func (u *ServiceUpsertOne) SetMaxValue(v int) *ServiceUpsertOne {
 	return u.Update(func(s *ServiceUpsert) {
-		s.SetMax(v)
+		s.SetMaxValue(v)
 	})
 }
 
-// AddMax adds v to the "max" field.
-func (u *ServiceUpsertOne) AddMax(v int) *ServiceUpsertOne {
+// AddMaxValue adds v to the "max_value" field.
+func (u *ServiceUpsertOne) AddMaxValue(v int) *ServiceUpsertOne {
 	return u.Update(func(s *ServiceUpsert) {
-		s.AddMax(v)
+		s.AddMaxValue(v)
 	})
 }
 
-// UpdateMax sets the "max" field to the value that was provided on create.
-func (u *ServiceUpsertOne) UpdateMax() *ServiceUpsertOne {
+// UpdateMaxValue sets the "max_value" field to the value that was provided on create.
+func (u *ServiceUpsertOne) UpdateMaxValue() *ServiceUpsertOne {
 	return u.Update(func(s *ServiceUpsert) {
-		s.UpdateMax()
-	})
-}
-
-// SetFee sets the "fee" field.
-func (u *ServiceUpsertOne) SetFee(v *schema.Fee) *ServiceUpsertOne {
-	return u.Update(func(s *ServiceUpsert) {
-		s.SetFee(v)
-	})
-}
-
-// UpdateFee sets the "fee" field to the value that was provided on create.
-func (u *ServiceUpsertOne) UpdateFee() *ServiceUpsertOne {
-	return u.Update(func(s *ServiceUpsert) {
-		s.UpdateFee()
+		s.UpdateMaxValue()
 	})
 }
 
@@ -1077,59 +1069,45 @@ func (u *ServiceUpsertBulk) UpdateActive() *ServiceUpsertBulk {
 	})
 }
 
-// SetMin sets the "min" field.
-func (u *ServiceUpsertBulk) SetMin(v int) *ServiceUpsertBulk {
+// SetMinValue sets the "min_value" field.
+func (u *ServiceUpsertBulk) SetMinValue(v int) *ServiceUpsertBulk {
 	return u.Update(func(s *ServiceUpsert) {
-		s.SetMin(v)
+		s.SetMinValue(v)
 	})
 }
 
-// AddMin adds v to the "min" field.
-func (u *ServiceUpsertBulk) AddMin(v int) *ServiceUpsertBulk {
+// AddMinValue adds v to the "min_value" field.
+func (u *ServiceUpsertBulk) AddMinValue(v int) *ServiceUpsertBulk {
 	return u.Update(func(s *ServiceUpsert) {
-		s.AddMin(v)
+		s.AddMinValue(v)
 	})
 }
 
-// UpdateMin sets the "min" field to the value that was provided on create.
-func (u *ServiceUpsertBulk) UpdateMin() *ServiceUpsertBulk {
+// UpdateMinValue sets the "min_value" field to the value that was provided on create.
+func (u *ServiceUpsertBulk) UpdateMinValue() *ServiceUpsertBulk {
 	return u.Update(func(s *ServiceUpsert) {
-		s.UpdateMin()
+		s.UpdateMinValue()
 	})
 }
 
-// SetMax sets the "max" field.
-func (u *ServiceUpsertBulk) SetMax(v int) *ServiceUpsertBulk {
+// SetMaxValue sets the "max_value" field.
+func (u *ServiceUpsertBulk) SetMaxValue(v int) *ServiceUpsertBulk {
 	return u.Update(func(s *ServiceUpsert) {
-		s.SetMax(v)
+		s.SetMaxValue(v)
 	})
 }
 
-// AddMax adds v to the "max" field.
-func (u *ServiceUpsertBulk) AddMax(v int) *ServiceUpsertBulk {
+// AddMaxValue adds v to the "max_value" field.
+func (u *ServiceUpsertBulk) AddMaxValue(v int) *ServiceUpsertBulk {
 	return u.Update(func(s *ServiceUpsert) {
-		s.AddMax(v)
+		s.AddMaxValue(v)
 	})
 }
 
-// UpdateMax sets the "max" field to the value that was provided on create.
-func (u *ServiceUpsertBulk) UpdateMax() *ServiceUpsertBulk {
+// UpdateMaxValue sets the "max_value" field to the value that was provided on create.
+func (u *ServiceUpsertBulk) UpdateMaxValue() *ServiceUpsertBulk {
 	return u.Update(func(s *ServiceUpsert) {
-		s.UpdateMax()
-	})
-}
-
-// SetFee sets the "fee" field.
-func (u *ServiceUpsertBulk) SetFee(v *schema.Fee) *ServiceUpsertBulk {
-	return u.Update(func(s *ServiceUpsert) {
-		s.SetFee(v)
-	})
-}
-
-// UpdateFee sets the "fee" field to the value that was provided on create.
-func (u *ServiceUpsertBulk) UpdateFee() *ServiceUpsertBulk {
-	return u.Update(func(s *ServiceUpsert) {
-		s.UpdateFee()
+		s.UpdateMaxValue()
 	})
 }
 

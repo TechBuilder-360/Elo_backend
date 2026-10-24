@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
 )
 
 const (
@@ -29,14 +30,21 @@ const (
 	FieldRequireSubscription = "require_subscription"
 	// FieldActive holds the string denoting the active field in the database.
 	FieldActive = "active"
-	// FieldMin holds the string denoting the min field in the database.
-	FieldMin = "min"
-	// FieldMax holds the string denoting the max field in the database.
-	FieldMax = "max"
-	// FieldFee holds the string denoting the fee field in the database.
-	FieldFee = "fee"
+	// FieldMinValue holds the string denoting the min_value field in the database.
+	FieldMinValue = "min_value"
+	// FieldMaxValue holds the string denoting the max_value field in the database.
+	FieldMaxValue = "max_value"
+	// EdgeFeeRules holds the string denoting the fee_rules edge name in mutations.
+	EdgeFeeRules = "fee_rules"
 	// Table holds the table name of the service in the database.
 	Table = "services"
+	// FeeRulesTable is the table that holds the fee_rules relation/edge.
+	FeeRulesTable = "fee_rules"
+	// FeeRulesInverseTable is the table name for the FeeRule entity.
+	// It exists in this package in order to avoid circular dependency with the "feerule" package.
+	FeeRulesInverseTable = "fee_rules"
+	// FeeRulesColumn is the table column denoting the fee_rules relation/edge.
+	FeeRulesColumn = "service_id"
 )
 
 // Columns holds all SQL columns for service fields.
@@ -50,9 +58,8 @@ var Columns = []string{
 	FieldProvider,
 	FieldRequireSubscription,
 	FieldActive,
-	FieldMin,
-	FieldMax,
-	FieldFee,
+	FieldMinValue,
+	FieldMaxValue,
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -82,10 +89,10 @@ var (
 	DefaultRequireSubscription bool
 	// DefaultActive holds the default value on creation for the "active" field.
 	DefaultActive bool
-	// DefaultMin holds the default value on creation for the "min" field.
-	DefaultMin int
-	// DefaultMax holds the default value on creation for the "max" field.
-	DefaultMax int
+	// DefaultMinValue holds the default value on creation for the "min_value" field.
+	DefaultMinValue int
+	// DefaultMaxValue holds the default value on creation for the "max_value" field.
+	DefaultMaxValue int
 	// DefaultID holds the default value on creation for the "id" field.
 	DefaultID func() string
 )
@@ -138,12 +145,33 @@ func ByActive(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldActive, opts...).ToFunc()
 }
 
-// ByMin orders the results by the min field.
-func ByMin(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldMin, opts...).ToFunc()
+// ByMinValue orders the results by the min_value field.
+func ByMinValue(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldMinValue, opts...).ToFunc()
 }
 
-// ByMax orders the results by the max field.
-func ByMax(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldMax, opts...).ToFunc()
+// ByMaxValue orders the results by the max_value field.
+func ByMaxValue(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldMaxValue, opts...).ToFunc()
+}
+
+// ByFeeRulesCount orders the results by fee_rules count.
+func ByFeeRulesCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newFeeRulesStep(), opts...)
+	}
+}
+
+// ByFeeRules orders the results by fee_rules terms.
+func ByFeeRules(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newFeeRulesStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+func newFeeRulesStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(FeeRulesInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, FeeRulesTable, FeeRulesColumn),
+	)
 }

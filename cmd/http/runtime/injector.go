@@ -8,26 +8,33 @@ import (
 	"github.com/samber/do/v2"
 )
 
-var Injector = do.New()
+var injector = do.New()
+
+func GetInjector() do.Injector {
+	return injector
+}
 
 func InitializeDI() {
 	// provides Database connection
 	// database initialization
-	do.Provide(Injector, database.NewClient)
+	do.Provide(injector, database.NewClient)
 
 	// provides redis connection
 	// redis initialization
-	do.Provide(Injector, r.NewClient)
+	do.Provide(injector, r.NewClient)
 
 	// provides async queue client
-	do.Provide(Injector, queue.NewClient)
+	do.Provide(injector, queue.NewClient)
 	// provides Asynq server for background workers
-	do.Provide(Injector, s.NewServer)
+	do.Provide(injector, s.NewServer)
 
 	// provides Server HTTP Engine
 	// GO-GIN server
-	do.Provide(Injector, server)
+	do.Provide(injector, server)
+
+	// Initialize Temporal Worker
+	initializeTemporal(injector)
 
 	// Initialize Services
-	initializeService(Injector)
+	initializeService(injector)
 }

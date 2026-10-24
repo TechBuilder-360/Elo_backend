@@ -12,13 +12,14 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/Toflex/directory_v2/ent/invoice"
 	"github.com/Toflex/directory_v2/ent/ledger"
 	"github.com/Toflex/directory_v2/ent/nubandeposit"
 	"github.com/Toflex/directory_v2/ent/nubantransfer"
 	"github.com/Toflex/directory_v2/ent/stablecoindeposit"
 	"github.com/Toflex/directory_v2/ent/stablecoinwithdrawal"
 	"github.com/Toflex/directory_v2/ent/transaction"
-	"github.com/Toflex/directory_v2/ent/wallet"
+	"github.com/Toflex/directory_v2/ent/transactionfee"
 )
 
 // TransactionCreate is the builder for creating a Transaction entity.
@@ -80,6 +81,14 @@ func (tc *TransactionCreate) SetReference(s string) *TransactionCreate {
 // SetExternalReference sets the "external_reference" field.
 func (tc *TransactionCreate) SetExternalReference(s string) *TransactionCreate {
 	tc.mutation.SetExternalReference(s)
+	return tc
+}
+
+// SetNillableExternalReference sets the "external_reference" field if the given value is not nil.
+func (tc *TransactionCreate) SetNillableExternalReference(s *string) *TransactionCreate {
+	if s != nil {
+		tc.SetExternalReference(*s)
+	}
 	return tc
 }
 
@@ -157,16 +166,30 @@ func (tc *TransactionCreate) SetNillableAmount(i *int64) *TransactionCreate {
 	return tc
 }
 
-// SetFee sets the "fee" field.
-func (tc *TransactionCreate) SetFee(i int64) *TransactionCreate {
-	tc.mutation.SetFee(i)
+// SetNetAmount sets the "net_amount" field.
+func (tc *TransactionCreate) SetNetAmount(i int64) *TransactionCreate {
+	tc.mutation.SetNetAmount(i)
 	return tc
 }
 
-// SetNillableFee sets the "fee" field if the given value is not nil.
-func (tc *TransactionCreate) SetNillableFee(i *int64) *TransactionCreate {
+// SetNillableNetAmount sets the "net_amount" field if the given value is not nil.
+func (tc *TransactionCreate) SetNillableNetAmount(i *int64) *TransactionCreate {
 	if i != nil {
-		tc.SetFee(*i)
+		tc.SetNetAmount(*i)
+	}
+	return tc
+}
+
+// SetEntry sets the "entry" field.
+func (tc *TransactionCreate) SetEntry(t transaction.Entry) *TransactionCreate {
+	tc.mutation.SetEntry(t)
+	return tc
+}
+
+// SetNillableEntry sets the "entry" field if the given value is not nil.
+func (tc *TransactionCreate) SetNillableEntry(t *transaction.Entry) *TransactionCreate {
+	if t != nil {
+		tc.SetEntry(*t)
 	}
 	return tc
 }
@@ -223,17 +246,6 @@ func (tc *TransactionCreate) SetNubanTransfer(n *NubanTransfer) *TransactionCrea
 	return tc.SetNubanTransferID(n.ID)
 }
 
-// SetWalletID sets the "wallet" edge to the Wallet entity by ID.
-func (tc *TransactionCreate) SetWalletID(id string) *TransactionCreate {
-	tc.mutation.SetWalletID(id)
-	return tc
-}
-
-// SetWallet sets the "wallet" edge to the Wallet entity.
-func (tc *TransactionCreate) SetWallet(w *Wallet) *TransactionCreate {
-	return tc.SetWalletID(w.ID)
-}
-
 // SetStablecoinDepositID sets the "stablecoin_deposit" edge to the StablecoinDeposit entity by ID.
 func (tc *TransactionCreate) SetStablecoinDepositID(id string) *TransactionCreate {
 	tc.mutation.SetStablecoinDepositID(id)
@@ -272,19 +284,38 @@ func (tc *TransactionCreate) SetStablecoinWithdrawal(s *StablecoinWithdrawal) *T
 	return tc.SetStablecoinWithdrawalID(s.ID)
 }
 
-// AddLedgerEntryIDs adds the "ledger_entries" edge to the Ledger entity by IDs.
-func (tc *TransactionCreate) AddLedgerEntryIDs(ids ...string) *TransactionCreate {
-	tc.mutation.AddLedgerEntryIDs(ids...)
+// AddFeeIDs adds the "fees" edge to the TransactionFee entity by IDs.
+func (tc *TransactionCreate) AddFeeIDs(ids ...string) *TransactionCreate {
+	tc.mutation.AddFeeIDs(ids...)
 	return tc
 }
 
-// AddLedgerEntries adds the "ledger_entries" edges to the Ledger entity.
-func (tc *TransactionCreate) AddLedgerEntries(l ...*Ledger) *TransactionCreate {
-	ids := make([]string, len(l))
-	for i := range l {
-		ids[i] = l[i].ID
+// AddFees adds the "fees" edges to the TransactionFee entity.
+func (tc *TransactionCreate) AddFees(t ...*TransactionFee) *TransactionCreate {
+	ids := make([]string, len(t))
+	for i := range t {
+		ids[i] = t[i].ID
 	}
-	return tc.AddLedgerEntryIDs(ids...)
+	return tc.AddFeeIDs(ids...)
+}
+
+// SetLedgerEntryID sets the "ledger_entry" edge to the Ledger entity by ID.
+func (tc *TransactionCreate) SetLedgerEntryID(id string) *TransactionCreate {
+	tc.mutation.SetLedgerEntryID(id)
+	return tc
+}
+
+// SetNillableLedgerEntryID sets the "ledger_entry" edge to the Ledger entity by ID if the given value is not nil.
+func (tc *TransactionCreate) SetNillableLedgerEntryID(id *string) *TransactionCreate {
+	if id != nil {
+		tc = tc.SetLedgerEntryID(*id)
+	}
+	return tc
+}
+
+// SetLedgerEntry sets the "ledger_entry" edge to the Ledger entity.
+func (tc *TransactionCreate) SetLedgerEntry(l *Ledger) *TransactionCreate {
+	return tc.SetLedgerEntryID(l.ID)
 }
 
 // AddReversalLedgerEntryIDs adds the "reversal_ledger_entries" edge to the Ledger entity by IDs.
@@ -300,6 +331,21 @@ func (tc *TransactionCreate) AddReversalLedgerEntries(l ...*Ledger) *Transaction
 		ids[i] = l[i].ID
 	}
 	return tc.AddReversalLedgerEntryIDs(ids...)
+}
+
+// AddInvoiceIDs adds the "invoice" edge to the Invoice entity by IDs.
+func (tc *TransactionCreate) AddInvoiceIDs(ids ...string) *TransactionCreate {
+	tc.mutation.AddInvoiceIDs(ids...)
+	return tc
+}
+
+// AddInvoice adds the "invoice" edges to the Invoice entity.
+func (tc *TransactionCreate) AddInvoice(i ...*Invoice) *TransactionCreate {
+	ids := make([]string, len(i))
+	for j := range i {
+		ids[j] = i[j].ID
+	}
+	return tc.AddInvoiceIDs(ids...)
 }
 
 // Mutation returns the TransactionMutation object of the builder.
@@ -353,9 +399,9 @@ func (tc *TransactionCreate) defaults() {
 		v := transaction.DefaultAmount
 		tc.mutation.SetAmount(v)
 	}
-	if _, ok := tc.mutation.Fee(); !ok {
-		v := transaction.DefaultFee
-		tc.mutation.SetFee(v)
+	if _, ok := tc.mutation.Entry(); !ok {
+		v := transaction.DefaultEntry
+		tc.mutation.SetEntry(v)
 	}
 	if _, ok := tc.mutation.ID(); !ok {
 		v := transaction.DefaultID()
@@ -373,9 +419,6 @@ func (tc *TransactionCreate) check() error {
 	}
 	if _, ok := tc.mutation.Reference(); !ok {
 		return &ValidationError{Name: "reference", err: errors.New(`ent: missing required field "Transaction.reference"`)}
-	}
-	if _, ok := tc.mutation.ExternalReference(); !ok {
-		return &ValidationError{Name: "external_reference", err: errors.New(`ent: missing required field "Transaction.external_reference"`)}
 	}
 	if _, ok := tc.mutation.GetType(); !ok {
 		return &ValidationError{Name: "type", err: errors.New(`ent: missing required field "Transaction.type"`)}
@@ -412,11 +455,13 @@ func (tc *TransactionCreate) check() error {
 	if _, ok := tc.mutation.Amount(); !ok {
 		return &ValidationError{Name: "amount", err: errors.New(`ent: missing required field "Transaction.amount"`)}
 	}
-	if _, ok := tc.mutation.Fee(); !ok {
-		return &ValidationError{Name: "fee", err: errors.New(`ent: missing required field "Transaction.fee"`)}
+	if _, ok := tc.mutation.Entry(); !ok {
+		return &ValidationError{Name: "entry", err: errors.New(`ent: missing required field "Transaction.entry"`)}
 	}
-	if len(tc.mutation.WalletIDs()) == 0 {
-		return &ValidationError{Name: "wallet", err: errors.New(`ent: missing required edge "Transaction.wallet"`)}
+	if v, ok := tc.mutation.Entry(); ok {
+		if err := transaction.EntryValidator(v); err != nil {
+			return &ValidationError{Name: "entry", err: fmt.Errorf(`ent: validator failed for field "Transaction.entry": %w`, err)}
+		}
 	}
 	return nil
 }
@@ -502,9 +547,13 @@ func (tc *TransactionCreate) createSpec() (*Transaction, *sqlgraph.CreateSpec) {
 		_spec.SetField(transaction.FieldAmount, field.TypeInt64, value)
 		_node.Amount = value
 	}
-	if value, ok := tc.mutation.Fee(); ok {
-		_spec.SetField(transaction.FieldFee, field.TypeInt64, value)
-		_node.Fee = value
+	if value, ok := tc.mutation.NetAmount(); ok {
+		_spec.SetField(transaction.FieldNetAmount, field.TypeInt64, value)
+		_node.NetAmount = value
+	}
+	if value, ok := tc.mutation.Entry(); ok {
+		_spec.SetField(transaction.FieldEntry, field.TypeEnum, value)
+		_node.Entry = value
 	}
 	if nodes := tc.mutation.NubanDepositIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
@@ -536,23 +585,6 @@ func (tc *TransactionCreate) createSpec() (*Transaction, *sqlgraph.CreateSpec) {
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		_spec.Edges = append(_spec.Edges, edge)
-	}
-	if nodes := tc.mutation.WalletIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: false,
-			Table:   transaction.WalletTable,
-			Columns: []string{transaction.WalletColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(wallet.FieldID, field.TypeString),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_node.transaction_wallet = &nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	if nodes := tc.mutation.StablecoinDepositIDs(); len(nodes) > 0 {
@@ -587,12 +619,28 @@ func (tc *TransactionCreate) createSpec() (*Transaction, *sqlgraph.CreateSpec) {
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := tc.mutation.LedgerEntriesIDs(); len(nodes) > 0 {
+	if nodes := tc.mutation.FeesIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   transaction.LedgerEntriesTable,
-			Columns: []string{transaction.LedgerEntriesColumn},
+			Table:   transaction.FeesTable,
+			Columns: []string{transaction.FeesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(transactionfee.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := tc.mutation.LedgerEntryIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2O,
+			Inverse: false,
+			Table:   transaction.LedgerEntryTable,
+			Columns: []string{transaction.LedgerEntryColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(ledger.FieldID, field.TypeString),
@@ -612,6 +660,22 @@ func (tc *TransactionCreate) createSpec() (*Transaction, *sqlgraph.CreateSpec) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(ledger.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := tc.mutation.InvoiceIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   transaction.InvoiceTable,
+			Columns: []string{transaction.InvoiceColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(invoice.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {
@@ -725,6 +789,12 @@ func (u *TransactionUpsert) UpdateExternalReference() *TransactionUpsert {
 	return u
 }
 
+// ClearExternalReference clears the value of the "external_reference" field.
+func (u *TransactionUpsert) ClearExternalReference() *TransactionUpsert {
+	u.SetNull(transaction.FieldExternalReference)
+	return u
+}
+
 // SetType sets the "type" field.
 func (u *TransactionUpsert) SetType(v transaction.Type) *TransactionUpsert {
 	u.Set(transaction.FieldType, v)
@@ -827,21 +897,39 @@ func (u *TransactionUpsert) AddAmount(v int64) *TransactionUpsert {
 	return u
 }
 
-// SetFee sets the "fee" field.
-func (u *TransactionUpsert) SetFee(v int64) *TransactionUpsert {
-	u.Set(transaction.FieldFee, v)
+// SetNetAmount sets the "net_amount" field.
+func (u *TransactionUpsert) SetNetAmount(v int64) *TransactionUpsert {
+	u.Set(transaction.FieldNetAmount, v)
 	return u
 }
 
-// UpdateFee sets the "fee" field to the value that was provided on create.
-func (u *TransactionUpsert) UpdateFee() *TransactionUpsert {
-	u.SetExcluded(transaction.FieldFee)
+// UpdateNetAmount sets the "net_amount" field to the value that was provided on create.
+func (u *TransactionUpsert) UpdateNetAmount() *TransactionUpsert {
+	u.SetExcluded(transaction.FieldNetAmount)
 	return u
 }
 
-// AddFee adds v to the "fee" field.
-func (u *TransactionUpsert) AddFee(v int64) *TransactionUpsert {
-	u.Add(transaction.FieldFee, v)
+// AddNetAmount adds v to the "net_amount" field.
+func (u *TransactionUpsert) AddNetAmount(v int64) *TransactionUpsert {
+	u.Add(transaction.FieldNetAmount, v)
+	return u
+}
+
+// ClearNetAmount clears the value of the "net_amount" field.
+func (u *TransactionUpsert) ClearNetAmount() *TransactionUpsert {
+	u.SetNull(transaction.FieldNetAmount)
+	return u
+}
+
+// SetEntry sets the "entry" field.
+func (u *TransactionUpsert) SetEntry(v transaction.Entry) *TransactionUpsert {
+	u.Set(transaction.FieldEntry, v)
+	return u
+}
+
+// UpdateEntry sets the "entry" field to the value that was provided on create.
+func (u *TransactionUpsert) UpdateEntry() *TransactionUpsert {
+	u.SetExcluded(transaction.FieldEntry)
 	return u
 }
 
@@ -956,6 +1044,13 @@ func (u *TransactionUpsertOne) SetExternalReference(v string) *TransactionUpsert
 func (u *TransactionUpsertOne) UpdateExternalReference() *TransactionUpsertOne {
 	return u.Update(func(s *TransactionUpsert) {
 		s.UpdateExternalReference()
+	})
+}
+
+// ClearExternalReference clears the value of the "external_reference" field.
+func (u *TransactionUpsertOne) ClearExternalReference() *TransactionUpsertOne {
+	return u.Update(func(s *TransactionUpsert) {
+		s.ClearExternalReference()
 	})
 }
 
@@ -1078,24 +1173,45 @@ func (u *TransactionUpsertOne) UpdateAmount() *TransactionUpsertOne {
 	})
 }
 
-// SetFee sets the "fee" field.
-func (u *TransactionUpsertOne) SetFee(v int64) *TransactionUpsertOne {
+// SetNetAmount sets the "net_amount" field.
+func (u *TransactionUpsertOne) SetNetAmount(v int64) *TransactionUpsertOne {
 	return u.Update(func(s *TransactionUpsert) {
-		s.SetFee(v)
+		s.SetNetAmount(v)
 	})
 }
 
-// AddFee adds v to the "fee" field.
-func (u *TransactionUpsertOne) AddFee(v int64) *TransactionUpsertOne {
+// AddNetAmount adds v to the "net_amount" field.
+func (u *TransactionUpsertOne) AddNetAmount(v int64) *TransactionUpsertOne {
 	return u.Update(func(s *TransactionUpsert) {
-		s.AddFee(v)
+		s.AddNetAmount(v)
 	})
 }
 
-// UpdateFee sets the "fee" field to the value that was provided on create.
-func (u *TransactionUpsertOne) UpdateFee() *TransactionUpsertOne {
+// UpdateNetAmount sets the "net_amount" field to the value that was provided on create.
+func (u *TransactionUpsertOne) UpdateNetAmount() *TransactionUpsertOne {
 	return u.Update(func(s *TransactionUpsert) {
-		s.UpdateFee()
+		s.UpdateNetAmount()
+	})
+}
+
+// ClearNetAmount clears the value of the "net_amount" field.
+func (u *TransactionUpsertOne) ClearNetAmount() *TransactionUpsertOne {
+	return u.Update(func(s *TransactionUpsert) {
+		s.ClearNetAmount()
+	})
+}
+
+// SetEntry sets the "entry" field.
+func (u *TransactionUpsertOne) SetEntry(v transaction.Entry) *TransactionUpsertOne {
+	return u.Update(func(s *TransactionUpsert) {
+		s.SetEntry(v)
+	})
+}
+
+// UpdateEntry sets the "entry" field to the value that was provided on create.
+func (u *TransactionUpsertOne) UpdateEntry() *TransactionUpsertOne {
+	return u.Update(func(s *TransactionUpsert) {
+		s.UpdateEntry()
 	})
 }
 
@@ -1380,6 +1496,13 @@ func (u *TransactionUpsertBulk) UpdateExternalReference() *TransactionUpsertBulk
 	})
 }
 
+// ClearExternalReference clears the value of the "external_reference" field.
+func (u *TransactionUpsertBulk) ClearExternalReference() *TransactionUpsertBulk {
+	return u.Update(func(s *TransactionUpsert) {
+		s.ClearExternalReference()
+	})
+}
+
 // SetType sets the "type" field.
 func (u *TransactionUpsertBulk) SetType(v transaction.Type) *TransactionUpsertBulk {
 	return u.Update(func(s *TransactionUpsert) {
@@ -1499,24 +1622,45 @@ func (u *TransactionUpsertBulk) UpdateAmount() *TransactionUpsertBulk {
 	})
 }
 
-// SetFee sets the "fee" field.
-func (u *TransactionUpsertBulk) SetFee(v int64) *TransactionUpsertBulk {
+// SetNetAmount sets the "net_amount" field.
+func (u *TransactionUpsertBulk) SetNetAmount(v int64) *TransactionUpsertBulk {
 	return u.Update(func(s *TransactionUpsert) {
-		s.SetFee(v)
+		s.SetNetAmount(v)
 	})
 }
 
-// AddFee adds v to the "fee" field.
-func (u *TransactionUpsertBulk) AddFee(v int64) *TransactionUpsertBulk {
+// AddNetAmount adds v to the "net_amount" field.
+func (u *TransactionUpsertBulk) AddNetAmount(v int64) *TransactionUpsertBulk {
 	return u.Update(func(s *TransactionUpsert) {
-		s.AddFee(v)
+		s.AddNetAmount(v)
 	})
 }
 
-// UpdateFee sets the "fee" field to the value that was provided on create.
-func (u *TransactionUpsertBulk) UpdateFee() *TransactionUpsertBulk {
+// UpdateNetAmount sets the "net_amount" field to the value that was provided on create.
+func (u *TransactionUpsertBulk) UpdateNetAmount() *TransactionUpsertBulk {
 	return u.Update(func(s *TransactionUpsert) {
-		s.UpdateFee()
+		s.UpdateNetAmount()
+	})
+}
+
+// ClearNetAmount clears the value of the "net_amount" field.
+func (u *TransactionUpsertBulk) ClearNetAmount() *TransactionUpsertBulk {
+	return u.Update(func(s *TransactionUpsert) {
+		s.ClearNetAmount()
+	})
+}
+
+// SetEntry sets the "entry" field.
+func (u *TransactionUpsertBulk) SetEntry(v transaction.Entry) *TransactionUpsertBulk {
+	return u.Update(func(s *TransactionUpsert) {
+		s.SetEntry(v)
+	})
+}
+
+// UpdateEntry sets the "entry" field to the value that was provided on create.
+func (u *TransactionUpsertBulk) UpdateEntry() *TransactionUpsertBulk {
+	return u.Update(func(s *TransactionUpsert) {
+		s.UpdateEntry()
 	})
 }
 

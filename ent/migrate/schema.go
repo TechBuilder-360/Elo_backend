@@ -84,26 +84,6 @@ var (
 			},
 		},
 	}
-	// BusinessFeaturesColumns holds the columns for the "business_features" table.
-	BusinessFeaturesColumns = []*schema.Column{
-		{Name: "id", Type: field.TypeString},
-		{Name: "created_at", Type: field.TypeTime},
-		{Name: "updated_at", Type: field.TypeTime},
-		{Name: "deleted_at", Type: field.TypeTime, Nullable: true},
-		{Name: "name", Type: field.TypeString, Unique: true},
-		{Name: "identifier", Type: field.TypeString, Unique: true},
-		{Name: "require_subscription", Type: field.TypeBool, Default: false},
-		{Name: "active", Type: field.TypeBool, Default: true},
-		{Name: "min", Type: field.TypeInt, Default: 0},
-		{Name: "max", Type: field.TypeInt, Default: 0},
-		{Name: "fee", Type: field.TypeJSON},
-	}
-	// BusinessFeaturesTable holds the schema information for the "business_features" table.
-	BusinessFeaturesTable = &schema.Table{
-		Name:       "business_features",
-		Columns:    BusinessFeaturesColumns,
-		PrimaryKey: []*schema.Column{BusinessFeaturesColumns[0]},
-	}
 	// BusinessLocationsColumns holds the columns for the "business_locations" table.
 	BusinessLocationsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeString},
@@ -184,6 +164,106 @@ var (
 			},
 		},
 	}
+	// FeeRulesColumns holds the columns for the "fee_rules" table.
+	FeeRulesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeString},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "deleted_at", Type: field.TypeTime, Nullable: true},
+		{Name: "name", Type: field.TypeString},
+		{Name: "fee_type", Type: field.TypeEnum, Enums: []string{"VAT", "SERVICE_FEE", "NETWORK_FEE", "PROCESSING_FEE", "WITHHOLDING_TAX"}},
+		{Name: "calculation_method", Type: field.TypeEnum, Enums: []string{"FLAT", "PERCENTAGE", "TIERED"}},
+		{Name: "flat_amount", Type: field.TypeInt64, Nullable: true, Default: 0},
+		{Name: "percentage_rate", Type: field.TypeFloat64, Nullable: true, Default: 0},
+		{Name: "currency", Type: field.TypeString},
+		{Name: "is_active", Type: field.TypeBool, Default: true},
+		{Name: "effective_from", Type: field.TypeTime},
+		{Name: "effective_to", Type: field.TypeTime, Nullable: true},
+		{Name: "min_value", Type: field.TypeInt64, Nullable: true},
+		{Name: "max_value", Type: field.TypeInt64, Nullable: true},
+		{Name: "min_fee", Type: field.TypeInt64, Nullable: true},
+		{Name: "max_fee", Type: field.TypeInt64, Nullable: true},
+		{Name: "service_id", Type: field.TypeString},
+	}
+	// FeeRulesTable holds the schema information for the "fee_rules" table.
+	FeeRulesTable = &schema.Table{
+		Name:       "fee_rules",
+		Columns:    FeeRulesColumns,
+		PrimaryKey: []*schema.Column{FeeRulesColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "fee_rules_services_fee_rules",
+				Columns:    []*schema.Column{FeeRulesColumns[17]},
+				RefColumns: []*schema.Column{ServicesColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+		},
+	}
+	// FeeTiersColumns holds the columns for the "fee_tiers" table.
+	FeeTiersColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeString},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "deleted_at", Type: field.TypeTime, Nullable: true},
+		{Name: "min_amount", Type: field.TypeInt64, Default: 0},
+		{Name: "max_amount", Type: field.TypeInt64, Nullable: true},
+		{Name: "charge_type", Type: field.TypeEnum, Enums: []string{"FLAT", "PERCENTAGE"}},
+		{Name: "flat_amount", Type: field.TypeInt64, Nullable: true, Default: 0},
+		{Name: "percentage_rate", Type: field.TypeFloat64, Nullable: true, Default: 0},
+		{Name: "priority", Type: field.TypeInt, Default: 0},
+		{Name: "fee_rule_tiers", Type: field.TypeString},
+	}
+	// FeeTiersTable holds the schema information for the "fee_tiers" table.
+	FeeTiersTable = &schema.Table{
+		Name:       "fee_tiers",
+		Columns:    FeeTiersColumns,
+		PrimaryKey: []*schema.Column{FeeTiersColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "fee_tiers_fee_rules_tiers",
+				Columns:    []*schema.Column{FeeTiersColumns[10]},
+				RefColumns: []*schema.Column{FeeRulesColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+		},
+	}
+	// InvoicesColumns holds the columns for the "invoices" table.
+	InvoicesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeString},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "deleted_at", Type: field.TypeTime, Nullable: true},
+		{Name: "reference", Type: field.TypeString, Unique: true},
+		{Name: "status", Type: field.TypeEnum, Enums: []string{"PENDING", "PAID", "FAILED", "VOID", "REFUNDED"}},
+		{Name: "amount", Type: field.TypeInt64},
+		{Name: "currency", Type: field.TypeString},
+		{Name: "period_start", Type: field.TypeTime},
+		{Name: "period_end", Type: field.TypeTime},
+		{Name: "due_at", Type: field.TypeTime},
+		{Name: "paid_at", Type: field.TypeTime, Nullable: true},
+		{Name: "subscription_invoices", Type: field.TypeString},
+		{Name: "transaction_invoice", Type: field.TypeString},
+	}
+	// InvoicesTable holds the schema information for the "invoices" table.
+	InvoicesTable = &schema.Table{
+		Name:       "invoices",
+		Columns:    InvoicesColumns,
+		PrimaryKey: []*schema.Column{InvoicesColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "invoices_subscriptions_invoices",
+				Columns:    []*schema.Column{InvoicesColumns[12]},
+				RefColumns: []*schema.Column{SubscriptionsColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+			{
+				Symbol:     "invoices_transactions_invoice",
+				Columns:    []*schema.Column{InvoicesColumns[13]},
+				RefColumns: []*schema.Column{TransactionsColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+		},
+	}
 	// KybDocumentsColumns holds the columns for the "kyb_documents" table.
 	KybDocumentsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeString},
@@ -230,12 +310,13 @@ var (
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "updated_at", Type: field.TypeTime},
 		{Name: "deleted_at", Type: field.TypeTime, Nullable: true},
+		{Name: "affected_balance", Type: field.TypeEnum, Enums: []string{"HOLDING_BALANCE", "AVAILABLE_BALANCE", "LEDGER_BALANCE"}},
 		{Name: "debit", Type: field.TypeInt64, Default: 0},
 		{Name: "credit", Type: field.TypeInt64, Default: 0},
 		{Name: "current_balance", Type: field.TypeInt64, Default: 0},
 		{Name: "previous_balance", Type: field.TypeInt64, Default: 0},
 		{Name: "is_reversal", Type: field.TypeBool, Default: false},
-		{Name: "transaction_id", Type: field.TypeString},
+		{Name: "transaction_id", Type: field.TypeString, Unique: true},
 		{Name: "reversal_transaction_id", Type: field.TypeString, Nullable: true},
 		{Name: "wallet_id", Type: field.TypeString},
 	}
@@ -246,20 +327,20 @@ var (
 		PrimaryKey: []*schema.Column{LedgersColumns[0]},
 		ForeignKeys: []*schema.ForeignKey{
 			{
-				Symbol:     "ledgers_transactions_ledger_entries",
-				Columns:    []*schema.Column{LedgersColumns[9]},
+				Symbol:     "ledgers_transactions_ledger_entry",
+				Columns:    []*schema.Column{LedgersColumns[10]},
 				RefColumns: []*schema.Column{TransactionsColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
 			{
 				Symbol:     "ledgers_transactions_reversal_ledger_entries",
-				Columns:    []*schema.Column{LedgersColumns[10]},
+				Columns:    []*schema.Column{LedgersColumns[11]},
 				RefColumns: []*schema.Column{TransactionsColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
 			{
 				Symbol:     "ledgers_wallets_ledger_entries",
-				Columns:    []*schema.Column{LedgersColumns[11]},
+				Columns:    []*schema.Column{LedgersColumns[12]},
 				RefColumns: []*schema.Column{WalletsColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
@@ -340,6 +421,111 @@ var (
 				Name:    "manager_user_id_business_id_role_id",
 				Unique:  true,
 				Columns: []*schema.Column{ManagersColumns[10], ManagersColumns[8], ManagersColumns[9]},
+			},
+		},
+	}
+	// NubanBanksColumns holds the columns for the "nuban_banks" table.
+	NubanBanksColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeString},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "deleted_at", Type: field.TypeTime, Nullable: true},
+		{Name: "name", Type: field.TypeString, Unique: true},
+		{Name: "cbn_code", Type: field.TypeString, Unique: true},
+		{Name: "short_name", Type: field.TypeString, Unique: true},
+		{Name: "slug", Type: field.TypeString, Unique: true},
+		{Name: "active", Type: field.TypeBool, Default: true},
+	}
+	// NubanBanksTable holds the schema information for the "nuban_banks" table.
+	NubanBanksTable = &schema.Table{
+		Name:       "nuban_banks",
+		Columns:    NubanBanksColumns,
+		PrimaryKey: []*schema.Column{NubanBanksColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "nubanbank_cbn_code_slug",
+				Unique:  true,
+				Columns: []*schema.Column{NubanBanksColumns[5], NubanBanksColumns[7]},
+			},
+		},
+	}
+	// NubanBeneficiariesColumns holds the columns for the "nuban_beneficiaries" table.
+	NubanBeneficiariesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeString},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "deleted_at", Type: field.TypeTime, Nullable: true},
+		{Name: "account_name", Type: field.TypeString},
+		{Name: "account_number", Type: field.TypeString},
+		{Name: "bank_name", Type: field.TypeString},
+		{Name: "nickname", Type: field.TypeString, Nullable: true},
+		{Name: "disabled", Type: field.TypeBool, Default: false},
+		{Name: "owner_id", Type: field.TypeString},
+		{Name: "nuban_bank_id", Type: field.TypeString},
+	}
+	// NubanBeneficiariesTable holds the schema information for the "nuban_beneficiaries" table.
+	NubanBeneficiariesTable = &schema.Table{
+		Name:       "nuban_beneficiaries",
+		Columns:    NubanBeneficiariesColumns,
+		PrimaryKey: []*schema.Column{NubanBeneficiariesColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "nuban_beneficiaries_ledger_owners_nuban_beneficiaries",
+				Columns:    []*schema.Column{NubanBeneficiariesColumns[9]},
+				RefColumns: []*schema.Column{LedgerOwnersColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+			{
+				Symbol:     "nuban_beneficiaries_nuban_banks_beneficiary_bank",
+				Columns:    []*schema.Column{NubanBeneficiariesColumns[10]},
+				RefColumns: []*schema.Column{NubanBanksColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "nubanbeneficiary_owner_id_account_number_nuban_bank_id",
+				Unique:  true,
+				Columns: []*schema.Column{NubanBeneficiariesColumns[9], NubanBeneficiariesColumns[5], NubanBeneficiariesColumns[10]},
+			},
+			{
+				Name:    "nubanbeneficiary_owner_id",
+				Unique:  false,
+				Columns: []*schema.Column{NubanBeneficiariesColumns[9]},
+			},
+		},
+	}
+	// NubanBlacklistsColumns holds the columns for the "nuban_blacklists" table.
+	NubanBlacklistsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeString},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "deleted_at", Type: field.TypeTime, Nullable: true},
+		{Name: "account_name", Type: field.TypeString},
+		{Name: "account_number", Type: field.TypeString},
+		{Name: "bank_name", Type: field.TypeString},
+		{Name: "reason", Type: field.TypeString},
+		{Name: "disabled", Type: field.TypeBool, Default: true},
+		{Name: "nuban_bank_id", Type: field.TypeString},
+	}
+	// NubanBlacklistsTable holds the schema information for the "nuban_blacklists" table.
+	NubanBlacklistsTable = &schema.Table{
+		Name:       "nuban_blacklists",
+		Columns:    NubanBlacklistsColumns,
+		PrimaryKey: []*schema.Column{NubanBlacklistsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "nuban_blacklists_nuban_banks_blacklist",
+				Columns:    []*schema.Column{NubanBlacklistsColumns[9]},
+				RefColumns: []*schema.Column{NubanBanksColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "nubanblacklist_account_number_nuban_bank_id",
+				Unique:  true,
+				Columns: []*schema.Column{NubanBlacklistsColumns[5], NubanBlacklistsColumns[9]},
 			},
 		},
 	}
@@ -444,14 +630,11 @@ var (
 		{Name: "deleted_at", Type: field.TypeTime, Nullable: true},
 		{Name: "recipient_account_name", Type: field.TypeString},
 		{Name: "recipient_account_number", Type: field.TypeString},
-		{Name: "sender_account_name", Type: field.TypeString},
-		{Name: "sender_account_number", Type: field.TypeString},
-		{Name: "sender_bank_name", Type: field.TypeString},
-		{Name: "sender_bank_code", Type: field.TypeString},
 		{Name: "amount", Type: field.TypeInt64, Default: 0},
-		{Name: "session_id", Type: field.TypeString},
-		{Name: "provider_reference", Type: field.TypeString},
+		{Name: "session_id", Type: field.TypeString, Nullable: true},
+		{Name: "provider_reference", Type: field.TypeString, Nullable: true},
 		{Name: "provider", Type: field.TypeString},
+		{Name: "nuban_bank_id", Type: field.TypeString},
 		{Name: "transaction_nuban_transfer", Type: field.TypeString, Unique: true},
 	}
 	// NubanTransfersTable holds the schema information for the "nuban_transfers" table.
@@ -461,8 +644,14 @@ var (
 		PrimaryKey: []*schema.Column{NubanTransfersColumns[0]},
 		ForeignKeys: []*schema.ForeignKey{
 			{
+				Symbol:     "nuban_transfers_nuban_banks_bank",
+				Columns:    []*schema.Column{NubanTransfersColumns[10]},
+				RefColumns: []*schema.Column{NubanBanksColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+			{
 				Symbol:     "nuban_transfers_transactions_nuban_transfer",
-				Columns:    []*schema.Column{NubanTransfersColumns[14]},
+				Columns:    []*schema.Column{NubanTransfersColumns[11]},
 				RefColumns: []*schema.Column{TransactionsColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
@@ -503,6 +692,40 @@ var (
 				Name:    "provider_slug",
 				Unique:  true,
 				Columns: []*schema.Column{ProvidersColumns[5]},
+			},
+		},
+	}
+	// ProviderBanksColumns holds the columns for the "provider_banks" table.
+	ProviderBanksColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "provider_code", Type: field.TypeString},
+		{Name: "provider", Type: field.TypeString},
+		{Name: "active", Type: field.TypeBool, Default: true},
+		{Name: "nuban_bank_id", Type: field.TypeString},
+	}
+	// ProviderBanksTable holds the schema information for the "provider_banks" table.
+	ProviderBanksTable = &schema.Table{
+		Name:       "provider_banks",
+		Columns:    ProviderBanksColumns,
+		PrimaryKey: []*schema.Column{ProviderBanksColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "provider_banks_nuban_banks_provider_banks",
+				Columns:    []*schema.Column{ProviderBanksColumns[4]},
+				RefColumns: []*schema.Column{NubanBanksColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "providerbank_provider_nuban_bank_id",
+				Unique:  true,
+				Columns: []*schema.Column{ProviderBanksColumns[2], ProviderBanksColumns[4]},
+			},
+			{
+				Name:    "providerbank_provider_provider_code",
+				Unique:  true,
+				Columns: []*schema.Column{ProviderBanksColumns[2], ProviderBanksColumns[1]},
 			},
 		},
 	}
@@ -587,9 +810,8 @@ var (
 		{Name: "provider", Type: field.TypeString},
 		{Name: "require_subscription", Type: field.TypeBool, Default: false},
 		{Name: "active", Type: field.TypeBool, Default: true},
-		{Name: "min", Type: field.TypeInt, Default: 0},
-		{Name: "max", Type: field.TypeInt, Default: 0},
-		{Name: "fee", Type: field.TypeJSON},
+		{Name: "min_value", Type: field.TypeInt, Default: 0},
+		{Name: "max_value", Type: field.TypeInt, Default: 0},
 	}
 	// ServicesTable holds the schema information for the "services" table.
 	ServicesTable = &schema.Table{
@@ -788,34 +1010,116 @@ var (
 			},
 		},
 	}
+	// SubscriptionsColumns holds the columns for the "subscriptions" table.
+	SubscriptionsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeString},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "deleted_at", Type: field.TypeTime, Nullable: true},
+		{Name: "status", Type: field.TypeEnum, Enums: []string{"TRIALING", "ACTIVE", "PAST_DUE", "CANCELLED", "EXPIRED", "PAUSED"}, Default: "TRIALING"},
+		{Name: "locked_amount", Type: field.TypeInt64},
+		{Name: "locked_currency", Type: field.TypeString},
+		{Name: "current_period_start", Type: field.TypeTime},
+		{Name: "current_period_end", Type: field.TypeTime},
+		{Name: "trial_ends_at", Type: field.TypeTime, Nullable: true},
+		{Name: "cancelled_at", Type: field.TypeTime, Nullable: true},
+		{Name: "cancel_at_period_end", Type: field.TypeTime, Nullable: true},
+		{Name: "business_subscriptions", Type: field.TypeString},
+		{Name: "subscription_plan_subscriptions", Type: field.TypeString},
+	}
+	// SubscriptionsTable holds the schema information for the "subscriptions" table.
+	SubscriptionsTable = &schema.Table{
+		Name:       "subscriptions",
+		Columns:    SubscriptionsColumns,
+		PrimaryKey: []*schema.Column{SubscriptionsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "subscriptions_businesses_subscriptions",
+				Columns:    []*schema.Column{SubscriptionsColumns[12]},
+				RefColumns: []*schema.Column{BusinessesColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+			{
+				Symbol:     "subscriptions_subscription_plans_subscriptions",
+				Columns:    []*schema.Column{SubscriptionsColumns[13]},
+				RefColumns: []*schema.Column{SubscriptionPlansColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+		},
+	}
+	// SubscriptionPlansColumns holds the columns for the "subscription_plans" table.
+	SubscriptionPlansColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeString},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "deleted_at", Type: field.TypeTime, Nullable: true},
+		{Name: "name", Type: field.TypeString},
+		{Name: "slug", Type: field.TypeString, Unique: true},
+		{Name: "description", Type: field.TypeString, Nullable: true, Size: 2147483647},
+		{Name: "billing_interval", Type: field.TypeEnum, Enums: []string{"DAILY", "WEEKLY", "MONTHLY", "QUARTERLY", "YEARLY"}},
+		{Name: "interval_count", Type: field.TypeInt, Default: 1},
+		{Name: "amount", Type: field.TypeInt64},
+		{Name: "currency", Type: field.TypeString},
+		{Name: "trial_period_days", Type: field.TypeInt, Default: 0},
+		{Name: "features", Type: field.TypeJSON, Nullable: true},
+		{Name: "max_seats", Type: field.TypeInt, Nullable: true},
+		{Name: "is_active", Type: field.TypeBool, Default: true},
+		{Name: "is_public", Type: field.TypeBool, Default: true},
+	}
+	// SubscriptionPlansTable holds the schema information for the "subscription_plans" table.
+	SubscriptionPlansTable = &schema.Table{
+		Name:       "subscription_plans",
+		Columns:    SubscriptionPlansColumns,
+		PrimaryKey: []*schema.Column{SubscriptionPlansColumns[0]},
+	}
 	// TransactionsColumns holds the columns for the "transactions" table.
 	TransactionsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeString},
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "updated_at", Type: field.TypeTime},
 		{Name: "deleted_at", Type: field.TypeTime, Nullable: true},
-		{Name: "reference", Type: field.TypeString, Unique: true},
-		{Name: "external_reference", Type: field.TypeString, Unique: true},
+		{Name: "reference", Type: field.TypeString},
+		{Name: "external_reference", Type: field.TypeString, Unique: true, Nullable: true},
 		{Name: "type", Type: field.TypeEnum, Enums: []string{"DEPOSIT", "WITHDRAWAL", "TRANSFER", "PAYMENT", "REFUND", "REVERSAL", "FX", "FEE", "ADJUSTMENT"}},
 		{Name: "channel", Type: field.TypeEnum, Enums: []string{"CRYPTO", "BANK_TRANSFER", "INTERNAL"}},
-		{Name: "status", Type: field.TypeEnum, Enums: []string{"PENDING", "PROCESSING", "COMPLETED", "FAILED", "REVERSED", "CANCELLED"}, Default: "PENDING"},
+		{Name: "status", Type: field.TypeEnum, Enums: []string{"PENDING", "PROCESSING", "COMPLETED", "SUCCESS", "FAILED", "REVERSED", "CANCELLED"}, Default: "PENDING"},
 		{Name: "currency", Type: field.TypeString},
 		{Name: "summary", Type: field.TypeString, Nullable: true},
 		{Name: "provider", Type: field.TypeString, Nullable: true},
 		{Name: "amount", Type: field.TypeInt64, Default: 0},
-		{Name: "fee", Type: field.TypeInt64, Default: 0},
-		{Name: "transaction_wallet", Type: field.TypeString},
+		{Name: "net_amount", Type: field.TypeInt64, Nullable: true},
+		{Name: "entry", Type: field.TypeEnum, Enums: []string{"DEBIT", "CREDIT"}, Default: "DEBIT"},
 	}
 	// TransactionsTable holds the schema information for the "transactions" table.
 	TransactionsTable = &schema.Table{
 		Name:       "transactions",
 		Columns:    TransactionsColumns,
 		PrimaryKey: []*schema.Column{TransactionsColumns[0]},
+	}
+	// TransactionFeesColumns holds the columns for the "transaction_fees" table.
+	TransactionFeesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeString},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "deleted_at", Type: field.TypeTime, Nullable: true},
+		{Name: "type", Type: field.TypeEnum, Enums: []string{"VAT", "SERVICE_FEE", "NETWORK_FEE", "PROCESSING_FEE", "WITHHOLDING_TAX", "FX_MARKUP", "PLATFORM_FEE"}},
+		{Name: "amount", Type: field.TypeInt64},
+		{Name: "currency", Type: field.TypeString},
+		{Name: "rate", Type: field.TypeFloat64, Nullable: true},
+		{Name: "base_amount", Type: field.TypeInt64, Nullable: true},
+		{Name: "service_identifier", Type: field.TypeString, Nullable: true},
+		{Name: "transaction_fees", Type: field.TypeString},
+	}
+	// TransactionFeesTable holds the schema information for the "transaction_fees" table.
+	TransactionFeesTable = &schema.Table{
+		Name:       "transaction_fees",
+		Columns:    TransactionFeesColumns,
+		PrimaryKey: []*schema.Column{TransactionFeesColumns[0]},
 		ForeignKeys: []*schema.ForeignKey{
 			{
-				Symbol:     "transactions_wallets_wallet",
-				Columns:    []*schema.Column{TransactionsColumns[14]},
-				RefColumns: []*schema.Column{WalletsColumns[0]},
+				Symbol:     "transaction_fees_transactions_fees",
+				Columns:    []*schema.Column{TransactionFeesColumns[10]},
+				RefColumns: []*schema.Column{TransactionsColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
 		},
@@ -875,7 +1179,7 @@ var (
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "updated_at", Type: field.TypeTime},
 		{Name: "deleted_at", Type: field.TypeTime, Nullable: true},
-		{Name: "type", Type: field.TypeEnum, Enums: []string{"TREASURY"}, Default: "TREASURY"},
+		{Name: "type", Type: field.TypeEnum, Enums: []string{"TREASURY", "FROZEN", "HOLDING"}, Default: "TREASURY"},
 		{Name: "status", Type: field.TypeEnum, Enums: []string{"ACTIVE", "SUSPENDED", "CLOSED"}, Default: "ACTIVE"},
 		{Name: "metadata", Type: field.TypeJSON, Nullable: true},
 		{Name: "ledger_owner_vaults", Type: field.TypeString},
@@ -995,6 +1299,31 @@ var (
 			},
 		},
 	}
+	// NubanBeneficiaryNubanBeneficiariesColumns holds the columns for the "nuban_beneficiary_nuban_beneficiaries" table.
+	NubanBeneficiaryNubanBeneficiariesColumns = []*schema.Column{
+		{Name: "nuban_beneficiary_id", Type: field.TypeString},
+		{Name: "nuban_transfer_id", Type: field.TypeString},
+	}
+	// NubanBeneficiaryNubanBeneficiariesTable holds the schema information for the "nuban_beneficiary_nuban_beneficiaries" table.
+	NubanBeneficiaryNubanBeneficiariesTable = &schema.Table{
+		Name:       "nuban_beneficiary_nuban_beneficiaries",
+		Columns:    NubanBeneficiaryNubanBeneficiariesColumns,
+		PrimaryKey: []*schema.Column{NubanBeneficiaryNubanBeneficiariesColumns[0], NubanBeneficiaryNubanBeneficiariesColumns[1]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "nuban_beneficiary_nuban_beneficiaries_nuban_beneficiary_id",
+				Columns:    []*schema.Column{NubanBeneficiaryNubanBeneficiariesColumns[0]},
+				RefColumns: []*schema.Column{NubanBeneficiariesColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+			{
+				Symbol:     "nuban_beneficiary_nuban_beneficiaries_nuban_transfer_id",
+				Columns:    []*schema.Column{NubanBeneficiaryNubanBeneficiariesColumns[1]},
+				RefColumns: []*schema.Column{NubanTransfersColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+		},
+	}
 	// RequestVerificationUserColumns holds the columns for the "request_verification_user" table.
 	RequestVerificationUserColumns = []*schema.Column{
 		{Name: "request_verification_id", Type: field.TypeString},
@@ -1099,21 +1428,27 @@ var (
 	Tables = []*schema.Table{
 		BusinessesTable,
 		BusinessDocumentsTable,
-		BusinessFeaturesTable,
 		BusinessLocationsTable,
 		BusinessServicesTable,
 		CurrenciesTable,
+		FeeRulesTable,
+		FeeTiersTable,
+		InvoicesTable,
 		KybDocumentsTable,
 		KybMessagesTable,
 		LedgersTable,
 		LedgerOwnersTable,
 		ManagersTable,
+		NubanBanksTable,
+		NubanBeneficiariesTable,
+		NubanBlacklistsTable,
 		NubanDepositsTable,
 		NubanDynamicAccountsTable,
 		NubanStaticAccountsTable,
 		NubanTransfersTable,
 		PermissionsTable,
 		ProvidersTable,
+		ProviderBanksTable,
 		RequestVerificationsTable,
 		RolesTable,
 		RolePermissionsTable,
@@ -1124,13 +1459,17 @@ var (
 		StablecoinSupportedNetworksTable,
 		StablecoinWalletsTable,
 		StablecoinWithdrawalsTable,
+		SubscriptionsTable,
+		SubscriptionPlansTable,
 		TransactionsTable,
+		TransactionFeesTable,
 		UsersTable,
 		UserDocumentsTable,
 		VaultsTable,
 		VerificationsTable,
 		WalletsTable,
 		KybDocumentKybDocumentsTable,
+		NubanBeneficiaryNubanBeneficiariesTable,
 		RequestVerificationUserTable,
 		RequestVerificationBusinessTable,
 		VerificationUserTable,
@@ -1143,6 +1482,10 @@ func init() {
 	BusinessDocumentsTable.ForeignKeys[0].RefTable = BusinessesTable
 	BusinessLocationsTable.ForeignKeys[0].RefTable = BusinessesTable
 	BusinessServicesTable.ForeignKeys[0].RefTable = BusinessesTable
+	FeeRulesTable.ForeignKeys[0].RefTable = ServicesTable
+	FeeTiersTable.ForeignKeys[0].RefTable = FeeRulesTable
+	InvoicesTable.ForeignKeys[0].RefTable = SubscriptionsTable
+	InvoicesTable.ForeignKeys[1].RefTable = TransactionsTable
 	KybMessagesTable.ForeignKeys[0].RefTable = BusinessesTable
 	LedgersTable.ForeignKeys[0].RefTable = TransactionsTable
 	LedgersTable.ForeignKeys[1].RefTable = TransactionsTable
@@ -1152,10 +1495,15 @@ func init() {
 	ManagersTable.ForeignKeys[0].RefTable = BusinessesTable
 	ManagersTable.ForeignKeys[1].RefTable = RolesTable
 	ManagersTable.ForeignKeys[2].RefTable = UsersTable
+	NubanBeneficiariesTable.ForeignKeys[0].RefTable = LedgerOwnersTable
+	NubanBeneficiariesTable.ForeignKeys[1].RefTable = NubanBanksTable
+	NubanBlacklistsTable.ForeignKeys[0].RefTable = NubanBanksTable
 	NubanDepositsTable.ForeignKeys[0].RefTable = TransactionsTable
 	NubanDynamicAccountsTable.ForeignKeys[0].RefTable = WalletsTable
 	NubanStaticAccountsTable.ForeignKeys[0].RefTable = WalletsTable
-	NubanTransfersTable.ForeignKeys[0].RefTable = TransactionsTable
+	NubanTransfersTable.ForeignKeys[0].RefTable = NubanBanksTable
+	NubanTransfersTable.ForeignKeys[1].RefTable = TransactionsTable
+	ProviderBanksTable.ForeignKeys[0].RefTable = NubanBanksTable
 	RolePermissionsTable.ForeignKeys[0].RefTable = PermissionsTable
 	RolePermissionsTable.ForeignKeys[1].RefTable = RolesTable
 	SocialsTable.ForeignKeys[0].RefTable = BusinessesTable
@@ -1167,13 +1515,17 @@ func init() {
 	StablecoinWalletsTable.ForeignKeys[1].RefTable = StablecoinNetworksTable
 	StablecoinWalletsTable.ForeignKeys[2].RefTable = WalletsTable
 	StablecoinWithdrawalsTable.ForeignKeys[0].RefTable = TransactionsTable
-	TransactionsTable.ForeignKeys[0].RefTable = WalletsTable
+	SubscriptionsTable.ForeignKeys[0].RefTable = BusinessesTable
+	SubscriptionsTable.ForeignKeys[1].RefTable = SubscriptionPlansTable
+	TransactionFeesTable.ForeignKeys[0].RefTable = TransactionsTable
 	UserDocumentsTable.ForeignKeys[0].RefTable = UsersTable
 	VaultsTable.ForeignKeys[0].RefTable = LedgerOwnersTable
 	WalletsTable.ForeignKeys[0].RefTable = CurrenciesTable
 	WalletsTable.ForeignKeys[1].RefTable = VaultsTable
 	KybDocumentKybDocumentsTable.ForeignKeys[0].RefTable = KybDocumentsTable
 	KybDocumentKybDocumentsTable.ForeignKeys[1].RefTable = BusinessDocumentsTable
+	NubanBeneficiaryNubanBeneficiariesTable.ForeignKeys[0].RefTable = NubanBeneficiariesTable
+	NubanBeneficiaryNubanBeneficiariesTable.ForeignKeys[1].RefTable = NubanTransfersTable
 	RequestVerificationUserTable.ForeignKeys[0].RefTable = RequestVerificationsTable
 	RequestVerificationUserTable.ForeignKeys[1].RefTable = UsersTable
 	RequestVerificationBusinessTable.ForeignKeys[0].RefTable = RequestVerificationsTable

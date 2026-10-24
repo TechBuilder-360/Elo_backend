@@ -8,6 +8,7 @@ import (
 	"math"
 
 	"entgo.io/ent"
+	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
@@ -26,6 +27,7 @@ type StablecoinSupportedNetworkQuery struct {
 	predicates            []predicate.StablecoinSupportedNetwork
 	withCurrency          *CurrencyQuery
 	withStablecoinNetwork *StablecoinNetworkQuery
+	modifiers             []func(*sql.Selector)
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -420,6 +422,9 @@ func (ssnq *StablecoinSupportedNetworkQuery) sqlAll(ctx context.Context, hooks .
 		node.Edges.loadedTypes = loadedTypes
 		return node.assignValues(columns, values)
 	}
+	if len(ssnq.modifiers) > 0 {
+		_spec.Modifiers = ssnq.modifiers
+	}
 	for i := range hooks {
 		hooks[i](ctx, _spec)
 	}
@@ -505,6 +510,9 @@ func (ssnq *StablecoinSupportedNetworkQuery) loadStablecoinNetwork(ctx context.C
 
 func (ssnq *StablecoinSupportedNetworkQuery) sqlCount(ctx context.Context) (int, error) {
 	_spec := ssnq.querySpec()
+	if len(ssnq.modifiers) > 0 {
+		_spec.Modifiers = ssnq.modifiers
+	}
 	_spec.Node.Columns = ssnq.ctx.Fields
 	if len(ssnq.ctx.Fields) > 0 {
 		_spec.Unique = ssnq.ctx.Unique != nil && *ssnq.ctx.Unique
@@ -573,6 +581,9 @@ func (ssnq *StablecoinSupportedNetworkQuery) sqlQuery(ctx context.Context) *sql.
 	if ssnq.ctx.Unique != nil && *ssnq.ctx.Unique {
 		selector.Distinct()
 	}
+	for _, m := range ssnq.modifiers {
+		m(selector)
+	}
 	for _, p := range ssnq.predicates {
 		p(selector)
 	}
@@ -588,6 +599,32 @@ func (ssnq *StablecoinSupportedNetworkQuery) sqlQuery(ctx context.Context) *sql.
 		selector.Limit(*limit)
 	}
 	return selector
+}
+
+// ForUpdate locks the selected rows against concurrent updates, and prevent them from being
+// updated, deleted or "selected ... for update" by other sessions, until the transaction is
+// either committed or rolled-back.
+func (ssnq *StablecoinSupportedNetworkQuery) ForUpdate(opts ...sql.LockOption) *StablecoinSupportedNetworkQuery {
+	if ssnq.driver.Dialect() == dialect.Postgres {
+		ssnq.Unique(false)
+	}
+	ssnq.modifiers = append(ssnq.modifiers, func(s *sql.Selector) {
+		s.ForUpdate(opts...)
+	})
+	return ssnq
+}
+
+// ForShare behaves similarly to ForUpdate, except that it acquires a shared mode lock
+// on any rows that are read. Other sessions can read the rows, but cannot modify them
+// until your transaction commits.
+func (ssnq *StablecoinSupportedNetworkQuery) ForShare(opts ...sql.LockOption) *StablecoinSupportedNetworkQuery {
+	if ssnq.driver.Dialect() == dialect.Postgres {
+		ssnq.Unique(false)
+	}
+	ssnq.modifiers = append(ssnq.modifiers, func(s *sql.Selector) {
+		s.ForShare(opts...)
+	})
+	return ssnq
 }
 
 // StablecoinSupportedNetworkGroupBy is the group-by builder for StablecoinSupportedNetwork entities.

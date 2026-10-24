@@ -8,6 +8,7 @@ import (
 	"math"
 
 	"entgo.io/ent"
+	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
@@ -24,6 +25,7 @@ type NubanDepositQuery struct {
 	inters          []Interceptor
 	predicates      []predicate.NubanDeposit
 	withTransaction *TransactionQuery
+	modifiers       []func(*sql.Selector)
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -383,6 +385,9 @@ func (ndq *NubanDepositQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([
 		node.Edges.loadedTypes = loadedTypes
 		return node.assignValues(columns, values)
 	}
+	if len(ndq.modifiers) > 0 {
+		_spec.Modifiers = ndq.modifiers
+	}
 	for i := range hooks {
 		hooks[i](ctx, _spec)
 	}
@@ -433,6 +438,9 @@ func (ndq *NubanDepositQuery) loadTransaction(ctx context.Context, query *Transa
 
 func (ndq *NubanDepositQuery) sqlCount(ctx context.Context) (int, error) {
 	_spec := ndq.querySpec()
+	if len(ndq.modifiers) > 0 {
+		_spec.Modifiers = ndq.modifiers
+	}
 	_spec.Node.Columns = ndq.ctx.Fields
 	if len(ndq.ctx.Fields) > 0 {
 		_spec.Unique = ndq.ctx.Unique != nil && *ndq.ctx.Unique
@@ -498,6 +506,9 @@ func (ndq *NubanDepositQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	if ndq.ctx.Unique != nil && *ndq.ctx.Unique {
 		selector.Distinct()
 	}
+	for _, m := range ndq.modifiers {
+		m(selector)
+	}
 	for _, p := range ndq.predicates {
 		p(selector)
 	}
@@ -513,6 +524,32 @@ func (ndq *NubanDepositQuery) sqlQuery(ctx context.Context) *sql.Selector {
 		selector.Limit(*limit)
 	}
 	return selector
+}
+
+// ForUpdate locks the selected rows against concurrent updates, and prevent them from being
+// updated, deleted or "selected ... for update" by other sessions, until the transaction is
+// either committed or rolled-back.
+func (ndq *NubanDepositQuery) ForUpdate(opts ...sql.LockOption) *NubanDepositQuery {
+	if ndq.driver.Dialect() == dialect.Postgres {
+		ndq.Unique(false)
+	}
+	ndq.modifiers = append(ndq.modifiers, func(s *sql.Selector) {
+		s.ForUpdate(opts...)
+	})
+	return ndq
+}
+
+// ForShare behaves similarly to ForUpdate, except that it acquires a shared mode lock
+// on any rows that are read. Other sessions can read the rows, but cannot modify them
+// until your transaction commits.
+func (ndq *NubanDepositQuery) ForShare(opts ...sql.LockOption) *NubanDepositQuery {
+	if ndq.driver.Dialect() == dialect.Postgres {
+		ndq.Unique(false)
+	}
+	ndq.modifiers = append(ndq.modifiers, func(s *sql.Selector) {
+		s.ForShare(opts...)
+	})
+	return ndq
 }
 
 // NubanDepositGroupBy is the group-by builder for NubanDeposit entities.

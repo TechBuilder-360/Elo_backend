@@ -38,3 +38,9 @@ const (
 	Business types.LedgerOwner = "BUSINESS"
 	User     types.LedgerOwner = "USER"
 )
+
+const (
+	TransactionSuccessStatus types.TransactionStatus = "SUCCESS"
+	TransactionFailedStatus  types.TransactionStatus = "FAILED"
+	TransactionPendingStatus types.TransactionStatus = "PENDING"
+)

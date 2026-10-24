@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
 	"github.com/Toflex/directory_v2/ent/predicate"
 )
 
@@ -104,14 +105,14 @@ func Active(v bool) predicate.Service {
 	return predicate.Service(sql.FieldEQ(FieldActive, v))
 }
 
-// Min applies equality check predicate on the "min" field. It's identical to MinEQ.
-func Min(v int) predicate.Service {
-	return predicate.Service(sql.FieldEQ(FieldMin, v))
+// MinValue applies equality check predicate on the "min_value" field. It's identical to MinValueEQ.
+func MinValue(v int) predicate.Service {
+	return predicate.Service(sql.FieldEQ(FieldMinValue, v))
 }
 
-// Max applies equality check predicate on the "max" field. It's identical to MaxEQ.
-func Max(v int) predicate.Service {
-	return predicate.Service(sql.FieldEQ(FieldMax, v))
+// MaxValue applies equality check predicate on the "max_value" field. It's identical to MaxValueEQ.
+func MaxValue(v int) predicate.Service {
+	return predicate.Service(sql.FieldEQ(FieldMaxValue, v))
 }
 
 // CreatedAtEQ applies the EQ predicate on the "created_at" field.
@@ -459,84 +460,107 @@ func ActiveNEQ(v bool) predicate.Service {
 	return predicate.Service(sql.FieldNEQ(FieldActive, v))
 }
 
-// MinEQ applies the EQ predicate on the "min" field.
-func MinEQ(v int) predicate.Service {
-	return predicate.Service(sql.FieldEQ(FieldMin, v))
+// MinValueEQ applies the EQ predicate on the "min_value" field.
+func MinValueEQ(v int) predicate.Service {
+	return predicate.Service(sql.FieldEQ(FieldMinValue, v))
 }
 
-// MinNEQ applies the NEQ predicate on the "min" field.
-func MinNEQ(v int) predicate.Service {
-	return predicate.Service(sql.FieldNEQ(FieldMin, v))
+// MinValueNEQ applies the NEQ predicate on the "min_value" field.
+func MinValueNEQ(v int) predicate.Service {
+	return predicate.Service(sql.FieldNEQ(FieldMinValue, v))
 }
 
-// MinIn applies the In predicate on the "min" field.
-func MinIn(vs ...int) predicate.Service {
-	return predicate.Service(sql.FieldIn(FieldMin, vs...))
+// MinValueIn applies the In predicate on the "min_value" field.
+func MinValueIn(vs ...int) predicate.Service {
+	return predicate.Service(sql.FieldIn(FieldMinValue, vs...))
 }
 
-// MinNotIn applies the NotIn predicate on the "min" field.
-func MinNotIn(vs ...int) predicate.Service {
-	return predicate.Service(sql.FieldNotIn(FieldMin, vs...))
+// MinValueNotIn applies the NotIn predicate on the "min_value" field.
+func MinValueNotIn(vs ...int) predicate.Service {
+	return predicate.Service(sql.FieldNotIn(FieldMinValue, vs...))
 }
 
-// MinGT applies the GT predicate on the "min" field.
-func MinGT(v int) predicate.Service {
-	return predicate.Service(sql.FieldGT(FieldMin, v))
+// MinValueGT applies the GT predicate on the "min_value" field.
+func MinValueGT(v int) predicate.Service {
+	return predicate.Service(sql.FieldGT(FieldMinValue, v))
 }
 
-// MinGTE applies the GTE predicate on the "min" field.
-func MinGTE(v int) predicate.Service {
-	return predicate.Service(sql.FieldGTE(FieldMin, v))
+// MinValueGTE applies the GTE predicate on the "min_value" field.
+func MinValueGTE(v int) predicate.Service {
+	return predicate.Service(sql.FieldGTE(FieldMinValue, v))
 }
 
-// MinLT applies the LT predicate on the "min" field.
-func MinLT(v int) predicate.Service {
-	return predicate.Service(sql.FieldLT(FieldMin, v))
+// MinValueLT applies the LT predicate on the "min_value" field.
+func MinValueLT(v int) predicate.Service {
+	return predicate.Service(sql.FieldLT(FieldMinValue, v))
 }
 
-// MinLTE applies the LTE predicate on the "min" field.
-func MinLTE(v int) predicate.Service {
-	return predicate.Service(sql.FieldLTE(FieldMin, v))
+// MinValueLTE applies the LTE predicate on the "min_value" field.
+func MinValueLTE(v int) predicate.Service {
+	return predicate.Service(sql.FieldLTE(FieldMinValue, v))
 }
 
-// MaxEQ applies the EQ predicate on the "max" field.
-func MaxEQ(v int) predicate.Service {
-	return predicate.Service(sql.FieldEQ(FieldMax, v))
+// MaxValueEQ applies the EQ predicate on the "max_value" field.
+func MaxValueEQ(v int) predicate.Service {
+	return predicate.Service(sql.FieldEQ(FieldMaxValue, v))
 }
 
-// MaxNEQ applies the NEQ predicate on the "max" field.
-func MaxNEQ(v int) predicate.Service {
-	return predicate.Service(sql.FieldNEQ(FieldMax, v))
+// MaxValueNEQ applies the NEQ predicate on the "max_value" field.
+func MaxValueNEQ(v int) predicate.Service {
+	return predicate.Service(sql.FieldNEQ(FieldMaxValue, v))
 }
 
-// MaxIn applies the In predicate on the "max" field.
-func MaxIn(vs ...int) predicate.Service {
-	return predicate.Service(sql.FieldIn(FieldMax, vs...))
+// MaxValueIn applies the In predicate on the "max_value" field.
+func MaxValueIn(vs ...int) predicate.Service {
+	return predicate.Service(sql.FieldIn(FieldMaxValue, vs...))
 }
 
-// MaxNotIn applies the NotIn predicate on the "max" field.
-func MaxNotIn(vs ...int) predicate.Service {
-	return predicate.Service(sql.FieldNotIn(FieldMax, vs...))
+// MaxValueNotIn applies the NotIn predicate on the "max_value" field.
+func MaxValueNotIn(vs ...int) predicate.Service {
+	return predicate.Service(sql.FieldNotIn(FieldMaxValue, vs...))
 }
 
-// MaxGT applies the GT predicate on the "max" field.
-func MaxGT(v int) predicate.Service {
-	return predicate.Service(sql.FieldGT(FieldMax, v))
+// MaxValueGT applies the GT predicate on the "max_value" field.
+func MaxValueGT(v int) predicate.Service {
+	return predicate.Service(sql.FieldGT(FieldMaxValue, v))
 }
 
-// MaxGTE applies the GTE predicate on the "max" field.
-func MaxGTE(v int) predicate.Service {
-	return predicate.Service(sql.FieldGTE(FieldMax, v))
+// MaxValueGTE applies the GTE predicate on the "max_value" field.
+func MaxValueGTE(v int) predicate.Service {
+	return predicate.Service(sql.FieldGTE(FieldMaxValue, v))
 }
 
-// MaxLT applies the LT predicate on the "max" field.
-func MaxLT(v int) predicate.Service {
-	return predicate.Service(sql.FieldLT(FieldMax, v))
+// MaxValueLT applies the LT predicate on the "max_value" field.
+func MaxValueLT(v int) predicate.Service {
+	return predicate.Service(sql.FieldLT(FieldMaxValue, v))
 }
 
-// MaxLTE applies the LTE predicate on the "max" field.
-func MaxLTE(v int) predicate.Service {
-	return predicate.Service(sql.FieldLTE(FieldMax, v))
+// MaxValueLTE applies the LTE predicate on the "max_value" field.
+func MaxValueLTE(v int) predicate.Service {
+	return predicate.Service(sql.FieldLTE(FieldMaxValue, v))
+}
+
+// HasFeeRules applies the HasEdge predicate on the "fee_rules" edge.
+func HasFeeRules() predicate.Service {
+	return predicate.Service(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, FeeRulesTable, FeeRulesColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasFeeRulesWith applies the HasEdge predicate on the "fee_rules" edge with a given conditions (other predicates).
+func HasFeeRulesWith(preds ...predicate.FeeRule) predicate.Service {
+	return predicate.Service(func(s *sql.Selector) {
+		step := newFeeRulesStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
 }
 
 // And groups predicates with the AND operator between them.

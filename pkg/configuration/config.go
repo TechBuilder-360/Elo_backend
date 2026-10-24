@@ -32,6 +32,9 @@ type baseConfig struct {
 	BasicUsername string      `env:"BASIC_USERNAME"`
 	BasicPassword string      `env:"BASIC_PASSWORD"`
 	DashboardUrl  string      `env:"DASHBOARD_URL"`
+
+	TemporalURL    string `env:"TEMPORAL_URL"`
+	TemporalWorker string `env:"TEMPORAL_WORKER"`
 }
 
 func LoadBaseConfiguration() {

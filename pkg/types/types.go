@@ -9,6 +9,7 @@ type VerificationStatus string
 type DocumentType string
 type CurrencyCode string
 type LedgerOwner string
+type TransactionStatus string
 
 type ToMinor struct {
 	Amount    float64
@@ -25,7 +26,7 @@ func (p Provider) ToString() string {
 }
 
 func (c CurrencyCode) ToString() string {
-	return string(c)
+	return string(c.Capitalize())
 }
 
 func (c CurrencyCode) Capitalize() CurrencyCode {

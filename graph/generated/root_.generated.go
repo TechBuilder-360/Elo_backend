@@ -94,19 +94,31 @@ type ComplexityRoot struct {
 	}
 
 	Mutation struct {
-		AddBusinessWallet           func(childComplexity int, currencyCode string, walletType model.WalletType) int
-		BusinessDetail              func(childComplexity int, input model.BusinessDetail) int
-		DeleteDocument              func(childComplexity int, input model.RemoveDocumentInput) int
-		GenerateDynamicNubanAccount func(childComplexity int) int
-		GenerateStablecoin          func(childComplexity int, input *model.StablecoinInput) int
-		GenerateStaticNubanAccount  func(childComplexity int) int
-		Login                       func(childComplexity int, input model.Login) int
-		Logout                      func(childComplexity int) int
-		RegisterBusiness            func(childComplexity int, input model.RegisterBusinessInput) int
-		Registration                func(childComplexity int, input model.Registration) int
-		RequestOtp                  func(childComplexity int, input *model.RequestOtp) int
-		RequestUserVerification     func(childComplexity int, input model.VerificationPayload) int
-		UploadDocument              func(childComplexity int, input model.DocumentInput) int
+		AddBusinessWallet          func(childComplexity int, currencyCode string, walletType model.WalletType) int
+		BusinessDetail             func(childComplexity int, input model.BusinessDetail) int
+		DeleteDocument             func(childComplexity int, input model.RemoveDocumentInput) int
+		GenerateStablecoin         func(childComplexity int, input *model.StablecoinInput) int
+		GenerateStaticNubanAccount func(childComplexity int, walletType *model.WalletType) int
+		Login                      func(childComplexity int, input model.Login) int
+		Logout                     func(childComplexity int) int
+		NubanTransfer              func(childComplexity int, input model.TransferPayload) int
+		RegisterBusiness           func(childComplexity int, input model.RegisterBusinessInput) int
+		Registration               func(childComplexity int, input model.Registration) int
+		RequestOtp                 func(childComplexity int, input *model.RequestOtp) int
+		RequestUserVerification    func(childComplexity int, input model.VerificationPayload) int
+		UpdateProfile              func(childComplexity int, input model.UpdateProfileInput) int
+		UploadDocument             func(childComplexity int, input model.DocumentInput) int
+	}
+
+	NubanTransferDetail struct {
+		Amount                 func(childComplexity int) int
+		BankCode               func(childComplexity int) int
+		BankName               func(childComplexity int) int
+		ID                     func(childComplexity int) int
+		ProviderReference      func(childComplexity int) int
+		RecipientAccountName   func(childComplexity int) int
+		RecipientAccountNumber func(childComplexity int) int
+		SessionID              func(childComplexity int) int
 	}
 
 	OTPResponse struct {
@@ -127,6 +139,7 @@ type ComplexityRoot struct {
 		GetUserBusinsses      func(childComplexity int) int
 		Me                    func(childComplexity int) int
 		MyBusinesses          func(childComplexity int) int
+		Transaction           func(childComplexity int, id string) int
 	}
 
 	RegistrationResponse struct {
@@ -160,10 +173,40 @@ type ComplexityRoot struct {
 		ID            func(childComplexity int) int
 	}
 
+	TransactionDetail struct {
+		Amount    func(childComplexity int) int
+		Channel   func(childComplexity int) int
+		CreatedAt func(childComplexity int) int
+		Currency  func(childComplexity int) int
+		Entry     func(childComplexity int) int
+		Fees      func(childComplexity int) int
+		ID        func(childComplexity int) int
+		NetAmount func(childComplexity int) int
+		Reference func(childComplexity int) int
+		Status    func(childComplexity int) int
+		Summary   func(childComplexity int) int
+		Transfer  func(childComplexity int) int
+		Type      func(childComplexity int) int
+	}
+
+	TransactionFeeDetail struct {
+		Amount   func(childComplexity int) int
+		Currency func(childComplexity int) int
+		ID       func(childComplexity int) int
+		Rate     func(childComplexity int) int
+		Type     func(childComplexity int) int
+	}
+
+	TransferResult struct {
+		ID     func(childComplexity int) int
+		Status func(childComplexity int) int
+	}
+
 	User struct {
 		DisableReason func(childComplexity int) int
 		Disabled      func(childComplexity int) int
 		DisplayName   func(childComplexity int) int
+		EmailAddress  func(childComplexity int) int
 		FirstName     func(childComplexity int) int
 		IsVerified    func(childComplexity int) int
 		LastName      func(childComplexity int) int
@@ -511,13 +554,6 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 
 		return e.complexity.Mutation.DeleteDocument(childComplexity, args["input"].(model.RemoveDocumentInput)), true
 
-	case "Mutation.generateDynamicNubanAccount":
-		if e.complexity.Mutation.GenerateDynamicNubanAccount == nil {
-			break
-		}
-
-		return e.complexity.Mutation.GenerateDynamicNubanAccount(childComplexity), true
-
 	case "Mutation.generateStablecoin":
 		if e.complexity.Mutation.GenerateStablecoin == nil {
 			break
@@ -535,7 +571,12 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			break
 		}
 
-		return e.complexity.Mutation.GenerateStaticNubanAccount(childComplexity), true
+		args, err := ec.field_Mutation_generateStaticNubanAccount_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.GenerateStaticNubanAccount(childComplexity, args["wallet_type"].(*model.WalletType)), true
 
 	case "Mutation.login":
 		if e.complexity.Mutation.Login == nil {
@@ -555,6 +596,18 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.complexity.Mutation.Logout(childComplexity), true
+
+	case "Mutation.nubanTransfer":
+		if e.complexity.Mutation.NubanTransfer == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_nubanTransfer_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.NubanTransfer(childComplexity, args["input"].(model.TransferPayload)), true
 
 	case "Mutation.registerBusiness":
 		if e.complexity.Mutation.RegisterBusiness == nil {
@@ -604,6 +657,18 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 
 		return e.complexity.Mutation.RequestUserVerification(childComplexity, args["input"].(model.VerificationPayload)), true
 
+	case "Mutation.updateProfile":
+		if e.complexity.Mutation.UpdateProfile == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_updateProfile_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.UpdateProfile(childComplexity, args["input"].(model.UpdateProfileInput)), true
+
 	case "Mutation.uploadDocument":
 		if e.complexity.Mutation.UploadDocument == nil {
 			break
@@ -615,6 +680,62 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.complexity.Mutation.UploadDocument(childComplexity, args["input"].(model.DocumentInput)), true
+
+	case "NubanTransferDetail.amount":
+		if e.complexity.NubanTransferDetail.Amount == nil {
+			break
+		}
+
+		return e.complexity.NubanTransferDetail.Amount(childComplexity), true
+
+	case "NubanTransferDetail.bank_code":
+		if e.complexity.NubanTransferDetail.BankCode == nil {
+			break
+		}
+
+		return e.complexity.NubanTransferDetail.BankCode(childComplexity), true
+
+	case "NubanTransferDetail.bank_name":
+		if e.complexity.NubanTransferDetail.BankName == nil {
+			break
+		}
+
+		return e.complexity.NubanTransferDetail.BankName(childComplexity), true
+
+	case "NubanTransferDetail.id":
+		if e.complexity.NubanTransferDetail.ID == nil {
+			break
+		}
+
+		return e.complexity.NubanTransferDetail.ID(childComplexity), true
+
+	case "NubanTransferDetail.provider_reference":
+		if e.complexity.NubanTransferDetail.ProviderReference == nil {
+			break
+		}
+
+		return e.complexity.NubanTransferDetail.ProviderReference(childComplexity), true
+
+	case "NubanTransferDetail.recipient_account_name":
+		if e.complexity.NubanTransferDetail.RecipientAccountName == nil {
+			break
+		}
+
+		return e.complexity.NubanTransferDetail.RecipientAccountName(childComplexity), true
+
+	case "NubanTransferDetail.recipient_account_number":
+		if e.complexity.NubanTransferDetail.RecipientAccountNumber == nil {
+			break
+		}
+
+		return e.complexity.NubanTransferDetail.RecipientAccountNumber(childComplexity), true
+
+	case "NubanTransferDetail.session_id":
+		if e.complexity.NubanTransferDetail.SessionID == nil {
+			break
+		}
+
+		return e.complexity.NubanTransferDetail.SessionID(childComplexity), true
 
 	case "OTPResponse.Identifier":
 		if e.complexity.OTPResponse.Identifier == nil {
@@ -744,6 +865,18 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 
 		return e.complexity.Query.MyBusinesses(childComplexity), true
 
+	case "Query.transaction":
+		if e.complexity.Query.Transaction == nil {
+			break
+		}
+
+		args, err := ec.field_Query_transaction_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.Transaction(childComplexity, args["id"].(string)), true
+
 	case "RegistrationResponse.user_id":
 		if e.complexity.RegistrationResponse.UserID == nil {
 			break
@@ -856,6 +989,146 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 
 		return e.complexity.StaticNubanAccountDetail.ID(childComplexity), true
 
+	case "TransactionDetail.amount":
+		if e.complexity.TransactionDetail.Amount == nil {
+			break
+		}
+
+		return e.complexity.TransactionDetail.Amount(childComplexity), true
+
+	case "TransactionDetail.channel":
+		if e.complexity.TransactionDetail.Channel == nil {
+			break
+		}
+
+		return e.complexity.TransactionDetail.Channel(childComplexity), true
+
+	case "TransactionDetail.created_at":
+		if e.complexity.TransactionDetail.CreatedAt == nil {
+			break
+		}
+
+		return e.complexity.TransactionDetail.CreatedAt(childComplexity), true
+
+	case "TransactionDetail.currency":
+		if e.complexity.TransactionDetail.Currency == nil {
+			break
+		}
+
+		return e.complexity.TransactionDetail.Currency(childComplexity), true
+
+	case "TransactionDetail.entry":
+		if e.complexity.TransactionDetail.Entry == nil {
+			break
+		}
+
+		return e.complexity.TransactionDetail.Entry(childComplexity), true
+
+	case "TransactionDetail.fees":
+		if e.complexity.TransactionDetail.Fees == nil {
+			break
+		}
+
+		return e.complexity.TransactionDetail.Fees(childComplexity), true
+
+	case "TransactionDetail.id":
+		if e.complexity.TransactionDetail.ID == nil {
+			break
+		}
+
+		return e.complexity.TransactionDetail.ID(childComplexity), true
+
+	case "TransactionDetail.net_amount":
+		if e.complexity.TransactionDetail.NetAmount == nil {
+			break
+		}
+
+		return e.complexity.TransactionDetail.NetAmount(childComplexity), true
+
+	case "TransactionDetail.reference":
+		if e.complexity.TransactionDetail.Reference == nil {
+			break
+		}
+
+		return e.complexity.TransactionDetail.Reference(childComplexity), true
+
+	case "TransactionDetail.status":
+		if e.complexity.TransactionDetail.Status == nil {
+			break
+		}
+
+		return e.complexity.TransactionDetail.Status(childComplexity), true
+
+	case "TransactionDetail.summary":
+		if e.complexity.TransactionDetail.Summary == nil {
+			break
+		}
+
+		return e.complexity.TransactionDetail.Summary(childComplexity), true
+
+	case "TransactionDetail.transfer":
+		if e.complexity.TransactionDetail.Transfer == nil {
+			break
+		}
+
+		return e.complexity.TransactionDetail.Transfer(childComplexity), true
+
+	case "TransactionDetail.type":
+		if e.complexity.TransactionDetail.Type == nil {
+			break
+		}
+
+		return e.complexity.TransactionDetail.Type(childComplexity), true
+
+	case "TransactionFeeDetail.amount":
+		if e.complexity.TransactionFeeDetail.Amount == nil {
+			break
+		}
+
+		return e.complexity.TransactionFeeDetail.Amount(childComplexity), true
+
+	case "TransactionFeeDetail.currency":
+		if e.complexity.TransactionFeeDetail.Currency == nil {
+			break
+		}
+
+		return e.complexity.TransactionFeeDetail.Currency(childComplexity), true
+
+	case "TransactionFeeDetail.id":
+		if e.complexity.TransactionFeeDetail.ID == nil {
+			break
+		}
+
+		return e.complexity.TransactionFeeDetail.ID(childComplexity), true
+
+	case "TransactionFeeDetail.rate":
+		if e.complexity.TransactionFeeDetail.Rate == nil {
+			break
+		}
+
+		return e.complexity.TransactionFeeDetail.Rate(childComplexity), true
+
+	case "TransactionFeeDetail.type":
+		if e.complexity.TransactionFeeDetail.Type == nil {
+			break
+		}
+
+		return e.complexity.TransactionFeeDetail.Type(childComplexity), true
+
+	case "TransferResult.id":
+		if e.complexity.TransferResult.ID == nil {
+			break
+		}
+
+		return e.complexity.TransferResult.ID(childComplexity), true
+
+	case "TransferResult.status":
+		if e.complexity.TransferResult.Status == nil {
+			break
+		}
+
+		return e.complexity.TransferResult.Status(childComplexity), true
+
 	case "User.disable_reason":
 		if e.complexity.User.DisableReason == nil {
 			break
@@ -876,6 +1149,13 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.complexity.User.DisplayName(childComplexity), true
+
+	case "User.email_address":
+		if e.complexity.User.EmailAddress == nil {
+			break
+		}
+
+		return e.complexity.User.EmailAddress(childComplexity), true
 
 	case "User.first_name":
 		if e.complexity.User.FirstName == nil {
@@ -1106,6 +1386,8 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 		ec.unmarshalInputRequestOTP,
 		ec.unmarshalInputStablecoinFilter,
 		ec.unmarshalInputStablecoinInput,
+		ec.unmarshalInputTransferPayload,
+		ec.unmarshalInputUpdateProfileInput,
 		ec.unmarshalInputWalletFilter,
 		ec.unmarshalInputbusinessDetail,
 		ec.unmarshalInputrole,
@@ -1207,7 +1489,173 @@ func (ec *executionContext) introspectType(name string) (*introspection.Type, er
 }
 
 var sources = []*ast.Source{
-	{Name: "../schema/authentication.graphqls", Input: `scalar Int64
+	{Name: "../schema/currency.graphqls", Input: `type Currency {
+    id: String!
+    code: String!
+    name: String!
+    symbol: String!
+    is_fiat: Boolean!
+}
+
+input CurrencyFilter {
+    is_fiat: Boolean!
+}
+
+extend type Query {
+  currencies(filter: CurrencyFilter): [Currency!]!
+}`, BuiltIn: false},
+	{Name: "../schema/nuban.graphqls", Input: `type StaticNubanAccountDetail {
+    account_number: String!
+    account_name: String!
+    bank_name: String!
+    currency: String!
+    id: String!
+}
+
+type DynamicNubanAccountDetail {
+    account_number: String!
+    account_name: String!
+    bank_name: String!
+    Amount: Float!
+    currency: String!
+    expiration_date: String!
+    id: String!
+}
+
+input TransferPayload {
+    account_number: String!
+bank_slug: String!
+narration: String
+amount: Int!
+reference: String!
+currency: String!
+}
+
+type TransferResult {
+    id: String!
+    status: String!
+}
+
+extend type Query {
+    business_nuban_accounts: [StaticNubanAccountDetail!]! @hasRole(role: ADMIN)
+}
+
+extend type Mutation {
+    nubanTransfer(input: TransferPayload!): TransferResult! @hasRole(role: ADMIN)
+    generateStaticNubanAccount(wallet_type: WalletType): StaticNubanAccountDetail! @hasRole(role: ADMIN)
+    # generateDynamicNubanAccount: DynamicNubanAccountDetail! @hasRole(role: ADMIN)
+}`, BuiltIn: false},
+	{Name: "../schema/stablecoin.graphqls", Input: `type Stablecoin {
+    id: String!
+    address: String!
+    coin: String!
+    network: String!
+}
+
+input StablecoinInput {
+    network: String!
+    wallet_id: String!
+}
+
+input StablecoinFilter {
+    coin: String
+    network: String
+    wallet_id: String
+}
+
+extend type Query {
+    business_stablecoins(filter: StablecoinFilter): [Stablecoin!]! @hasRole(role: ADMIN)
+}
+
+extend type Mutation {
+    generateStablecoin(input: StablecoinInput): Stablecoin! @hasRole(role: ADMIN)
+}`, BuiltIn: false},
+	{Name: "../schema/transaction.graphqls", Input: `type TransactionFeeDetail {
+    id: String!
+    amount: Float!
+    rate: Float
+    type: String!
+    currency: String!
+}
+
+type NubanTransferDetail {
+    id: String!
+    amount: Float!
+    recipient_account_name: String!
+    recipient_account_number: String!
+    bank_name: String
+    bank_code: String
+    session_id: String
+    provider_reference: String
+}
+
+union TransferDetail = NubanTransferDetail
+
+type TransactionDetail {
+    id: String!
+    reference: String!
+    type: String!
+    channel: String!
+    status: String!
+    currency: String!
+    summary: String
+    amount: Float!
+    net_amount: Float
+    entry: String!
+    created_at: String!
+    fees: [TransactionFeeDetail!]!
+    transfer: TransferDetail
+}
+
+extend type Query {
+    transaction(id: String!): TransactionDetail @hasRole(role: ADMIN)
+}
+`, BuiltIn: false},
+	{Name: "../schema/wallet.graphqls", Input: `"""
+Creates a new wallet.
+
+Example:
+
+mutation {
+  addWallet(
+    currencyCode: "NGN"
+    walletType: "MAIN"
+  ) {
+    id
+    currency
+    type
+    availableBalance
+  }
+}
+"""
+
+enum WalletType {
+  TREASURY
+}
+
+type Wallet {
+    available_balance: Float!
+    ledger_balance: Float!
+    holding_balance: Float!
+    id: String!
+    currency: String!
+    active: Boolean!
+    is_fiat: Boolean!
+}
+
+input WalletFilter {
+    is_fiat: Boolean!
+}
+
+extend type Query {
+  business_wallets(wallet_type: WalletType!=TREASURY, filter: WalletFilter): [Wallet!]!  @hasRole (role: ADMIN)
+  business_wallet(currencyCode: String!, wallet_type: WalletType!=TREASURY): Wallet  @hasRole (role: ADMIN)
+}
+
+extend type Mutation {
+  add_business_wallet(currency_code: String!, wallet_type: WalletType!=TREASURY): Wallet!  @hasRole (role: ADMIN)
+}`, BuiltIn: false},
+	{Name: "../schema/auth/authentication.graphqls", Input: `scalar Int64
 
 input Registration {
   email_address: String!
@@ -1249,7 +1697,71 @@ type Mutation {
   logout: Boolean! @authUser
 }
 `, BuiltIn: false},
-	{Name: "../schema/business.graphqls", Input: `directive @authBusiness on FIELD_DEFINITION
+	{Name: "../schema/auth/user.graphqls", Input: `directive @authUser on FIELD_DEFINITION
+
+type User {
+  first_name: String!
+  last_name: String!
+  display_name: String!
+  email_address: String
+  is_verified: Boolean!
+  disabled: Boolean!
+  disable_reason: String!
+}
+
+type UserBusiness {
+  id: ID!
+  name: String!
+  role: String!
+  logo: String!
+  industry: String!
+}
+
+extend type Query {
+  me: User! @authUser
+  getUserBusinsses: [UserBusiness!]!
+}
+
+input UpdateProfileInput {
+  first_name: String
+  last_name: String
+  display_name: String
+  email_address: String
+}
+
+extend type Mutation {
+  updateProfile(input: UpdateProfileInput!): User! @authUser
+}
+
+`, BuiltIn: false},
+	{Name: "../schema/auth/verification.graphqls", Input: `# directive @authUser on FIELD_DEFINITION
+
+enum Entity {
+  USER_VERIFICATION
+BUSINESS_VERIFICATION
+}
+
+type VerificationSuccess {
+   link: String!
+   status: String!
+}
+
+type VerificationError {
+  code: String!
+  message: String!
+}
+
+input verificationPayload {
+  entity: Entity
+}
+
+union VerificationResponse = VerificationSuccess | VerificationError
+
+
+extend type Mutation {
+  requestUserVerification(input: verificationPayload!): VerificationResponse! @authUser
+}`, BuiltIn: false},
+	{Name: "../schema/business/business.graphqls", Input: `directive @authBusiness on FIELD_DEFINITION
 directive @hasRole(role: Role!) on FIELD_DEFINITION
 
 enum Role {
@@ -1389,165 +1901,5 @@ extend type Mutation {
   businessDetail(input: businessDetail!): Boolean! @hasRole(role: ADMIN)
 }
 `, BuiltIn: false},
-	{Name: "../schema/currency.graphqls", Input: `type Currency {
-    id: String!
-    code: String!
-    name: String!
-    symbol: String!
-    is_fiat: Boolean!
-}
-
-input CurrencyFilter {
-    is_fiat: Boolean!
-}
-
-extend type Query {
-  currencies(filter: CurrencyFilter): [Currency!]!
-}`, BuiltIn: false},
-	{Name: "../schema/nuban.graphqls", Input: `type StaticNubanAccountDetail {
-    account_number: String!
-    account_name: String!
-    bank_name: String!
-    currency: String!
-    id: String!
-}
-
-type DynamicNubanAccountDetail {
-    account_number: String!
-    account_name: String!
-    bank_name: String!
-    Amount: Float!
-    currency: String!
-    expiration_date: String!
-    id: String!
-}
-
-extend type Query {
-    business_nuban_accounts: [StaticNubanAccountDetail!]! @hasRole(role: ADMIN)
-}
-
-extend type Mutation {
-    generateStaticNubanAccount: StaticNubanAccountDetail! @hasRole(role: ADMIN)
-    generateDynamicNubanAccount: DynamicNubanAccountDetail! @hasRole(role: ADMIN)
-}`, BuiltIn: false},
-	{Name: "../schema/stablecoin.graphqls", Input: `type Stablecoin {
-    id: String!
-    address: String!
-    coin: String!
-    network: String!
-}
-
-input StablecoinInput {
-    network: String!
-    wallet_id: String!
-}
-
-input StablecoinFilter {
-    coin: String
-    network: String
-    wallet_id: String
-}
-
-extend type Query {
-    business_stablecoins(filter: StablecoinFilter): [Stablecoin!]! @hasRole(role: ADMIN)
-}
-
-extend type Mutation {
-    generateStablecoin(input: StablecoinInput): Stablecoin! @hasRole(role: ADMIN)
-}`, BuiltIn: false},
-	{Name: "../schema/user.graphqls", Input: `directive @authUser on FIELD_DEFINITION
-
-type User {
-  first_name: String!
-  last_name: String!
-  display_name: String!
-  is_verified: Boolean!
-  disabled: Boolean!
-  disable_reason: String!
-}
-
-type UserBusiness {
-  id: ID!
-  name: String!
-  role: String!
-  logo: String!
-  industry: String!
-}
-extend type Query {
-  me: User! @authUser
-  getUserBusinsses: [UserBusiness!]!
-}
-`, BuiltIn: false},
-	{Name: "../schema/verification.graphqls", Input: `# directive @authUser on FIELD_DEFINITION
-
-enum Entity {
-  USER_VERIFICATION
-BUSINESS_VERIFICATION
-}
-
-type VerificationSuccess {
-   link: String!
-   status: String!
-}
-
-type VerificationError {
-  code: String!
-  message: String!
-}
-
-input verificationPayload {
-  entity: Entity
-}
-
-union VerificationResponse = VerificationSuccess | VerificationError
-
-
-extend type Mutation {
-  requestUserVerification(input: verificationPayload!): VerificationResponse! @authUser
-}`, BuiltIn: false},
-	{Name: "../schema/wallet.graphqls", Input: `"""
-Creates a new wallet.
-
-Example:
-
-mutation {
-  addWallet(
-    currencyCode: "NGN"
-    walletType: "MAIN"
-  ) {
-    id
-    currency
-    type
-    availableBalance
-  }
-}
-"""
-
-enum WalletType {
-  TREASURY
-}
-
-type Wallet {
-    available_balance: Float!
-    ledger_balance: Float!
-    holding_balance: Float!
-    id: String!
-    currency: String!
-    active: Boolean!
-    is_fiat: Boolean!
-}
-
-input WalletFilter {
-    is_fiat: Boolean!
-}
-
-extend type Query {
-  business_wallets(wallet_type: WalletType!=TREASURY, filter: WalletFilter): [Wallet!]!  @hasRole (role: ADMIN)
-  business_wallet(currencyCode: String!, wallet_type: WalletType!=TREASURY): Wallet  @hasRole (role: ADMIN)
-}
-
-extend type Mutation {
-  add_business_wallet(currency_code: String!, wallet_type: WalletType!=TREASURY): Wallet!  @hasRole (role: ADMIN)
-}`, BuiltIn: false},
 }
 var parsedSchema = gqlparser.MustLoadSchema(sources...)

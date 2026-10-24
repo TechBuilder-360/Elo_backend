@@ -10,12 +10,14 @@ import (
 	"fmt"
 
 	"github.com/Toflex/directory_v2/graph/model"
+	"github.com/Toflex/directory_v2/internal/nuban"
 	"github.com/Toflex/directory_v2/middlewares"
 	"github.com/Toflex/directory_v2/pkg/log"
+	"github.com/Toflex/directory_v2/pkg/types"
 )
 
 // GenerateStaticNubanAccount is the resolver for the generateStaticNubanAccount field.
-func (r *mutationResolver) GenerateStaticNubanAccount(ctx context.Context) (*model.StaticNubanAccountDetail, error) {
+func (r *mutationResolver) GenerateStaticNubanAccount(ctx context.Context, walletType *model.WalletType) (*model.StaticNubanAccountDetail, error) {
 	return nil, fmt.Errorf("not implemented: GenerateStaticNubanAccount - generateStaticNubanAccount")
 	logger := log.LoggerInContext(ctx)
 
@@ -47,4 +49,35 @@ func (r *mutationResolver) GenerateDynamicNubanAccount(ctx context.Context) (*mo
 // BusinessNubanAccounts is the resolver for the business_nuban_accounts field.
 func (r *queryResolver) BusinessNubanAccounts(ctx context.Context) ([]*model.StaticNubanAccountDetail, error) {
 	return nil, fmt.Errorf("not implemented: BusinessNubanAccounts - business_nuban_accounts")
+}
+
+// NubanTransfer implements [generated.MutationResolver].
+func (r *mutationResolver) NubanTransfer(ctx context.Context, input model.TransferPayload) (*model.TransferResult, error) {
+	logger := log.LoggerInContext(ctx)
+
+	b, err := middlewares.BusinessFromContext(ctx)
+	if err != nil {
+		logger.WithError(err).Error("failed to fetch business in context")
+		return nil, err
+	}
+
+	result, err := r.Services.NubanService.InitiateTransfer(ctx, &nuban.NubanTransferRequest{
+		OwnerID:       b.Edges.Owner.ID,
+		AccountNumber: input.AccountNumber,
+		BankSlug:      input.BankSlug,
+		Narration:     input.Narration,
+		Amount:        uint64(input.Amount),
+		Reference:     input.Reference,
+		Currency:      types.CurrencyCode(input.Currency),
+	})
+	if err != nil {
+		logger.WithError(err).Error("failed to initilize nuban transfer")
+		return nil, err
+	}
+
+	return &model.TransferResult{
+		ID:     result.ID,
+		Status: result.Status,
+	}, nil
+
 }

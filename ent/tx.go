@@ -16,14 +16,18 @@ type Tx struct {
 	Business *BusinessClient
 	// BusinessDocument is the client for interacting with the BusinessDocument builders.
 	BusinessDocument *BusinessDocumentClient
-	// BusinessFeature is the client for interacting with the BusinessFeature builders.
-	BusinessFeature *BusinessFeatureClient
 	// BusinessLocation is the client for interacting with the BusinessLocation builders.
 	BusinessLocation *BusinessLocationClient
 	// BusinessServices is the client for interacting with the BusinessServices builders.
 	BusinessServices *BusinessServicesClient
 	// Currency is the client for interacting with the Currency builders.
 	Currency *CurrencyClient
+	// FeeRule is the client for interacting with the FeeRule builders.
+	FeeRule *FeeRuleClient
+	// FeeTier is the client for interacting with the FeeTier builders.
+	FeeTier *FeeTierClient
+	// Invoice is the client for interacting with the Invoice builders.
+	Invoice *InvoiceClient
 	// KYBDocument is the client for interacting with the KYBDocument builders.
 	KYBDocument *KYBDocumentClient
 	// KYBMessage is the client for interacting with the KYBMessage builders.
@@ -34,6 +38,12 @@ type Tx struct {
 	LedgerOwner *LedgerOwnerClient
 	// Manager is the client for interacting with the Manager builders.
 	Manager *ManagerClient
+	// NubanBank is the client for interacting with the NubanBank builders.
+	NubanBank *NubanBankClient
+	// NubanBeneficiary is the client for interacting with the NubanBeneficiary builders.
+	NubanBeneficiary *NubanBeneficiaryClient
+	// NubanBlacklist is the client for interacting with the NubanBlacklist builders.
+	NubanBlacklist *NubanBlacklistClient
 	// NubanDeposit is the client for interacting with the NubanDeposit builders.
 	NubanDeposit *NubanDepositClient
 	// NubanDynamicAccount is the client for interacting with the NubanDynamicAccount builders.
@@ -46,6 +56,8 @@ type Tx struct {
 	Permission *PermissionClient
 	// Provider is the client for interacting with the Provider builders.
 	Provider *ProviderClient
+	// ProviderBank is the client for interacting with the ProviderBank builders.
+	ProviderBank *ProviderBankClient
 	// RequestVerification is the client for interacting with the RequestVerification builders.
 	RequestVerification *RequestVerificationClient
 	// Role is the client for interacting with the Role builders.
@@ -66,8 +78,14 @@ type Tx struct {
 	StablecoinWallet *StablecoinWalletClient
 	// StablecoinWithdrawal is the client for interacting with the StablecoinWithdrawal builders.
 	StablecoinWithdrawal *StablecoinWithdrawalClient
+	// Subscription is the client for interacting with the Subscription builders.
+	Subscription *SubscriptionClient
+	// SubscriptionPlan is the client for interacting with the SubscriptionPlan builders.
+	SubscriptionPlan *SubscriptionPlanClient
 	// Transaction is the client for interacting with the Transaction builders.
 	Transaction *TransactionClient
+	// TransactionFee is the client for interacting with the TransactionFee builders.
+	TransactionFee *TransactionFeeClient
 	// User is the client for interacting with the User builders.
 	User *UserClient
 	// UserDocument is the client for interacting with the UserDocument builders.
@@ -211,21 +229,27 @@ func (tx *Tx) Client() *Client {
 func (tx *Tx) init() {
 	tx.Business = NewBusinessClient(tx.config)
 	tx.BusinessDocument = NewBusinessDocumentClient(tx.config)
-	tx.BusinessFeature = NewBusinessFeatureClient(tx.config)
 	tx.BusinessLocation = NewBusinessLocationClient(tx.config)
 	tx.BusinessServices = NewBusinessServicesClient(tx.config)
 	tx.Currency = NewCurrencyClient(tx.config)
+	tx.FeeRule = NewFeeRuleClient(tx.config)
+	tx.FeeTier = NewFeeTierClient(tx.config)
+	tx.Invoice = NewInvoiceClient(tx.config)
 	tx.KYBDocument = NewKYBDocumentClient(tx.config)
 	tx.KYBMessage = NewKYBMessageClient(tx.config)
 	tx.Ledger = NewLedgerClient(tx.config)
 	tx.LedgerOwner = NewLedgerOwnerClient(tx.config)
 	tx.Manager = NewManagerClient(tx.config)
+	tx.NubanBank = NewNubanBankClient(tx.config)
+	tx.NubanBeneficiary = NewNubanBeneficiaryClient(tx.config)
+	tx.NubanBlacklist = NewNubanBlacklistClient(tx.config)
 	tx.NubanDeposit = NewNubanDepositClient(tx.config)
 	tx.NubanDynamicAccount = NewNubanDynamicAccountClient(tx.config)
 	tx.NubanStaticAccount = NewNubanStaticAccountClient(tx.config)
 	tx.NubanTransfer = NewNubanTransferClient(tx.config)
 	tx.Permission = NewPermissionClient(tx.config)
 	tx.Provider = NewProviderClient(tx.config)
+	tx.ProviderBank = NewProviderBankClient(tx.config)
 	tx.RequestVerification = NewRequestVerificationClient(tx.config)
 	tx.Role = NewRoleClient(tx.config)
 	tx.RolePermission = NewRolePermissionClient(tx.config)
@@ -236,7 +260,10 @@ func (tx *Tx) init() {
 	tx.StablecoinSupportedNetwork = NewStablecoinSupportedNetworkClient(tx.config)
 	tx.StablecoinWallet = NewStablecoinWalletClient(tx.config)
 	tx.StablecoinWithdrawal = NewStablecoinWithdrawalClient(tx.config)
+	tx.Subscription = NewSubscriptionClient(tx.config)
+	tx.SubscriptionPlan = NewSubscriptionPlanClient(tx.config)
 	tx.Transaction = NewTransactionClient(tx.config)
+	tx.TransactionFee = NewTransactionFeeClient(tx.config)
 	tx.User = NewUserClient(tx.config)
 	tx.UserDocument = NewUserDocumentClient(tx.config)
 	tx.Vault = NewVaultClient(tx.config)

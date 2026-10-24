@@ -24,14 +24,8 @@ const (
 	FieldRecipientAccountName = "recipient_account_name"
 	// FieldRecipientAccountNumber holds the string denoting the recipient_account_number field in the database.
 	FieldRecipientAccountNumber = "recipient_account_number"
-	// FieldSenderAccountName holds the string denoting the sender_account_name field in the database.
-	FieldSenderAccountName = "sender_account_name"
-	// FieldSenderAccountNumber holds the string denoting the sender_account_number field in the database.
-	FieldSenderAccountNumber = "sender_account_number"
-	// FieldSenderBankName holds the string denoting the sender_bank_name field in the database.
-	FieldSenderBankName = "sender_bank_name"
-	// FieldSenderBankCode holds the string denoting the sender_bank_code field in the database.
-	FieldSenderBankCode = "sender_bank_code"
+	// FieldNubanBankID holds the string denoting the nuban_bank_id field in the database.
+	FieldNubanBankID = "nuban_bank_id"
 	// FieldAmount holds the string denoting the amount field in the database.
 	FieldAmount = "amount"
 	// FieldSessionID holds the string denoting the session_id field in the database.
@@ -42,6 +36,10 @@ const (
 	FieldProvider = "provider"
 	// EdgeTransaction holds the string denoting the transaction edge name in mutations.
 	EdgeTransaction = "transaction"
+	// EdgeNubanBank holds the string denoting the nuban_bank edge name in mutations.
+	EdgeNubanBank = "nuban_bank"
+	// EdgeBeneficiaries holds the string denoting the beneficiaries edge name in mutations.
+	EdgeBeneficiaries = "beneficiaries"
 	// Table holds the table name of the nubantransfer in the database.
 	Table = "nuban_transfers"
 	// TransactionTable is the table that holds the transaction relation/edge.
@@ -51,6 +49,18 @@ const (
 	TransactionInverseTable = "transactions"
 	// TransactionColumn is the table column denoting the transaction relation/edge.
 	TransactionColumn = "transaction_nuban_transfer"
+	// NubanBankTable is the table that holds the nuban_bank relation/edge.
+	NubanBankTable = "nuban_transfers"
+	// NubanBankInverseTable is the table name for the NubanBank entity.
+	// It exists in this package in order to avoid circular dependency with the "nubanbank" package.
+	NubanBankInverseTable = "nuban_banks"
+	// NubanBankColumn is the table column denoting the nuban_bank relation/edge.
+	NubanBankColumn = "nuban_bank_id"
+	// BeneficiariesTable is the table that holds the beneficiaries relation/edge. The primary key declared below.
+	BeneficiariesTable = "nuban_beneficiary_nuban_beneficiaries"
+	// BeneficiariesInverseTable is the table name for the NubanBeneficiary entity.
+	// It exists in this package in order to avoid circular dependency with the "nubanbeneficiary" package.
+	BeneficiariesInverseTable = "nuban_beneficiaries"
 )
 
 // Columns holds all SQL columns for nubantransfer fields.
@@ -61,10 +71,7 @@ var Columns = []string{
 	FieldDeletedAt,
 	FieldRecipientAccountName,
 	FieldRecipientAccountNumber,
-	FieldSenderAccountName,
-	FieldSenderAccountNumber,
-	FieldSenderBankName,
-	FieldSenderBankCode,
+	FieldNubanBankID,
 	FieldAmount,
 	FieldSessionID,
 	FieldProviderReference,
@@ -76,6 +83,12 @@ var Columns = []string{
 var ForeignKeys = []string{
 	"transaction_nuban_transfer",
 }
+
+var (
+	// BeneficiariesPrimaryKey and BeneficiariesColumn2 are the table columns denoting the
+	// primary key for the beneficiaries relation (M2M).
+	BeneficiariesPrimaryKey = []string{"nuban_beneficiary_id", "nuban_transfer_id"}
+)
 
 // ValidColumn reports if the column name is valid (part of the table columns).
 func ValidColumn(column string) bool {
@@ -103,20 +116,10 @@ var (
 	RecipientAccountNameValidator func(string) error
 	// RecipientAccountNumberValidator is a validator for the "recipient_account_number" field. It is called by the builders before save.
 	RecipientAccountNumberValidator func(string) error
-	// SenderAccountNameValidator is a validator for the "sender_account_name" field. It is called by the builders before save.
-	SenderAccountNameValidator func(string) error
-	// SenderAccountNumberValidator is a validator for the "sender_account_number" field. It is called by the builders before save.
-	SenderAccountNumberValidator func(string) error
-	// SenderBankNameValidator is a validator for the "sender_bank_name" field. It is called by the builders before save.
-	SenderBankNameValidator func(string) error
-	// SenderBankCodeValidator is a validator for the "sender_bank_code" field. It is called by the builders before save.
-	SenderBankCodeValidator func(string) error
+	// NubanBankIDValidator is a validator for the "nuban_bank_id" field. It is called by the builders before save.
+	NubanBankIDValidator func(string) error
 	// DefaultAmount holds the default value on creation for the "amount" field.
 	DefaultAmount int64
-	// SessionIDValidator is a validator for the "session_id" field. It is called by the builders before save.
-	SessionIDValidator func(string) error
-	// ProviderReferenceValidator is a validator for the "provider_reference" field. It is called by the builders before save.
-	ProviderReferenceValidator func(string) error
 	// ProviderValidator is a validator for the "provider" field. It is called by the builders before save.
 	ProviderValidator func(string) error
 	// DefaultID holds the default value on creation for the "id" field.
@@ -156,24 +159,9 @@ func ByRecipientAccountNumber(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldRecipientAccountNumber, opts...).ToFunc()
 }
 
-// BySenderAccountName orders the results by the sender_account_name field.
-func BySenderAccountName(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldSenderAccountName, opts...).ToFunc()
-}
-
-// BySenderAccountNumber orders the results by the sender_account_number field.
-func BySenderAccountNumber(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldSenderAccountNumber, opts...).ToFunc()
-}
-
-// BySenderBankName orders the results by the sender_bank_name field.
-func BySenderBankName(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldSenderBankName, opts...).ToFunc()
-}
-
-// BySenderBankCode orders the results by the sender_bank_code field.
-func BySenderBankCode(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldSenderBankCode, opts...).ToFunc()
+// ByNubanBankID orders the results by the nuban_bank_id field.
+func ByNubanBankID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldNubanBankID, opts...).ToFunc()
 }
 
 // ByAmount orders the results by the amount field.
@@ -202,10 +190,45 @@ func ByTransactionField(field string, opts ...sql.OrderTermOption) OrderOption {
 		sqlgraph.OrderByNeighborTerms(s, newTransactionStep(), sql.OrderByField(field, opts...))
 	}
 }
+
+// ByNubanBankField orders the results by nuban_bank field.
+func ByNubanBankField(field string, opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newNubanBankStep(), sql.OrderByField(field, opts...))
+	}
+}
+
+// ByBeneficiariesCount orders the results by beneficiaries count.
+func ByBeneficiariesCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newBeneficiariesStep(), opts...)
+	}
+}
+
+// ByBeneficiaries orders the results by beneficiaries terms.
+func ByBeneficiaries(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newBeneficiariesStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
 func newTransactionStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(TransactionInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.O2O, true, TransactionTable, TransactionColumn),
+	)
+}
+func newNubanBankStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(NubanBankInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.M2O, true, NubanBankTable, NubanBankColumn),
+	)
+}
+func newBeneficiariesStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(BeneficiariesInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.M2M, true, BeneficiariesTable, BeneficiariesPrimaryKey...),
 	)
 }

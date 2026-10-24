@@ -8,6 +8,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/Toflex/directory_v2/database/database"
 	"github.com/Toflex/directory_v2/graph/model"
 	"github.com/Toflex/directory_v2/middlewares"
 	"github.com/Toflex/directory_v2/pkg/log"
@@ -28,9 +29,53 @@ func (r *queryResolver) Me(ctx context.Context) (*model.User, error) {
 		FirstName:     u.FirstName,
 		LastName:      u.LastName,
 		DisplayName:   u.DisplayName,
+		EmailAddress:  &u.EmailAddress,
 		IsVerified:    u.Verified,
 		Disabled:      u.Disabled,
 		DisableReason: util.AddressToString(u.DisableReason),
+	}, nil
+}
+
+// UpdateProfile is the resolver for the updateProfile mutation.
+func (r *mutationResolver) UpdateProfile(ctx context.Context, input model.UpdateProfileInput) (*model.User, error) {
+	logger := log.LoggerInContext(ctx)
+
+	u, err := middlewares.UserFromContext(ctx)
+	if err != nil {
+		logger.WithError(err).Error("failed to fetch user in context")
+		return nil, toGQLError(err)
+	}
+
+	db := database.DBInstance()
+	update := db.User.UpdateOneID(u.ID)
+
+	if input.FirstName != nil && *input.FirstName != "" {
+		update.SetFirstName(*input.FirstName)
+	}
+	if input.LastName != nil && *input.LastName != "" {
+		update.SetLastName(*input.LastName)
+	}
+	if input.DisplayName != nil && *input.DisplayName != "" {
+		update.SetDisplayName(*input.DisplayName)
+	}
+	if input.EmailAddress != nil && *input.EmailAddress != "" {
+		update.SetEmailAddress(*input.EmailAddress)
+	}
+
+	updatedUser, err := update.Save(ctx)
+	if err != nil {
+		logger.WithError(err).Error("failed to update user profile")
+		return nil, toGQLError(err)
+	}
+
+	return &model.User{
+		FirstName:     updatedUser.FirstName,
+		LastName:      updatedUser.LastName,
+		DisplayName:   updatedUser.DisplayName,
+		EmailAddress:  &updatedUser.EmailAddress,
+		IsVerified:    updatedUser.Verified,
+		Disabled:      updatedUser.Disabled,
+		DisableReason: util.AddressToString(updatedUser.DisableReason),
 	}, nil
 }
 
@@ -38,3 +83,4 @@ func (r *queryResolver) Me(ctx context.Context) (*model.User, error) {
 func (r *queryResolver) GetUserBusinsses(ctx context.Context) ([]*model.UserBusiness, error) {
 	panic(fmt.Errorf("not implemented: GetUserBusinsses - getUserBusinsses"))
 }
+

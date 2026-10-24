@@ -14,21 +14,27 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"github.com/Toflex/directory_v2/ent/business"
 	"github.com/Toflex/directory_v2/ent/businessdocument"
-	"github.com/Toflex/directory_v2/ent/businessfeature"
 	"github.com/Toflex/directory_v2/ent/businesslocation"
 	"github.com/Toflex/directory_v2/ent/businessservices"
 	"github.com/Toflex/directory_v2/ent/currency"
+	"github.com/Toflex/directory_v2/ent/feerule"
+	"github.com/Toflex/directory_v2/ent/feetier"
+	"github.com/Toflex/directory_v2/ent/invoice"
 	"github.com/Toflex/directory_v2/ent/kybdocument"
 	"github.com/Toflex/directory_v2/ent/kybmessage"
 	"github.com/Toflex/directory_v2/ent/ledger"
 	"github.com/Toflex/directory_v2/ent/ledgerowner"
 	"github.com/Toflex/directory_v2/ent/manager"
+	"github.com/Toflex/directory_v2/ent/nubanbank"
+	"github.com/Toflex/directory_v2/ent/nubanbeneficiary"
+	"github.com/Toflex/directory_v2/ent/nubanblacklist"
 	"github.com/Toflex/directory_v2/ent/nubandeposit"
 	"github.com/Toflex/directory_v2/ent/nubandynamicaccount"
 	"github.com/Toflex/directory_v2/ent/nubanstaticaccount"
 	"github.com/Toflex/directory_v2/ent/nubantransfer"
 	"github.com/Toflex/directory_v2/ent/permission"
 	"github.com/Toflex/directory_v2/ent/provider"
+	"github.com/Toflex/directory_v2/ent/providerbank"
 	"github.com/Toflex/directory_v2/ent/requestverification"
 	"github.com/Toflex/directory_v2/ent/role"
 	"github.com/Toflex/directory_v2/ent/rolepermission"
@@ -39,7 +45,10 @@ import (
 	"github.com/Toflex/directory_v2/ent/stablecoinsupportednetwork"
 	"github.com/Toflex/directory_v2/ent/stablecoinwallet"
 	"github.com/Toflex/directory_v2/ent/stablecoinwithdrawal"
+	"github.com/Toflex/directory_v2/ent/subscription"
+	"github.com/Toflex/directory_v2/ent/subscriptionplan"
 	"github.com/Toflex/directory_v2/ent/transaction"
+	"github.com/Toflex/directory_v2/ent/transactionfee"
 	"github.com/Toflex/directory_v2/ent/user"
 	"github.com/Toflex/directory_v2/ent/userdocument"
 	"github.com/Toflex/directory_v2/ent/vault"
@@ -107,21 +116,27 @@ func checkColumn(table, column string) error {
 		columnCheck = sql.NewColumnCheck(map[string]func(string) bool{
 			business.Table:                   business.ValidColumn,
 			businessdocument.Table:           businessdocument.ValidColumn,
-			businessfeature.Table:            businessfeature.ValidColumn,
 			businesslocation.Table:           businesslocation.ValidColumn,
 			businessservices.Table:           businessservices.ValidColumn,
 			currency.Table:                   currency.ValidColumn,
+			feerule.Table:                    feerule.ValidColumn,
+			feetier.Table:                    feetier.ValidColumn,
+			invoice.Table:                    invoice.ValidColumn,
 			kybdocument.Table:                kybdocument.ValidColumn,
 			kybmessage.Table:                 kybmessage.ValidColumn,
 			ledger.Table:                     ledger.ValidColumn,
 			ledgerowner.Table:                ledgerowner.ValidColumn,
 			manager.Table:                    manager.ValidColumn,
+			nubanbank.Table:                  nubanbank.ValidColumn,
+			nubanbeneficiary.Table:           nubanbeneficiary.ValidColumn,
+			nubanblacklist.Table:             nubanblacklist.ValidColumn,
 			nubandeposit.Table:               nubandeposit.ValidColumn,
 			nubandynamicaccount.Table:        nubandynamicaccount.ValidColumn,
 			nubanstaticaccount.Table:         nubanstaticaccount.ValidColumn,
 			nubantransfer.Table:              nubantransfer.ValidColumn,
 			permission.Table:                 permission.ValidColumn,
 			provider.Table:                   provider.ValidColumn,
+			providerbank.Table:               providerbank.ValidColumn,
 			requestverification.Table:        requestverification.ValidColumn,
 			role.Table:                       role.ValidColumn,
 			rolepermission.Table:             rolepermission.ValidColumn,
@@ -132,7 +147,10 @@ func checkColumn(table, column string) error {
 			stablecoinsupportednetwork.Table: stablecoinsupportednetwork.ValidColumn,
 			stablecoinwallet.Table:           stablecoinwallet.ValidColumn,
 			stablecoinwithdrawal.Table:       stablecoinwithdrawal.ValidColumn,
+			subscription.Table:               subscription.ValidColumn,
+			subscriptionplan.Table:           subscriptionplan.ValidColumn,
 			transaction.Table:                transaction.ValidColumn,
+			transactionfee.Table:             transactionfee.ValidColumn,
 			user.Table:                       user.ValidColumn,
 			userdocument.Table:               userdocument.ValidColumn,
 			vault.Table:                      vault.ValidColumn,

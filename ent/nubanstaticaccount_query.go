@@ -8,6 +8,7 @@ import (
 	"math"
 
 	"entgo.io/ent"
+	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
@@ -25,6 +26,7 @@ type NubanStaticAccountQuery struct {
 	predicates []predicate.NubanStaticAccount
 	withWallet *WalletQuery
 	withFKs    bool
+	modifiers  []func(*sql.Selector)
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -391,6 +393,9 @@ func (nsaq *NubanStaticAccountQuery) sqlAll(ctx context.Context, hooks ...queryH
 		node.Edges.loadedTypes = loadedTypes
 		return node.assignValues(columns, values)
 	}
+	if len(nsaq.modifiers) > 0 {
+		_spec.Modifiers = nsaq.modifiers
+	}
 	for i := range hooks {
 		hooks[i](ctx, _spec)
 	}
@@ -444,6 +449,9 @@ func (nsaq *NubanStaticAccountQuery) loadWallet(ctx context.Context, query *Wall
 
 func (nsaq *NubanStaticAccountQuery) sqlCount(ctx context.Context) (int, error) {
 	_spec := nsaq.querySpec()
+	if len(nsaq.modifiers) > 0 {
+		_spec.Modifiers = nsaq.modifiers
+	}
 	_spec.Node.Columns = nsaq.ctx.Fields
 	if len(nsaq.ctx.Fields) > 0 {
 		_spec.Unique = nsaq.ctx.Unique != nil && *nsaq.ctx.Unique
@@ -506,6 +514,9 @@ func (nsaq *NubanStaticAccountQuery) sqlQuery(ctx context.Context) *sql.Selector
 	if nsaq.ctx.Unique != nil && *nsaq.ctx.Unique {
 		selector.Distinct()
 	}
+	for _, m := range nsaq.modifiers {
+		m(selector)
+	}
 	for _, p := range nsaq.predicates {
 		p(selector)
 	}
@@ -521,6 +532,32 @@ func (nsaq *NubanStaticAccountQuery) sqlQuery(ctx context.Context) *sql.Selector
 		selector.Limit(*limit)
 	}
 	return selector
+}
+
+// ForUpdate locks the selected rows against concurrent updates, and prevent them from being
+// updated, deleted or "selected ... for update" by other sessions, until the transaction is
+// either committed or rolled-back.
+func (nsaq *NubanStaticAccountQuery) ForUpdate(opts ...sql.LockOption) *NubanStaticAccountQuery {
+	if nsaq.driver.Dialect() == dialect.Postgres {
+		nsaq.Unique(false)
+	}
+	nsaq.modifiers = append(nsaq.modifiers, func(s *sql.Selector) {
+		s.ForUpdate(opts...)
+	})
+	return nsaq
+}
+
+// ForShare behaves similarly to ForUpdate, except that it acquires a shared mode lock
+// on any rows that are read. Other sessions can read the rows, but cannot modify them
+// until your transaction commits.
+func (nsaq *NubanStaticAccountQuery) ForShare(opts ...sql.LockOption) *NubanStaticAccountQuery {
+	if nsaq.driver.Dialect() == dialect.Postgres {
+		nsaq.Unique(false)
+	}
+	nsaq.modifiers = append(nsaq.modifiers, func(s *sql.Selector) {
+		s.ForShare(opts...)
+	})
+	return nsaq
 }
 
 // NubanStaticAccountGroupBy is the group-by builder for NubanStaticAccount entities.

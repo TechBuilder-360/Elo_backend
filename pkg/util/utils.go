@@ -264,3 +264,17 @@ func ToMajorUnit(unit types.ToMajor) float64 {
 func ToMinorUnit(unit types.ToMinor) int64 {
 	return int64(float64(unit.Amount) * float64(unit.Precision))
 }
+
+// IsWithinRange checks if a value falls within min and max limits.
+// If min > 0, value must be greater than or equal to min.
+// If max > 0, value must be less than or equal to max.
+func IsWithinRange(value, min, max int64) bool {
+	if min > 0 && value < min {
+		return false
+	}
+	if max > 0 && value > max {
+		return false
+	}
+	return true
+}
+

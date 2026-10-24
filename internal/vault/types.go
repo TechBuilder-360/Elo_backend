@@ -5,4 +5,5 @@ type VaultOwner string
 
 const (
 	Treasury VaultType = "TREASURY"
+	Frozen   VaultType = "FROZEN"
 )
